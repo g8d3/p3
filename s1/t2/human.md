@@ -5,4 +5,4 @@ Things I noticed should be fixed:
 - there should be additional columns showing the raw funding rate and which period is exchange using
 - funding time and next funding time should be presented in human format not timestamp
 - additional exchange specific output should be on a new column, so data is not lost
-- cli file is too long, 
+- cli file is too long, causing ai to have to read the entire thing, what about splitting it for ai convenience
