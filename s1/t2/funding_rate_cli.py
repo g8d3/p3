@@ -40,7 +40,7 @@ class LighterClient(ExchangeAPIClient):
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            response = self.session.get(f"{self.base_url}/api/v1/funding-rates", timeout=10)
+            response = self.session.get(f"{self.base_url}/api/v1/funding-rates", timeout=5)
             response.raise_for_status()
             data = response.json()
             
@@ -59,11 +59,10 @@ class LighterClient(ExchangeAPIClient):
             # If symbol not found, return None
             print(f"Symbol {symbol} not found in {self.name} funding rates")
             return None
-            
+             
         except Exception as e:
             print(f"Error fetching {self.name} {symbol}: {e}")
             return None
-
 
 class AsterClient(ExchangeAPIClient):
     def __init__(self):
@@ -74,7 +73,7 @@ class AsterClient(ExchangeAPIClient):
             # Convert symbol to USDT format for Aster
             usdt_symbol = f"{symbol}USDT" if not symbol.endswith("USDT") else symbol
             
-            response = self.session.get(f"{self.base_url}/fapi/v1/fundingRate", params={"symbol": usdt_symbol}, timeout=10)
+            response = self.session.get(f"{self.base_url}/fapi/v1/fundingRate", params={"symbol": usdt_symbol}, timeout=5)
             response.raise_for_status()
             data = response.json()
             
@@ -132,7 +131,7 @@ class HyperliquidClient(ExchangeAPIClient):
                                            "startTime": start_time
                                        }, 
                                        headers={"Content-Type": "application/json"},
-                                       timeout=10)
+                                        timeout=5)
             response.raise_for_status()
             data = response.json()
             
@@ -148,12 +147,11 @@ class HyperliquidClient(ExchangeAPIClient):
                 }
             else:
                 print(f"No funding history found for {self.name} {symbol}")
-                return None
-                
+            return None
+             
         except Exception as e:
             print(f"Error fetching {self.name} {symbol}: {e}")
             return None
-
 
 class EdgeXClient(ExchangeAPIClient):
     def __init__(self):
@@ -164,7 +162,7 @@ class EdgeXClient(ExchangeAPIClient):
             # Use the market stats endpoint to get current funding rate
             # Convert symbol to Extended format (BTC -> BTC-USD)
             market_symbol = f"{symbol}-USD"
-            response = self.session.get(f"{self.base_url}/api/v1/info/markets/{market_symbol}/stats", timeout=10)
+            response = self.session.get(f"{self.base_url}/api/v1/info/markets/{market_symbol}/stats", timeout=5)
             response.raise_for_status()
             data = response.json()
             if data.get("status") == "OK":
@@ -178,22 +176,24 @@ class EdgeXClient(ExchangeAPIClient):
                 }
             else:
                 print(f"Error fetching {self.name} {symbol}: {data.get('error', 'Unknown error')}")
-                return None
-        except Exception as e:
-            print(f"Error fetching {self.name} {symbol}: {e}")
             return None
 
+        except Exception as e:
+
+            print(f"Error fetching {self.name} {symbol}: {e}")
+
+            return None
 
 class ApexClient(ExchangeAPIClient):
     def __init__(self):
         super().__init__("ApeX Protocol", "https://api.pro.apex.exchange")
-    
-def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
+
+    def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
             # Use public endpoint for funding rates
             response = self.session.get(f"{self.base_url}/v3/funding", 
                                         params={"symbol": f"{symbol}-USDT"}, 
-                                        timeout=15)
+                                        timeout=5)
             response.raise_for_status()
             data = response.json()
             
@@ -213,11 +213,6 @@ def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         except Exception as e:
             print(f"Error fetching {self.name} {symbol}: {e}")
             return None
-                
-        except Exception as e:
-            print(f"Error fetching {self.name} {symbol}: {e}")
-            return None
-
 
 class GrvtClient(ExchangeAPIClient):
     def __init__(self):
@@ -225,7 +220,7 @@ class GrvtClient(ExchangeAPIClient):
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            response = self.session.get(f"{self.base_url}/funding-rate", params={"instrument": symbol}, timeout=10)
+            response = self.session.get(f"{self.base_url}/funding-rate", params={"instrument": symbol}, timeout=5)
             response.raise_for_status()
             data = response.json()
             return {
@@ -246,7 +241,7 @@ class ExtendedClient(ExchangeAPIClient):
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            response = self.session.get(f"{self.base_url}/funding-rate", params={"market": symbol}, timeout=10)
+            response = self.session.get(f"{self.base_url}/funding-rate", params={"market": symbol}, timeout=5)
             response.raise_for_status()
             data = response.json()
             return {
@@ -266,7 +261,7 @@ class ParadexClient(ExchangeAPIClient):
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            response = self.session.get(f"{self.base_url}/v1/funding-data", params={"market": symbol}, timeout=10)
+            response = self.session.get(f"{self.base_url}/v1/funding-data", params={"market": symbol}, timeout=5)
             response.raise_for_status()
             data = response.json()
             results = data.get("results", [])
@@ -290,7 +285,7 @@ class PacificaClient(ExchangeAPIClient):
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            response = self.session.get(f"{self.base_url}/api/v1/funding_rate/history", params={"symbol": symbol}, timeout=10)
+            response = self.session.get(f"{self.base_url}/api/v1/funding_rate/history", params={"symbol": symbol}, timeout=5)
             response.raise_for_status()
             data = response.json()
             if data.get("success") and data.get("data"):
@@ -313,7 +308,7 @@ class ReyaClient(ExchangeAPIClient):
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            response = self.session.get(f"{self.base_url}/v2/funding", params={"market": symbol}, timeout=10)
+            response = self.session.get(f"{self.base_url}/v2/funding", params={"market": symbol}, timeout=5)
             response.raise_for_status()
             data = response.json()
             return {
@@ -472,11 +467,21 @@ class FundingRateCLI:
         
         self.display_results(results)
         
+        export_choice = 'n'
+        filename = ''
         if results:
             export_choice = input("\nExport data to CSV? (y/n): ").strip().lower()
             if export_choice in ['y', 'yes']:
                 filename = input("Enter filename (press Enter for default): ").strip()
                 self.export_data(results, filename if filename else None)
+        
+
+        # Print non-interactive equivalent
+        equivalent = f"python {sys.argv[0]} --exchanges {' '.join(exchanges)} --pairs {' '.join(pairs)}"
+        if export_choice in ['y', 'yes']:
+            export_filename = filename if filename else f"funding_rates_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+            equivalent += f" --export {export_filename}"
+        print(f"\nNon-interactive equivalent: {equivalent}")
     
     def run_cli(self, args):
         """Run with command line arguments"""
