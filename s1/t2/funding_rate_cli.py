@@ -50,7 +50,7 @@ def parse_exchange_data(file_path: str) -> Dict[str, Dict]:
             current_line = lines[i] if i < len(lines) else ''
             
             # Parse funding rate info until next exchange or end
-            while i < len(lines) and not (lines[i].strip().startswith(str(len(exchanges) + 1) + '.') if bool(exchanges) else False):
+            while i < len(lines) and not (lines[i].strip().startswith(str(len(exchanges) + 1) + '.') if len(exchanges) > 0 else False):
                 current_line = lines[i].strip()
                 if current_line.startswith('   - Endpoint:'):
                     endpoint = current_line.split('Endpoint:')[1].strip()
