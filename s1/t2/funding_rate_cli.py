@@ -40,16 +40,26 @@ class LighterClient(ExchangeAPIClient):
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            response = self.session.get(f"{self.base_url}/funding", params={"symbol": symbol}, timeout=10)
+            response = self.session.get(f"{self.base_url}/api/v1/funding-rates", timeout=10)
             response.raise_for_status()
             data = response.json()
-            return {
-                "exchange": self.name,
-                "symbol": data.get("symbol", symbol),
-                "funding_rate": float(data.get("funding_rate", 0)),
-                "funding_time": data.get("funding_time"),
-                "next_funding_time": data.get("next_funding_time")
-            }
+            
+            # Find the funding rate for the requested symbol from any exchange
+            funding_rates = data.get("funding_rates", [])
+            for rate_data in funding_rates:
+                if rate_data.get("symbol") == symbol:
+                    return {
+                        "exchange": self.name,
+                        "symbol": symbol,
+                        "funding_rate": float(rate_data.get("rate", 0)),
+                        "source_exchange": rate_data.get("exchange", "unknown"),
+                        "market_id": rate_data.get("market_id")
+                    }
+            
+            # If symbol not found, return None
+            print(f"Symbol {symbol} not found in {self.name} funding rates")
+            return None
+            
         except Exception as e:
             print(f"Error fetching {self.name} {symbol}: {e}")
             return None

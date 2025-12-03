@@ -56,11 +56,9 @@ This file tracks errors discovered during testing and their solutions.
 **Date**: 2025-12-03  
 **Description**: 404 Client Error: Not Found for url: https://mainnet.zklighter.elliot.ai/funding?symbol=BTC  
 **Location**: LighterClient.get_funding_rate()  
-**Cause**: API endpoint may be outdated or incorrect  
-**Attempted Solutions**: 
-- Tried alternative base URL (api.lighter.xyz) - domain doesn't exist
-- Reverted to original URL from documentation  
-**Status**: ❌ UNSOLVED - Need updated API documentation
+**Cause**: API endpoint was outdated - using `/funding` instead of `/api/v1/funding-rates`  
+**Solution**: Updated endpoint to `/api/v1/funding-rates` and modified response parsing to handle array of funding rates from multiple exchanges  
+**Status**: ✅ SOLVED
 
 ### Error #7: Hyperliquid API 422 Error
 **Date**: 2025-12-03  
@@ -121,15 +119,16 @@ This file tracks errors discovered during testing and their solutions.
 
 ✅ **Aster** - Successfully fetching real funding rates  
 ✅ **Pacifica** - Successfully fetching real funding rates  
+✅ **Lighter** - Successfully fetching real funding rates  
 
 ---
 
 ## ERROR STATISTICS
 
 - **Total Errors Discovered**: 13
-- **Solved Errors**: 5 (38.5%)
-- **Unsolved Errors**: 8 (61.5%)
-- **Working Exchanges**: 2 out of 10 (20%)
+- **Solved Errors**: 6 (46.2%)
+- **Unsolved Errors**: 7 (53.8%)
+- **Working Exchanges**: 3 out of 10 (30%)
 
 ---
 
