@@ -157,20 +157,28 @@ class HyperliquidClient(ExchangeAPIClient):
 
 class EdgeXClient(ExchangeAPIClient):
     def __init__(self):
-        super().__init__("edgeX", "https://pro.edgex.exchange")
+        super().__init__("edgeX", "https://api.starknet.extended.exchange")
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            response = self.session.get(f"{self.base_url}/api/v1/funding-rate", params={"market": symbol}, timeout=10)
+            # Use the market stats endpoint to get current funding rate
+            # Convert symbol to Extended format (BTC -> BTC-USD)
+            market_symbol = f"{symbol}-USD"
+            response = self.session.get(f"{self.base_url}/api/v1/info/markets/{market_symbol}/stats", timeout=10)
             response.raise_for_status()
             data = response.json()
-            return {
-                "exchange": self.name,
-                "symbol": data.get("market", symbol),
-                "funding_rate": float(data.get("funding_rate", 0)),
-                "funding_time": data.get("funding_time"),
-                "mark_price": float(data.get("mark_price", 0))
-            }
+            if data.get("status") == "OK":
+                market_data = data.get("data", {})
+                return {
+                    "exchange": self.name,
+                    "symbol": market_symbol,
+                    "funding_rate": float(market_data.get("fundingRate", 0)),
+                    "funding_time": market_data.get("nextFundingRate"),
+                    "mark_price": float(market_data.get("markPrice", 0))
+                }
+            else:
+                print(f"Error fetching {self.name} {symbol}: {data.get('error', 'Unknown error')}")
+                return None
         except Exception as e:
             print(f"Error fetching {self.name} {symbol}: {e}")
             return None
