@@ -72,8 +72,9 @@ This file tracks errors discovered during testing and their solutions.
 **Date**: 2025-12-03  
 **Description**: 404 Client Error: Not Found for url: https://pro.edgex.exchange/api/v1/funding-rate?market=BTC  
 **Location**: EdgeXClient.get_funding_rate()  
-**Cause**: API endpoint may be outdated  
-**Status**: ❌ UNSOLVED - Need updated API documentation
+**Cause**: API endpoint was outdated - using old EdgeX domain instead of new Extended API  
+**Solution**: Updated endpoint to use Extended API (https://api.starknet.extended.exchange) with correct market stats endpoint and symbol format (BTC -> BTC-USD)  
+**Status**: ✅ SOLVED
 
 ### Error #9: Apex Protocol Connection Timeout
 **Date**: 2025-12-03  

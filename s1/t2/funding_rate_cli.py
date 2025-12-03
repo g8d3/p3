@@ -188,12 +188,12 @@ class ApexClient(ExchangeAPIClient):
     def __init__(self):
         super().__init__("ApeX Protocol", "https://api.pro.apex.exchange")
     
-    def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
+def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
             # Use public endpoint for funding rates
-            response = self.session.get(f"{self.base_url}/v3/funding-rate-history", 
-                                       params={"symbol": f"{symbol}-USDT"}, 
-                                       timeout=15)
+            response = self.session.get(f"{self.base_url}/v3/funding", 
+                                        params={"symbol": f"{symbol}-USDT"}, 
+                                        timeout=15)
             response.raise_for_status()
             data = response.json()
             
@@ -202,14 +202,17 @@ class ApexClient(ExchangeAPIClient):
                 latest = data[-1]  # Most recent entry
                 return {
                     "exchange": self.name,
-                    "symbol": symbol,
+                    "symbol": latest.get("symbol", f"{symbol}-USDT"),
                     "funding_rate": float(latest.get("rate", 0)),
                     "funding_time": latest.get("time"),
-                    "funding_interval": latest.get("interval", "1h")  # Default to 1h if not specified
+                    "mark_price": float(latest.get("price", 0))
                 }
             else:
-                print(f"No funding history found for {self.name} {symbol}")
+                print(f"Error fetching {self.name} {symbol}: No funding rate data available")
                 return None
+        except Exception as e:
+            print(f"Error fetching {self.name} {symbol}: {e}")
+            return None
                 
         except Exception as e:
             print(f"Error fetching {self.name} {symbol}: {e}")
