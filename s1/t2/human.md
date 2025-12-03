@@ -4,4 +4,5 @@ Things I noticed should be fixed:
 - funding rate should be presented in % per hour
 - there should be additional columns showing the raw funding rate and which period is exchange using
 - funding time and next funding time should be presented in human format not timestamp
-- additional exchange specific output should be 
+- additional exchange specific output should be on a new column, so data is not lost
+- cli file is too long, 
