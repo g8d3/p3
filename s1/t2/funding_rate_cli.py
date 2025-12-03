@@ -177,7 +177,7 @@ class EdgeXClient(ExchangeAPIClient):
                     "mark_price": float(market_data.get("markPrice", 0))
                 }
             else:
-                print(f"Error fetching {self.name} {symbol}: {data.get('error', 'Unknown error')}\")
+                print(f"Error fetching {self.name} {symbol}: {data.get('error', 'Unknown error')}")
                 return None
         except Exception as e:
             print(f"Error fetching {self.name} {symbol}: {e}")
