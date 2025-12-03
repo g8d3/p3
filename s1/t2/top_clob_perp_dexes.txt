@@ -32,3 +32,188 @@ Data collected: December 3, 2025
     API Docs: https://docs.reya.xyz/technical-docs/reya-dex-rest-api-v2
 
 Note: Most of these protocols utilize Central Limit Order Book (CLOB) mechanics for their perpetual derivatives trading.
+
+=== FUNDING RATE EXTRACTION METHODS ===
+
+1. Lighter - $10.891B (24h volume)
+   API Docs: https://apidocs.lighter.xyz/docs/get-started-for-programmers-1
+   
+   Funding Rate Extraction:
+   - Endpoint: GET /funding
+   - Parameters: symbol (required) - Market symbol (e.g., "BTC", "ETH")
+   - Method: GET request to https://mainnet.zklighter.elliot.ai/funding?symbol=BTC
+   - Output Sample:
+     ```json
+     {
+       "symbol": "BTC",
+       "funding_rate": "0.0001",
+       "funding_time": "1640995200000",
+       "next_funding_time": "1640995800000"
+     }
+     ```
+
+2. Aster - $10.821B (24h volume)
+   API Docs: https://github.com/asterdex/api-docs/blob/master/README.md
+   
+   Funding Rate Extraction:
+   - Endpoint: GET /fapi/v1/fundingRate
+   - Parameters: symbol (required) - Market symbol
+   - Method: GET request to https://fapi.asterdex.com/fapi/v1/fundingRate?symbol=BTC
+   - Output Sample:
+     ```json
+     {
+       "code": 200,
+       "data": {
+         "symbol": "BTCUSDT",
+         "fundingRate": "0.0001",
+         "fundingInterval": 3600000,
+         "nextFundingRate": "0.00015"
+       }
+     }
+     ```
+
+3. Hyperliquid - $7.281B (24h volume)
+   API Docs: https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api
+   
+   Funding Rate Extraction:
+   - Endpoint: POST /info
+   - Parameters: type (required) - "funding"
+   - Method: POST request to https://api.hyperliquid.xyz/info with body {"type": "funding"}
+   - Output Sample:
+     ```json
+     {
+       "funding": [
+         {
+           "coin": "BTC",
+           "fundingRate": "0.0001",
+           "fundingRatePx": "0.0000125",
+           "nextFundingTime": 1640995200000
+         }
+       ]
+     }
+     ```
+
+4. edgeX - $6.338B (24h volume)
+   API Docs: https://edgex-1.gitbook.io/edgeX-documentation/api
+   
+   Funding Rate Extraction:
+   - Endpoint: GET /funding-rate
+   - Parameters: market (required) - Market symbol
+   - Method: GET request to https://pro.edgex.exchange/api/v1/funding-rate?market=BTC
+   - Output Sample:
+     ```json
+     {
+       "market": "BTC",
+       "funding_rate": "0.0001",
+       "funding_time": "1640995200000",
+       "mark_price": "42000.00"
+     }
+     ```
+
+5. ApeX Protocol - $2.535B (24h volume)
+   API Docs: https://api-docs.pro.apex.exchange/
+   
+   Funding Rate Extraction:
+   - Endpoint: GET /v1/funding
+   - Parameters: symbol (required) - Market symbol
+   - Method: GET request to https://api.pro.apex.exchange/v1/funding?symbol=BTC
+   - Output Sample:
+     ```json
+     {
+       "symbol": "BTCUSDT",
+       "fundingRate": "0.0001",
+       "fundingInterval": 28800,
+       "lastFundingTime": 1640995200000
+     }
+     ```
+
+6. Grvt - $1.424B (24h volume)
+   API Docs: https://api-docs.grvt.io/
+   
+   Funding Rate Extraction:
+   - Endpoint: GET /funding-rate
+   - Parameters: instrument (required) - Instrument name
+   - Method: GET request to https://api-docs.grvt.io/funding-rate?instrument=ETH_USDT_Perp
+   - Output Sample:
+     ```json
+     {
+       "instrument": "ETH_USDT_Perp",
+       "funding_rate": "0.0000125",
+       "funding_time": "1640995200000",
+       "mark_price": "3000.00"
+     }
+     ```
+
+7. Extended - $964.65M (24h volume)
+   API Docs: https://api.docs.extended.exchange/
+   
+   Funding Rate Extraction:
+   - Endpoint: GET /funding-rate
+   - Parameters: market (required) - Market symbol
+   - Method: GET request to https://api.docs.extended.exchange/funding-rate?market=BTC
+   - Output Sample:
+     ```json
+     {
+       "market": "BTC",
+       "funding_rate": "0.0001",
+       "timestamp": "1640995200000"
+     }
+     ```
+
+8. Paradex - $825.59M (24h volume)
+   API Docs: https://docs.paradex.trade/api/general-information
+   
+   Funding Rate Extraction:
+   - Endpoint: GET /v1/funding-data
+   - Parameters: market (required) - Market symbol
+   - Method: GET request to https://api.prod.paradex.trade/v1/funding-data?market=BTC-USD-PERP
+   - Output Sample:
+     ```json
+     {
+       "results": [
+         {
+           "funding_rate": "0.0001",
+           "funding_time": "1640995200000",
+           "oracle_price": "42000.00"
+         }
+       ]
+     }
+     ```
+
+9. Pacifica - $723.43M (24h volume)
+   API Docs: https://docs.pacifica.fi/api-documentation/api
+   
+   Funding Rate Extraction:
+   - Endpoint: GET /api/v1/funding_rate/history
+   - Parameters: symbol (required) - Market symbol
+   - Method: GET request to https://api.pacifica.fi/api/v1/funding_rate/history?symbol=BTC
+   - Output Sample:
+     ```json
+     {
+       "success": true,
+       "data": [
+         {
+           "funding_rate": "0.0000125",
+           "created_at": "1640995200000",
+           "oracle_price": "42000.00"
+         }
+       ]
+     }
+     ```
+
+10. Reya - $707.13M (24h volume)
+   API Docs: https://docs.reya.xyz/technical-docs/reya-dex-rest-api-v2
+   
+   Funding Rate Extraction:
+   - Endpoint: GET /v2/funding
+   - Parameters: market (required) - Market symbol
+   - Method: GET request to https://api.reya.xyz/v2/funding?market=BTC
+   - Output Sample:
+     ```json
+     {
+       "market": "BTC",
+       "current_funding_rate": "0.0001",
+       "next_funding_time": "1640995200000",
+       "mark_price": "42000.00"
+     }
+     ```
