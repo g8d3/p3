@@ -64,12 +64,9 @@ This file tracks errors discovered during testing and their solutions.
 **Date**: 2025-12-03  
 **Description**: 422 Client Error: Unprocessable Entity for url: https://api.hyperliquid.xyz/info  
 **Location**: HyperliquidClient.get_funding_rate()  
-**Cause**: Request format or authentication issue  
-**Attempted Solutions**:
-- Verified JSON payload format matches documentation
-- Added proper Content-Type headers  
-- Tested with curl - same 422 error  
-**Status**: ❌ UNSOLVED - Need updated API documentation or authentication
+**Cause**: Request format was incorrect - using `type: "funding"` instead of `type: "fundingHistory"`  
+**Solution**: Updated endpoint to use `type: "fundingHistory"` with proper parameters and response parsing  
+**Status**: ✅ SOLVED
 
 ### Error #8: edgeX API 404 Error
 **Date**: 2025-12-03  

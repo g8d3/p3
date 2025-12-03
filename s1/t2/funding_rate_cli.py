@@ -120,35 +120,35 @@ class HyperliquidClient(ExchangeAPIClient):
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            # Try the documented format first
+            # Use fundingHistory endpoint with recent timestamp
+            import time
+            current_time = int(time.time() * 1000)  # Current time in milliseconds
+            start_time = current_time - (24 * 60 * 60 * 1000)  # 24 hours ago
+            
             response = self.session.post(f"{self.base_url}/info", 
-                                       json={"type": "funding"}, 
+                                       json={
+                                           "type": "fundingHistory", 
+                                           "coin": symbol,
+                                           "startTime": start_time
+                                       }, 
                                        headers={"Content-Type": "application/json"},
                                        timeout=10)
             response.raise_for_status()
             data = response.json()
-            funding_list = data.get("funding", [])
             
-            for item in funding_list:
-                if item.get("coin") == symbol:
-                    return {
-                        "exchange": self.name,
-                        "symbol": symbol,
-                        "funding_rate": float(item.get("fundingRate", 0)),
-                        "funding_rate_px": float(item.get("fundingRatePx", 0)),
-                        "next_funding_time": item.get("nextFundingTime")
-                    }
-            
-            # If symbol not found, return the first one as fallback
-            if funding_list:
-                item = funding_list[0]
+            # Get most recent funding rate
+            if data and len(data) > 0:
+                latest = data[-1]  # Most recent entry
                 return {
                     "exchange": self.name,
-                    "symbol": item.get("coin", symbol),
-                    "funding_rate": float(item.get("fundingRate", 0)),
-                    "funding_rate_px": float(item.get("fundingRatePx", 0)),
-                    "next_funding_time": item.get("nextFundingTime")
+                    "symbol": symbol,
+                    "funding_rate": float(latest.get("fundingRate", 0)),
+                    "premium": float(latest.get("premium", 0)),
+                    "timestamp": latest.get("time")
                 }
+            else:
+                print(f"No funding history found for {self.name} {symbol}")
+                return None
                 
         except Exception as e:
             print(f"Error fetching {self.name} {symbol}: {e}")
@@ -182,16 +182,27 @@ class ApexClient(ExchangeAPIClient):
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            response = self.session.get(f"{self.base_url}/v1/funding", params={"symbol": symbol}, timeout=10)
+            # Use public endpoint for funding rates
+            response = self.session.get(f"{self.base_url}/v3/funding-rate-history", 
+                                       params={"symbol": f"{symbol}-USDT"}, 
+                                       timeout=15)
             response.raise_for_status()
             data = response.json()
-            return {
-                "exchange": self.name,
-                "symbol": data.get("symbol", symbol),
-                "funding_rate": float(data.get("fundingRate", 0)),
-                "funding_interval": data.get("fundingInterval"),
-                "last_funding_time": data.get("lastFundingTime")
-            }
+            
+            # Get the most recent funding rate
+            if data and len(data) > 0:
+                latest = data[-1]  # Most recent entry
+                return {
+                    "exchange": self.name,
+                    "symbol": symbol,
+                    "funding_rate": float(latest.get("rate", 0)),
+                    "funding_time": latest.get("time"),
+                    "funding_interval": latest.get("interval", "1h")  # Default to 1h if not specified
+                }
+            else:
+                print(f"No funding history found for {self.name} {symbol}")
+                return None
+                
         except Exception as e:
             print(f"Error fetching {self.name} {symbol}: {e}")
             return None
