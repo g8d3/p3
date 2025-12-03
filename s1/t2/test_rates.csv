@@ -1,0 +1,5 @@
+exchange,symbol,funding_rate,funding_time,next_funding_time,funding_interval,mark_price,oracle_price,timestamp
+Aster,BTCUSDT,-3.59e-06,1764777600000,N/A,N/A,N/A,N/A,N/A
+Aster,ETHUSDT,7.055e-05,1764777600000,N/A,N/A,N/A,N/A,N/A
+Pacifica,BTC,1.25e-05,N/A,N/A,N/A,N/A,92951.419739,N/A
+Pacifica,ETH,1.121e-05,N/A,N/A,N/A,N/A,3127.922186,N/A

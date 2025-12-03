@@ -17,7 +17,7 @@ try:
 except ImportError:
     print("Installing required package: tabulate")
     import subprocess
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "tabulate"])
+    subprocess.check_call(["uv", "pip", "install", "tabulate"])
     from tabulate import tabulate
 
 
@@ -61,18 +61,44 @@ class AsterClient(ExchangeAPIClient):
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            response = self.session.get(f"{self.base_url}/fapi/v1/fundingRate", params={"symbol": symbol}, timeout=10)
+            # Convert symbol to USDT format for Aster
+            usdt_symbol = f"{symbol}USDT" if not symbol.endswith("USDT") else symbol
+            
+            response = self.session.get(f"{self.base_url}/fapi/v1/fundingRate", params={"symbol": usdt_symbol}, timeout=10)
             response.raise_for_status()
             data = response.json()
-            if data.get("code") == 200:
-                funding_data = data.get("data", {})
+            
+            # Aster returns an array of historical funding rates
+            if isinstance(data, list) and len(data) > 0:
+                # Get the most recent funding rate
+                latest = data[-1]
                 return {
                     "exchange": self.name,
-                    "symbol": funding_data.get("symbol", symbol),
-                    "funding_rate": float(funding_data.get("fundingRate", 0)),
-                    "funding_interval": funding_data.get("fundingInterval"),
-                    "next_funding_rate": float(funding_data.get("nextFundingRate", 0))
+                    "symbol": latest.get("symbol", usdt_symbol),
+                    "funding_rate": float(latest.get("fundingRate", 0)),
+                    "funding_time": latest.get("fundingTime"),
+                    "historical_count": len(data)
                 }
+            elif isinstance(data, dict):
+                # Handle potential dict response
+                if data.get("code") == 200:
+                    funding_data = data.get("data", {})
+                    return {
+                        "exchange": self.name,
+                        "symbol": funding_data.get("symbol", usdt_symbol),
+                        "funding_rate": float(funding_data.get("fundingRate", 0)),
+                        "funding_interval": funding_data.get("fundingInterval"),
+                        "next_funding_rate": float(funding_data.get("nextFundingRate", 0))
+                    }
+                else:
+                    # Try direct dict format
+                    return {
+                        "exchange": self.name,
+                        "symbol": data.get("symbol", usdt_symbol),
+                        "funding_rate": float(data.get("fundingRate", 0)),
+                        "funding_interval": data.get("fundingInterval"),
+                        "next_funding_rate": float(data.get("nextFundingRate", 0))
+                    }
         except Exception as e:
             print(f"Error fetching {self.name} {symbol}: {e}")
             return None
@@ -84,7 +110,11 @@ class HyperliquidClient(ExchangeAPIClient):
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            response = self.session.post(f"{self.base_url}/info", json={"type": "funding"}, timeout=10)
+            # Try the documented format first
+            response = self.session.post(f"{self.base_url}/info", 
+                                       json={"type": "funding"}, 
+                                       headers={"Content-Type": "application/json"},
+                                       timeout=10)
             response.raise_for_status()
             data = response.json()
             funding_list = data.get("funding", [])
@@ -98,6 +128,18 @@ class HyperliquidClient(ExchangeAPIClient):
                         "funding_rate_px": float(item.get("fundingRatePx", 0)),
                         "next_funding_time": item.get("nextFundingTime")
                     }
+            
+            # If symbol not found, return the first one as fallback
+            if funding_list:
+                item = funding_list[0]
+                return {
+                    "exchange": self.name,
+                    "symbol": item.get("coin", symbol),
+                    "funding_rate": float(item.get("fundingRate", 0)),
+                    "funding_rate_px": float(item.get("fundingRatePx", 0)),
+                    "next_funding_time": item.get("nextFundingTime")
+                }
+                
         except Exception as e:
             print(f"Error fetching {self.name} {symbol}: {e}")
             return None
