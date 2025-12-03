@@ -216,7 +216,7 @@ class PacificaClient(ExchangeAPIClient):
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            response = self.session.get(f"{self.base_url}/api/v1/funding_rate/history", params={"symbol": symbol})
+            response = self.session.get(f"{self.base_url}/api/v1/funding_rate/history", params={"symbol": symbol}, timeout=10)
             response.raise_for_status()
             data = response.json()
             if data.get("success") and data.get("data"):
@@ -239,7 +239,7 @@ class ReyaClient(ExchangeAPIClient):
     
     def get_funding_rate(self, symbol: str) -> Optional[Dict[str, Any]]:
         try:
-            response = self.session.get(f"{self.base_url}/v2/funding", params={"market": symbol})
+            response = self.session.get(f"{self.base_url}/v2/funding", params={"market": symbol}, timeout=10)
             response.raise_for_status()
             data = response.json()
             return {
