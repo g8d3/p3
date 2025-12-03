@@ -1,0 +1,34 @@
+Top 10 CLOB Perp DEXes by 24h Volume (Source: DeFiLlama)
+Data collected: December 3, 2025
+
+1. Lighter - $10.891B (24h volume)
+   API Docs: https://apidocs.lighter.xyz/docs/get-started-for-programmers-1
+
+2. Aster - $10.821B (24h volume)
+   API Docs: https://github.com/asterdex/api-docs/blob/master/README.md
+
+3. Hyperliquid - $7.281B (24h volume)
+   API Docs: https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api
+
+4. edgeX - $6.338B (24h volume)
+   API Docs: https://edgex-1.gitbook.io/edgeX-documentation/api
+
+5. ApeX Protocol - $2.535B (24h volume)
+   API Docs: https://api-docs.pro.apex.exchange/
+
+6. Grvt - $1.424B (24h volume)
+   API Docs: https://api-docs.grvt.io/
+
+7. Extended - $964.65M (24h volume)
+   API Docs: https://api.docs.extended.exchange/
+
+8. Paradex - $825.59M (24h volume)
+   API Docs: https://docs.paradex.trade/api/general-information
+
+9. Pacifica - $723.43M (24h volume)
+   API Docs: https://docs.pacifica.fi/api-documentation/api
+
+10. Reya - $707.13M (24h volume)
+    API Docs: https://docs.reya.xyz/technical-docs/reya-dex-rest-api-v2
+
+Note: Most of these protocols utilize Central Limit Order Book (CLOB) mechanics for their perpetual derivatives trading.
