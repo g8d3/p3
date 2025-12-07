@@ -1,0 +1,29 @@
+# Configuration for Autonomous Hybrid Scraper
+# API credentials can be set via environment variables (recommended):
+# export PROVIDER="openai"  # or "gemini", "anthropic", etc.
+# export API_KEY_ENV_VAR="GEMINI_API_KEY"  # Specify which env var contains the API key
+# export LLM_MODEL="gpt-4o"  # Model name (provider-specific)
+# export API_BASE_URL="https://api.openai.com/v1"  # Optional: for custom endpoints
+
+# provider: "openai"  # Can be set via PROVIDER env var
+# api_key_env_var: "OPENAI_API_KEY"  # Can be set via API_KEY_ENV_VAR env var
+# llm_model: "gpt-4o"  # Can be set via LLM_MODEL env var
+# api_base_url: "https://api.openai.com/v1"  # Can be set via API_BASE_URL env var
+
+targets:
+  - name: "test_simple"
+    url: "https://httpbin.org/html"
+    prompt_instructions: |
+      This is a simple HTML test page.
+      Extract the h1 title and any paragraph text.
+
+  - name: "github_repos"
+    url: "https://github.com/search?q=python&type=repositories"
+    prompt_instructions: |
+      This is a GitHub repository search results page.
+      Identify the repository listing containers and extract:
+      - Repository name
+      - Description
+      - Stars count
+      - Language
+      - Repository URL

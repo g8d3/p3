@@ -1,0 +1,14 @@
+{
+  "database": {
+    "path": "./data/scraper.db"
+  },
+  "outputs": {
+    "directory": "./outputs"
+  },
+  "workflows": {
+    "directory": "./workflows"
+  },
+  "cdp": {
+    "port": 9222
+  }
+}
