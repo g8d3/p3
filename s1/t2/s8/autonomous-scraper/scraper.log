@@ -1,0 +1,123 @@
+2025-12-07 15:45:45,441 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 15:45:45,441 - __main__ - INFO - Starting scraping for target: amazon_search
+2025-12-07 15:45:45,442 - __main__ - ERROR - Failed to scrape amazon_search: Client.__init__() got an unexpected keyword argument 'proxies'
+2025-12-07 15:45:45,442 - __main__ - ERROR - Application error: Client.__init__() got an unexpected keyword argument 'proxies'
+2025-12-07 15:49:24,781 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 15:49:24,781 - __main__ - INFO - Starting scraping for target: amazon_search
+2025-12-07 15:49:24,782 - __main__ - ERROR - Failed to scrape amazon_search: Client.__init__() got an unexpected keyword argument 'proxies'
+2025-12-07 15:49:24,782 - __main__ - ERROR - Application error: Client.__init__() got an unexpected keyword argument 'proxies'
+2025-12-07 15:49:53,352 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 15:49:53,352 - __main__ - INFO - Starting scraping for target: amazon_search
+2025-12-07 15:49:53,369 - discovery - WARNING - Using mock schema for testing - no real API key provided
+2025-12-07 15:49:53,369 - __main__ - INFO - Generated schema: {"item_selector":".s-result-item","fields":[{"field_name":"title","relative_selector":"h2 a span","extraction_type":"text"},{"field_name":"price","relative_selector":".a-price .a-offscreen","extraction_type":"text"},{"field_name":"image_url","relative_selector":".s-image","extraction_type":"attribute"},{"field_name":"link","relative_selector":"h2 a","extraction_type":"href"}]}
+2025-12-07 15:49:53,556 - __main__ - ERROR - Failed to scrape amazon_search: Executable doesn't exist at /home/vuos/.cache/ms-playwright/chromium-1091/chrome-linux/chrome
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+2025-12-07 15:49:53,557 - __main__ - ERROR - Application error: Executable doesn't exist at /home/vuos/.cache/ms-playwright/chromium-1091/chrome-linux/chrome
+╔════════════════════════════════════════════════════════════╗
+║ Looks like Playwright was just installed or updated.       ║
+║ Please run the following command to download new browsers: ║
+║                                                            ║
+║     playwright install                                     ║
+║                                                            ║
+║ <3 Playwright Team                                         ║
+╚════════════════════════════════════════════════════════════╝
+2025-12-07 15:50:30,954 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 15:50:30,954 - __main__ - INFO - Starting scraping for target: amazon_search
+2025-12-07 15:50:30,971 - discovery - WARNING - Using mock schema for testing - no real API key provided
+2025-12-07 15:50:30,972 - __main__ - INFO - Generated schema: {"item_selector":".s-result-item","fields":[{"field_name":"title","relative_selector":"h2 a span","extraction_type":"text"},{"field_name":"price","relative_selector":".a-price .a-offscreen","extraction_type":"text"},{"field_name":"image_url","relative_selector":".s-image","extraction_type":"attribute"},{"field_name":"link","relative_selector":"h2 a","extraction_type":"href"}]}
+2025-12-07 15:51:04,514 - __main__ - ERROR - Failed to scrape amazon_search: invalid state
+2025-12-07 15:51:04,514 - __main__ - ERROR - Application error: invalid state
+2025-12-07 15:51:13,037 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 15:51:13,037 - __main__ - INFO - Starting scraping for target: amazon_search
+2025-12-07 15:51:13,055 - discovery - WARNING - Using mock schema for testing - no real API key provided
+2025-12-07 15:51:24,370 - __main__ - INFO - Generated schema: {"item_selector":".s-result-item","fields":[{"field_name":"title","relative_selector":"h2 a span","extraction_type":"text"},{"field_name":"price","relative_selector":".a-price .a-offscreen","extraction_type":"text"},{"field_name":"image_url","relative_selector":".s-image","extraction_type":"attribute"},{"field_name":"link","relative_selector":"h2 a","extraction_type":"href"}]}
+2025-12-07 15:51:24,746 - __main__ - INFO - Successfully scraped 20 items for amazon_search
+2025-12-07 15:51:24,746 - __main__ - INFO - Output saved to output_amazon_search_20251207_155124.json
+2025-12-07 15:51:24,746 - __main__ - INFO - Total time: 11.71 seconds
+2025-12-07 15:51:24,746 - __main__ - INFO - Starting scraping for target: github_repos
+2025-12-07 15:51:24,762 - discovery - WARNING - Using mock schema for testing - no real API key provided
+2025-12-07 15:51:28,508 - __main__ - INFO - Generated schema: {"item_selector":".s-result-item","fields":[{"field_name":"title","relative_selector":"h2 a span","extraction_type":"text"},{"field_name":"price","relative_selector":".a-price .a-offscreen","extraction_type":"text"},{"field_name":"image_url","relative_selector":".s-image","extraction_type":"attribute"},{"field_name":"link","relative_selector":"h2 a","extraction_type":"href"}]}
+2025-12-07 15:51:28,577 - __main__ - INFO - Successfully scraped 0 items for github_repos
+2025-12-07 15:51:28,577 - __main__ - INFO - Output saved to output_github_repos_20251207_155128.json
+2025-12-07 15:51:28,577 - __main__ - INFO - Total time: 3.83 seconds
+2025-12-07 15:55:48,355 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 15:55:48,355 - __main__ - INFO - Starting scraping for target: amazon_search
+2025-12-07 15:56:21,245 - __main__ - ERROR - Failed to scrape amazon_search: invalid state
+2025-12-07 15:56:21,245 - __main__ - ERROR - Application error: invalid state
+2025-12-07 15:56:36,355 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 15:56:36,355 - __main__ - INFO - Starting scraping for target: amazon_search
+2025-12-07 15:57:08,942 - discovery - ERROR - Error capturing page data for https://www.amazon.com/s?k=laptop: invalid state
+2025-12-07 15:57:08,942 - __main__ - ERROR - Failed to scrape amazon_search: invalid state
+2025-12-07 15:57:08,942 - __main__ - ERROR - Application error: invalid state
+2025-12-07 15:57:19,600 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 15:57:19,600 - __main__ - INFO - Starting scraping for target: amazon_search
+2025-12-07 15:57:51,176 - discovery - ERROR - Error capturing page data for https://www.amazon.com/s?k=laptop: Timeout 30000ms exceeded.
+=========================== logs ===========================
+"load" event fired
+============================================================
+2025-12-07 15:57:51,177 - __main__ - ERROR - Failed to scrape amazon_search: Timeout 30000ms exceeded.
+=========================== logs ===========================
+"load" event fired
+============================================================
+2025-12-07 15:57:51,177 - __main__ - ERROR - Application error: Timeout 30000ms exceeded.
+=========================== logs ===========================
+"load" event fired
+============================================================
+2025-12-07 15:58:04,956 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 15:58:04,956 - __main__ - INFO - Starting scraping for target: test_simple
+2025-12-07 15:58:09,500 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 404 Not Found"
+2025-12-07 15:58:09,504 - __main__ - ERROR - Failed to scrape test_simple: Error code: 404 - {'error': {'message': 'The model `gpt-4-vision-preview` has been deprecated, learn more here: https://platform.openai.com/docs/deprecations', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
+2025-12-07 15:58:09,504 - __main__ - ERROR - Application error: Error code: 404 - {'error': {'message': 'The model `gpt-4-vision-preview` has been deprecated, learn more here: https://platform.openai.com/docs/deprecations', 'type': 'invalid_request_error', 'param': None, 'code': 'model_not_found'}}
+2025-12-07 15:58:15,048 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 15:58:15,048 - __main__ - INFO - Starting scraping for target: test_simple
+2025-12-07 15:58:18,871 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-12-07 15:58:18,871 - openai._base_client - INFO - Retrying request to /chat/completions in 0.759762 seconds
+2025-12-07 15:58:21,342 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-12-07 15:58:21,342 - openai._base_client - INFO - Retrying request to /chat/completions in 1.949777 seconds
+2025-12-07 15:58:26,256 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-12-07 15:58:26,256 - __main__ - ERROR - Failed to scrape test_simple: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-12-07 15:58:26,257 - __main__ - ERROR - Application error: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-12-07 15:58:33,555 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 15:58:33,555 - __main__ - INFO - Starting scraping for target: test_simple
+2025-12-07 15:58:33,572 - discovery - WARNING - Using mock schema for testing - API key not configured or is placeholder
+2025-12-07 15:58:35,423 - __main__ - INFO - Generated schema: {"item_selector":"div","fields":[{"field_name":"title","relative_selector":"h1","extraction_type":"text"},{"field_name":"content","relative_selector":"p","extraction_type":"text"}]}
+2025-12-07 15:58:35,425 - __main__ - INFO - Successfully scraped 1 items for test_simple
+2025-12-07 15:58:35,425 - __main__ - INFO - Output saved to output_test_simple_20251207_155835.json
+2025-12-07 15:58:35,425 - __main__ - INFO - Total time: 1.87 seconds
+2025-12-07 15:59:44,268 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 15:59:44,269 - __main__ - INFO - Starting scraping for target: test_simple
+2025-12-07 15:59:44,286 - discovery - WARNING - Using mock schema for testing - API key not configured or is placeholder
+2025-12-07 15:59:47,232 - __main__ - INFO - Generated schema: {"item_selector":"div","fields":[{"field_name":"title","relative_selector":"h1","extraction_type":"text"},{"field_name":"content","relative_selector":"p","extraction_type":"text"}]}
+2025-12-07 15:59:47,233 - __main__ - INFO - Successfully scraped 1 items for test_simple
+2025-12-07 15:59:47,233 - __main__ - INFO - Output saved to output_test_simple_20251207_155947.json
+2025-12-07 15:59:47,233 - __main__ - INFO - Total time: 2.96 seconds
+2025-12-07 15:59:47,233 - __main__ - INFO - Starting scraping for target: github_repos
+2025-12-07 15:59:47,249 - discovery - WARNING - Using mock schema for testing - API key not configured or is placeholder
+2025-12-07 15:59:51,258 - __main__ - INFO - Generated schema: {"item_selector":"div","fields":[{"field_name":"title","relative_selector":"h1","extraction_type":"text"},{"field_name":"content","relative_selector":"p","extraction_type":"text"}]}
+2025-12-07 15:59:51,388 - __main__ - INFO - Successfully scraped 453 items for github_repos
+2025-12-07 15:59:51,388 - __main__ - INFO - Output saved to output_github_repos_20251207_155951.json
+2025-12-07 15:59:51,388 - __main__ - INFO - Total time: 4.16 seconds
+2025-12-07 16:02:22,266 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 16:02:22,267 - __main__ - INFO - Starting scraping for target: test_simple
+2025-12-07 16:02:22,267 - __main__ - ERROR - Failed to scrape test_simple: OpenAI API key is required. Set OPENAI_API_KEY environment variable or configure in config.yaml
+2025-12-07 16:02:22,267 - __main__ - ERROR - Application error: OpenAI API key is required. Set OPENAI_API_KEY environment variable or configure in config.yaml
+2025-12-07 16:02:24,476 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 16:02:24,476 - __main__ - INFO - Starting scraping for target: test_simple
+2025-12-07 16:02:26,950 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-12-07 16:02:26,950 - openai._base_client - INFO - Retrying request to /chat/completions in 0.996754 seconds
+2025-12-07 16:02:29,054 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-12-07 16:02:29,055 - openai._base_client - INFO - Retrying request to /chat/completions in 1.536673 seconds
+2025-12-07 16:02:31,716 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-12-07 16:02:31,716 - __main__ - ERROR - Failed to scrape test_simple: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-12-07 16:02:31,716 - __main__ - ERROR - Application error: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-12-07 16:07:14,945 - __main__ - INFO - Configuration loaded successfully
+2025-12-07 16:07:14,946 - __main__ - INFO - Starting scraping for target: test_simple
+2025-12-07 16:07:14,946 - __main__ - ERROR - Failed to scrape test_simple: API key is required. Set GEMINI_API_KEY environment variable or configure in config.yaml
+2025-12-07 16:07:14,946 - __main__ - ERROR - Application error: API key is required. Set GEMINI_API_KEY environment variable or configure in config.yaml
