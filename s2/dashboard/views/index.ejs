@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BizBot Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --primary: #8b5cf6;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .card .value {
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 0.5rem;
+        }
+
+        th {
+            text-align: left;
+            color: var(--text-muted);
+            padding: 1rem;
+            font-weight: 400;
+        }
+
+        td {
+            background: rgba(30, 41, 59, 0.7);
+            padding: 1rem;
+            first-child: border-radius: 8px 0 0 8px;
+            last-child: border-radius: 0 8px 8px 0;
+        }
+
+        tr td:first-child { border-radius: 8px 0 0 8px; }
+        tr td:last-child { border-radius: 0 8px 8px 0; }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .tag {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            background: rgba(255,255,255,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>BizBot // Dashboard</h1>
+            <div class="status-indicator">
+                <span style="color: #4ade80">●</span> System Online
+            </div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="card">
+                <h3>Ideas Scouted</h3>
+                <div class="value"><%= stats.ideas %></div>
+            </div>
+            <div class="card">
+                <h3>Products Created</h3>
+                <div class="value"><%= stats.assets %></div>
+            </div>
+            <div class="card">
+                <h3>Revenue</h3>
+                <div class="value">$0.00</div>
+            </div>
+        </div>
+
+        <section>
+            <h2>Incoming Ideas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Title</th>
+                        <th>Score</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% ideas.forEach(idea => { %>
+                    <tr>
+                        <td><span class="tag"><%= idea.source %></span></td>
+                        <td><%= idea.title.substring(0, 60) %>...</td>
+                        <td><%= idea.score %></td>
+                        <td>
+                            <form action="/ideas/<%= idea.id %>/approve" method="POST" style="display:inline">
+                                <button class="btn btn-sm">Generate Product</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <% }); %>
+                    <% if (ideas.length === 0) { %>
+                        <tr><td colspan="4" style="text-align:center; color: var(--text-muted)">No new ideas found.</td></tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Portfolio Assets</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% assets.forEach(asset => { %>
+                    <tr>
+                        <td><%= asset.name.substring(0, 40) %>...</td>
+                        <td><span class="tag"><%= asset.type %></span></td>
+                        <td><%= asset.status %></td>
+                        <td><%= asset.description.substring(0, 50) %>...</td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </section>
+    </div>
+</body>
+</html>
