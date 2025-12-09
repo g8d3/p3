@@ -11,6 +11,12 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "archiver": "^7.0.1",
+    "better-sqlite3": "^12.5.0",
+    "ejs": "^3.1.10",
+    "express": "^5.2.1",
+    "openai": "^6.10.0",
+    "pdfkit": "^0.17.2",
     "playwright": "^1.57.0"
   }
 }
