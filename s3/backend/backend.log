@@ -1,0 +1,8 @@
+
+> backend@1.0.0 dev
+> ts-node src/index-simple.ts
+
+[dotenv@17.2.3] injecting env (0) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+🚀 Backend server ready at http://localhost:4000
+📊 Health check: http://localhost:4000/health
+🔗 GraphQL endpoint: http://localhost:4000/graphql

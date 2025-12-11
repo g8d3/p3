@@ -27,6 +27,18 @@ function initSchema() {
             status TEXT DEFAULT 'draft', -- draft, live, sold
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
+
+        CREATE TABLE IF NOT EXISTS llm_configs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            provider TEXT NOT NULL, -- openai, anthropic, etc.
+            api_key TEXT,
+            model TEXT,
+            base_url TEXT,
+            is_active INTEGER DEFAULT 0, -- 0 or 1
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
     `);
     console.log('Database initialized at', dbPath);
 }
@@ -45,7 +57,10 @@ function saveIdea(idea) {
 }
 
 function getIdeas(status = 'new') {
-    return db.prepare('SELECT * FROM ideas WHERE status = ? ORDER BY score DESC').all(status);
+    if (status === 'all') {
+        return db.prepare('SELECT * FROM ideas ORDER BY scraped_at DESC').all();
+    }
+    return db.prepare('SELECT * FROM ideas WHERE status = ? ORDER BY scraped_at DESC').all(status);
 }
 
 function updateIdeaStatus(id, status) {
@@ -60,11 +75,56 @@ function saveAsset(asset) {
     return stmt.run(asset);
 }
 
+// LLM Config functions
+function saveLLMConfig(config) {
+    const stmt = db.prepare(`
+        INSERT INTO llm_configs (name, provider, api_key, model, base_url, is_active)
+        VALUES (@name, @provider, @api_key, @model, @base_url, @is_active)
+    `);
+    return stmt.run(config);
+}
+
+function getLLMConfigs() {
+    return db.prepare('SELECT * FROM llm_configs ORDER BY created_at DESC').all();
+}
+
+function getActiveLLMConfig() {
+    return db.prepare('SELECT * FROM llm_configs WHERE is_active = 1 LIMIT 1').get();
+}
+
+function updateLLMConfig(id, config) {
+    const stmt = db.prepare(`
+        UPDATE llm_configs 
+        SET name = @name, provider = @provider, api_key = @api_key, 
+            model = @model, base_url = @base_url, is_active = @is_active,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = @id
+    `);
+    return stmt.run({ ...config, id });
+}
+
+function setActiveLLMConfig(id) {
+    // First, deactivate all configs
+    db.prepare('UPDATE llm_configs SET is_active = 0').run();
+    // Then activate the specified one
+    return db.prepare('UPDATE llm_configs SET is_active = 1 WHERE id = ?').run(id);
+}
+
+function deleteLLMConfig(id) {
+    return db.prepare('DELETE FROM llm_configs WHERE id = ?').run(id);
+}
+
 module.exports = {
     db,
     initSchema,
     saveIdea,
     getIdeas,
     updateIdeaStatus,
-    saveAsset
+    saveAsset,
+    saveLLMConfig,
+    getLLMConfigs,
+    getActiveLLMConfig,
+    updateLLMConfig,
+    setActiveLLMConfig,
+    deleteLLMConfig
 };
