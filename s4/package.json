@@ -1,0 +1,21 @@
+{
+    "name": "bitwarden-popout-automation",
+    "version": "1.0.0",
+    "description": "Automated script to open Bitwarden extension and pop it out to a new window",
+    "main": "popout-bitwarden.js",
+    "scripts": {
+        "start": "node popout-bitwarden.js",
+        "install-deps": "npm install playwright"
+    },
+    "dependencies": {
+        "playwright": "^1.40.0"
+    },
+    "keywords": [
+        "bitwarden",
+        "automation",
+        "playwright",
+        "browser-automation"
+    ],
+    "author": "Droid Assistant",
+    "license": "MIT"
+}
