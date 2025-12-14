@@ -6,3 +6,4 @@ Each task:
 - has its own solution file, js file
 - saves its deps on package.json on the parent folder
 - use browser with cdp on port 9222
+- use playwright, which is already a dep
