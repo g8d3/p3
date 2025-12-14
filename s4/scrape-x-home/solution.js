@@ -47,12 +47,17 @@ async function scrapeTweets(num = 10) {
         console.log('Navigating to home...');
         await page.goto('https://x.com/home', { waitUntil: 'domcontentloaded', timeout: 15000 });
       }
-    } else if (choice === optionIndex) {
-      console.log('Creating new tab...');
-      const context = await browser.newContext();
-      page = await context.newPage();
-      await page.goto('https://x.com/home', { waitUntil: 'domcontentloaded', timeout: 15000 });
-    } else {
+     } else if (choice === optionIndex) {
+       console.log('Creating new tab...');
+       let context;
+       if (existingContexts.length > 0) {
+         context = existingContexts[0];
+       } else {
+         context = await browser.newContext();
+       }
+       page = await context.newPage();
+       await page.goto('https://x.com/home', { waitUntil: 'domcontentloaded', timeout: 15000 });
+     } else {
       throw new Error('Invalid choice');
     }
 
