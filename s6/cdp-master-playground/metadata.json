@@ -1,0 +1,8 @@
+{
+  "name": "CDP Master Playground",
+  "description": "An interactive Chrome DevTools Protocol (CDP) explorer and management dashboard. Control virtual browser targets, execute low-level commands, and visualize protocol logs with AI-powered assistance.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
