@@ -1,0 +1,674 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Scraper Power User</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pocketbase/dist/pocketbase.umd.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div id="app" class="container mx-auto p-4">
+        <header class="mb-8 flex justify-between items-center border-b border-gray-700 pb-4">
+            <h1 class="text-3xl font-bold">AI Scraper <span class="text-blue-500">Pro</span></h1>
+            <div id="user-info" class="text-sm"></div>
+        </header>
+
+        <div id="auth-section" class="hidden max-w-md mx-auto bg-gray-800 p-6 rounded-lg shadow-xl">
+            <h2 class="text-xl mb-4">Login</h2>
+            <input id="email" type="email" placeholder="Email" class="w-full p-2 mb-2 bg-gray-700 rounded">
+            <input id="password" type="password" placeholder="Password" class="w-full p-2 mb-4 bg-gray-700 rounded">
+            <button onclick="login()" class="w-full bg-blue-600 p-2 rounded hover:bg-blue-700">Login / Register</button>
+        </div>
+
+        <div id="main-content" class="hidden grid grid-cols-12 gap-6">
+            <!-- Sidebar -->
+            <aside class="col-span-3 space-y-4">
+                <nav class="space-y-2">
+                    <button onclick="showSection('configs')" class="w-full text-left p-2 hover:bg-gray-800 rounded">Configs</button>
+                    <button onclick="showSection('scrapers')" class="w-full text-left p-2 hover:bg-gray-800 rounded">Scrapers</button>
+                    <button onclick="showSection('runs')" class="w-full text-left p-2 hover:bg-gray-800 rounded">Execution Runs</button>
+                </nav>
+            </aside>
+
+            <!-- Content Area -->
+            <main class="col-span-9 bg-gray-800 p-6 rounded-lg">
+                <div id="section-configs" class="hidden">
+                    <h2 class="text-2xl mb-4">Configurations</h2>
+                    
+                    <div class="mb-8">
+                        <h3 class="text-lg mb-2 font-semibold">AI Models</h3>
+                        <div id="ai-models-list" class="space-y-2 mb-4"></div>
+                        <button onclick="addConfig('ai_model')" class="text-sm bg-green-600 px-3 py-1 rounded">Add Model</button>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-lg mb-2 font-semibold">Browsers (CDP)</h3>
+                        <div id="browsers-list" class="space-y-2 mb-4"></div>
+                        <button onclick="addConfig('browser')" class="text-sm bg-green-600 px-3 py-1 rounded">Add Browser</button>
+                    </div>
+
+                    <div class="mb-8">
+                        <h3 class="text-lg mb-2 font-semibold">Data Sinks</h3>
+                        <div id="sinks-list" class="space-y-2 mb-4"></div>
+                        <button onclick="addConfig('data_sink')" class="text-sm bg-green-600 px-3 py-1 rounded">Add Data Sink</button>
+                    </div>
+                </div>
+
+                <div id="section-scrapers" class="hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-2xl">Scrapers</h2>
+                        <button onclick="addScraper()" class="bg-blue-600 px-4 py-2 rounded">New Scraper</button>
+                    </div>
+                    <div id="scrapers-list" class="grid grid-cols-2 gap-4"></div>
+                </div>
+
+                <div id="section-runs" class="hidden">
+                    <h2 class="text-2xl mb-4">Execution Runs</h2>
+                    <div id="runs-list" class="space-y-4"></div>
+                </div>
+
+                <div id="scraper-detail" class="hidden">
+                    <button onclick="showSection('scrapers')" class="mb-4 text-blue-400">&larr; Back</button>
+                    <div id="scraper-content"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+        <div class="bg-gray-800 p-6 rounded-lg max-w-lg w-full">
+            <div id="modal-body"></div>
+            <div class="flex justify-end space-x-2 mt-4">
+                <button onclick="closeModal()" class="px-4 py-2 border border-gray-600 rounded">Cancel</button>
+                <button id="modal-save" class="px-4 py-2 bg-blue-600 rounded">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        try {
+            const pb = new PocketBase('http://' + location.hostname + ':8090');
+            console.log('PocketBase client initialized');
+
+            async function init() {
+                try {
+                    console.log('Initializing app...');
+
+                    // Check if we have a valid token and try a simple API call
+                    if (pb.authStore.isValid && pb.authStore.token) {
+                        try {
+                            // Try a simple authenticated request to verify auth works
+                            await pb.collection('_pb_users_auth_').getFirstListItem('id != ""');
+                            console.log('User is authenticated, showing main app');
+                            showMain();
+                        } catch (authError) {
+                            console.warn('Auth token exists but API call failed, clearing auth:', authError.message);
+                            pb.authStore.clear();
+                            showAuth();
+                        }
+                    } else {
+                        console.log('User not authenticated, showing login');
+                        showAuth();
+                    }
+                } catch (error) {
+                    console.error('Error in init():', error);
+                }
+            }
+
+            // Make pb global for debugging
+            window.pb = pb;
+
+            // Initialize the app
+            if (typeof init === 'function') {
+                init();
+            } else {
+                console.error('init function not defined');
+            }
+        } catch (error) {
+            console.error('Error initializing app:', error);
+        }
+
+        function showAuth() {
+            try {
+                console.log('Showing auth section');
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('main-content').classList.add('hidden');
+            } catch (error) {
+                console.error('Error in showAuth():', error);
+            }
+        }
+
+        function showMain() {
+            try {
+                console.log('Showing main app section');
+                document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                document.getElementById('user-info').innerText = pb.authStore.model.email;
+                showSection('scrapers');
+            } catch (error) {
+                console.error('Error in showMain():', error);
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                // Try to create user first, if fails assume exists and try to login
+                try {
+                    await pb.collection('users').create({ email, password, passwordConfirm: password });
+                } catch(e) {}
+                await pb.collection('users').authWithPassword(email, password);
+                showMain();
+            } catch (e) {
+                alert("Auth error: " + e.message);
+            }
+        }
+
+        function showSection(name) {
+            ['configs', 'scrapers', 'runs', 'detail'].forEach(s => {
+                const el = document.getElementById('section-' + s) || document.getElementById('scraper-' + s);
+                if (el) el.classList.add('hidden');
+            });
+            const target = document.getElementById('section-' + name) || document.getElementById('scraper-' + name);
+            if (target) target.classList.remove('hidden');
+
+            if (name === 'configs') loadConfigs();
+            if (name === 'scrapers') loadScrapers();
+            if (name === 'runs') loadRuns();
+        }
+
+        async function loadConfigs() {
+            try {
+                const models = await pb.collection('ai_models').getFullList();
+                const browsers = await pb.collection('browsers').getFullList();
+                const sinks = await pb.collection('data_sinks').getFullList();
+
+                let modelsHtml = '';
+                if (models.length > 0) {
+                    modelsHtml = models.map(m =>
+                        '<div class="bg-gray-700 p-2 rounded flex justify-between">' +
+                            '<span>' + m.name + ' (' + m.model_id + ')</span>' +
+                            '<button onclick="deleteConfig(\'ai_models\', \'' + m.id + '\')" class="text-red-400">Delete</button>' +
+                        '</div>'
+                    ).join('');
+                } else {
+                    modelsHtml = '<div class="text-gray-500">No AI models configured</div>';
+                }
+                document.getElementById('ai-models-list').innerHTML = modelsHtml;
+
+                let browsersHtml = '';
+                if (browsers.length > 0) {
+                    browsersHtml = browsers.map(b =>
+                        '<div class="bg-gray-700 p-2 rounded flex justify-between">' +
+                            '<span>' + b.name + '</span>' +
+                            '<button onclick="deleteConfig(\'browsers\', \'' + b.id + '\')" class="text-red-400">Delete</button>' +
+                        '</div>'
+                    ).join('');
+                } else {
+                    browsersHtml = '<div class="text-gray-500">No browsers configured</div>';
+                }
+                document.getElementById('browsers-list').innerHTML = browsersHtml;
+
+                let sinksHtml = '';
+                if (sinks.length > 0) {
+                    sinksHtml = sinks.map(s =>
+                        '<div class="bg-gray-700 p-2 rounded flex justify-between">' +
+                            '<span>' + s.name + ' (' + s.type + ')</span>' +
+                            '<button onclick="deleteConfig(\'data_sinks\', \'' + s.id + '\')" class="text-red-400">Delete</button>' +
+                        '</div>'
+                    ).join('');
+                } else {
+                    sinksHtml = '<div class="text-gray-500">No data sinks configured</div>';
+                }
+                document.getElementById('sinks-list').innerHTML = sinksHtml;
+            } catch (error) {
+                console.error('Failed to load configs:', error);
+                // Show empty state or error message
+                document.getElementById('ai-models-list').innerHTML = '<div class="text-gray-500">Failed to load AI models</div>';
+                document.getElementById('browsers-list').innerHTML = '<div class="text-gray-500">Failed to load browsers</div>';
+                document.getElementById('sinks-list').innerHTML = '<div class="text-gray-500">Failed to load data sinks</div>';
+            }
+        }
+
+        async function loadRuns() {
+            try {
+                // Load recent runs from extraction_runs collection
+                const runs = await pb.collection('extraction_runs').getList(1, 10, {
+                    sort: '-created'
+                }).catch(() => ({ items: [] }));
+                let runsHtml = '';
+                if (runs.items.length > 0) {
+                    runsHtml = runs.items.map(run => {
+                        const statusClass = run.status === 'completed' ? 'bg-green-600' :
+                                          run.status === 'failed' ? 'bg-red-600' :
+                                          run.status === 'running' ? 'bg-yellow-600' : 'bg-gray-600';
+                        return '<div class="bg-gray-700 p-4 rounded">' +
+                            '<div class="flex justify-between items-center">' +
+                                '<span class="font-bold">' + (run.scraper || 'Unknown Scraper') + '</span>' +
+                                '<span class="text-sm px-2 py-1 rounded ' + statusClass + '">' + run.status + '</span>' +
+                            '</div>' +
+                            '<div class="text-sm text-gray-400 mt-2">' +
+                                new Date(run.created).toLocaleString() +
+                            '</div>' +
+                        '</div>';
+                    }).join('');
+                } else {
+                    runsHtml = '<div class="text-gray-500 text-center py-8">No runs found</div>';
+                }
+                document.getElementById('runs-list').innerHTML = runsHtml;
+            } catch (error) {
+                console.error('Failed to load runs:', error);
+                document.getElementById('runs-list').innerHTML = '<div class="text-gray-500 text-center py-8">Failed to load runs. Please check authentication.</div>';
+            }
+        }
+
+
+        async function loadScrapers() {
+            try {
+                console.log('Loading scrapers, auth status:', pb.authStore.isValid, pb.authStore.token ? 'has token' : 'no token');
+                console.log('User ID:', pb.authStore.model?.id);
+
+                // Try without filter first to see if collection access works
+                const scrapers = await pb.collection('scrapers').getFullList();
+                console.log('Scrapers loaded successfully:', scrapers.length, 'items');
+                let scrapersHtml = '';
+                if (scrapers.length > 0) {
+                    scrapersHtml = scrapers.map(s =>
+                        '<div onclick="viewScraper(\'' + s.id + '\')" class="bg-gray-700 p-4 rounded cursor-pointer hover:bg-gray-600 transition">' +
+                            '<h3 class="font-bold text-lg">' + s.name + '</h3>' +
+                            '<p class="text-sm text-gray-400 truncate">' + s.url + '</p>' +
+                            '<div class="mt-2 text-xs flex space-x-2">' +
+                            '<span class="' + (s.code ? 'text-green-400' : 'text-yellow-400') + '">' +
+                                (s.code ? 'Code Ready' : 'No Code') +
+                            '</span>' +
+                        '</div>'
+                    ).join('');
+                } else {
+                    scrapersHtml = '<div class="text-gray-500 text-center py-8">No scrapers created yet</div>';
+                }
+                document.getElementById('scrapers-list').innerHTML = scrapersHtml;
+            } catch (error) {
+                console.error('Failed to load scrapers:', error, 'Type:', typeof error, 'Message:', error.message, 'Stack:', error.stack);
+                if (error.message && error.message.includes('404')) {
+                    console.error('Collection not found or permission denied. This suggests collection permissions are too restrictive.');
+                }
+                document.getElementById('scrapers-list').innerHTML = '<div class="text-gray-500 text-center py-8">Failed to load scrapers. Collection access issue.</div>';
+            }
+        }
+
+        async function viewScraper(id) {
+            const s = await pb.collection('scrapers').getOne(id, { expand: 'ai_model,browser' });
+            showSection('detail');
+            const content = document.getElementById('scraper-content');
+            let html = '<div class="space-y-6">' +
+                '<div>' +
+                    '<h2 class="text-3xl font-bold">' + s.name + '</h2>' +
+                    '<a href="' + s.url + '" target="_blank" class="text-blue-400 hover:underline">' + s.url + '</a>' +
+                '</div>' +
+                '<div class="grid grid-cols-3 gap-4">' +
+                    '<button onclick="discoverExtraction(\'' + s.id + '\', event)" class="bg-purple-600 p-3 rounded font-bold">1. Discover Targets</button>' +
+                    '<button onclick="generateCode(\'' + s.id + '\', event)" class="bg-indigo-600 p-3 rounded font-bold">2. Generate Code</button>' +
+                    '<button onclick="runScraper(\'' + s.id + '\', event)" class="bg-green-600 p-3 rounded font-bold">3. Run Scraper</button>' +
+                '</div>' +
+                '<div class="mt-4">' +
+                    '<h3 class="font-bold mb-2">Tests</h3>' +
+                    '<div id="tests-list" class="space-y-2 mb-2"></div>' +
+                    '<button onclick="addTest(\'' + s.id + '\')" class="text-sm bg-blue-600 px-3 py-1 rounded">Add Test</button>' +
+                    '<div id="test-runs" class="mt-4 space-y-2"></div>' +
+                '</div>' +
+                '<div id="discovery-results" class="' + (s.discovery_options ? '' : 'hidden') + ' bg-gray-900 p-4 rounded">' +
+                    '<!-- Discovery results will be populated here -->' +
+                '</div>' +
+                '<div class="' + (s.code ? '' : 'hidden') + '">' +
+                    '<h3 class="font-bold mb-2">Extraction Code</h3>' +
+                    '<pre class="bg-black p-4 rounded text-xs overflow-x-auto text-green-400"><code>' + (s.code || '') + '</code></pre>' +
+                '</div>' +
+                '<div id="run-status" class="hidden mt-4 p-4 bg-gray-900 rounded border border-gray-700">' +
+                    '<h3 class="font-bold mb-2">Current Run</h3>' +
+                    '<div id="run-steps" class="space-y-1 text-sm"></div>' +
+                '</div>' +
+            '</div>';
+
+            content.innerHTML = html;
+
+            // Load tests
+            const tests = await pb.collection('tests').getFullList({ filter: "scraper='" + id + "'" });
+            let testsHtml = '';
+            if (tests.length > 0) {
+                testsHtml = tests.map(t =>
+                    '<div class="bg-gray-700 p-2 rounded flex justify-between items-center">' +
+                        '<span>' + t.name + '</span>' +
+                        '<button onclick="runTest(\'' + t.id + '\', event)" class="bg-blue-500 px-2 py-1 rounded text-xs">Run Test</button>' +
+                    '</div>'
+                ).join('');
+            } else {
+                testsHtml = '<div class="text-gray-500">No tests created yet.</div>';
+            }
+            document.getElementById('tests-list').innerHTML = testsHtml;
+
+            // Load test runs
+            const testRuns = await pb.collection('test_runs').getFullList({
+                filter: "test.owner='" + pb.authStore.model.id + "'",
+                sort: '-run_at'
+            });
+
+            let testRunsHtml = '';
+            if (testRuns.length > 0) {
+                testRunsHtml = '<h4 class="font-bold text-sm mt-4 mb-2">Test Run History</h4>';
+                testRunsHtml += testRuns.map(tr => {
+                    const statusClass = tr.status === 'pass' ? 'text-green-400' : 'text-red-400';
+                    const logsHtml = tr.logs?.map(l =>
+                        l.msg + (l.details ? ' (' + JSON.stringify(l.details) + ')' : '')
+                    ).join('<br>') || 'No logs';
+
+                    return '<div class="bg-gray-800 p-2 rounded text-xs">' +
+                        '<div class="flex justify-between">' +
+                            '<span>' + new Date(tr.run_at).toLocaleString() + '</span>' +
+                            '<span class="' + statusClass + '">' + tr.status + '</span>' +
+                        '</div>' +
+                        '<div class="mt-1">' + logsHtml + '</div>' +
+                    '</div>';
+                }).join('');
+            }
+            document.getElementById('test-runs').innerHTML = testRunsHtml;
+
+        }
+
+        async function discoverExtraction(id, event) {
+            const btn = event ? event.target : null;
+            btn.disabled = true;
+            btn.innerText = "Discovering...";
+            try {
+                const res = await fetch('/api/discover', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ scraperId: id })
+                });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+                viewScraper(id);
+            } catch (e) {
+                alert(e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "1. Discover Targets";
+            }
+        }
+
+        async function selectOption(id, title) {
+            await pb.collection('scrapers').update(id, { selected_option: title });
+            viewScraper(id);
+        }
+
+        async function generateCode(id, event) {
+            const btn = event ? event.target : null;
+            btn.disabled = true;
+            btn.innerText = "Generating Code...";
+            try {
+                const res = await fetch('/api/generate-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ scraperId: id })
+                });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+                viewScraper(id);
+            } catch (e) {
+                alert(e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "2. Generate Code";
+            }
+        }
+
+        async function runScraper(id, event) {
+            const btn = event ? event.target : null;
+            btn.disabled = true;
+            btn.innerText = "Running...";
+            try {
+                const res = await fetch('/api/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ scraperId: id })
+                });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+                
+                // Since it returns "Run started", we need to find the latest run for this scraper to poll it
+                const runs = await pb.collection('extraction_runs').getList(1, 1, {
+                    filter: "scraper='" + id + "'",
+                    sort: '-created'
+                });
+                if (runs.items.length > 0) {
+                    pollRun(runs.items[0].id);
+                }
+            } catch (e) {
+                alert(e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "3. Run Scraper";
+            }
+        }
+
+        async function pollRun(runId) {
+            document.getElementById('run-status').classList.remove('hidden');
+            const interval = setInterval(async () => {
+                const run = await pb.collection('extraction_runs').getOne(runId);
+                const stepsEl = document.getElementById('run-steps');
+                let stepsHtml = '';
+                if (run.steps && run.steps.length > 0) {
+                    stepsHtml = run.steps.map(s => {
+                        const detailsHtml = s.details ?
+                            '<span class="text-xs bg-gray-800 px-1 text-gray-400">' + JSON.stringify(s.details) + '</span>' : '';
+                        return '<div class="flex space-x-2">' +
+                            '<span class="text-gray-500">' + new Date(s.timestamp).toLocaleTimeString() + '</span>' +
+                            '<span>' + s.message + '</span>' +
+                            detailsHtml +
+                        '</div>';
+                    }).join('');
+                }
+                stepsEl.innerHTML = stepsHtml;
+
+                if (run.status !== 'running') {
+                    clearInterval(interval);
+                    if (run.status === 'completed') {
+                        stepsEl.innerHTML += '<div class="text-green-400 font-bold mt-2">RUN COMPLETED SUCCESSFULLY</div>';
+                        console.log("Output:", run.output_data);
+                    } else {
+                        stepsEl.innerHTML += '<div class="text-red-400 font-bold mt-2">RUN FAILED: ' + JSON.stringify(run.errors) + '</div>';
+                    }
+                }
+            }, 1000);
+        }
+
+        async function addTest(scraperId) {
+            const modal = document.getElementById('modal');
+            const body = document.getElementById('modal-body');
+            const saveBtn = document.getElementById('modal-save');
+            
+            modal.classList.remove('hidden');
+            body.innerHTML =
+                '<h2 class="text-xl mb-4">Add Test</h2>' +
+                '<input id="test-name" placeholder="Test Name" class="w-full p-2 mb-2 bg-gray-700 rounded">' +
+                '<textarea id="test-code" placeholder="async function testExtract(data) { return { success: data.length > 0 }; }" class="w-full p-2 mb-2 bg-gray-700 rounded h-32"></textarea>';
+            saveBtn.onclick = async () => {
+                await pb.collection('tests').create({
+                    name: document.getElementById('test-name').value,
+                    code: document.getElementById('test-code').value,
+                    scraper: scraperId,
+                    owner: pb.authStore.model.id
+                });
+                closeModal();
+                viewScraper(scraperId);
+            };
+        }
+
+        async function runTest(testId, event) {
+            const btn = event ? event.target : null;
+            btn.disabled = true;
+            btn.innerText = "Running Test...";
+            try {
+                const res = await fetch('/api/run-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ testId: testId })
+                });
+                const data = await res.json();
+                if (data.error) throw new Error(data.error);
+                alert("Test run started. Check test history.");
+            } catch (e) {
+                alert(e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Run Test";
+            }
+        }
+
+        // Configuration helpers
+        function addConfig(type) {
+            const modal = document.getElementById('modal');
+            const body = document.getElementById('modal-body');
+            const saveBtn = document.getElementById('modal-save');
+            
+            modal.classList.remove('hidden');
+            if (type === 'ai_model') {
+                body.innerHTML =
+                    '<h2 class="text-xl mb-4">Add AI Model</h2>' +
+                    '<input id="conf-name" placeholder="Name (e.g. OpenAI GPT-4)" class="w-full p-2 mb-2 bg-gray-700 rounded">' +
+                    '<input id="conf-url" placeholder="API Base URL" class="w-full p-2 mb-2 bg-gray-700 rounded" value="https://api.openai.com/v1">' +
+                    '<input id="conf-key" placeholder="API Key" type="password" class="w-full p-2 mb-2 bg-gray-700 rounded">' +
+                    '<input id="conf-model" placeholder="Model ID (e.g. gpt-4)" class="w-full p-2 mb-2 bg-gray-700 rounded">';
+                saveBtn.onclick = async () => {
+                    await pb.collection('ai_models').create({
+                        name: document.getElementById('conf-name').value,
+                        api_url: document.getElementById('conf-url').value,
+                        api_key: document.getElementById('conf-key').value,
+                        model_id: document.getElementById('conf-model').value,
+                        owner: pb.authStore.model.id
+                    });
+                    closeModal();
+                    loadConfigs();
+                };
+            } else if (type === 'browser') {
+                body.innerHTML =
+                    '<h2 class="text-xl mb-4">Add Browser</h2>' +
+                    '<input id="conf-name" placeholder="Name (e.g. Local Chrome)" class="w-full p-2 mb-2 bg-gray-700 rounded">' +
+                    '<input id="conf-url" placeholder="CDP URL (ws://...)" class="w-full p-2 mb-2 bg-gray-700 rounded">';
+                saveBtn.onclick = async () => {
+                    await pb.collection('browsers').create({
+                        name: document.getElementById('conf-name').value,
+                        cdp_url: document.getElementById('conf-url').value,
+                        owner: pb.authStore.model.id
+                    });
+                    closeModal();
+                    loadConfigs();
+                };
+            } else if (type === 'data_sink') {
+                body.innerHTML =
+                    '<h2 class="text-xl mb-4">Add Data Sink</h2>' +
+                    '<input id="conf-name" placeholder="Name" class="w-full p-2 mb-2 bg-gray-700 rounded">' +
+                    '<select id="conf-type" class="w-full p-2 mb-2 bg-gray-700 rounded">' +
+                        '<option value="webhook">Webhook</option>' +
+                        '<option value="s3">S3</option>' +
+                        '<option value="pocketbase">PocketBase</option>' +
+                        '<option value="custom_api">Custom API</option>' +
+                    '</select>' +
+                    '<textarea id="conf-config" placeholder="Config JSON" class="w-full p-2 mb-2 bg-gray-700 rounded h-32"></textarea>';
+                saveBtn.onclick = async () => {
+                    let config = {};
+                    try {
+                        config = JSON.parse(document.getElementById('conf-config').value || '{}');
+                    } catch(e) {}
+                    await pb.collection('data_sinks').create({
+                        name: document.getElementById('conf-name').value,
+                        type: document.getElementById('conf-type').value,
+                        config: config,
+                        owner: pb.authStore.model.id
+                    });
+                    closeModal();
+                    loadConfigs();
+                };
+            }
+        }
+
+        function addScraper() {
+            const modal = document.getElementById('modal');
+            const body = document.getElementById('modal-body');
+            const saveBtn = document.getElementById('modal-save');
+            
+            modal.classList.remove('hidden');
+            body.innerHTML =
+                '<h2 class="text-xl mb-4">New Scraper</h2>' +
+                '<input id="sc-name" placeholder="Name" class="w-full p-2 mb-2 bg-gray-700 rounded">' +
+                '<input id="sc-url" placeholder="URL to scrape" class="w-full p-2 mb-2 bg-gray-700 rounded">' +
+                '<select id="sc-ai" class="w-full p-2 mb-2 bg-gray-700 rounded"><option>Select AI Model</option></select>' +
+                '<select id="sc-browser" class="w-full p-2 mb-2 bg-gray-700 rounded"><option>Select Browser</option></select>' +
+                '<input id="sc-schedule" placeholder="Cron schedule (optional)" class="w-full p-2 mb-2 bg-gray-700 rounded">' +
+                '<select id="sc-sink" class="w-full p-2 mb-2 bg-gray-700 rounded"><option>Select Data Sink (optional)</option></select>';
+
+            // Load selects
+            pb.collection('ai_models').getFullList().then(list => {
+                let optionsHtml = '<option>Select AI Model</option>';
+                if (list.length > 0) {
+                    optionsHtml += list.map(i => '<option value="' + i.id + '">' + i.name + '</option>').join('');
+                }
+                document.getElementById('sc-ai').innerHTML = optionsHtml;
+            }).catch(() => {
+                document.getElementById('sc-ai').innerHTML = '<option>No AI models available</option>';
+            });
+
+            pb.collection('browsers').getFullList().then(list => {
+                let optionsHtml = '<option>Select Browser</option>';
+                if (list.length > 0) {
+                    optionsHtml += list.map(i => '<option value="' + i.id + '">' + i.name + '</option>').join('');
+                }
+                document.getElementById('sc-browser').innerHTML = optionsHtml;
+            }).catch(() => {
+                document.getElementById('sc-browser').innerHTML = '<option>No browsers available</option>';
+            });
+
+            pb.collection('data_sinks').getFullList().then(list => {
+                let optionsHtml = '<option>Select Data Sink (optional)</option>';
+                if (list.length > 0) {
+                    optionsHtml += list.map(i => '<option value="' + i.id + '">' + i.name + '</option>').join('');
+                }
+                document.getElementById('sc-sink').innerHTML = optionsHtml;
+            }).catch(() => {
+                document.getElementById('sc-sink').innerHTML = '<option>No data sinks available</option>';
+            });
+
+            saveBtn.onclick = async () => {
+                await pb.collection('scrapers').create({
+                    name: document.getElementById('sc-name').value,
+                    url: document.getElementById('sc-url').value,
+                    ai_model: document.getElementById('sc-ai').value,
+                    browser: document.getElementById('sc-browser').value,
+                    schedule: document.getElementById('sc-schedule').value,
+                    data_sink: document.getElementById('sc-sink').value || null,
+                    owner: pb.authStore.model.id
+                });
+                closeModal();
+                loadScrapers();
+            };
+
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.add('hidden');
+        }
+
+        async function deleteConfig(coll, id) {
+            if (confirm("Are you sure?")) {
+                await pb.collection(coll).delete(id);
+                loadConfigs();
+            }
+        }
+
+
+    </script>
+</body>
+</html>

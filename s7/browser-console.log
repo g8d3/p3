@@ -1,0 +1,26 @@
+[2025-12-23T03:30:16.147Z] [INFO] Ignored extension page error: Cannot redefine property: ethereum
+Object.defineProperty (<anonymous>)
+[2025-12-23T03:30:16.388Z] [ERROR] Browser Page Error: Unexpected token 'catch'
+[2025-12-23T03:30:17.205Z] [INFO] Browser Console log: Testing JavaScript execution...
+[2025-12-23T03:30:19.205Z] [ERROR] Browser test FAILED: 1 console errors found
+[2025-12-23T03:31:12.054Z] [INFO] Ignored extension page error: Cannot redefine property: ethereum
+Object.defineProperty (<anonymous>)
+[2025-12-23T03:31:12.282Z] [INFO] Browser Console log: PocketBase client initialized
+[2025-12-23T03:31:12.283Z] [INFO] Browser Console log: Initializing app...
+[2025-12-23T03:31:12.340Z] [INFO] Browser Console log: User is authenticated, showing main app
+[2025-12-23T03:31:12.341Z] [INFO] Browser Console log: Showing main app section
+[2025-12-23T03:31:12.360Z] [ERROR] Browser Console Error: Failed to load resource: the server responded with a status of 404 (Not Found)
+[2025-12-23T03:31:12.364Z] [ERROR] Browser Console Error: Failed to load scrapers: JSHandle@error
+[2025-12-23T03:31:13.106Z] [INFO] Browser Console log: Testing JavaScript execution...
+[2025-12-23T03:31:15.106Z] [ERROR] Browser test FAILED: 2 console errors found
+[2025-12-23T03:48:45.345Z] [INFO] Ignored extension page error: Cannot redefine property: ethereum
+Object.defineProperty (<anonymous>)
+[2025-12-23T03:48:45.576Z] [INFO] Browser Console log: PocketBase client initialized
+[2025-12-23T03:48:45.576Z] [INFO] Browser Console log: Initializing app...
+[2025-12-23T03:48:45.636Z] [INFO] Browser Console log: User is authenticated, showing main app
+[2025-12-23T03:48:45.636Z] [INFO] Browser Console log: Showing main app section
+[2025-12-23T03:48:45.636Z] [INFO] Browser Console log: Loading scrapers, auth status: true has token
+[2025-12-23T03:48:45.637Z] [INFO] Browser Console log: User ID: qxs8hjxcc0ys9bz
+[2025-12-23T03:48:45.653Z] [INFO] Browser Console log: Scrapers loaded successfully: 0 items
+[2025-12-23T03:48:46.194Z] [INFO] Browser Console log: Testing JavaScript execution...
+[2025-12-23T03:48:48.197Z] [SUCCESS] Browser test PASSED: No console errors detected
