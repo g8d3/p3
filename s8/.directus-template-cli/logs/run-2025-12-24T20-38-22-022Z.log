@@ -1,0 +1,31 @@
+Log started at 2025-12-24T20-38-22-022Z
+2025-12-24T20:40:47.131Z - INFO: Applying template - CMS to http://localhost:8055
+2025-12-24T20:41:25.270Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:41:27.276Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:41:27.278Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:41:30.285Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:41:31.294Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:41:37.317Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:41:50.374Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:41:52.380Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:41:53.377Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:41:55.330Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:41:55.394Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:41:57.375Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:41:59.400Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:00.346Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:01.448Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:04.550Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:16.420Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:19.603Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:24.414Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:24.444Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:29.432Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:33.639Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:35.549Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:38.544Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:43.558Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:48.572Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:50.603Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:42:53.584Z - ERROR: Error: fetch failed Context: {}
+2025-12-24T20:43:33.756Z - ERROR: Error: fetch failed Context: {}
