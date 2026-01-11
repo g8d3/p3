@@ -1,0 +1,14 @@
+{
+  "name": "smart-contract-security-app",
+  "version": "1.0.0",
+  "description": "Web app for smart contract security automation",
+  "scripts": {
+    "start": "npx concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm start",
+    "e2e": "cd frontend && npm run e2e"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
