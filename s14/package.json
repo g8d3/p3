@@ -1,0 +1,16 @@
+{
+  "name": "s14",
+  "version": "1.0.0",
+  "description": "A Python-based system for managing LLC profiles, transactions, and generating filled IRS tax forms (5472 and 1120-F).",
+  "main": "fill_manual.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
+  }
+}
