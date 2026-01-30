@@ -1,0 +1,123 @@
+{
+  "generated_at": "2026-01-30T08:34:08.271428",
+  "statistics": null,
+  "individual_metrics": [
+    {
+      "timestamp": "2026-01-30T08:33:34.681756",
+      "connection_time": 0,
+      "time_to_first_token": 0,
+      "time_to_completion": 2.784941506004543,
+      "first_token_latency": 0,
+      "tokens_per_second": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "status": "error_429",
+      "error_message": "{\"error\":{\"code\":\"1113\",\"message\":\"\u4f59\u989d\u4e0d\u8db3\u6216\u65e0\u53ef\u7528\u8d44\u6e90\u5305,\u8bf7\u5145\u503c\u3002\"}}"
+    },
+    {
+      "timestamp": "2026-01-30T08:33:38.467630",
+      "connection_time": 0,
+      "time_to_first_token": 0,
+      "time_to_completion": 4.101898523993441,
+      "first_token_latency": 0,
+      "tokens_per_second": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "status": "error_429",
+      "error_message": "{\"error\":{\"code\":\"1113\",\"message\":\"\u4f59\u989d\u4e0d\u8db3\u6216\u65e0\u53ef\u7528\u8d44\u6e90\u5305,\u8bf7\u5145\u503c\u3002\"}}"
+    },
+    {
+      "timestamp": "2026-01-30T08:33:43.571489",
+      "connection_time": 0,
+      "time_to_first_token": 0,
+      "time_to_completion": 2.633213279012125,
+      "first_token_latency": 0,
+      "tokens_per_second": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "status": "error_429",
+      "error_message": "{\"error\":{\"code\":\"1113\",\"message\":\"\u4f59\u989d\u4e0d\u8db3\u6216\u65e0\u53ef\u7528\u8d44\u6e90\u5305,\u8bf7\u5145\u503c\u3002\"}}"
+    },
+    {
+      "timestamp": "2026-01-30T08:33:47.205638",
+      "connection_time": 0,
+      "time_to_first_token": 0,
+      "time_to_completion": 2.478845801000716,
+      "first_token_latency": 0,
+      "tokens_per_second": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "status": "error_429",
+      "error_message": "{\"error\":{\"code\":\"1113\",\"message\":\"\u4f59\u989d\u4e0d\u8db3\u6216\u65e0\u53ef\u7528\u8d44\u6e90\u5305,\u8bf7\u5145\u503c\u3002\"}}"
+    },
+    {
+      "timestamp": "2026-01-30T08:33:50.685641",
+      "connection_time": 0,
+      "time_to_first_token": 0,
+      "time_to_completion": 1.956723701005103,
+      "first_token_latency": 0,
+      "tokens_per_second": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "status": "error_429",
+      "error_message": "{\"error\":{\"code\":\"1113\",\"message\":\"\u4f59\u989d\u4e0d\u8db3\u6216\u65e0\u53ef\u7528\u8d44\u6e90\u5305,\u8bf7\u5145\u503c\u3002\"}}"
+    },
+    {
+      "timestamp": "2026-01-30T08:33:53.644187",
+      "connection_time": 0,
+      "time_to_first_token": 0,
+      "time_to_completion": 1.402540996990865,
+      "first_token_latency": 0,
+      "tokens_per_second": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "status": "error_429",
+      "error_message": "{\"error\":{\"code\":\"1113\",\"message\":\"\u4f59\u989d\u4e0d\u8db3\u6216\u65e0\u53ef\u7528\u8d44\u6e90\u5305,\u8bf7\u5145\u503c\u3002\"}}"
+    },
+    {
+      "timestamp": "2026-01-30T08:33:56.048725",
+      "connection_time": 0,
+      "time_to_first_token": 0,
+      "time_to_completion": 1.6234513010131195,
+      "first_token_latency": 0,
+      "tokens_per_second": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "status": "error_429",
+      "error_message": "{\"error\":{\"code\":\"1113\",\"message\":\"\u4f59\u989d\u4e0d\u8db3\u6216\u65e0\u53ef\u7528\u8d44\u6e90\u5305,\u8bf7\u5145\u503c\u3002\"}}"
+    },
+    {
+      "timestamp": "2026-01-30T08:33:58.673653",
+      "connection_time": 0,
+      "time_to_first_token": 0,
+      "time_to_completion": 4.353067053001723,
+      "first_token_latency": 0,
+      "tokens_per_second": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "status": "error_429",
+      "error_message": "{\"error\":{\"code\":\"1113\",\"message\":\"\u4f59\u989d\u4e0d\u8db3\u6216\u65e0\u53ef\u7528\u8d44\u6e90\u5305,\u8bf7\u5145\u503c\u3002\"}}"
+    },
+    {
+      "timestamp": "2026-01-30T08:34:04.027692",
+      "connection_time": 0,
+      "time_to_first_token": 0,
+      "time_to_completion": 3.241808962004143,
+      "first_token_latency": 0,
+      "tokens_per_second": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "total_tokens": 0,
+      "status": "error_429",
+      "error_message": "{\"error\":{\"code\":\"1113\",\"message\":\"\u4f59\u989d\u4e0d\u8db3\u6216\u65e0\u53ef\u7528\u8d44\u6e90\u5305,\u8bf7\u5145\u503c\u3002\"}}"
+    }
+  ]
+}
