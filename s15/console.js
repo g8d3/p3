@@ -1,0 +1,1 @@
+$$('div[role=list] > div > a').map(e=> e.href.match(/0x[\d|a-f]{4}/)[0])
