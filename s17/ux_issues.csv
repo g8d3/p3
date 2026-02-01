@@ -1,0 +1,40 @@
+severity,action,issue,suggestion
+high,Initial state,No help visible on screen,Add help text or visible shortcuts
+high,Press ? for help,No help visible on screen,Add help text or visible shortcuts
+high,Press / for chat,No help visible on screen,Add help text or visible shortcuts
+high,Press p for providers,No help visible on screen,Add help text or visible shortcuts
+high,Press m for models,No help visible on screen,Add help text or visible shortcuts
+high,Press a for agents,No help visible on screen,Add help text or visible shortcuts
+high,Press s for sessions,No help visible on screen,Add help text or visible shortcuts
+high,Press t for tools,No help visible on screen,Add help text or visible shortcuts
+high,Press h for schedules,No help visible on screen,Add help text or visible shortcuts
+high,Press enter,No help visible on screen,Add help text or visible shortcuts
+high,Press escape,No help visible on screen,Add help text or visible shortcuts
+high,Press up arrow,No help visible on screen,Add help text or visible shortcuts
+high,Press down arrow,No help visible on screen,Add help text or visible shortcuts
+high,Press //help (as user might try),No help visible on screen,Add help text or visible shortcuts
+high,Press ? then ? again,No help visible on screen,Add help text or visible shortcuts
+medium,Initial state,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press ? for help,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press / for chat,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press p for providers,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press m for models,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press a for agents,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press s for sessions,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press t for tools,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press h for schedules,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press enter,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press escape,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press up arrow,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press down arrow,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press //help (as user might try),No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+medium,Press ? then ? again,No keyboard shortcuts hints,"Show available shortcuts (e.g.; ""Press ? for help"")"
+low,Initial state,No status/mode indicator visible,Show current mode in status bar
+low,Press ? for help,No status/mode indicator visible,Show current mode in status bar
+low,Press / for chat,No status/mode indicator visible,Show current mode in status bar
+low,Press p for providers,No status/mode indicator visible,Show current mode in status bar
+low,Press m for models,No status/mode indicator visible,Show current mode in status bar
+low,Press a for agents,No status/mode indicator visible,Show current mode in status bar
+low,Press s for sessions,No status/mode indicator visible,Show current mode in status bar
+low,Press t for tools,No status/mode indicator visible,Show current mode in status bar
+low,Press h for schedules,No status/mode indicator visible,Show current mode in status bar
