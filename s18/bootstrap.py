@@ -61,8 +61,24 @@ def setup_directories():
 
 def load_state() -> Dict:
     if STATE_FILE.exists():
-        return json.loads(STATE_FILE.read_text())
-    return {"cycle": 0, "agents": {}, "earnings": 0, "last_actions": [], "logging_policy": None}
+        state = json.loads(STATE_FILE.read_text())
+        if "first_run" not in state:
+            state["first_run"] = True
+        if "intervals" not in state:
+            state["intervals"] = [1, 3, 5]
+        if "interval_idx" not in state:
+            state["interval_idx"] = 0
+        return state
+    return {
+        "cycle": 0,
+        "agents": {},
+        "earnings": 0,
+        "last_actions": [],
+        "logging_policy": None,
+        "intervals": [1, 3, 5],
+        "interval_idx": 0,
+        "first_run": True
+    }
 
 def save_state(state: Dict):
     STATE_FILE.write_text(json.dumps(state, indent=2))
@@ -91,11 +107,13 @@ def load_system_prompt(state: Dict) -> str:
     if prompt_file.exists():
         prompt = prompt_file.read_text()
         current_files = get_current_files()[:10]
+        intervals = state.get("intervals", [1, 3, 5])
         
         return prompt.replace("{{cycle}}", str(state["cycle"])) \
                     .replace("{{timestamp}}", datetime.now().strftime("%Y-%m-%d %H:%M:%S")) \
                     .replace("{{earnings}}", str(state.get("earnings", 0))) \
-                    .replace("{{recent_files}}", json.dumps([str(f.relative_to(ROOT_DIR)) for f in current_files], indent=2))
+                    .replace("{{recent_files}}", json.dumps([str(f.relative_to(ROOT_DIR)) for f in current_files], indent=2)) \
+                    .replace("{{intervals}}", json.dumps(intervals))
     
     return "Explore autonomous opportunities, create value, and earn money legally."
 
@@ -196,6 +214,11 @@ def run_agent_cycle(state: Dict, interval_minutes: int):
             state["logging_policy"] = logging_policy
             apply_logging_policy(logging_policy)
         
+        if intervals := result.get("intervals"):
+            if isinstance(intervals, list) and len(intervals) > 0:
+                state["intervals"] = intervals
+                logger.info(f"Updated intervals: {intervals}")
+        
         state["last_actions"] = result.get("actions", [])[:5]
         state["earnings"] = state.get("earnings", 0) + result.get("earnings_delta", 0)
         
@@ -211,24 +234,32 @@ def run():
     logger.info("Starting Openclaw-style Autonomous Agent System")
     logger.info("=" * 60)
     
-    intervals = [5, 15, 60]
-    interval_idx = 0
     state = load_state()
     
     if policy := state.get("logging_policy"):
         apply_logging_policy(policy)
     
     while not shutdown_flag:
+        state = load_state()
+        intervals = state.get("intervals", [1, 3, 5])
+        interval_idx = state.get("interval_idx", 0)
         interval = intervals[interval_idx]
-        logger.info(f"Next cycle in {interval} minutes")
+        first_run = state.get("first_run", False)
         
-        for remaining in range(interval * 60, 0, -10):
+        if first_run:
+            logger.info("First run - executing immediately")
+            state["first_run"] = False
+            save_state(state)
+        else:
+            logger.info(f"Next cycle in {interval} minutes (intervals: {intervals})")
+            
+            for remaining in range(interval * 60, 0, -10):
+                if shutdown_flag:
+                    break
+                time.sleep(10)
+            
             if shutdown_flag:
                 break
-            time.sleep(10)
-        
-        if shutdown_flag:
-            break
         
         try:
             run_agent_cycle(state, interval)
@@ -236,7 +267,9 @@ def run():
             logger.error(f"Cycle error: {e}", exc_info=True)
             time.sleep(60)
         
-        interval_idx = (interval_idx + 1) % len(intervals)
+        state = load_state()
+        state["interval_idx"] = (interval_idx + 1) % len(intervals)
+        save_state(state)
     
     logger.info("Shutting down gracefully...")
 

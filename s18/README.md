@@ -8,12 +8,14 @@ Bootstrap script for autonomous economic agents that explore, create value, and 
 # Install dependencies
 pip3 install requests
 
-# Run once to test
+# Run once to test (executes immediately on first run)
 ./bootstrap.py
 
 # Run continuously (uninterrupted)
 ./bootstrap.py &
 ```
+
+**First run behavior:** The system executes immediately without waiting, then uses intervals for subsequent cycles. Default intervals: `[1, 3, 5]` minutes (rotating). The AI can dynamically adjust these intervals.
 
 ## Running Uninterruptedly
 
@@ -132,7 +134,7 @@ For systemd user instance, use `GLM_API_KEY=$GLM_API_KEY` to inherit from your s
 ```
 .
 ├── bootstrap.py              # Main script
-├── state.json                # System state
+├── state.json                # System state (cycle, intervals, earnings, etc.)
 ├── logs/                     # Logs (AI decides rotation policy)
 ├── agents/                   # Agent configurations
 ├── memory/
@@ -146,6 +148,14 @@ For systemd user instance, use `GLM_API_KEY=$GLM_API_KEY` to inherit from your s
 └── creations/                # Generated content
 ```
 
+**state.json fields:**
+- `cycle`: Current cycle number
+- `intervals`: Array of minute values e.g., `[1, 3, 5]`
+- `interval_idx`: Current position in intervals array
+- `earnings`: Total earnings tracked
+- `logging_policy`: Log rotation settings
+- `first_run`: Auto-set to false after first execution
+
 ## Evolution
 
 The system can evolve itself:
@@ -153,6 +163,8 @@ The system can evolve itself:
 - New agents created in `agents/`
 - Tools installed as needed
 - Logging policies decided by AI
+- **Interval schedules** updated by AI via `intervals` field in response JSON
+- Configuration changes applied by updating `state.json`
 
 ## Monitoring
 

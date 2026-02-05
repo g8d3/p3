@@ -32,6 +32,20 @@ Cycle: {{cycle}}
 Time: {{timestamp}}
 Total earnings: {{earnings}}
 Recent files: {{recent_files}}
+Intervals: {{intervals}}
+
+## Dynamic Configuration
+You can update system behavior by modifying state.json:
+- intervals: Array of minute values [1, 3, 5] - cycle rotation
+- interval_idx: Current position in intervals array
+- Any changes to state.json are read at start of each cycle
+
+## System Evolution
+To update bootstrap.py or this prompt file:
+1. Create a proposal in memory/proposals/ explaining the change
+2. Write new file content in file_updates
+3. The script will apply updates immediately
+4. For major changes, create a backup proposal first
 
 ## Response Format
 Return JSON with:
@@ -51,5 +65,6 @@ Return JSON with:
         "rotate": true/false,
         "max_size_mb": 100,
         "keep_days": 30
-    }
+    },
+    "intervals": [1, 3, 5]
 }
