@@ -130,9 +130,9 @@ All methods above handle restarts:
 
 ## Environment Variables
 
-Required:
+Edit `.env` file and set your key:
 ```bash
-export GLM_API_KEY="your_key_here"
+GLM_API_KEY=your_key_here
 ```
 
 ## Directory Structure
