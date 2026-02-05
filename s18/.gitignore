@@ -4,3 +4,6 @@ state.json
 logs/*
 creations/*
 node_modules/
+.commands.json
+memory/human_input.md
+__pycache__/
