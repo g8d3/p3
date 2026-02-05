@@ -1,0 +1,7 @@
+{
+  "title": "Establish Logging Policy",
+  "description": "Proposing a logging policy to track agent activities, research, and earnings. Default: rotate=true, max_size_mb=100, keep_days=30",
+  "files_modified": [
+    "state.json"
+  ]
+}
