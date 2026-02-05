@@ -1,0 +1,17 @@
+[Unit]
+Description=Autonomous Agent Bootstrap System
+After=network.target
+
+[Service]
+Type=simple
+User=vuos
+WorkingDirectory=/home/vuos/code/p3/s18
+Environment="GLM_API_KEY="
+ExecStart=/usr/bin/python3 /home/vuos/code/p3/s18/bootstrap.py
+Restart=always
+RestartSec=60
+StandardOutput=append:/home/vuos/code/p3/s18/logs/systemd.log
+StandardError=append:/home/vuos/code/p3/s18/logs/systemd_error.log
+
+[Install]
+WantedBy=multi-user.target
