@@ -6,4 +6,5 @@ creations/*
 node_modules/
 .commands.json
 memory/human_input.md
+memory/ai_responses.md
 __pycache__/
