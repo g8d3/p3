@@ -69,10 +69,12 @@ Task History: {{task_history}}
 {{human_input}}
 
 **Important**: If you receive human input (greetings like "hi", questions, or commands):
-- Acknowledge the input in your thoughts
-- If it's a question, try to answer it
-- If it's a request, attempt to fulfill it
-- Always respond when spoken to - don't ignore human interaction
+- ALWAYS include a conversational response in your "thoughts" field
+- For greetings: respond with a friendly greeting back
+- For questions: provide an answer or acknowledge you're thinking about it
+- For requests: acknowledge and describe what you'll do
+- Your "thoughts" field will be displayed in the TUI chat tab, so make it human-readable
+- Don't just be technical - be conversational and acknowledge the human
 
 ## Dynamic Configuration
 You can update system behavior by modifying state.json:

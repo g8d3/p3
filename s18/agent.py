@@ -1,29 +1,17 @@
-#!/usr/bin/env python3
+# Agent
 
 import os
 import json
 import time
-import random
 import subprocess
 import signal
-import sys
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List
 from datetime import datetime
 import requests
 
-ROOT_DIR = Path(__file__).parent
-AGENTS_DIR = ROOT_DIR / "agents"
-MEMORY_DIR = ROOT_DIR / "memory"
-CREATIONS_DIR = ROOT_DIR / "creations"
-STATE_FILE = ROOT_DIR / "state.json"
-LOG_DIR = ROOT_DIR / "logs"
-COMMANDS_FILE = ROOT_DIR / ".commands.json"
-
-API_KEY = os.environ.get("GLM_API_KEY")
-MODEL = "glm-4.7"
-BASE_URL = "https://api.z.ai/api/coding/paas/v4"
+import config
 
 shutdown_flag = False
 
@@ -35,38 +23,38 @@ signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
 def setup_logging():
-    LOG_DIR.mkdir(exist_ok=True)
+    config.LOG_DIR.mkdir(exist_ok=True)
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
+        format=config.LOG_FORMAT,
         handlers=[
-            logging.FileHandler(LOG_DIR / 'bootstrap.log'),
+            logging.FileHandler(config.LOG_FILE),
             logging.StreamHandler()
         ]
     )
-    return logging.getLogger('bootstrap')
+    return logging.getLogger('agent')
 
 logger = setup_logging()
 
 def setup_directories():
-    AGENTS_DIR.mkdir(exist_ok=True)
-    MEMORY_DIR.mkdir(exist_ok=True)
-    (MEMORY_DIR / "context").mkdir(exist_ok=True)
-    (MEMORY_DIR / "prompts").mkdir(exist_ok=True)
-    (MEMORY_DIR / "knowledge").mkdir(exist_ok=True)
-    (MEMORY_DIR / "tools").mkdir(exist_ok=True)
-    (MEMORY_DIR / "proposals").mkdir(exist_ok=True)
-    (MEMORY_DIR / "reasoning").mkdir(exist_ok=True)
-    CREATIONS_DIR.mkdir(exist_ok=True)
-    LOG_DIR.mkdir(exist_ok=True)
+    config.AGENTS_DIR.mkdir(exist_ok=True)
+    config.MEMORY_DIR.mkdir(exist_ok=True)
+    (config.MEMORY_DIR / "context").mkdir(exist_ok=True)
+    (config.MEMORY_DIR / "prompts").mkdir(exist_ok=True)
+    (config.MEMORY_DIR / "knowledge").mkdir(exist_ok=True)
+    (config.MEMORY_DIR / "tools").mkdir(exist_ok=True)
+    (config.MEMORY_DIR / "proposals").mkdir(exist_ok=True)
+    (config.MEMORY_DIR / "reasoning").mkdir(exist_ok=True)
+    config.CREATIONS_DIR.mkdir(exist_ok=True)
+    config.LOG_DIR.mkdir(exist_ok=True)
 
 def load_state() -> Dict:
-    if STATE_FILE.exists():
-        state = json.loads(STATE_FILE.read_text())
+    if config.STATE_FILE.exists():
+        state = json.loads(config.STATE_FILE.read_text())
         if "first_run" not in state:
             state["first_run"] = True
         if "intervals" not in state:
-            state["intervals"] = [1, 3, 5]
+            state["intervals"] = config.DEFAULT_INTERVALS
         if "interval_idx" not in state:
             state["interval_idx"] = 0
         if "pending_tasks" not in state:
@@ -80,7 +68,7 @@ def load_state() -> Dict:
         "earnings": 0,
         "last_actions": [],
         "logging_policy": None,
-        "intervals": [1, 3, 5],
+        "intervals": config.DEFAULT_INTERVALS,
         "interval_idx": 0,
         "first_run": True,
         "pending_tasks": [],
@@ -88,15 +76,15 @@ def load_state() -> Dict:
     }
 
 def save_state(state: Dict):
-    STATE_FILE.write_text(json.dumps(state, indent=2))
+    config.STATE_FILE.write_text(json.dumps(state, indent=2))
 
 def call_ai(messages: List[Dict]) -> str:
-    if not API_KEY:
+    if not config.API_KEY:
         return "No API key available"
-    headers = {"Authorization": f"Bearer {API_KEY}", "Content-Type": "application/json"}
-    payload = {"model": MODEL, "messages": messages}
+    headers = {"Authorization": f"Bearer {config.API_KEY}", "Content-Type": "application/json"}
+    payload = {"model": config.MODEL, "messages": messages}
     try:
-        response = requests.post(f"{BASE_URL}/chat/completions", headers=headers, json=payload, timeout=60)
+        response = requests.post(f"{config.BASE_URL}/chat/completions", headers=headers, json=payload, timeout=60)
         return response.json().get("choices", [{}])[0].get("message", {}).get("content", "")
     except Exception as e:
         logger.error(f"AI call error: {e}")
@@ -104,39 +92,38 @@ def call_ai(messages: List[Dict]) -> str:
 
 def get_current_files() -> List[Path]:
     files = []
-    for base_dir in [AGENTS_DIR, MEMORY_DIR, CREATIONS_DIR]:
+    for base_dir in [config.AGENTS_DIR, config.MEMORY_DIR, config.CREATIONS_DIR]:
         if base_dir.exists():
             files.extend(base_dir.rglob("*"))
     return [f for f in files if f.is_file()]
 
 def load_system_prompt(state: Dict) -> str:
-    prompt_file = MEMORY_DIR / "prompts" / "system.md"
+    prompt_file = config.MEMORY_DIR / "prompts" / "system.md"
     if prompt_file.exists():
         prompt = prompt_file.read_text()
         current_files = get_current_files()[:10]
-        intervals = state.get("intervals", [1, 3, 5])
+        intervals = state.get("intervals", config.DEFAULT_INTERVALS)
         pending_tasks = state.get("pending_tasks", [])
         task_history = state.get("task_history", [])
         
-        human_input_file = MEMORY_DIR / "human_input.md"
         human_input = ""
-        if human_input_file.exists():
-            human_input = human_input_file.read_text()
+        if config.HUMAN_INPUT_FILE.exists():
+            human_input = config.HUMAN_INPUT_FILE.read_text()
         
         return prompt.replace("{{cycle}}", str(state["cycle"])) \
                     .replace("{{timestamp}}", datetime.now().strftime("%Y-%m-%d %H:%M:%S")) \
                     .replace("{{earnings}}", str(state.get("earnings", 0))) \
-                    .replace("{{recent_files}}", json.dumps([str(f.relative_to(ROOT_DIR)) for f in current_files], indent=2)) \
+                    .replace("{{recent_files}}", json.dumps([str(f.relative_to(config.ROOT_DIR)) for f in current_files], indent=2)) \
                     .replace("{{intervals}}", json.dumps(intervals)) \
                     .replace("{{pending_tasks}}", json.dumps(pending_tasks[:5], indent=2)) \
-                    .replace("{{task_history}}", json.dumps(task_history[-5:], indent=2)) \
+                    .replace("{{task_history}}", json.dumps(task_history[-config.MAX_STATE_HISTORY:], indent=2)) \
                     .replace("{{human_input}}", human_input or "No recent human input")
     
     return "Explore autonomous opportunities, create value, and earn money legally."
 
 def apply_logging_policy(policy: Dict):
     if policy.get("rotate"):
-        for log_file in LOG_DIR.glob("*.log"):
+        for log_file in config.LOG_DIR.glob("*.log"):
             if log_file.stat().st_size > policy.get("max_size_mb", 100) * 1024 * 1024:
                 archive_name = f"{log_file}.{datetime.now().strftime('%Y%m%d_%H%M%S')}"
                 log_file.rename(archive_name)
@@ -145,7 +132,7 @@ def apply_logging_policy(policy: Dict):
     keep_days = policy.get("keep_days", 30)
     cutoff = datetime.now().timestamp() - keep_days * 86400
     
-    for old_file in LOG_DIR.glob("*.*"):
+    for old_file in config.LOG_DIR.glob("*.*"):
         if old_file.stat().st_mtime < cutoff:
             old_file.unlink()
             logger.info(f"Deleted old log: {old_file.name}")
@@ -207,6 +194,10 @@ def run_agent_cycle(state: Dict, interval_minutes: int):
             logger.warning("No JSON found in response")
             result = {}
         
+        if thoughts := result.get("thoughts"):
+            config.AI_RESPONSES_FILE.parent.mkdir(parents=True, exist_ok=True)
+            config.AI_RESPONSES_FILE.write_text(thoughts)
+        
         for action in result.get("actions", []):
             action_type = action.get("type")
             description = action.get("description", "")
@@ -250,16 +241,16 @@ def run_agent_cycle(state: Dict, interval_minutes: int):
                         "success": True,
                         "completed": datetime.now().isoformat()
                     })
-                    state["task_history"] = task_history[-50:]
+                    state["task_history"] = task_history[-config.MAX_TASK_HISTORY:]
         
         for update in result.get("file_updates", []):
-            file_path = ROOT_DIR / update["path"]
+            file_path = config.ROOT_DIR / update["path"]
             file_path.parent.mkdir(parents=True, exist_ok=True)
             file_path.write_text(update["content"])
             logger.info(f"Wrote file: {update['path']}")
         
         for proposal in result.get("proposals_for_human", []):
-            proposal_file = MEMORY_DIR / "proposals" / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{proposal['title'].replace(' ', '_')}.json"
+            proposal_file = config.MEMORY_DIR / "proposals" / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{proposal['title'].replace(' ', '_')}.json"
             proposal_file.write_text(json.dumps(proposal, indent=2))
             logger.info(f"Created proposal: {proposal['title']}")
         
@@ -289,11 +280,11 @@ def run_agent_cycle(state: Dict, interval_minutes: int):
     logger.info(f"Cycle {state['cycle']} completed")
 
 def process_commands(state: Dict) -> bool:
-    if not COMMANDS_FILE.exists():
+    if not config.COMMANDS_FILE.exists():
         return False
     
     try:
-        commands = json.loads(COMMANDS_FILE.read_text())
+        commands = json.loads(config.COMMANDS_FILE.read_text())
     except:
         return False
     
@@ -321,7 +312,7 @@ def process_commands(state: Dict) -> bool:
             logger.info(f"⏭️ Skip task requested: {task_to_skip}")
         else:
             logger.info(f"💬 Adding human input to context: {cmd.get('command', '')}")
-            human_input_file = MEMORY_DIR / "human_input.md"
+            human_input_file = config.HUMAN_INPUT_FILE
             existing = human_input_file.read_text() if human_input_file.exists() else ""
             human_input_file.write_text(
                 f"{existing}\n## {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n{cmd.get('command', '')}\n"
@@ -331,9 +322,9 @@ def process_commands(state: Dict) -> bool:
     
     processed_commands = [c for c in commands if c.get("processed", False)]
     if len(processed_commands) == len(commands):
-        COMMANDS_FILE.unlink()
+        config.COMMANDS_FILE.unlink()
     else:
-        COMMANDS_FILE.write_text(json.dumps(commands, indent=2))
+        config.COMMANDS_FILE.write_text(json.dumps(commands, indent=2))
     
     return len(unprocessed) > 0
 
@@ -353,7 +344,7 @@ def run():
         if process_commands(state):
             state = load_state()
         
-        intervals = state.get("intervals", [1, 3, 5])
+        intervals = state.get("intervals", config.DEFAULT_INTERVALS)
         interval_idx = state.get("interval_idx", 0)
         interval = intervals[interval_idx]
         first_run = state.get("first_run", False)

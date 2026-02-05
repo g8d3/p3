@@ -2,93 +2,87 @@
 
 ## Completed Tasks
 
-### Python Launchers for System Startup
+### Code Reorganization
 **Status**: ✅ Completed
 
-Created Python launchers as alternative to tmux:
-- `launch.py` - Concise, automatically runs both bootstrap.py and tui.py in separate terminal windows
-- `run.py` - Interactive menu to choose: both, bootstrap only, or TUI only
-- Auto-detects common terminals (gnome-terminal, konsole, alacritty, kitty, etc.)
-- Falls back to manual instructions if no terminal found
+Reorganized code into three files with clear separation of concerns:
+- `config.py` - Declarative configuration, constants, and paths
+- `agent.py` - Core agent logic (AI, state, execution)
+- `ui.py` - TUI interface (monitoring, control, chat)
+- `main.py` - Entry point (launches UI)
 
-**Files created**:
-- `/run.py` - Interactive launcher with menu
-- `/launch.py` - Automatic launcher for quick startup
+**Benefits:**
+- Clear separation of concerns
+- Easier to test components independently
+- Declarative configuration in one place
+- Config can be edited without touching logic
 
-## Skipped Items
+**Files removed:**
+- `bootstrap.py` → replaced by `agent.py`
+- `tui.py` → replaced by `ui.py`
+- `launch.py`, `run.py`, `run-all.sh` → no longer needed (main.py handles everything)
 
-### High Priority
+## New Tasks
 
-#### Fix TUI via Interactive Testing
-**Status**: Skipped (hard to implement without interactive terminal)
+### Ctrl+Q Quit All Processes
+**Status**: ✅ Completed
 
-The TUI needs interactive testing and fixing through actual usage. This requires:
-- Running tui.py and exploring all tabs
-- Finding and fixing UI issues
-- Testing edge cases (empty states, large files, etc.)
-- Improving error handling and user feedback
+Implemented Ctrl+Q to quit both UI and agent:
+- Added key binding `ctrl+q` in ui.py
+- Writes "quit" command to commands file
+- Gives agent time to process
+- Then exits UI gracefully
+- Agent subprocess terminated on UI exit
 
-**Implementation note**: Would need a way to run TUI interactively and iterate based on feedback.
+### AI Responses Not Showing in Chat
+**Status**: ✅ Completed
 
-### Medium Priority
+Fixed AI response display in Chat tab:
+- Added debug info showing file watching status
+- Improved file watching with mtime tracking
+- Added notification when new AI response arrives
+- Shows last update timestamp
+- More robust error handling in watch loop
 
-#### Terminal File Explorer Integration
-**Status**: Skipped (requires research and integration)
+### Intervals Management UI
+**Status**: ✅ Completed
 
-Current file browser uses a simple Tree widget. Better alternatives exist:
-- **lf** - Fast terminal file manager written in Go
-- **ranger** - Console file manager with vim keybindings
-- **yazi** - Blazing fast terminal file manager written in Rust
-- **nnn** - n³ - The missing terminal file manager for X
+Implemented Schedule tab for interval management:
+- View current intervals in readable list format
+- See which interval is currently active (marked with [→])
+- Add new intervals via input field
+- Remove intervals (by index)
+- Save changes to state.json
+- Reset to default intervals
+- Visual status of cycle position
 
-**Implementation note**: Would need to:
-1. Research and choose best option
-2. Check if it has a library/IPC interface
-3. Integrate with TUI (possibly as subprocess or embedded)
-4. Handle synchronization between TUI and file explorer
+**Features:**
+- Real-time state updates
+- Add interval validation
+- Save/Reset buttons
+- Current interval highlight
 
 ## Known Issues
-
-### TUI Commands Not Working When No Agent Running
-**Status**: ✅ Fixed - Documentation improved
-
-The TUI is a monitoring/control interface only. It requires bootstrap.py to be running for commands to take effect.
-
-**Solution**: Run both processes:
-```bash
-# Option 1: Python launchers (recommended)
-./launch.py           # Automatic - opens both
-# or
-./run.py              # Interactive menu
-
-# Option 2: Manual (two terminals)
-# Terminal 1: Run the agent system
-./bootstrap.py
-
-# Terminal 2: Run the TUI
-./tui.py
-```
-
-**Changes made**:
-- Created Python launchers (launch.py, run.py)
-- Updated README with clear instructions
 
 ### Human Input "hi" Does Nothing
 **Status**: ✅ Fixed - AI responsiveness improved
 
 When user types non-special commands (like "hi"):
-1. TUI writes to `.commands.json`
-2. bootstrap.py reads it and writes to `memory/human_input.md`
+1. UI writes to `.commands.json`
+2. agent.py reads it and writes to `memory/human_input.md`
 3. AI incorporates this context in next cycle
+4. AI's thoughts are saved to `memory/ai_responses.md`
+5. UI should display AI responses in Chat tab
 
-**Previous limitations**:
+**Previous limitations:**
 - AI only sees human input at start of cycle
 - No immediate feedback/acknowledgment
 - May need explicit instructions to respond
 
-**Changes made**:
+**Changes made:**
 - Updated system prompt to explicitly tell AI to respond to human input
 - Added instructions to acknowledge greetings, answer questions, fulfill requests
+- Created AI responses file that UI watches for real-time display
 
 ## Future Improvements
 

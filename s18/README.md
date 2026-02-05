@@ -1,6 +1,6 @@
 # Autonomous Agent System
 
-Bootstrap script for autonomous economic agents that explore, create value, and earn money.
+Autonomous economic agents that explore, create value, and earn money.
 
 ## Quick Start
 
@@ -11,51 +11,42 @@ uv pip install -r requirements.txt
 # Or using pip
 python3 -m pip install -r requirements.txt
 
-# Option 1: Launch both (recommended - opens 2 terminals)
-./launch.py
-# Or interactive:
-./run.py
-
-# Option 2: Run agent + TUI manually (two terminals)
-# Terminal 1: Run the agent system
-./bootstrap.py
-
-# Terminal 2: Run the TUI to monitor and control
-./tui.py
-
-# Option 3: Run agent only
-./bootstrap.py
-
-# Option 4: Run continuously in background
-./bootstrap.py &
+# Run the system (single terminal, auto-starts agent)
+./main.py
 ```
 
-**IMPORTANT**: The TUI is a monitoring/control interface. It requires `bootstrap.py` to be running for commands to work and logs to appear. The Python launchers automatically handle this.
+**IMPORTANT**: The UI automatically starts `agent.py` as a background process. Everything runs in one terminal with tabs for:
+- Live logs
+- System state
+- Files
+- Schedule - Manage interval schedules (add/remove/edit intervals)
+- Chat with agent (shows both your input and AI responses)
+- **Ctrl+Q** quits both UI and agent
 
 **TUI Features:**
-- Tab 1: Live logs with auto-scroll
-- Tab 2: System state, pending tasks, recent actions
-- Tab 3: File browser (memory/, creations/, agents/)
-- Tab 4: Command input to trigger actions
-- Type commands in Chat tab to influence agent behavior
-
-**TUI Commands:**
-- `run` / `now` - Trigger immediate agent cycle
-- `skip <task_desc>` - Skip a pending task
-- `quit` / `stop` - Shutdown system
-- Any other text - Added as human input for agent context
+- Tab 1 (Logs): Live logs with auto-scroll (shows everything happening)
+- Tab 2 (State): System state, pending tasks, recent actions
+- Tab 3 (Files): File browser (memory/, creations/, agents/)
+- Tab 4 (Chat): 
+  - Shows AI responses in real-time (extracted from agent thoughts)
+  - Send commands, questions, or greetings
+  - Type `run`/`now` to trigger immediate cycle
+  - Type `skip <task>` to skip pending tasks
+  - Type `quit`/`stop` to shutdown
+  - AI responses are automatically shown when available
 
 **Note:**
 - TUI requires a terminal supporting UTF-8 and at least 80x24 characters
 - Screenshots saved by agent-browser need absolute paths (e.g., `/home/vuos/code/p3/s18/creations/screenshot.png`)
-- `launch.py` finds your terminal automatically (gnome-terminal, konsole, alacritty, kitty, etc.)
-- `run.py` offers interactive menu: run both, bootstrap only, or TUI only
+- TUI automatically starts bootstrap.py in background (no need for manual startup)
 
 **First run behavior:** The system executes immediately without waiting, then uses intervals for subsequent cycles. Default intervals: `[1, 3, 5]` minutes (rotating). The AI can dynamically adjust these intervals.
 
 **Event-driven execution:** When commands fail, they're added to `pending_tasks` and the system immediately retries (no wait). Successful commands are tracked in `task_history`. The AI can skip pending tasks with `skip_pending` field.
 
-## Running Uninterruptedly
+## Running Uninterruptedly (Optional)
+
+Since TUI now starts bootstrap.py automatically, these are optional for production use:
 
 ### Option 1: Systemd User Instance (Recommended - inherits your env)
 
@@ -82,24 +73,22 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now agent-bootstrap
 ```
 
-### Option 2: Screen/Tmux
+### Option 2: Run Agent Only (without UI)
 
 ```bash
-# With screen
-screen -S agent
-./bootstrap.py
-# Ctrl+A, D to detach
+# For debugging or production use
+python3 agent.py
+```
 
-# Reattach
-screen -r agent
+### Option 3: Systemd User Instance (Recommended for production)
 
-# With tmux
-tmux new -s agent
-./bootstrap.py
-# Ctrl+B, D to detach
+```bash
+# Install user service (copy already created)
+systemctl --user daemon-reload
+systemctl --user enable --now agent-bootstrap
 
-# Reattach
-tmux attach -t agent
+# Check status
+systemctl --user status agent-bootstrap
 ```
 
 ### Option 3: Docker
@@ -171,23 +160,26 @@ For systemd user instance, use `GLM_API_KEY=$GLM_API_KEY` to inherit from your s
 
 ```
 .
-├── bootstrap.py              # Main script
-├── tui.py                   # Terminal UI control panel
-├── requirements.txt           # Python dependencies
-├── .commands.json           # TUI commands (deleted after processing)
-├── state.json                # System state (cycle, intervals, earnings, etc.)
-├── logs/                     # Logs (AI decides rotation policy)
-├── agents/                   # Agent configurations
+├── main.py                  # Entry point (launches UI)
+├── ui.py                    # TUI interface (tabs: logs, state, files, chat)
+├── agent.py                 # Core agent logic (AI, state, execution)
+├── config.py                # Configuration and constants (declarative)
+├── requirements.txt          # Python dependencies
+├── .commands.json          # UI commands (deleted after processing)
+├── state.json               # System state (cycle, intervals, earnings, etc.)
+├── logs/                    # Logs (AI decides rotation policy)
+├── agents/                  # Agent configurations
 ├── memory/
-│   ├── prompts/              # Dynamic prompts (loaded each cycle)
-│   │   └── system.md         # Main system prompt
-│   ├── context/              # Agent context
-│   ├── knowledge/            # Learned information
-│   ├── tools/                # Tool documentation
-│   ├── proposals/            # Proposals for human review
-│   ├── reasoning/            # Decision reasoning
-│   └── human_input.md       # Human input from TUI
-└── creations/                # Generated content
+│   ├── prompts/             # Dynamic prompts (loaded each cycle)
+│   │   └── system.md        # Main system prompt
+│   ├── context/             # Agent context
+│   ├── knowledge/           # Learned information
+│   ├── tools/               # Tool documentation
+│   ├── proposals/           # Proposals for human review
+│   ├── reasoning/           # Decision reasoning
+│   ├── human_input.md      # Human input from UI
+│   └── ai_responses.md     # AI responses for UI chat
+└── creations/               # Generated content
 ```
 
 **state.json fields:**
@@ -203,12 +195,14 @@ For systemd user instance, use `GLM_API_KEY=$GLM_API_KEY` to inherit from your s
 ## Evolution
 
 The system can evolve itself:
-- Agents modify prompts in `memory/prompts/`
-- New agents created in `agents/`
+- AI modifies prompts in `memory/prompts/`
+- New configurations via `state.json` updates
 - Tools installed as needed
 - Logging policies decided by AI
 - **Interval schedules** updated by AI via `intervals` field in response JSON
 - Configuration changes applied by updating `state.json`
+
+To change behavior, edit `config.py` for constants, or update system prompts in `memory/prompts/`.
 
 ## Monitoring
 
