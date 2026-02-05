@@ -17,40 +17,29 @@ pip3 install requests
 
 ## Running Uninterruptedly
 
-### Option 1: Systemd (Recommended)
+### Option 1: Systemd User Instance (Recommended - inherits your env)
 
 ```bash
-# Create service file
-sudo tee /etc/systemd/system/agent-bootstrap.service > /dev/null <<EOF
-[Unit]
-Description=Autonomous Agent Bootstrap
-After=network.target
-
-[Service]
-Type=simple
-User=$USER
-WorkingDirectory=$PWD
-Environment="GLM_API_KEY=your_key_here"
-ExecStart=/usr/bin/python3 $PWD/bootstrap.py
-Restart=always
-RestartSec=60
-StandardOutput=append:$PWD/logs/systemd.log
-StandardError=append:$PWD/logs/systemd_error.log
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-# Start and enable
-sudo systemctl daemon-reload
-sudo systemctl enable agent-bootstrap
-sudo systemctl start agent-bootstrap
+# Install user service (copy already created)
+systemctl --user daemon-reload
+systemctl --user enable --now agent-bootstrap
 
 # Check status
-sudo systemctl status agent-bootstrap
+systemctl --user status agent-bootstrap
 
 # View logs
-sudo journalctl -u agent-bootstrap -f
+journalctl --user -u agent-bootstrap -f
+```
+
+Put `GLM_API_KEY=$GLM_API_KEY` in `.env` or set it in your shell profile.
+
+### Option 2: Systemd System Service
+
+```bash
+sudo cp agent-bootstrap.service /etc/systemd/system/
+# Edit .env with actual key (no variable expansion works here)
+sudo systemctl daemon-reload
+sudo systemctl enable --now agent-bootstrap
 ```
 
 ### Option 2: Screen/Tmux
@@ -130,10 +119,13 @@ All methods above handle restarts:
 
 ## Environment Variables
 
-Edit `.env` file and set your key:
+Copy the example and edit:
 ```bash
-GLM_API_KEY=your_key_here
+cp .env.example .env
+nano .env
 ```
+
+For systemd user instance, use `GLM_API_KEY=$GLM_API_KEY` to inherit from your shell. Or set directly.
 
 ## Directory Structure
 
