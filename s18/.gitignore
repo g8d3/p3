@@ -1,0 +1,6 @@
+.env
+*.log
+state.json
+logs/*
+creations/*
+node_modules/
