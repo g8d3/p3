@@ -1,0 +1,308 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// User model (supports both humans and agents)
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String
+  type          UserType  // HUMAN, AGENT
+  walletAddress String?   @unique
+  erc8004Id     String?   @unique // ERC-8004 identity token
+  reputation    Float     @default(0)
+  image         String?
+  bio           String?   @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Relations
+  skills        Skill[]
+  experiences   Experience[]
+  purchases     Purchase[]
+  accounts      Account[]
+  sessions      Session[]
+}
+
+enum UserType {
+  HUMAN
+  AGENT
+}
+
+// Better Auth models
+model Account {
+  id                    String  @id @default(uuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([providerId, accountId])
+}
+
+model Session {
+  id             String   @id @default(uuid())
+  userId         String
+  token          String   @unique
+  expiresAt      DateTime
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  @@unique([identifier, value])
+}
+
+// Skill/Agent Capability
+model Skill {
+  id              String      @id @default(uuid())
+  name            String
+  slug            String      @unique
+  description     String      @db.Text
+  shortDesc       String      // For cards
+  
+  // Categorization
+  category        Category
+  subcategory     String?
+  tags            String[]    // Array for flexible tagging
+  
+  // Technical specs
+  integrationType IntegrationType // API, MCP, WEBSOCKET, SDK, etc.
+  inputSchema     Json?       // JSON Schema for inputs
+  outputSchema    Json?       // JSON Schema for outputs
+  endpointUrl     String?     // API endpoint or documentation URL
+  
+  // Documentation
+  documentation   String?     @db.Text
+  examples        Json?       // Array of example usages
+  
+  // Pricing
+  pricingType     PricingType // ONE_TIME, SUBSCRIPTION, USAGE, FREE
+  price           Decimal     @db.Decimal(10, 2)
+  currency        String      @default("USD")
+  
+  // For crypto payments
+  x402Price       String?     // Price in wei/smallest unit
+  x402Currency    String?     // USDC, ETH, etc.
+  x402Network     String?     // base, ethereum, etc.
+  x402Recipient   String?     // Wallet address for x402 payments
+  
+  // ERC-8004 escrow
+  erc8004EscrowContract String? // Contract address for escrow
+  
+  // Stats
+  totalUses       Int         @default(0)
+  avgRating       Float       @default(0)
+  reviewCount     Int         @default(0)
+  
+  // Versioning
+  version         String      @default("1.0.0")
+  isPublished     Boolean     @default(false)
+  
+  // Relations
+  sellerId        String
+  seller          User        @relation(fields: [sellerId], references: [id])
+  experiences     Experience[]
+  purchases       Purchase[]
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  @@index([category])
+  @@index([tags])
+  @@index([avgRating])
+  @@index([sellerId])
+  @@index([isPublished])
+}
+
+enum Category {
+  DATA_PROCESSING
+  NLP
+  VISION
+  AUTOMATION
+  ANALYTICS
+  COMMUNICATION
+  CREATIVE
+  RESEARCH
+  DEV_TOOLS
+  FINANCE
+  OTHER
+}
+
+enum IntegrationType {
+  API
+  MCP
+  WEBSOCKET
+  SDK
+  WEBHOOK
+  GRAPHQL
+  LIBRARY
+}
+
+enum PricingType {
+  ONE_TIME
+  SUBSCRIPTION
+  USAGE_BASED
+  FREE
+}
+
+// Experience/Review with STRUCTURED DATA
+model Experience {
+  id                  String   @id @default(uuid())
+  
+  // Core review data
+  rating              Int      // 1-5
+  title               String?
+  content             String   @db.Text
+  
+  // STRUCTURED METRICS - Critical for filtering/sorting
+  successRate         Float?   // 0-100 percentage
+  avgLatencyMs        Int?     // Average response time in ms
+  costEfficiency      Float?   // 1-5 rating on cost/value
+  easeOfIntegration   Float?   // 1-5 rating
+  documentationQuality Float?  // 1-5 rating
+  supportQuality      Float?   // 1-5 rating
+  
+  // Usage context (for filtering)
+  useCase             UseCase
+  workloadSize        WorkloadSize // SMALL, MEDIUM, LARGE
+  buyerType           UserType     // HUMAN or AGENT
+  
+  // Verification
+  isVerifiedPurchase  Boolean  @default(false)
+  isVerifiedUsage     Boolean  @default(false) // Verified through actual API usage
+  
+  // Engagement
+  helpfulCount        Int      @default(0)
+  unhelpfulCount      Int      @default(0)
+  
+  // Media
+  attachments         Json?    // Screenshots, logs, etc.
+  
+  // Relations
+  skillId             String
+  skill               Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  authorId            String
+  author              User     @relation(fields: [authorId], references: [id])
+  purchaseId          String? @unique
+  purchase            Purchase? @relation(fields: [purchaseId], references: [id])
+  
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  
+  @@index([skillId])
+  @@index([rating])
+  @@index([useCase])
+  @@index([buyerType])
+  @@index([createdAt])
+  @@index([isVerifiedPurchase])
+}
+
+enum UseCase {
+  PRODUCTION
+  DEVELOPMENT
+  RESEARCH
+  PERSONAL
+  ENTERPRISE
+  PROTOTYPING
+}
+
+enum WorkloadSize {
+  SMALL      // < 1000 calls/month
+  MEDIUM     // 1000-10000 calls/month
+  LARGE      // 10000-100000 calls/month
+  ENTERPRISE // > 100000 calls/month
+}
+
+// Purchase/License
+model Purchase {
+  id              String          @id @default(uuid())
+  
+  // Payment info
+  paymentMethod   PaymentMethod
+  paymentStatus   PaymentStatus   @default(PENDING)
+  
+  // Polar.sh specific
+  polarCheckoutId String?
+  polarOrderId    String?
+  
+  // x402 specific
+  x402PaymentId   String?
+  x402TxHash      String?
+  
+  // ERC-8004 specific
+  erc8004EscrowId String?
+  
+  // Pricing at time of purchase
+  pricePaid       Decimal         @db.Decimal(10, 2)
+  currency        String
+  
+  // License
+  licenseKey      String?         @unique
+  licenseType     LicenseType     @default(PERPETUAL)
+  expiresAt       DateTime?
+  
+  // Usage tracking (for usage-based)
+  usageQuota      Int?            // Max calls allowed
+  usageConsumed   Int             @default(0)
+  
+  // Relations
+  skillId         String
+  skill           Skill           @relation(fields: [skillId], references: [id])
+  buyerId         String
+  buyer           User            @relation(fields: [buyerId], references: [id])
+  experience      Experience?
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  @@index([buyerId])
+  @@index([skillId])
+  @@index([paymentStatus])
+}
+
+enum PaymentMethod {
+  POLAR
+  X402
+  ERC8004
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  DISPUTED
+}
+
+enum LicenseType {
+  PERPETUAL
+  SUBSCRIPTION
+  USAGE_BASED
+  TRIAL
+}
