@@ -13,6 +13,8 @@ import { config } from '../../config/defaults.js';
 import logger from '../infrastructure/logger.js';
 import { createApiRouter } from './api.js';
 import { getWebSocketManager } from './websocket.js';
+import { createAuthRouter, authMiddleware, optionalAuth } from '../auth/index.js';
+import { createAIRouter } from '../ai/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -159,9 +161,17 @@ export class DashboardServer {
       });
     });
 
-    // API routes
+    // Auth routes (public)
+    const authRouter = createAuthRouter(this.orchestrator.state);
+    this.app.use('/auth', authRouter);
+
+    // AI routes (auth required)
+    const aiRouter = createAIRouter(this.orchestrator);
+    this.app.use('/ai', authMiddleware, aiRouter);
+
+    // API routes (auth required for user-scoped data)
     const apiRouter = createApiRouter(this.orchestrator, this.wsManager);
-    this.app.use('/api', apiRouter);
+    this.app.use('/api', authMiddleware, apiRouter);
 
     // Static files from public directory
     const publicPath = join(__dirname, 'public');
