@@ -1,0 +1,197 @@
+[2026-02-16T18:27:43.472Z] [INFO ] [orchestrator] Initializing Orchestrator...
+[2026-02-16T18:27:43.480Z] [INFO ] [ContentFactory] ContentFactory initialized {"model":"glm-4-flash","identity":"novaisabuilder"}
+[2026-02-16T18:27:43.481Z] [INFO ] [scheduler] Scheduler initialized
+[2026-02-16T18:27:43.481Z] [INFO ] [orchestrator] Orchestrator initialized successfully
+[2026-02-16T18:27:43.481Z] [INFO ] [orchestrator] Starting Orchestrator...
+[2026-02-16T18:27:43.481Z] [INFO ] [orchestrator] Connecting to browser...
+[2026-02-16T18:27:43.496Z] [INFO ] [orchestrator] Browser connected
+[2026-02-16T18:27:43.497Z] [INFO ] [scheduler] Starting scheduler...
+[2026-02-16T18:27:43.529Z] [INFO ] [scheduler] Registered job: check_mentions (*/30 * * * *) - Check for new mentions and replies
+[2026-02-16T18:27:43.530Z] [INFO ] [scheduler] Registered job: check_bookmarks (0 */2 * * *) - Sync bookmarks for content ideas
+[2026-02-16T18:27:43.530Z] [INFO ] [scheduler] Registered job: collect_engagement (0 */4 * * *) - Collect engagement metrics for posted content
+[2026-02-16T18:27:43.530Z] [INFO ] [scheduler] Registered job: generate_content (0 9,15 * * *) - Generate new content drafts
+[2026-02-16T18:27:43.531Z] [INFO ] [scheduler] Registered job: post_scheduled (30 * * * *) - Post any scheduled content due
+[2026-02-16T18:27:43.531Z] [INFO ] [scheduler] Registered job: topic_exploration (0 10 * * 1) - Explore new topics based on trends
+[2026-02-16T18:27:43.532Z] [INFO ] [scheduler] Registered job: analyze_experiments (0 18 * * 5) - Analyze experiment results and extract learnings
+[2026-02-16T18:27:43.532Z] [INFO ] [scheduler] Registered job: cleanup_old_data (0 3 * * 0) - Clean up old logs and expired data
+[2026-02-16T18:27:43.533Z] [INFO ] [scheduler] Registered job: health_check (*/5 * * * *) - Check system health and connectivity
+[2026-02-16T18:27:43.533Z] [INFO ] [scheduler] Scheduler started with 9 active jobs
+[2026-02-16T18:27:43.533Z] [INFO ] [orchestrator] Orchestrator started successfully
+[2026-02-16T18:27:48.388Z] [INFO ] [orchestrator] Received SIGTERM, initiating graceful shutdown...
+[2026-02-16T18:27:48.388Z] [INFO ] [orchestrator] Shutting down Orchestrator...
+[2026-02-16T18:27:48.388Z] [INFO ] [scheduler] Stopping scheduler...
+[2026-02-16T18:27:48.388Z] [ERROR] [scheduler] Error stopping job check_mentions: job.stop is not a function
+[2026-02-16T18:27:48.388Z] [ERROR] [scheduler] Error stopping job check_bookmarks: job.stop is not a function
+[2026-02-16T18:27:48.388Z] [ERROR] [scheduler] Error stopping job collect_engagement: job.stop is not a function
+[2026-02-16T18:27:48.388Z] [ERROR] [scheduler] Error stopping job generate_content: job.stop is not a function
+[2026-02-16T18:27:48.389Z] [ERROR] [scheduler] Error stopping job post_scheduled: job.stop is not a function
+[2026-02-16T18:27:48.389Z] [ERROR] [scheduler] Error stopping job topic_exploration: job.stop is not a function
+[2026-02-16T18:27:48.389Z] [ERROR] [scheduler] Error stopping job analyze_experiments: job.stop is not a function
+[2026-02-16T18:27:48.389Z] [ERROR] [scheduler] Error stopping job cleanup_old_data: job.stop is not a function
+[2026-02-16T18:27:48.389Z] [ERROR] [scheduler] Error stopping job health_check: job.stop is not a function
+[2026-02-16T18:27:48.389Z] [INFO ] [scheduler] Scheduler stopped
+[2026-02-16T18:27:48.390Z] [WARN ] [orchestrator] Browser disconnected
+[2026-02-16T18:27:48.390Z] [INFO ] [orchestrator] Orchestrator stopped
+[2026-02-16T18:28:35.633Z] [INFO ] [orchestrator] Initializing Orchestrator...
+[2026-02-16T18:28:35.637Z] [INFO ] [ContentFactory] ContentFactory initialized {"model":"glm-4-flash","identity":"novaisabuilder"}
+[2026-02-16T18:28:35.638Z] [INFO ] [scheduler] Scheduler initialized
+[2026-02-16T18:28:35.638Z] [INFO ] [orchestrator] Orchestrator initialized successfully
+[2026-02-16T18:28:35.638Z] [INFO ] [orchestrator] Starting Orchestrator...
+[2026-02-16T18:28:35.638Z] [INFO ] [orchestrator] Connecting to browser...
+[2026-02-16T18:28:35.653Z] [INFO ] [orchestrator] Browser connected
+[2026-02-16T18:28:35.654Z] [INFO ] [scheduler] Starting scheduler...
+[2026-02-16T18:28:35.668Z] [INFO ] [scheduler] Registered job: check_mentions (*/30 * * * *) - Check for new mentions and replies
+[2026-02-16T18:28:35.669Z] [INFO ] [scheduler] Registered job: check_bookmarks (0 */2 * * *) - Sync bookmarks for content ideas
+[2026-02-16T18:28:35.669Z] [INFO ] [scheduler] Registered job: collect_engagement (0 */4 * * *) - Collect engagement metrics for posted content
+[2026-02-16T18:28:35.669Z] [INFO ] [scheduler] Registered job: generate_content (0 9,15 * * *) - Generate new content drafts
+[2026-02-16T18:28:35.670Z] [INFO ] [scheduler] Registered job: post_scheduled (30 * * * *) - Post any scheduled content due
+[2026-02-16T18:28:35.670Z] [INFO ] [scheduler] Registered job: topic_exploration (0 10 * * 1) - Explore new topics based on trends
+[2026-02-16T18:28:35.671Z] [INFO ] [scheduler] Registered job: analyze_experiments (0 18 * * 5) - Analyze experiment results and extract learnings
+[2026-02-16T18:28:35.671Z] [INFO ] [scheduler] Registered job: cleanup_old_data (0 3 * * 0) - Clean up old logs and expired data
+[2026-02-16T18:28:35.672Z] [INFO ] [scheduler] Registered job: health_check (*/5 * * * *) - Check system health and connectivity
+[2026-02-16T18:28:35.672Z] [INFO ] [scheduler] Scheduler started with 9 active jobs
+[2026-02-16T18:28:35.672Z] [INFO ] [orchestrator] Orchestrator started successfully
+[2026-02-16T18:28:40.547Z] [INFO ] [orchestrator] Received SIGTERM, initiating graceful shutdown...
+[2026-02-16T18:28:40.547Z] [INFO ] [orchestrator] Shutting down Orchestrator...
+[2026-02-16T18:28:40.547Z] [INFO ] [scheduler] Stopping scheduler...
+[2026-02-16T18:28:40.547Z] [INFO ] [scheduler] Scheduler stopped
+[2026-02-16T18:28:40.548Z] [WARN ] [orchestrator] Browser disconnected
+[2026-02-16T18:28:40.548Z] [INFO ] [orchestrator] Orchestrator stopped
+[2026-02-16T18:38:11.889Z] [INFO ] [orchestrator] Initializing Orchestrator...
+[2026-02-16T18:38:11.893Z] [INFO ] [ContentFactory] ContentFactory initialized {"model":"glm-4-flash","identity":"novaisabuilder"}
+[2026-02-16T18:38:11.894Z] [INFO ] [scheduler] Scheduler initialized
+[2026-02-16T18:38:11.894Z] [INFO ] [orchestrator] Orchestrator initialized successfully
+[2026-02-16T18:38:11.894Z] [INFO ] [orchestrator] Starting Orchestrator...
+[2026-02-16T18:38:11.894Z] [INFO ] [orchestrator] Connecting to browser...
+[2026-02-16T18:38:11.908Z] [INFO ] [orchestrator] Browser connected
+[2026-02-16T18:38:11.908Z] [INFO ] [scheduler] Starting scheduler...
+[2026-02-16T18:38:11.922Z] [INFO ] [scheduler] Registered job: check_mentions (*/30 * * * *) - Check for new mentions and replies
+[2026-02-16T18:38:11.922Z] [INFO ] [scheduler] Registered job: check_bookmarks (0 */2 * * *) - Sync bookmarks for content ideas
+[2026-02-16T18:38:11.923Z] [INFO ] [scheduler] Registered job: collect_engagement (0 */4 * * *) - Collect engagement metrics for posted content
+[2026-02-16T18:38:11.923Z] [INFO ] [scheduler] Registered job: generate_content (0 9,15 * * *) - Generate new content drafts
+[2026-02-16T18:38:11.924Z] [INFO ] [scheduler] Registered job: post_scheduled (30 * * * *) - Post any scheduled content due
+[2026-02-16T18:38:11.924Z] [INFO ] [scheduler] Registered job: topic_exploration (0 10 * * 1) - Explore new topics based on trends
+[2026-02-16T18:38:11.925Z] [INFO ] [scheduler] Registered job: analyze_experiments (0 18 * * 5) - Analyze experiment results and extract learnings
+[2026-02-16T18:38:11.925Z] [INFO ] [scheduler] Registered job: cleanup_old_data (0 3 * * 0) - Clean up old logs and expired data
+[2026-02-16T18:38:11.925Z] [INFO ] [scheduler] Registered job: health_check (*/5 * * * *) - Check system health and connectivity
+[2026-02-16T18:38:11.926Z] [INFO ] [scheduler] Scheduler started with 9 active jobs
+[2026-02-16T18:38:11.926Z] [INFO ] [orchestrator] Orchestrator started successfully
+[2026-02-16T18:38:47.456Z] [INFO ] [orchestrator] Received SIGINT, initiating graceful shutdown...
+[2026-02-16T18:38:47.457Z] [INFO ] [orchestrator] Shutting down Orchestrator...
+[2026-02-16T18:38:47.457Z] [INFO ] [scheduler] Stopping scheduler...
+[2026-02-16T18:38:47.457Z] [INFO ] [scheduler] Scheduler stopped
+[2026-02-16T18:38:47.458Z] [WARN ] [orchestrator] Browser disconnected
+[2026-02-16T18:38:47.458Z] [INFO ] [orchestrator] Orchestrator stopped
+[2026-02-16T18:52:06.536Z] [INFO ] [orchestrator] Initializing Orchestrator...
+[2026-02-16T18:52:06.539Z] [INFO ] [ContentFactory] ContentFactory initialized {"model":"glm-4-flash","identity":"novaisabuilder"}
+[2026-02-16T18:52:06.539Z] [INFO ] [scheduler] Scheduler initialized
+[2026-02-16T18:52:06.539Z] [INFO ] [orchestrator] Orchestrator initialized successfully
+[2026-02-16T18:52:06.539Z] [INFO ] [orchestrator] Starting Orchestrator...
+[2026-02-16T18:52:06.540Z] [INFO ] [orchestrator] Connecting to browser...
+[2026-02-16T18:52:06.555Z] [INFO ] [orchestrator] Browser connected
+[2026-02-16T18:52:06.555Z] [INFO ] [scheduler] Starting scheduler...
+[2026-02-16T18:52:06.569Z] [INFO ] [scheduler] Registered job: check_mentions (*/30 * * * *) - Check for new mentions and replies
+[2026-02-16T18:52:06.570Z] [INFO ] [scheduler] Registered job: check_bookmarks (0 */2 * * *) - Sync bookmarks for content ideas
+[2026-02-16T18:52:06.570Z] [INFO ] [scheduler] Registered job: collect_engagement (0 */4 * * *) - Collect engagement metrics for posted content
+[2026-02-16T18:52:06.571Z] [INFO ] [scheduler] Registered job: generate_content (0 9,15 * * *) - Generate new content drafts
+[2026-02-16T18:52:06.571Z] [INFO ] [scheduler] Registered job: post_scheduled (30 * * * *) - Post any scheduled content due
+[2026-02-16T18:52:06.572Z] [INFO ] [scheduler] Registered job: topic_exploration (0 10 * * 1) - Explore new topics based on trends
+[2026-02-16T18:52:06.572Z] [INFO ] [scheduler] Registered job: analyze_experiments (0 18 * * 5) - Analyze experiment results and extract learnings
+[2026-02-16T18:52:06.573Z] [INFO ] [scheduler] Registered job: cleanup_old_data (0 3 * * 0) - Clean up old logs and expired data
+[2026-02-16T18:52:06.573Z] [INFO ] [scheduler] Registered job: health_check (*/5 * * * *) - Check system health and connectivity
+[2026-02-16T18:52:06.573Z] [INFO ] [scheduler] Scheduler started with 9 active jobs
+[2026-02-16T18:52:06.573Z] [INFO ] [orchestrator] Starting dashboard server...
+[2026-02-16T18:52:06.575Z] [INFO ] [websocket] WebSocket server initialized, path: /ws
+[2026-02-16T18:52:06.575Z] [INFO ] [websocket] Orchestrator event listeners registered
+[2026-02-16T18:52:06.578Z] [INFO ] [server] Dashboard server started on http://0.0.0.0:3456
+[2026-02-16T18:52:06.578Z] [INFO ] [orchestrator] Orchestrator started successfully
+[2026-02-16T18:52:14.405Z] [INFO ] [orchestrator] Received SIGTERM, initiating graceful shutdown...
+[2026-02-16T18:52:14.405Z] [INFO ] [orchestrator] Shutting down Orchestrator...
+[2026-02-16T18:52:14.405Z] [INFO ] [scheduler] Stopping scheduler...
+[2026-02-16T18:52:14.406Z] [INFO ] [scheduler] Scheduler stopped
+[2026-02-16T18:52:14.406Z] [INFO ] [server] Stopping dashboard server...
+[2026-02-16T18:52:14.406Z] [INFO ] [websocket] WebSocket server closed
+[2026-02-16T18:52:14.406Z] [INFO ] [server] HTTP server closed
+[2026-02-16T18:52:14.406Z] [INFO ] [server] Dashboard server stopped
+[2026-02-16T18:52:14.407Z] [WARN ] [orchestrator] Browser disconnected
+[2026-02-16T18:52:14.407Z] [INFO ] [orchestrator] Orchestrator stopped
+[2026-02-16T18:52:39.917Z] [INFO ] [orchestrator] Initializing Orchestrator...
+[2026-02-16T18:52:39.920Z] [INFO ] [ContentFactory] ContentFactory initialized {"model":"glm-4-flash","identity":"novaisabuilder"}
+[2026-02-16T18:52:39.921Z] [INFO ] [scheduler] Scheduler initialized
+[2026-02-16T18:52:39.921Z] [INFO ] [orchestrator] Orchestrator initialized successfully
+[2026-02-16T18:52:39.921Z] [INFO ] [orchestrator] Starting Orchestrator...
+[2026-02-16T18:52:39.921Z] [INFO ] [orchestrator] Connecting to browser...
+[2026-02-16T18:52:39.937Z] [INFO ] [orchestrator] Browser connected
+[2026-02-16T18:52:39.937Z] [INFO ] [scheduler] Starting scheduler...
+[2026-02-16T18:52:39.953Z] [INFO ] [scheduler] Registered job: check_mentions (*/30 * * * *) - Check for new mentions and replies
+[2026-02-16T18:52:39.953Z] [INFO ] [scheduler] Registered job: check_bookmarks (0 */2 * * *) - Sync bookmarks for content ideas
+[2026-02-16T18:52:39.954Z] [INFO ] [scheduler] Registered job: collect_engagement (0 */4 * * *) - Collect engagement metrics for posted content
+[2026-02-16T18:52:39.954Z] [INFO ] [scheduler] Registered job: generate_content (0 9,15 * * *) - Generate new content drafts
+[2026-02-16T18:52:39.955Z] [INFO ] [scheduler] Registered job: post_scheduled (30 * * * *) - Post any scheduled content due
+[2026-02-16T18:52:39.955Z] [INFO ] [scheduler] Registered job: topic_exploration (0 10 * * 1) - Explore new topics based on trends
+[2026-02-16T18:52:39.956Z] [INFO ] [scheduler] Registered job: analyze_experiments (0 18 * * 5) - Analyze experiment results and extract learnings
+[2026-02-16T18:52:39.956Z] [INFO ] [scheduler] Registered job: cleanup_old_data (0 3 * * 0) - Clean up old logs and expired data
+[2026-02-16T18:52:39.956Z] [INFO ] [scheduler] Registered job: health_check (*/5 * * * *) - Check system health and connectivity
+[2026-02-16T18:52:39.956Z] [INFO ] [scheduler] Scheduler started with 9 active jobs
+[2026-02-16T18:52:39.956Z] [INFO ] [orchestrator] Starting dashboard server...
+[2026-02-16T18:52:39.958Z] [INFO ] [websocket] WebSocket server initialized, path: /ws
+[2026-02-16T18:52:39.958Z] [INFO ] [websocket] Orchestrator event listeners registered
+[2026-02-16T18:52:39.961Z] [INFO ] [server] Dashboard server started on http://0.0.0.0:3456
+[2026-02-16T18:52:39.961Z] [INFO ] [orchestrator] Orchestrator started successfully
+[2026-02-16T18:54:59.648Z] [INFO ] [orchestrator] Received SIGTERM, initiating graceful shutdown...
+[2026-02-16T18:54:59.648Z] [INFO ] [orchestrator] Shutting down Orchestrator...
+[2026-02-16T18:54:59.648Z] [INFO ] [scheduler] Stopping scheduler...
+[2026-02-16T18:54:59.649Z] [INFO ] [scheduler] Scheduler stopped
+[2026-02-16T18:54:59.649Z] [INFO ] [server] Stopping dashboard server...
+[2026-02-16T18:54:59.649Z] [INFO ] [websocket] WebSocket server closed
+[2026-02-16T18:54:59.649Z] [INFO ] [server] HTTP server closed
+[2026-02-16T18:54:59.649Z] [INFO ] [server] Dashboard server stopped
+[2026-02-16T18:54:59.650Z] [WARN ] [orchestrator] Browser disconnected
+[2026-02-16T18:54:59.651Z] [INFO ] [orchestrator] Orchestrator stopped
+[2026-02-16T18:57:02.567Z] [INFO ] [orchestrator] Initializing Orchestrator...
+[2026-02-16T18:57:02.570Z] [INFO ] [ContentFactory] ContentFactory initialized {"model":"glm-4-flash","identity":"novaisabuilder"}
+[2026-02-16T18:57:02.571Z] [INFO ] [scheduler] Scheduler initialized
+[2026-02-16T18:57:02.571Z] [INFO ] [orchestrator] Orchestrator initialized successfully
+[2026-02-16T18:57:02.571Z] [INFO ] [orchestrator] Starting Orchestrator...
+[2026-02-16T18:57:02.571Z] [INFO ] [orchestrator] Connecting to browser...
+[2026-02-16T18:57:02.585Z] [INFO ] [orchestrator] Browser connected
+[2026-02-16T18:57:02.585Z] [INFO ] [scheduler] Starting scheduler...
+[2026-02-16T18:57:02.599Z] [INFO ] [scheduler] Registered job: check_mentions (*/30 * * * *) - Check for new mentions and replies
+[2026-02-16T18:57:02.599Z] [INFO ] [scheduler] Registered job: check_bookmarks (0 */2 * * *) - Sync bookmarks for content ideas
+[2026-02-16T18:57:02.600Z] [INFO ] [scheduler] Registered job: collect_engagement (0 */4 * * *) - Collect engagement metrics for posted content
+[2026-02-16T18:57:02.600Z] [INFO ] [scheduler] Registered job: generate_content (0 9,15 * * *) - Generate new content drafts
+[2026-02-16T18:57:02.601Z] [INFO ] [scheduler] Registered job: post_scheduled (30 * * * *) - Post any scheduled content due
+[2026-02-16T18:57:02.601Z] [INFO ] [scheduler] Registered job: topic_exploration (0 10 * * 1) - Explore new topics based on trends
+[2026-02-16T18:57:02.601Z] [INFO ] [scheduler] Registered job: analyze_experiments (0 18 * * 5) - Analyze experiment results and extract learnings
+[2026-02-16T18:57:02.602Z] [INFO ] [scheduler] Registered job: cleanup_old_data (0 3 * * 0) - Clean up old logs and expired data
+[2026-02-16T18:57:02.602Z] [INFO ] [scheduler] Registered job: health_check (*/5 * * * *) - Check system health and connectivity
+[2026-02-16T18:57:02.602Z] [INFO ] [scheduler] Scheduler started with 9 active jobs
+[2026-02-16T18:57:02.602Z] [INFO ] [orchestrator] Starting dashboard server...
+[2026-02-16T18:57:02.604Z] [INFO ] [websocket] WebSocket server initialized, path: /ws
+[2026-02-16T18:57:02.604Z] [INFO ] [websocket] Orchestrator event listeners registered
+[2026-02-16T18:57:02.607Z] [INFO ] [server] Dashboard server started on http://0.0.0.0:3456
+[2026-02-16T18:57:02.607Z] [INFO ] [orchestrator] Orchestrator started successfully
+[2026-02-16T18:57:32.993Z] [INFO ] [websocket] Client connected: 192.168.0.15:1771268252993
+[2026-02-16T18:57:32.995Z] [ERROR] [api] Approvals list error: this.stateManager.run is not a function
+[2026-02-16T18:58:03.103Z] [INFO ] [websocket] Client disconnected: 192.168.0.15:1771268252993
+[2026-02-16T18:58:03.227Z] [ERROR] [api] Approvals list error: this.stateManager.run is not a function
+[2026-02-16T18:58:03.245Z] [INFO ] [websocket] Client connected: 192.168.0.15:1771268283245
+[2026-02-16T18:59:12.798Z] [ERROR] [api] Rejection error: this.stateManager.run is not a function
+[2026-02-16T18:59:17.507Z] [ERROR] [api] Rejection error: this.stateManager.run is not a function
+[2026-02-16T18:59:19.310Z] [ERROR] [api] Rejection error: this.stateManager.run is not a function
+[2026-02-16T19:00:00.813Z] [INFO ] [scheduler] Executing task: check_mentions (twitter.checkMentions)
+[2026-02-16T19:00:00.813Z] [INFO ] [twitter] Checking for new mentions
+[2026-02-16T19:00:00.815Z] [INFO ] [scheduler] Executing task: health_check (system.healthCheck)
+[2026-02-16T19:00:00.827Z] [INFO ] [scheduler] Task completed: health_check (12ms)
+[2026-02-16T19:00:13.870Z] [INFO ] [twitter] Found 0 new mentions
+[2026-02-16T19:00:13.871Z] [INFO ] [scheduler] Task completed: check_mentions (13058ms)
+[2026-02-16T19:05:00.174Z] [INFO ] [scheduler] Executing task: health_check (system.healthCheck)
+[2026-02-16T19:05:00.175Z] [INFO ] [scheduler] Task completed: health_check (1ms)
+[2026-02-16T19:07:02.624Z] [INFO ] [websocket] Client disconnected: 192.168.0.15:1771268283245
+[2026-02-16T19:10:00.478Z] [INFO ] [scheduler] Executing task: health_check (system.healthCheck)
+[2026-02-16T19:10:00.479Z] [INFO ] [scheduler] Task completed: health_check (1ms)
+[2026-02-16T19:11:01.347Z] [INFO ] [websocket] Client connected: 192.168.0.19:1771269061347
+[2026-02-16T19:15:00.774Z] [INFO ] [scheduler] Executing task: health_check (system.healthCheck)
+[2026-02-16T19:15:00.775Z] [INFO ] [scheduler] Task completed: health_check (1ms)
+[2026-02-16T19:20:00.073Z] [INFO ] [scheduler] Executing task: health_check (system.healthCheck)
+[2026-02-16T19:20:00.074Z] [INFO ] [scheduler] Task completed: health_check (1ms)
