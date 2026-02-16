@@ -1,0 +1,153 @@
+[
+  {
+    "children": [
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "dateAdded": 1770133620395,
+                "id": "5",
+                "index": 0,
+                "parentId": "6",
+                "syncing": true,
+                "title": "likes",
+                "url": "https://x.com/novaisabuilder/likes"
+              },
+              {
+                "dateAdded": 1770133638963,
+                "id": "7",
+                "index": 1,
+                "parentId": "6",
+                "syncing": true,
+                "title": "bookamarks",
+                "url": "https://x.com/i/bookmarks"
+              }
+            ],
+            "dateAdded": 1770133632253,
+            "dateGroupModified": 1770133638963,
+            "id": "6",
+            "index": 0,
+            "parentId": "9",
+            "syncing": true,
+            "title": "x.com"
+          },
+          {
+            "children": [
+              {
+                "dateAdded": 1771104444915,
+                "id": "13",
+                "index": 0,
+                "parentId": "12",
+                "syncing": true,
+                "title": "My Applications | Discord Developer Portal",
+                "url": "https://discord.com/developers/applications/1472274143180488986/bot"
+              },
+              {
+                "dateAdded": 1771104444915,
+                "id": "14",
+                "index": 1,
+                "parentId": "12",
+                "syncing": true,
+                "title": "Automation | MailerLite",
+                "url": "https://dashboard.mailerlite.com/automations/status/workflows"
+              },
+              {
+                "dateAdded": 1771104444915,
+                "id": "15",
+                "index": 2,
+                "parentId": "12",
+                "syncing": true,
+                "title": "(2) Nova Builds (@novaisabuilder) / X",
+                "url": "https://x.com/novaisabuilder"
+              },
+              {
+                "dateAdded": 1771104444915,
+                "id": "16",
+                "index": 3,
+                "parentId": "12",
+                "syncing": true,
+                "title": "• Discord | Roles | Nova's server",
+                "url": "https://discord.com/channels/1472259440085438494/1472259440525836457"
+              },
+              {
+                "dateAdded": 1771104444915,
+                "id": "17",
+                "index": 4,
+                "parentId": "12",
+                "syncing": true,
+                "title": "Inbox (21) - novaisabuilder@gmail.com - Gmail",
+                "url": "https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox"
+              },
+              {
+                "dateAdded": 1771104444915,
+                "id": "18",
+                "index": 5,
+                "parentId": "12",
+                "syncing": true,
+                "title": "Typefully",
+                "url": "https://typefully.com/"
+              },
+              {
+                "dateAdded": 1771104444915,
+                "id": "19",
+                "index": 6,
+                "parentId": "12",
+                "syncing": true,
+                "title": "Nova — AI Teacher for Agent Builders",
+                "url": "https://novabuilds.top/#learn"
+              },
+              {
+                "dateAdded": 1771104444915,
+                "id": "20",
+                "index": 7,
+                "parentId": "12",
+                "syncing": true,
+                "title": "Benefits | Nova Builder | Polar",
+                "url": "https://polar.sh/dashboard/nova-builder/products/benefits?type=discord&description=Discord+Role+1&guild_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJndWlsZF9pZCI6IjE0NzIyNTk0NDAwODU0Mzg0OTQiLCJ0eXBlIjoiZGlzY29yZF9ndWlsZF90b2tlbiIsImV4cCI6MTc3MTA5NzgwMn0.SNYHKckrH2UGFXXfpAxRWrbNqQ6X1DX9o2D0Yft85zM&guild_id=1472259440085438494"
+              },
+              {
+                "dateAdded": 1771105165670,
+                "id": "21",
+                "index": 8,
+                "parentId": "12",
+                "syncing": true,
+                "title": "Your Repositories",
+                "url": "https://github.com/novaisabuilder?tab=repositories"
+              }
+            ],
+            "dateAdded": 1771104444914,
+            "dateGroupModified": 1771105168381,
+            "id": "12",
+            "index": 1,
+            "parentId": "9",
+            "syncing": true,
+            "title": "nova"
+          }
+        ],
+        "dateAdded": 1771084061285,
+        "dateGroupModified": 1771105165670,
+        "folderType": "bookmarks-bar",
+        "id": "9",
+        "index": 0,
+        "parentId": "0",
+        "syncing": true,
+        "title": "Bookmarks bar"
+      },
+      {
+        "children": [],
+        "dateAdded": 1771084061285,
+        "folderType": "other",
+        "id": "10",
+        "index": 1,
+        "parentId": "0",
+        "syncing": true,
+        "title": "Other bookmarks"
+      }
+    ],
+    "dateAdded": 1771084054749,
+    "id": "0",
+    "syncing": false,
+    "title": ""
+  }
+]

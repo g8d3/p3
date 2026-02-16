@@ -55,7 +55,7 @@ class GLMAPIPerformanceMonitor:
         self.api_key = api_key or os.environ.get("GLM_API_KEY", "")
         if not self.api_key or self.api_key == "YOUR_API_KEY_HERE":
             raise ValueError("GLM_API_KEY not set. Set GLM_API_KEY environment variable or pass api_key parameter.")
-        self.base_url = base_url or os.environ.get("GLM_BASE_URL", "https://open.bigmodel.cn/api/paas/v4/chat/completions")
+        self.base_url = base_url or os.environ.get("GLM_BASE_URL", "https://api.z.ai/api/coding/paas/v4/chat/completions")
         self.metrics_history: List[PerformanceMetrics] = []
         self.headers = {
             "Authorization": f"Bearer {api_key}",
