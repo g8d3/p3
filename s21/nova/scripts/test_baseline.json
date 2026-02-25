@@ -1,0 +1,60 @@
+{
+  "timestamp": "2026-02-24T21:30:20.693143",
+  "db_path": "/home/vuos/code/p3/s21/nova/data/curation.db",
+  "total_urls": 632,
+  "stats": {
+    "nodes": {
+      "Person": 423,
+      "Content": 632,
+      "Topic": 107,
+      "GitHubRepo": 54,
+      "Domain": 1
+    },
+    "relationships": {
+      "LIKED": 631,
+      "BOOKMARKED": 268,
+      "POSTED": 631,
+      "HAS_TOPIC": 194,
+      "MENTIONS_REPO": 59,
+      "LINKS_TO": 123
+    }
+  },
+  "samples": {
+    "liked": {
+      "top_5": [
+        "https://x.com/hasantoxr/status/2026315418684825899",
+        "https://x.com/tom_doerr/status/2026094688218849692",
+        "https://x.com/XueJia24682/status/2026159868823077070",
+        "https://x.com/opentensor/status/2026034986877432115",
+        "https://x.com/haydenbleasel/status/2026359649499492395"
+      ],
+      "bottom_5": [
+        "https://x.com/Saboo_Shubham_/status/2025984111735878062",
+        "https://x.com/heinenbros/status/2025795602240749644",
+        "https://x.com/golangch/status/2025770488610554184",
+        "https://x.com/tom_doerr/status/2025899595469824200",
+        "https://x.com/gonzalo_fuente1/status/2025880791247462523"
+      ],
+      "newest": "https://x.com/hasantoxr/status/2026315418684825899",
+      "count": 631
+    },
+    "bookmarked": {
+      "top_5": [
+        "https://x.com/tom_doerr/status/2026381785676869719",
+        "https://x.com/yasser_elsaid_/status/2025992657235841452",
+        "https://x.com/NEARProtocol/status/2026047334468157764",
+        "https://x.com/luthiraabeykoon/status/2026036244455489750",
+        "https://x.com/glcst/status/2026317435679219829"
+      ],
+      "bottom_5": [
+        "https://x.com/sama/status/2023150230905159801",
+        "https://x.com/steipete/status/2023154018714100102",
+        "https://x.com/Param_eth/status/2019450730042781927",
+        "https://x.com/ryancarson/status/2019429542121660743",
+        "https://x.com/RoundtableSpace/status/2019422133395611915"
+      ],
+      "newest": "https://x.com/tom_doerr/status/2026381785676869719",
+      "count": 267
+    }
+  }
+}
