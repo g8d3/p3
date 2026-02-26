@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "chrome-direct": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@daohoangson/chrome-devtools-mcp@latest",
+        "--browser-url=http://127.0.0.1:9222"
+      ]
+    },
+    "shell": {
+      "command": "npx",
+      "args": ["-y", "@mako10k/mcp-shell-server"]
+    }
+  }
+}
