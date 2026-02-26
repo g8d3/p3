@@ -1,0 +1,346 @@
+[mcp-superassistant-proxy] Starting...
+[mcp-superassistant-proxy] Starting mcp-superassistant-proxy ...
+[mcp-superassistant-proxy]   - outputTransport: streamableHttp
+[mcp-superassistant-proxy]   - config: ./config.json
+[mcp-superassistant-proxy]   - Headers: (none)
+[mcp-superassistant-proxy]   - host: 0.0.0.0
+[mcp-superassistant-proxy]   - port: 3006
+[mcp-superassistant-proxy]   - streamableHttpPath: /mcp
+[mcp-superassistant-proxy]   - stateless: true
+[mcp-superassistant-proxy]   - CORS: enabled ("*")
+[mcp-superassistant-proxy]   - Health endpoints: (none)
+[mcp-superassistant-proxy] Loaded config with 2 servers
+[mcp-superassistant-proxy] Starting server chrome-direct: npx -y @daohoangson/chrome-devtools-mcp@latest --browser-url=http://127.0.0.1:9222
+chrome-devtools-mcp exposes content of the browser instance to the MCP clients allowing them to inspect,
+debug, and modify any data in the browser or DevTools.
+Avoid sharing sensitive or personal information that you do not want to share with MCP clients.
+[mcp-superassistant-proxy] Connected to server: chrome-direct
+[mcp-superassistant-proxy] Server chrome-direct has 26 tools
+[mcp-superassistant-proxy] Successfully initialized server: chrome-direct
+[mcp-superassistant-proxy] Starting server shell: npx -y @mako10k/mcp-shell-server
+ProcessManager: Streaming components initialized
+isEnhancedModeEnabled() called: true
+[mcp-superassistant-proxy] Connected to server: shell
+[mcp-superassistant-proxy] Server shell has 13 tools
+[mcp-superassistant-proxy] Successfully initialized server: shell
+[mcp-superassistant-proxy] Config-to-StreamableHttp gateway ready
+[mcp-superassistant-proxy] Listening on 0.0.0.0:3006
+[mcp-superassistant-proxy] StreamableHttp endpoint: http://0.0.0.0:3006/mcp
+[mcp-superassistant-proxy] Mode: stateless
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":0,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"mcp-client-streamable-http","version":"1.0.0"}}}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","method":"notifications/initialized"}
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":1,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":2,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":3,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":4,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":5,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":6,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":7,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":8,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":9,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":10,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":11,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":12,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":13,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":14,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":15,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":16,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":0,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"mcp-client-streamable-http","version":"1.0.0"}}}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","method":"notifications/initialized"}
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":1,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":2,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":3,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":4,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":5,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":6,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":7,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":8,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":9,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":10,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":11,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":12,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":13,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":14,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":15,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":16,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":17,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":18,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":19,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":20,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":21,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":22,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":23,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":24,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":25,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":26,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":27,"method":"tools/call","params":{"name":"shell.shell_execute","arguments":{"command":"pwd"}}}
+isEnhancedModeEnabled() called: true
+[DEBUG] Enhanced Evaluator - Command: pwd
+[DEBUG] Enhanced Evaluator - History entries: 0
+[DEBUG] Enhanced Evaluator - History commands: 
+Error in createMessageCallbackFromMCPServer: McpError: MCP error -32601: Method not found
+    at McpError.fromError (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/types.js:2035:16)
+    at Server._onresponse (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js:482:36)
+    at _transport.onmessage (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js:234:22)
+    at StdioServerTransport.processReadBuffer (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js:41:33)
+    at StdioServerTransport._ondata (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js:17:18)
+    at Socket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23) {
+  code: -32601,
+  data: undefined
+}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":28,"method":"tools/call","params":{"name":"shell.shell_execute","arguments":{"command":"pwd"}}}
+isEnhancedModeEnabled() called: true
+[DEBUG] Enhanced Evaluator - Command: pwd
+[DEBUG] Enhanced Evaluator - History entries: 0
+[DEBUG] Enhanced Evaluator - History commands: 
+Error in createMessageCallbackFromMCPServer: McpError: MCP error -32601: Method not found
+    at McpError.fromError (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/types.js:2035:16)
+    at Server._onresponse (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js:482:36)
+    at _transport.onmessage (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js:234:22)
+    at StdioServerTransport.processReadBuffer (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js:41:33)
+    at StdioServerTransport._ondata (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js:17:18)
+    at Socket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23) {
+  code: -32601,
+  data: undefined
+}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":29,"method":"tools/call","params":{"name":"shell.shell_execute","arguments":{"command":"pwd"}}}
+isEnhancedModeEnabled() called: true
+[DEBUG] Enhanced Evaluator - Command: pwd
+[DEBUG] Enhanced Evaluator - History entries: 0
+[DEBUG] Enhanced Evaluator - History commands: 
+Error in createMessageCallbackFromMCPServer: McpError: MCP error -32601: Method not found
+    at McpError.fromError (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/types.js:2035:16)
+    at Server._onresponse (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js:482:36)
+    at _transport.onmessage (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js:234:22)
+    at StdioServerTransport.processReadBuffer (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js:41:33)
+    at StdioServerTransport._ondata (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js:17:18)
+    at Socket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23) {
+  code: -32601,
+  data: undefined
+}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":30,"method":"tools/call","params":{"name":"shell.shell_execute","arguments":{"command":"pwd"}}}
+isEnhancedModeEnabled() called: true
+[DEBUG] Enhanced Evaluator - Command: pwd
+[DEBUG] Enhanced Evaluator - History entries: 0
+[DEBUG] Enhanced Evaluator - History commands: 
+Error in createMessageCallbackFromMCPServer: McpError: MCP error -32601: Method not found
+    at McpError.fromError (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/types.js:2035:16)
+    at Server._onresponse (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js:482:36)
+    at _transport.onmessage (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/protocol.js:234:22)
+    at StdioServerTransport.processReadBuffer (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js:41:33)
+    at StdioServerTransport._ondata (file:///home/vuos/.npm/_npx/fb39a35dd1f96601/node_modules/@modelcontextprotocol/sdk/dist/esm/server/stdio.js:17:18)
+    at Socket.emit (node:events:518:28)
+    at addChunk (node:internal/streams/readable:561:12)
+    at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+    at Readable.push (node:internal/streams/readable:392:5)
+    at Pipe.onStreamRead (node:internal/stream_base_commons:189:23) {
+  code: -32601,
+  data: undefined
+}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":0,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"mcp-client-streamable-http","version":"1.0.0"}}}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","method":"notifications/initialized"}
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":1,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":2,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":3,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":4,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":5,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":6,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":7,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":8,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":9,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":10,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":11,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":12,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":13,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":14,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":15,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":16,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":17,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":18,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":19,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":20,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":0,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"mcp-client-streamable-http","version":"1.0.0"}}}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","method":"notifications/initialized"}
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":1,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":2,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":3,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":4,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":5,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":6,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":7,"method":"resources/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Received stateless StreamableHttp request
+[mcp-superassistant-proxy] StreamableHttp → Servers: {"jsonrpc":"2.0","id":8,"method":"tools/list"}
+[mcp-superassistant-proxy] Servers → StreamableHttp:
+[mcp-superassistant-proxy] Caught SIGINT. Exiting...
+[mcp-superassistant-proxy] Cleaned up server: chrome-direct
+[mcp-superassistant-proxy] Cleaned up server: shell
