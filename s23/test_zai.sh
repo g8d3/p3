@@ -1,0 +1,1 @@
+curl -sN --http1.1 -X POST "https://api.z.ai/api/coding/paas/v4/chat/completions" -H "Authorization: Bearer $ZAI_API_KEY" -H "Content-Type: application/json" -d "{\"model\": \"glm-4.7-flash\", \"stream\": true, \"messages\": [{\"role\": \"user\", \"content\": \"Write a simple Python FastAPI hello world\"}]}"
