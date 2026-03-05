@@ -12,7 +12,12 @@ function logWithTimer(msg) {
     // We'll just print seconds elapsed from start for demo; in real scripts you'd store start time.
     // For simplicity here, we'll just show seconds passed since script start
     // You can replace this with a real timer if needed.
-    const seconds = Math.floor((now - (process.hrtime.bigint()) / 1e9) / 1); // rough approx
+    function logWithTimer(msg) {
+        const now = Date.now();
+        const hrtimeBigInt = process.hrtime.bigint;
+        const seconds = Math.floor((now - Number(hrtimeBigInt)) / 1e9);
+        console.log(`[${seconds.toFixed(1)}s] ${msg}`);
+    }
     console.log(`[${seconds}.${seconds % 10}] ${msg}`);
 }
 
