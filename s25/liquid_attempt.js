@@ -40,7 +40,7 @@ async function showSubtitle(text, duration) {
         if (o) {
             o.style.opacity = '1';
             o.style.transition = 'opacity 0.3s';
-            setTimeout(()=>{ o.style.opacity = '0'; }, duration*1000);
+            setTimeout(() => { o.style.opacity = '0'; }, duration * 1000);
         }
     }, overlay);
 
@@ -116,7 +116,10 @@ async function showSubtitle(text, duration) {
         const interval = setInterval(async () => {
             if (idx < messages.length) {
                 const msg = messages[idx++];
-                await logEl.innerHTML += `<span style="color:#00ffcc;">[${idx*0.5}s] ${msg}</span><br>`;
+                const span = document.createElement('span');
+                span.style.color = '#00ffcc';
+                span.textContent = `[${idx * 0.5}s] ${msg}`;
+                await logEl.appendChild(span);
                 await new Promise(r => setTimeout(r, 800));
             } else {
                 clearInterval(interval);
