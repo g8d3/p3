@@ -2,23 +2,11 @@ const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 
-// Helper: Elapsed timer prefix
 function logWithTimer(msg) {
     const now = Date.now();
-    // For demo purposes, we'll just count seconds elapsed roughly
-    // In real usage you could track start time at top and compute delta
-    // Here we simulate a simple counter for illustration:
-    // Let's assume we want a relative time like "+5.2s"
-    // We'll just print seconds elapsed from start for demo; in real scripts you'd store start time.
-    // For simplicity here, we'll just show seconds passed since script start
-    // You can replace this with a real timer if needed.
-    function logWithTimer(msg) {
-        const now = Date.now();
-        const hrtimeBigInt = process.hrtime.bigint;
-        const seconds = Math.floor((now - Number(hrtimeBigInt)) / 1e9);
-        console.log(`[${seconds.toFixed(1)}s] ${msg}`);
-    }
-    console.log(`[${seconds}.${seconds % 10}] ${msg}`);
+    const hrtimeBigInt = process.hrtime.bigint;
+    const seconds = Math.floor((now - Number(hrtimeBigInt)) / 1e9);
+    console.log(`[${seconds.toFixed(1)}s] ${msg}`);
 }
 
 // Helper: Overlay function
