@@ -1,58 +1,57 @@
 # TODO - Autonomous Video Generator
 
-## Priority 1: Core Functionality
-- [ ] **YouTube Upload** - Already fixed (OAuth client secret re-downloaded)
-- [ ] **Test YouTube Upload** - Verify it works with new credentials
-
-## Priority 2: Secrets Management
-- [ ] **Password Manager Integration** - Use Bitwarden/1Password CLI to store/retrieve API keys
-- [ ] **Auto OAuth Flow** - No manual Google Cloud Console setup required
-
-## Priority 3: Ultra Easy Onboarding (One-liner)
-- [ ] **Magic Install Script** - `curl | bash` installs everything, user just talks
-- [ ] **Auto API Key Creation** - LLM creates Inworld/OpenAI/11Labs keys from user account
-- [ ] **Auto Google Cloud Setup** - Program creates OAuth credentials automatically via API
-- [ ] **Auto CDP Browser Setup** - Copy user browser profile data automatically
-- [ ] **Wizard Mode** - First run guides through all setup automatically
-
-## Priority 4: Video/Audio Quality
-- [ ] **More TTS Providers** - Add OpenAI TTS, ElevenLabs support
-- [ ] **Subtitles Generation** - Auto-generate SRT/VTT from audio
-- [ ] **Better Slide Templates** - Multiple visual styles, backgrounds
-
-## Priority 5: Heavy Lifting in Code
-- [ ] **Profiling** - Optimize code to minimize LLM calls
-- [ ] **Config-driven Defaults** - Smart defaults reduce LLM interaction
-- [ ] **Template System** - Pre-built templates for common video types
-
-## Priority 6: Automation
-- [ ] **Local Scheduling** - Cron-style scheduling for automatic uploads
-- [ ] **Webhook Triggers** - Generate video on external events
-- [ ] **Batch Processing** - Generate multiple videos from list
-
-## Ideas for Later
-- [ ] Voice cloning support
-- [ ] Multi-language support
-- [ ] Background music/ambient audio
-- [ ] Transition animations
-- [ ] Analytics tracking (views, engagement)
-- [ ] Social media auto-posting
-
----
-
-## Philosophy
-
+## Core Philosophy
 **User does ONE thing:** talks/gives instructions
 
 **System does EVERYTHING else:**
-- Create API keys automatically
-- Set up OAuth credentials
-- Copy browser profiles
-- Generate videos
-- Upload to YouTube
-- Schedule posting
+- Create API keys automatically (via scripts → programs)
+- Set up OAuth credentials automatically
+- Copy browser profiles automatically
+- Generate videos automatically
+- Upload to YouTube automatically
+- Schedule posting automatically
 
-**LLM does only creative work:**
-- Script writing
-- Style decisions
-- NOT: technical setup, credentials, infrastructure
+**LLM role:** Builds scripts → Scripts become programs → Human just runs programs
+
+---
+
+## Priority 1: Zero-Wizard Setup
+- [ ] **OAuth via Browser** - User clicks once, system handles the rest
+- [ ] **API Keys via Chat** - User gives key once, system stores and manages
+- [ ] **No Manual Console** - All Google Cloud/Provider setup via API calls
+
+## Priority 2: Auto-Setup Scripts (LLM-written, then automated)
+- [ ] **Create Google Cloud Project** - Script calls Cloud Resource Manager API
+- [ ] **Enable YouTube API** - Script calls Cloud AI Platform API  
+- [ ] **Create OAuth Credentials** - Script calls OAuth2 API
+- [ ] **Create TTS Provider Account** - Script navigates provider APIs
+- [ ] **Copy CDP Browser Profile** - Script copies browser data directory
+
+## Priority 3: Programmatic Core
+- [ ] **Secrets Manager** - Encrypted storage for all API keys/OAuth
+- [ ] **Video Pipeline** - End-to-end generate → upload → schedule
+- [ ] **CDP Browser Manager** - Auto-launch with user profile
+
+## Priority 4: TTS Providers
+- [ ] **Inworld** - Already working
+- [ ] **OpenAI TTS** - Add support
+- [ ] **ElevenLabs** - Add support
+
+## Priority 5: Polish
+- [ ] **Subtitles** - Auto-generate SRT/VTT
+- [ ] **Better Slides** - Multiple templates
+- [ ] **Background Music** - Royalty-free ambient
+
+---
+
+## What NOT to build (Wizard Anti-pattern)
+❌ Interactive setup wizard with questions
+❌ User entering values manually
+❌ User navigating provider consoles
+❌ User copying secrets between apps
+
+## What TO build (Zero-Wizard)
+✅ User gives consent once (OAuth/API key)
+✅ System handles ALL setup
+✅ User just talks: "make a video about X"
+✅ Video appears on YouTube
