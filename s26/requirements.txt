@@ -1,0 +1,16 @@
+# Core dependencies
+requests>=2.31.0
+pyyaml>=6.0
+
+# Google OAuth & YouTube
+google-auth>=2.24.0
+google-auth-oauthlib>=1.2.0
+google-auth-httplib2>=0.2.0
+google-api-python-client>=2.118.0
+
+# TTS Providers (optional, install what you need)
+# Inworld (recommended)
+# OpenAI
+openai>=1.0.0
+# ElevenLabs
+elevenlabs>=1.0.0
