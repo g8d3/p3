@@ -1,0 +1,51 @@
+{
+  "title": "No-Mnemonic Wallets - Privy vs Capsule",
+  "duration": 63,
+  "segments": [
+    {
+      "start": 0,
+      "end": 2,
+      "text": "Seed phrases are dead. The fix almost broke my application."
+    },
+    {
+      "start": 2,
+      "end": 7,
+      "text": "I spent three weeks debugging MPC wallet integration so you don't have to. This is the unfiltered story of implementing no-mnemonic wallets with Privy and Capsule."
+    },
+    {
+      "start": 7,
+      "end": 12,
+      "text": "Let's start with Privy. They've got excellent documentation. Embedded wallets that just work. Email login, social login, automatic wallet creation. No seed phrase required."
+    },
+    {
+      "start": 12,
+      "end": 17,
+      "text": "Now here's Capsule. Also known as Para. They use passkeys as the authentication factor. Passkey equals private key. It's innovative, but the UX is confusing for normal users."
+    },
+    {
+      "start": 17,
+      "end": 20,
+      "text": "Privy has Python support. They've got an official SDK. That's huge for backend developers."
+    },
+    {
+      "start": 20,
+      "end": 35,
+      "text": "Here's where it gets real. The struggle is the content. Friction point number one: Iframe setup failures. The docs show it but don't emphasize the critical ordering. Two hours lost on something that should work out of the box. Friction point two: Passkey UX confusion. User clicks sign in with email. Gets verification code. Then prompted to create passkey. Browser shows native dialog. User is confused: I thought I was logging in? Thirty percent abandonment at this step. Friction point three: Python SDK hidden in docs. Found it via a GitHub issue, not official docs. Zero examples online. I became the documentation."
+    },
+    {
+      "start": 35,
+      "end": 43,
+      "text": "Let's talk numbers. Integration time. Privy: two to four hours. Capsule: four to eight hours. Python support. Privy: official SDK. Capsule: JavaScript only. Documentation quality. Privy: excellent. Capsule: good, but gaps."
+    },
+    {
+      "start": 43,
+      "end": 51,
+      "text": "The verdict is clear. Privy wins. Better docs, Python support, and it just works out of the box. Capsule is the future. If passkeys take off as predicted, they'll have the superior UX. But today, more friction. Seed phrases are dying. MPC wallets are the future. Choose based on your team's capacity to debug."
+    },
+    {
+      "start": 51,
+      "end": 63,
+      "text": "That's the viral execution report. Check the code in the description for implementation details. Like, subscribe, hit the bell. And remember: the struggle is the content."
+    }
+  ]
+}

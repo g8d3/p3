@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">
+  <voice name="Timothy">
+    <prosody rate="1.0" pitch="0Hz">
+      
+      <!-- [0:00 - 0:02] INTRO -->
+      <s>Seed phrases are dead.</s>
+      <s>The fix almost broke my application.</s>
+      
+      <!-- [0:02 - 0:07] PRIVY WELCOME -->
+      <s>I spent three weeks debugging MPC wallet integration so you don't have to.</s>
+      <s>This is the unfiltered story of implementing no-mnemonic wallets with Privy and Capsule.</s>
+      
+      <!-- [0:07 - 0:12] PRIVY DOCS -->
+      <s>Let's start with Privy.</s>
+      <s>They've got excellent documentation.</s>
+      <s>Embedded wallets that just work.</s>
+      <s>Email login, social login, automatic wallet creation.</s>
+      <s>No seed phrase required.</s>
+      
+      <!-- [0:12 - 0:17] CAPSULE/PARA -->
+      <s>Now here's Capsule.</s>
+      <s>Also known as Para.</s>
+      <s>They use passkeys as the authentication factor.</s>
+      <s>Passkey equals private key.</s>
+      <s>It's innovative, but the UX is confusing for normal users.</s>
+      
+      <!-- [0:17 - 0:20] PRIVY JS SDK -->
+      <s>Privy has Python support.</s>
+      <s>They've got an official SDK.</s>
+      <s>That's huge for backend developers.</s>
+      
+      <!-- [0:20 - 0:35] THE STRUGGLE -->
+      <s>Here's where it gets real.</s>
+      <s>The struggle is the content.</s>
+      <s>Friction point number one: Iframe setup failures.</s>
+      <s>The docs show it but don't emphasize the critical ordering.</s>
+      <s>Two hours lost on something that should work out of the box.</s>
+      <s>Friction point two: Passkey UX confusion.</s>
+      <s>User clicks sign in with email.</s>
+      <s>Gets verification code.</s>
+      <s>Then prompted to create passkey.</s>
+      <s>Browser shows native dialog.</s>
+      <s>User is confused: I thought I was logging in?</s>
+      <s>Thirty percent abandonment at this step.</s>
+      <s>Friction point three: Python SDK hidden in docs.</s>
+      <s>Found it via a GitHub issue, not official docs.</s>
+      <s>Zero examples online.</s>
+      <s>I became the documentation.</s>
+      
+      <!-- [0:35 - 0:43] DX COMPARISON -->
+      <s>Let's talk numbers.</s>
+      <s>Integration time.</s>
+      <s>Privy: two to four hours.</s>
+      <s>Capsule: four to eight hours.</s>
+      <s>Python support.</s>
+      <s>Privy: official SDK.</s>
+      <s>Capsule: JavaScript only.</s>
+      <s>Documentation quality.</s>
+      <s>Privy: excellent.</s>
+      <s>Capsule: good, but gaps.</s>
+      
+      <!-- [0:43 - 0:51] THE VERDICT -->
+      <s>The verdict is clear.</s>
+      <s>Privy wins.</s>
+      <s>Better docs, Python support, and it just works out of the box.</s>
+      <s>Capsule is the future.</s>
+      <s>If passkeys take off as predicted, they'll have the superior UX.</s>
+      <s>But today, more friction.</s>
+      <s>Seed phrases are dying.</s>
+      <s>MPC wallets are the future.</s>
+      <s>Choose based on your team's capacity to debug.</s>
+      
+      <!-- [0:51 - 0:63] OUTRO -->
+      <s>That's the viral execution report.</s>
+      <s>Check the code in the description for implementation details.</s>
+      <s>Like, subscribe, hit the bell.</s>
+      <s>And remember: the struggle is the content.</s>
+      
+    </prosody>
+  </voice>
+</speak>

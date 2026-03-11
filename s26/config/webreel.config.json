@@ -1,0 +1,77 @@
+{
+  "$schema": "https://webreel.dev/schema/v1.json",
+  "outDir": "videos",
+  "viewport": "macbook-pro",
+  "theme": {
+    "cursor": {
+      "size": 32
+    },
+    "hud": {
+      "background": "rgba(30, 41, 59, 0.85)",
+      "color": "#FFFF00",
+      "fontSize": 32,
+      "fontFamily": "monospace",
+      "borderRadius": 8,
+      "position": "bottom"
+    }
+  },
+  "videos": {
+    "privy-demo": {
+      "url": "https://docs.privy.io/wallets/using-wallets/ethereum",
+      "output": "privy-demo.mp4",
+      "steps": [
+        {
+          "action": "wait",
+          "selector": "h1",
+          "timeout": 10000
+        },
+        {
+          "action": "pause",
+          "ms": 2000
+        },
+        {
+          "action": "scroll",
+          "y": 300,
+          "delay": 500
+        },
+        {
+          "action": "pause",
+          "ms": 2000
+        },
+        {
+          "action": "scroll",
+          "y": 500,
+          "delay": 500
+        },
+        {
+          "action": "pause",
+          "ms": 2000
+        }
+      ]
+    },
+    "capsule-demo": {
+      "url": "https://docs.usecapsule.com/",
+      "output": "capsule-demo.mp4",
+      "steps": [
+        {
+          "action": "wait",
+          "selector": "h1",
+          "timeout": 10000
+        },
+        {
+          "action": "pause",
+          "ms": 2000
+        },
+        {
+          "action": "scroll",
+          "y": 300,
+          "delay": 500
+        },
+        {
+          "action": "pause",
+          "ms": 2000
+        }
+      ]
+    }
+  }
+}
