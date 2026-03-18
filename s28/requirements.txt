@@ -1,0 +1,6 @@
+bittensor>=7.0.0
+substrate-interface>=1.7.0
+pyyaml>=6.0
+pytest>=8.0
+pytest-asyncio>=0.23
+aiohttp>=3.9

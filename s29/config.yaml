@@ -1,0 +1,25 @@
+# Subnet Trader Configuration
+
+# taostats.io API key (optional, get from https://taostats.io)
+# TAOSTATS_API_KEY=your-key-here
+
+# Data sources
+chain_network: "finney"  # Bittensor network: finney, archive, etc.
+
+# Signal weights
+weights:
+  yield: 0.30      # Alpha price
+  volume: 0.20     # Real 24h trading volume
+  momentum_1h: 0.15  # 1h price change
+  momentum_1d: 0.15  # 1d price change
+  momentum_7d: 0.10  # 7d price change
+  age: 0.10         # Network maturity
+
+# Strategy settings
+top_n: 5           # Number of top subnets to stake in
+bottom_n: 2        # Number of bottom subnets to unstake from
+rebalance_interval_days: 7
+
+# Execution
+dry_run: true      # Don't execute actual transactions
+total_stake_tao: 1000.0  # Total TAO for staking

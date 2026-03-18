@@ -1,0 +1,17 @@
+rpc_endpoint: "wss://entrypoint-finney.opentensor.ai:443"
+network: "finney"
+
+weights:
+  yield: 0.30
+  momentum: 0.25
+  price_trend: 0.20
+  volume: 0.15
+  age: 0.10
+
+top_n: 5
+rebalance_interval_days: 7
+dry_run: true
+
+# Reference data source for accuracy tests
+reference_url: "https://taostats.io"
+accuracy_margin: 0.05  # 5%
