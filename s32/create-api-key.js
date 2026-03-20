@@ -70,13 +70,32 @@ function parseArgs(argv) {
 
 // ─── CSV ────────────────────────────────────────────────────────────────────
 
-const DELIM = "|";
+// RFC 4180 CSV parser: handles quoted fields with commas inside
+function parseCSVLine(line) {
+  const fields = [];
+  let current = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"' && line[i + 1] === '"') { current += '"'; i++; }
+      else if (ch === '"') inQuotes = false;
+      else current += ch;
+    } else {
+      if (ch === '"') inQuotes = true;
+      else if (ch === ",") { fields.push(current); current = ""; }
+      else current += ch;
+    }
+  }
+  fields.push(current);
+  return fields;
+}
 
 function loadCSV() {
   const lines = fs.readFileSync(CSV_PATH, "utf-8").trim().split("\n");
-  const headers = lines[0].split(DELIM);
+  const headers = parseCSVLine(lines[0]);
   return lines.slice(1).map((line) => {
-    const vals = line.split(DELIM);
+    const vals = parseCSVLine(line);
     const obj = {};
     headers.forEach((h, i) => (obj[h.trim()] = (vals[i] || "").trim()));
     return obj;
@@ -84,9 +103,10 @@ function loadCSV() {
 }
 
 function saveCSV(services) {
-  const headers = "service|sign_in_url|login_pattern|keys_page_url|api_create_endpoint|key_response_field|key_pattern|create_btn_selector|name_input_selector|confirm_btn_selector|key_display_selector|login_result|last_verified";
-  const keys = headers.split(DELIM);
-  const rows = services.map((s) => keys.map((k) => s[k.trim()] || "").join(DELIM));
+  const headers = "service,sign_in_url,login_pattern,keys_page_url,api_create_endpoint,key_response_field,key_pattern,create_btn_selector,name_input_selector,confirm_btn_selector,key_display_selector,login_result,last_verified";
+  const keys = headers.split(",");
+  const escape = (v) => (v && v.includes(",") ? `"${v}"` : v || "");
+  const rows = services.map((s) => keys.map((k) => escape(s[k.trim()])).join(","));
   fs.writeFileSync(CSV_PATH, [headers, ...rows].join("\n") + "\n");
 }
 
@@ -341,6 +361,12 @@ async function main() {
 // ─── Strategy: Fetch Intercept ──────────────────────────────────────────────
 
 async function createKeyViaIntercept(cdp, sessionId, svc, args) {
+  // Build JS to extract key from response based on key_response_field
+  const fieldPath = svc.key_response_field || "key";
+  const extractJS = fieldPath.includes(".")
+    ? `data.${fieldPath.replace(/\./g, "?.")}`  // e.g., data.key?.sensitive_id
+    : `data.${fieldPath}`;
+
   // Intercept fetch to capture API key from response
   await evalJS(cdp, sessionId, `
     window.__capturedApiKey = null;
@@ -348,14 +374,15 @@ async function createKeyViaIntercept(cdp, sessionId, svc, args) {
     window.fetch = async function(...args) {
       const resp = await origFetch.apply(this, args);
       const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || '';
-      if (url.includes('api_keys') && resp.status < 300) {
+      if ((url.includes('key') || url.includes('token')) && resp.status < 300) {
         try {
           const clone = resp.clone();
           const data = await clone.json();
-          if (data.exposed_secret_key) window.__capturedApiKey = data.exposed_secret_key;
-          else if (data.key) window.__capturedApiKey = data.key;
-          else if (data.token) window.__capturedApiKey = data.token;
-          else if (Array.isArray(data.data) && data.data[0]?.exposed_secret_key) window.__capturedApiKey = data.data[0].exposed_secret_key;
+          // Try configured field path
+          let key = ${extractJS};
+          if (!key && Array.isArray(data.data)) key = data.data[0]?.${fieldPath.includes(".") ? fieldPath.replace(/\./g, "?.") : fieldPath};
+          if (!key) key = data.exposed_secret_key || data.key || data.token || data.secret;
+          if (key && typeof key === 'string' && key.length > 10) window.__capturedApiKey = key;
         } catch {}
       }
       return resp;
@@ -365,12 +392,10 @@ async function createKeyViaIntercept(cdp, sessionId, svc, args) {
   // Get selectors
   const selectors = await getSelectors(cdp, sessionId, svc, args);
 
-  // Click create
-  if (selectors.createBtn) {
-    console.log(`   Clicking: ${selectors.createBtn}`);
-    await evalJS(cdp, sessionId, `document.querySelector(${JSON.stringify(selectors.createBtn)})?.click()`);
-    await sleep(2000);
-  }
+  // Click create button
+  console.log("   Clicking create button...");
+  await clickButton(cdp, sessionId, selectors.createBtn, selectors.createBtnText);
+  await sleep(2000);
 
   // Fill name
   if (selectors.nameInput) {
@@ -386,18 +411,9 @@ async function createKeyViaIntercept(cdp, sessionId, svc, args) {
   }
 
   // Click confirm
-  if (selectors.confirmBtn) {
-    const btnPos = await evalJS(cdp, sessionId, `
-      const btn = document.querySelector(${JSON.stringify(selectors.confirmBtn)});
-      btn ? JSON.stringify({x: btn.getBoundingClientRect().x + btn.getBoundingClientRect().width/2, y: btn.getBoundingClientRect().y + btn.getBoundingClientRect().height/2}) : null
-    `);
-    if (btnPos) {
-      const p = JSON.parse(btnPos);
-      await cdp.send("Input.dispatchMouseEvent", { type: "mousePressed", x: p.x, y: p.y, button: "left", clickCount: 1 }, sessionId);
-      await cdp.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: p.x, y: p.y, button: "left", clickCount: 1 }, sessionId);
-      console.log("   Submitted");
-    }
-  }
+  console.log("   Clicking confirm...");
+  await clickButton(cdp, sessionId, selectors.confirmBtn, selectors.confirmBtnText);
+  console.log("   Submitted");
 
   await sleep(5000);
   return await evalJS(cdp, sessionId, "window.__capturedApiKey");
@@ -449,14 +465,14 @@ async function createKeyViaBrowser(cdp, sessionId, svc, args) {
   return null;
 }
 
-// ─── Selector Resolution (cache → LLM) ─────────────────────────────────────
+// ─── Selector Resolution (cache → text → LLM) ──────────────────────────────
 
 async function getSelectors(cdp, sessionId, svc, args) {
-  // Use cached selectors if available
+  // 1. Try CSS selectors from CSV
   if (svc.create_btn_selector) {
     const exists = await evalJS(cdp, sessionId, `!!document.querySelector(${JSON.stringify(svc.create_btn_selector)})`);
     if (exists) {
-      console.log("   📋 Using cached selectors");
+      console.log("   📋 Using cached CSS selectors");
       return {
         createBtn: svc.create_btn_selector,
         nameInput: svc.name_input_selector,
@@ -464,10 +480,37 @@ async function getSelectors(cdp, sessionId, svc, args) {
         keyDisplay: svc.key_display_selector,
       };
     }
-    console.log("   ⚠️  Cached selectors stale");
+    console.log("   ⚠️  Cached CSS selectors stale, trying text-based...");
   }
 
-  // LLM fallback
+  // 2. Try text-based button matching from CSV
+  if (svc.create_btn_text) {
+    const found = await evalJS(cdp, sessionId, `
+      (function() {
+        const result = {};
+        for (const b of document.querySelectorAll('button, a, [role="button"]')) {
+          const t = (b.textContent || '').trim();
+          ${svc.create_btn_text ? `if (t.includes(${JSON.stringify(svc.create_btn_text)})) result.createBtn = true;` : ""}
+          ${svc.confirm_btn_text ? `if (t.includes(${JSON.stringify(svc.confirm_btn_text)})) result.confirmBtn = true;` : ""}
+        }
+        return JSON.stringify(result);
+      })()
+    `);
+    const parsed = JSON.parse(found || "{}");
+    if (parsed.createBtn) {
+      console.log("   📋 Using text-based button matching");
+      return {
+        createBtn: svc.create_btn_selector || null,
+        createBtnText: svc.create_btn_text,
+        nameInput: svc.name_input_selector,
+        confirmBtn: svc.confirm_btn_selector || null,
+        confirmBtnText: svc.confirm_btn_text,
+        keyDisplay: svc.key_display_selector,
+      };
+    }
+  }
+
+  // 3. LLM fallback
   if (!args.noLlm && args.llmBaseUrl && args.llmApiKey) {
     console.log("   🤖 Asking LLM for selectors...");
     const pageHtml = await evalJS(cdp, sessionId, "document.documentElement.outerHTML");
@@ -477,7 +520,6 @@ async function getSelectors(cdp, sessionId, svc, args) {
     try {
       const jsonMatch = llmResp.match(/\{[\s\S]*\}/);
       const selectors = JSON.parse(jsonMatch ? jsonMatch[0] : llmResp);
-      // Update CSV
       svc.create_btn_selector = selectors.createBtn || "";
       svc.name_input_selector = selectors.nameInput || "";
       svc.confirm_btn_selector = selectors.confirmBtn || "";
@@ -493,6 +535,31 @@ async function getSelectors(cdp, sessionId, svc, args) {
 
   console.error("   ❌ No selectors available");
   process.exit(1);
+}
+
+// Click a button by CSS selector or by text content
+async function clickButton(cdp, sessionId, selector, text) {
+  if (selector) {
+    const exists = await evalJS(cdp, sessionId, `!!document.querySelector(${JSON.stringify(selector)})`);
+    if (exists) {
+      await evalJS(cdp, sessionId, `document.querySelector(${JSON.stringify(selector)}).click()`);
+      return true;
+    }
+  }
+  if (text) {
+    const clicked = await evalJS(cdp, sessionId, `
+      (function() {
+        for (const b of document.querySelectorAll('button, a, [role="button"]')) {
+          if ((b.textContent || '').trim().includes(${JSON.stringify(text)})) {
+            b.click(); return true;
+          }
+        }
+        return false;
+      })()
+    `);
+    if (clicked) return true;
+  }
+  return false;
 }
 
 main().catch((err) => {
