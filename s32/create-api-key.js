@@ -70,22 +70,23 @@ function parseArgs(argv) {
 
 // ─── CSV ────────────────────────────────────────────────────────────────────
 
+const DELIM = "|";
+
 function loadCSV() {
   const lines = fs.readFileSync(CSV_PATH, "utf-8").trim().split("\n");
-  const headers = lines[0].split(",");
+  const headers = lines[0].split(DELIM);
   return lines.slice(1).map((line) => {
-    const vals = line.match(/(".*?"|[^,]+)/g)?.map((v) => v.replace(/^"|"$/g, "")) || [];
+    const vals = line.split(DELIM);
     const obj = {};
-    headers.forEach((h, i) => (obj[h.trim()] = vals[i] || ""));
+    headers.forEach((h, i) => (obj[h.trim()] = (vals[i] || "").trim()));
     return obj;
   });
 }
 
 function saveCSV(services) {
-  const headers = "service,sign_in_url,login_pattern,keys_page_url,api_create_endpoint,key_response_field,key_pattern,create_btn_selector,name_input_selector,confirm_btn_selector,key_display_selector,login_result,last_verified";
-  const rows = services.map((s) =>
-    headers.split(",").map((h) => `"${s[h.trim()] || ""}"`).join(",")
-  );
+  const headers = "service|sign_in_url|login_pattern|keys_page_url|api_create_endpoint|key_response_field|key_pattern|create_btn_selector|name_input_selector|confirm_btn_selector|key_display_selector|login_result|last_verified";
+  const keys = headers.split(DELIM);
+  const rows = services.map((s) => keys.map((k) => s[k.trim()] || "").join(DELIM));
   fs.writeFileSync(CSV_PATH, [headers, ...rows].join("\n") + "\n");
 }
 

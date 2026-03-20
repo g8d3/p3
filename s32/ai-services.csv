@@ -1,12 +1,12 @@
-service,sign_in_url,login_pattern,keys_page_url,api_create_endpoint,key_response_field,key_pattern,create_btn_selector,name_input_selector,confirm_btn_selector,key_display_selector,login_result,last_verified
-"groq","https://console.groq.com/login","console.groq.com","https://console.groq.com/keys","intercept_fetch","exposed_secret_key","^gsk_[A-Za-z0-9]+$","[data-testid='keys-page-create-button']","[data-testid='key-name-input']","[data-testid='key-form-submit-button']","success","2026-03-20","2026-03-20"
-"openai","https://platform.openai.com/login","platform.openai.com","https://platform.openai.com/api-keys","POST https://api.openai.com/v1/organization/admin_api_keys","key","^sk-[A-Za-z0-9]{20","}$","success","2026-03-20","","",""
-"anthropic","https://console.anthropic.com/login","console.anthropic.com","https://console.anthropic.com/settings/keys","[A-Za-z0-9]{20","}$","success","2026-03-20","","","","",""
-"mistral","https://console.mistral.ai/login","console.mistral.ai","https://console.mistral.ai/api-keys","[A-Za-z0-9]{32","}$","success","2026-03-20","","","","",""
-"cohere","https://dashboard.cohere.com/welcome/login","dashboard.cohere.com","https://dashboard.cohere.com/api-keys","[A-Za-z0-9]{40","}$","success","2026-03-20","","","","",""
-"openrouter","https://openrouter.ai/login","openrouter.ai","https://openrouter.ai/settings/keys","POST https://openrouter.ai/api/v1/keys","key","^sk-or-[A-Za-z0-9-]+$","success","2026-03-20","","","",""
-"ai21","https://studio.ai21.com/v2/login","studio.ai21.com","https://studio.ai21.com/v2/account/api-keys","[A-Za-z0-9]{32","}$","success","2026-03-20","","","","",""
-"deepseek","https://platform.deepseek.com/login","platform.deepseek.com","https://platform.deepseek.com/api-keys","[A-Za-z0-9]{32","}$","success","2026-03-20","","","","",""
-"huggingface","https://huggingface.co/login","huggingface.co","https://huggingface.co/settings/tokens","token","^hf_[A-Za-z0-9]{30","}$","success","2026-03-20","","","",""
-"elevenlabs","https://elevenlabs.io/app/sign-in","elevenlabs.io/app","https://elevenlabs.io/app/settings/api-keys","POST https://api.elevenlabs.io/v1/service-accounts/{id}/api-keys","xi-api-key","[A-Za-z0-9]{32","}$","success","2026-03-20","","",""
-"googleaistudio","https://aistudio.google.com/","aistudio.google.com","https://aistudio.google.com/apikey","^[A-Za-z0-9_-]{30","}$","success","2026-03-20","","","","",""
+service|sign_in_url|login_pattern|keys_page_url|api_create_endpoint|key_response_field|key_pattern|create_btn_selector|name_input_selector|confirm_btn_selector|key_display_selector|login_result|last_verified
+groq|https://console.groq.com/login|console.groq.com|https://console.groq.com/keys|intercept_fetch|exposed_secret_key|^gsk_[A-Za-z0-9]+$|[data-testid='keys-page-create-button']|[data-testid='key-name-input']|[data-testid='key-form-submit-button']||success|2026-03-20
+openai|https://platform.openai.com/login|platform.openai.com|https://platform.openai.com/api-keys|POST https://api.openai.com/v1/organization/admin_api_keys|key|^sk-[A-Za-z0-9]{20,}$|||||success|2026-03-20
+anthropic|https://console.anthropic.com/login|console.anthropic.com|https://console.anthropic.com/settings/keys|||||success|2026-03-20
+mistral|https://console.mistral.ai/login|console.mistral.ai|https://console.mistral.ai/api-keys|||||success|2026-03-20
+cohere|https://dashboard.cohere.com/welcome/login|dashboard.cohere.com|https://dashboard.cohere.com/api-keys|||||success|2026-03-20
+openrouter|https://openrouter.ai/login|openrouter.ai|https://openrouter.ai/settings/keys|POST https://openrouter.ai/api/v1/keys|key|^sk-or-[A-Za-z0-9-]+$|||||success|2026-03-20
+ai21|https://studio.ai21.com/v2/login|studio.ai21.com|https://studio.ai21.com/v2/account/api-keys|||||success|2026-03-20
+deepseek|https://platform.deepseek.com/login|platform.deepseek.com|https://platform.deepseek.com/api-keys|||||success|2026-03-20
+huggingface|https://huggingface.co/login|huggingface.co|https://huggingface.co/settings/tokens||token|^hf_[A-Za-z0-9]{30,}$|||||success|2026-03-20
+elevenlabs|https://elevenlabs.io/app/sign-in|elevenlabs.io/app|https://elevenlabs.io/app/settings/api-keys|POST https://api.elevenlabs.io/v1/service-accounts/{id}/api-keys|xi-api-key|||||success|2026-03-20
+googleaistudio|https://aistudio.google.com/|aistudio.google.com|https://aistudio.google.com/apikey|||||success|2026-03-20
