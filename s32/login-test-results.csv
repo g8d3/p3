@@ -1,0 +1,11 @@
+service,sign_in_url,post_login_pattern,has_google_sso,login_result,notes,timestamp
+ElevenLabs,https://elevenlabs.io/app/sign-in,elevenlabs.io/app,true,success,Works. Uses Firebase Auth + Google SSO. Popup flow via elevenlabs.io/__/auth/handler. Tested successfully multiple times.,2026-03-20
+Groq,https://console.groq.com/login,console.groq.com,true,success,Works. Google SSO auto-authenticates. Redirects to console.groq.com/playground or console.groq.com/keys.,2026-03-20
+Mistral,https://console.mistral.ai/login,console.mistral.ai,true,partial,Google button not found via text search. Mistral uses auth.mistral.ai redirect. May need different button selector or direct OAuth URL detection.,2026-03-20
+Cohere,https://dashboard.cohere.com/welcome/login,dashboard.cohere.com,true,success,Works. Google SSO present. Redirects to dashboard.cohere.com after auth.,2026-03-20
+HuggingFace,https://huggingface.co/login,huggingface.co,true,success,Works. Google SSO available on login page. Redirects to huggingface.co after auth.,2026-03-20
+OpenRouter,https://openrouter.ai/login,openrouter.ai,true,success,Works. Google SSO available. Redirects to openrouter.ai after auth.,2026-03-20
+AI21,https://studio.ai21.com/v2/login,studio.ai21.com,true,success,Works. Google SSO available. Redirects to studio.ai21.com after auth.,2026-03-20
+DeepSeek,https://platform.deepseek.com/login,platform.deepseek.com,true,success,Works. Google SSO available. Redirects to platform.deepseek.com after auth.,2026-03-20
+GoogleAIStudio,https://aistudio.google.com/,aistudio.google.com,true,success,Works. Direct Google auth (no intermediate SSO button). Redirects to aistudio.google.com after auth.,2026-03-20
+Anthropic,https://console.anthropic.com/login,console.anthropic.com,true,success,Works. Google SSO available. Redirects to console.anthropic.com after auth. Popup closes fast due to active Google session.,2026-03-20
