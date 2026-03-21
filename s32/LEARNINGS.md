@@ -20,6 +20,16 @@ re-discovering them.
   just stops responding.
 - **Page hydration:** Next.js pages need time to hydrate. Poll for button existence
   instead of fixed sleep. Some pages (AI21) need 8+ seconds.
+- **Popup vs redirect:** Some sites (Mistral) redirect the current tab to Google instead
+  of opening a popup. The script must handle both: race new-target detection against
+  same-tab URL change.
+- **Image-only buttons:** Many sites (Mistral, Cohere) have Google SSO buttons with no
+  text — just an `<img alt="Google">`. Text search must also check for images with
+  "google" in alt/src inside clickable elements.
+- **Vision LLM fallback:** When text + image search fails, take a screenshot via
+  `Page.captureScreenshot` and send to a vision LLM. Ask for button coordinates.
+  Works universally regardless of DOM structure. Requires `--llm-base-url`,
+  `--llm-api-key`, `--llm-model` flags.
 
 ## CSV Format
 

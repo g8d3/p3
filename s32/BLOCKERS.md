@@ -14,9 +14,9 @@
 - **Login page:** `https://console.anthropic.com/login` → "Continue with Google"
 
 ### Mistral
-- **Issue:** No Google SSO on login page. Redirects to `auth.mistral.ai`
-- **Fix:** Need email/password flow or detect Mistral's own OAuth button
-- **Login page:** `https://console.mistral.ai/login`
+- **Issue:** ~~No Google SSO~~ → Has Google SSO via image-only button (`<img alt="Google">`)
+- **Status:** Login works! Lands on `admin.mistral.ai/join` (workspace setup). Need to handle workspace creation.
+- **Login page:** `https://console.mistral.ai/login` → redirects to `auth.mistral.ai`
 
 ### Cohere
 - **Issue:** Not tested yet. Has "Continue with Google" button

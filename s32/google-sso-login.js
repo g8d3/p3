@@ -9,9 +9,12 @@
  *   node google-sso-login.js [options] <sign-in-url> <post-login-url-pattern>
  *
  * Options:
- *   --port <n>       CDP port (default: 9222)
- *   --timeout <ms>   Overall timeout in ms (default: 90000)
- *   --retries <n>    Button detection retries (default: 5)
+ *   --port <n>          CDP port (default: 9222)
+ *   --timeout <ms>      Overall timeout in ms (default: 90000)
+ *   --retries <n>       Button detection retries (default: 5)
+ *   --llm-base-url <url>  Vision LLM URL (fallback for button detection)
+ *   --llm-api-key <key>   Vision LLM API key
+ *   --llm-model <model>   Vision model (default: gpt-4o-mini)
  *
  * Examples:
  *   node google-sso-login.js "https://elevenlabs.io/app/sign-in" "elevenlabs.io/app"
@@ -19,6 +22,8 @@
  */
 
 const http = require("http");
+const https = require("https");
+const fs = require("fs");
 const WebSocket = require("ws");
 
 // ─── CLI Parsing ────────────────────────────────────────────────────────────
@@ -30,10 +35,16 @@ function parseArgs(argv) {
     if (argv[i] === "--port") args.port = Number(argv[++i]);
     else if (argv[i] === "--timeout") args.timeout = Number(argv[++i]);
     else if (argv[i] === "--retries") args.retries = Number(argv[++i]);
+    else if (argv[i] === "--llm-base-url") args.llmBaseUrl = argv[++i];
+    else if (argv[i] === "--llm-api-key") args.llmApiKey = argv[++i];
+    else if (argv[i] === "--llm-model") args.llmModel = argv[++i];
     else positional.push(argv[i]);
   }
   args.signInUrl = positional[0];
   args.postLoginPattern = positional[1];
+  args.llmBaseUrl = args.llmBaseUrl || process.env.LLM_BASE_URL;
+  args.llmApiKey = args.llmApiKey || process.env.LLM_API_KEY;
+  args.llmModel = args.llmModel || process.env.LLM_MODEL || "gpt-4o-mini";
   return args;
 }
 
@@ -51,11 +62,22 @@ const TIMEOUTS = {
 
 const FIND_GOOGLE_BTN = `
   (function() {
+    // Text-based search
     for (const el of document.querySelectorAll('button, a, [role="button"]')) {
       const t = (el.textContent || '').toLowerCase().trim();
-      if (t.includes('sign in with google') || t.includes('continue with google')) {
+      if (t.includes('sign in with google') || t.includes('continue with google') || t === 'google') {
         const r = el.getBoundingClientRect();
         return JSON.stringify({ x: r.x + r.width/2, y: r.y + r.height/2 });
+      }
+    }
+    // Image-based search (buttons with Google logo, no text)
+    for (const img of document.querySelectorAll('img[alt*="google" i], img[src*="google" i]')) {
+      const btn = img.closest('button, a, [role="button"]');
+      if (btn) {
+        const r = btn.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          return JSON.stringify({ x: r.x + r.width/2, y: r.y + r.height/2 });
+        }
       }
     }
     return null;
@@ -184,6 +206,53 @@ async function evalJS(cdp, sessionId, expression) {
   return result.result?.value;
 }
 
+/** Use vision LLM to find Google sign-in button via screenshot */
+async function findGoogleBtnViaVision(cdp, sessionId, llmBaseUrl, llmApiKey, llmModel) {
+  // Take screenshot
+  const screenshot = await cdp.send("Page.captureScreenshot", { format: "png" }, sessionId);
+  const imageBase64 = screenshot.data;
+
+  // Call vision LLM
+  const url = new URL("/v1/chat/completions", llmBaseUrl);
+  const body = JSON.stringify({
+    model: llmModel,
+    messages: [{
+      role: "user",
+      content: [
+        { type: "text", text: 'This is a screenshot of a web login page (1280x720 viewport). Find the "Sign in with Google" or "Continue with Google" button. It usually has a Google "G" logo. Return ONLY a JSON object: {"x": <center_x>, "y": <center_y>, "found": true} or {"found": false}. Be precise with coordinates.' },
+        { type: "image_url", image_url: { url: `data:image/png;base64,${imageBase64}` } }
+      ]
+    }],
+    max_tokens: 100,
+    temperature: 0,
+  });
+
+  const proto = url.protocol === "https:" ? https : http;
+  const response = await new Promise((resolve, reject) => {
+    const req = proto.request(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${llmApiKey}` },
+    }, (res) => {
+      let data = "";
+      res.on("data", (d) => (data += d));
+      res.on("end", () => {
+        try { resolve(JSON.parse(data).choices?.[0]?.message?.content || ""); }
+        catch { reject(new Error(`Vision LLM error: ${data.substring(0, 200)}`)); }
+      });
+    });
+    req.on("error", reject);
+    req.write(body);
+    req.end();
+  });
+
+  // Parse coordinates from response
+  const jsonMatch = response.match(/\{[\s\S]*?\}/);
+  if (!jsonMatch) return null;
+  const parsed = JSON.parse(jsonMatch[0]);
+  if (!parsed.found) return null;
+  return { x: parsed.x, y: parsed.y };
+}
+
 /** Poll for a value with exponential backoff (200ms → 400ms → 800ms, capped at 2s) */
 async function pollUntil(fn, { timeoutMs, label, intervalMs = 300 } = {}) {
   return withTimeout(
@@ -294,7 +363,19 @@ async function main() {
     }
 
     if (!posResult) {
-      console.error("   ❌ Google sign-in button not found");
+      // Fallback: vision LLM
+      if (args.llmBaseUrl && args.llmApiKey) {
+        console.log("   Text search failed, trying vision LLM...");
+        const visionPos = await findGoogleBtnViaVision(cdp, sessionId, args.llmBaseUrl, args.llmApiKey, args.llmModel);
+        if (visionPos) {
+          posResult = JSON.stringify(visionPos);
+          console.log(`   ✅ Vision found button at (${visionPos.x}, ${visionPos.y})`);
+        }
+      }
+    }
+
+    if (!posResult) {
+      console.error("   ❌ Google sign-in button not found (text + vision)");
       process.exit(1);
     }
 
@@ -303,29 +384,18 @@ async function main() {
     await cdp.send("Input.dispatchMouseEvent", { type: "mouseReleased", x: pos.x, y: pos.y, button: "left", clickCount: 1 }, sessionId);
     console.log("   ✅ Clicked\n");
 
-    // ── Wait for OAuth popup (event-driven + polling fallback) ──────────
-    console.log("5️⃣  Waiting for OAuth popup...");
+    // ── Wait for OAuth (popup or same-tab redirect) ──────────────────────
+    console.log("5️⃣  Waiting for OAuth flow...");
 
     const { targetInfos: beforeTargets } = await cdp.send("Target.getTargets");
     const beforePageIds = new Set(beforeTargets.filter((t) => t.type === "page").map((t) => t.targetId));
 
-    // Try event-driven detection first
+    // Race: new popup target vs same-tab navigation
     let oauthTarget = null;
+    let oauthSid = null;
     await cdp.send("Target.setDiscoverTargets", { discover: true });
 
-    const eventPromise = new Promise((resolve) => {
-      const handler = ({ targetInfo }) => {
-        if (targetInfo.type === "page" && !beforePageIds.has(targetInfo.targetId) && targetInfo.url && !targetInfo.url.startsWith("chrome://")) {
-          cdp.off("Target.targetCreated", handler);
-          resolve(targetInfo);
-        }
-      };
-      cdp.on("Target.targetCreated", handler);
-      // Cleanup if polling wins
-      setTimeout(() => cdp.off("Target.targetCreated", handler), TIMEOUTS.oauthPopup);
-    });
-
-    const pollPromise = pollUntil(
+    const popupPromise = pollUntil(
       async () => {
         const { targetInfos } = await cdp.send("Target.getTargets");
         const newPages = targetInfos.filter(
@@ -333,17 +403,36 @@ async function main() {
         );
         return newPages[0] || null;
       },
-      { timeoutMs: TIMEOUTS.oauthPopup, label: "OAuth popup detection", intervalMs: 500 }
-    );
+      { timeoutMs: TIMEOUTS.oauthPopup, label: "OAuth popup", intervalMs: 500 }
+    ).catch(() => null);
 
-    // Whichever comes first wins
-    oauthTarget = await Promise.race([eventPromise, pollPromise]);
+    const redirectPromise = pollUntil(
+      async () => {
+        try {
+          const url = await evalJS(cdp, sessionId, "window.location.href");
+          if (url.includes("accounts.google.com") || url.includes("auth")) return url;
+        } catch {}
+        return null;
+      },
+      { timeoutMs: TIMEOUTS.oauthPopup, label: "OAuth redirect", intervalMs: 500 }
+    ).catch(() => null);
 
-    console.log(`   ✅ Popup opened: ${oauthTarget.url.substring(0, 80)}...\n`);
+    const [popup, redirect] = await Promise.all([popupPromise, redirectPromise]);
 
-    // Attach to popup
-    const { sessionId: oauthSid } = await cdp.send("Target.attachToTarget", { targetId: oauthTarget.targetId, flatten: true });
-    await cdp.send("Runtime.enable", {}, oauthSid);
+    if (popup) {
+      // Popup flow
+      oauthTarget = popup;
+      console.log(`   ✅ Popup opened: ${popup.url.substring(0, 80)}...\n`);
+      ({ sessionId: oauthSid } = await cdp.send("Target.attachToTarget", { targetId: popup.targetId, flatten: true }));
+      await cdp.send("Runtime.enable", {}, oauthSid);
+    } else if (redirect) {
+      // Same-tab redirect flow
+      console.log(`   ✅ Redirected to: ${redirect.substring(0, 80)}...\n`);
+      oauthSid = sessionId; // Use same session
+    } else {
+      console.error("   ❌ No OAuth flow detected");
+      process.exit(1);
+    }
 
     // ── Handle Google account selection ─────────────────────────────────
     console.log("6️⃣  Processing Google authorization...");
@@ -372,19 +461,33 @@ async function main() {
       }
     }
 
-    // ── Wait for popup to close ─────────────────────────────────────────
-    console.log("7️⃣  Waiting for OAuth popup to close...");
-
-    await pollUntil(
-      async () => {
-        const { targetInfos } = await cdp.send("Target.getTargets");
-        const t = targetInfos.find((t) => t.targetId === oauthTarget.targetId);
-        return (!t || !t.attached) ? true : null;
-      },
-      { timeoutMs: TIMEOUTS.oauthComplete, label: "Popup close", intervalMs: 500 }
-    );
-
-    console.log("   ✅ Popup closed\n");
+    // ── Wait for auth to complete ────────────────────────────────────────
+    if (oauthTarget) {
+      // Popup flow: wait for popup to close
+      console.log("7️⃣  Waiting for OAuth popup to close...");
+      await pollUntil(
+        async () => {
+          const { targetInfos } = await cdp.send("Target.getTargets");
+          const t = targetInfos.find((t) => t.targetId === oauthTarget.targetId);
+          return (!t || !t.attached) ? true : null;
+        },
+        { timeoutMs: TIMEOUTS.oauthComplete, label: "Popup close", intervalMs: 500 }
+      );
+      console.log("   ✅ Popup closed\n");
+    } else {
+      // Same-tab flow: wait for redirect back to app
+      console.log("7️⃣  Waiting for auth redirect...");
+      await pollUntil(
+        async () => {
+          try {
+            const url = await evalJS(cdp, sessionId, "window.location.href");
+            return url.includes(postLoginPattern) ? true : null;
+          } catch { return null; }
+        },
+        { timeoutMs: TIMEOUTS.oauthComplete, label: "Auth redirect", intervalMs: 500 }
+      ).catch(() => console.log("   ⚠️  Redirect timeout, checking anyway"));
+      console.log("   ✅ Auth complete\n");
+    }
 
     // ── Verify login ────────────────────────────────────────────────────
     console.log("8️⃣  Verifying login...");
