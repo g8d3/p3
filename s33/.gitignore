@@ -1,0 +1,8 @@
+# Zig build cache
+.zig-cache/
+
+# Zig install output
+zig-out/
+
+# Zig package dependencies (fetched via zig build --fetch)
+zig-pkg/
