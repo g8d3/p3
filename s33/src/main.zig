@@ -245,9 +245,25 @@ fn readPassword(allocator: std.mem.Allocator, io: Io, stderr: *Io.Writer, prompt
     try stderr.print("{s}", .{prompt});
     try stderr.flush();
 
-    // Try to open /dev/tty for password input (hides echo)
+    // If stdin is not a TTY (piped input), read directly from stdin
+    if (std.c.isatty(std.posix.STDIN_FILENO) == 0) {
+        var buf: [1024]u8 = undefined;
+        var len: usize = 0;
+        while (len < buf.len) {
+            var byte: [1]u8 = undefined;
+            const n = std.posix.read(std.posix.STDIN_FILENO, &byte) catch break;
+            if (n == 0) break;
+            if (byte[0] == '\n') break;
+            if (byte[0] != '\r') {
+                buf[len] = byte[0];
+                len += 1;
+            }
+        }
+        return allocator.dupe(u8, buf[0..len]);
+    }
+
+    // Interactive: open /dev/tty to hide echo
     const tty = std.Io.Dir.openFileAbsolute(io, "/dev/tty", .{ .mode = .read_only }) catch {
-        // Fallback: read line from stdin byte-by-byte
         var buf: [1024]u8 = undefined;
         var len: usize = 0;
         while (len < buf.len) {
