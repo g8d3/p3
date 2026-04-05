@@ -1,0 +1,7 @@
+Script started on 2026-04-04 18:16:07-05:00 [COMMAND="timeout 20 node post-x-thread.js --tweet 'Demo tweet' --media /tmp/m1.png --tweet 'Second tweet'" <not executed on terminal>]
+
+Script done on 2026-04-04 18:16:27-05:00 [COMMAND_EXIT_CODE="124"]
+econd tweet"
+Dry run: 2 tweet(s). Screenshot saved.
+
+Script done on 2026-04-04 18:16:16-05:00 [COMMAND_EXIT_CODE="0"]
