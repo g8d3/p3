@@ -1,0 +1,55 @@
+{
+  "run_id": 14,
+  "params": {
+    "momentum_windows": [
+      5,
+      10,
+      20
+    ],
+    "mean_reversion_ma_periods": [
+      20,
+      40,
+      60
+    ],
+    "funding_extreme_threshold": 0.0016643003112155501,
+    "bb_period": 24,
+    "bb_std": 2.6136729223971065,
+    "oi_change_window": 4,
+    "rsi_period": 18,
+    "volume_ma_period": 33,
+    "cross_coin_lead_window": 1,
+    "combination_min_history": 39,
+    "regression_lookback": 40,
+    "vol_lookback": 62,
+    "rebalance_interval": 3,
+    "kelly_fraction": 0.7576636531188793,
+    "max_fraction": 0.32057595291418745,
+    "min_edge": 0.04489735257718911,
+    "position_sizing": "fixed",
+    "fixed_fraction": 0.2894717463898274,
+    "stop_loss_pct": 0.05316802280488519,
+    "take_profit_pct": 0.059691359165998284,
+    "max_leverage": 4.381477427629794
+  },
+  "sharpe": 0.8838468934785434,
+  "max_drawdown": 0.028937962405738298,
+  "total_return": 0.016916045583938555,
+  "win_rate": 0.4647887323943662,
+  "total_trades": 284,
+  "profit_factor": 1.2770500458312783,
+  "per_signal_ic": {
+    "momentum": -0.11338892180047692,
+    "mean_reversion": 0.12330678170038122,
+    "funding_rate": -0.0516813099317285,
+    "orderbook_imbalance": 1.0076837075360995e-17,
+    "volatility_breakout": -0.07824988186844385,
+    "open_interest": 0.0,
+    "rsi_divergence": -0.0065308091421845535,
+    "volume_imbalance": 0.02890770854826777,
+    "bb_width": -0.13065726353571316,
+    "funding_acceleration": 0.00544576215236992,
+    "oi_rate_of_change": 0.0,
+    "cross_coin": -0.00733227085750485
+  },
+  "timestamp": "2026-04-10T16:12:56.271072"
+}
