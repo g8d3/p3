@@ -1,0 +1,379 @@
+# -------------------------------------------------------------------------------------------------
+#  Copyright (C) 2015-2026 Nautech Systems Pty Ltd. All rights reserved.
+#  https://nautechsystems.io
+#
+#  Licensed under the GNU Lesser General Public License Version 3.0 (the "License");
+#  You may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at https://www.gnu.org/licenses/lgpl-3.0.en.html
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+# -------------------------------------------------------------------------------------------------
+
+"""
+Streamlit web dashboard for comparing grid trading vs TP/SL trading strategies.
+"""
+
+import streamlit as st
+import pandas as pd
+import numpy as np
+from decimal import Decimal
+from datetime import datetime, timedelta
+from pathlib import Path
+import sys
+import json
+import plotly.express as px
+
+sys.path.insert(0, str(Path(__file__).parent))
+
+from nautilus_trader.model.identifiers import InstrumentId, Venue
+from nautilus_trader.test_kit.providers import TestInstrumentProvider
+from nautilus_trader.model.data import BarType
+from nautilus_trader.model.objects import Price, Quantity, Money
+from nautilus_trader.model.currencies import BTC, USDT
+
+from backtest.runner import generate_synthetic_bars, run_backtest
+from strategies.grid_trading import GridTrading, GridTradingConfig
+from strategies.tpsl_trading import TPSLTrading, TPSLTradingConfig
+
+
+st.set_page_config(page_title="Hyperliquid Trading Game", layout="wide")
+
+st.title("Hyperliquid Trading Game")
+st.markdown("""
+Learn trading by comparing **Grid Trading** vs **Take-Profit/Stop-Loss Trading** strategies.
+Adjust parameters, run backtests, and see which strategy performs better!
+""")
+
+# Sidebar for parameters
+st.sidebar.header("Strategy Parameters")
+
+# Common parameters
+st.sidebar.subheader("Common Settings")
+user_id = st.sidebar.text_input("Your Name/ID", value="Player1")
+instrument_choice = st.sidebar.selectbox("Instrument", ["BTCUSDT", "ETHUSDT", "SOLUSDT"], index=0)
+timeframe = st.sidebar.selectbox("Timeframe", ["4h", "8h", "12h", "1d"], index=0)
+num_bars = st.sidebar.slider("Number of bars (backtest length)", min_value=50, max_value=1000, value=200, step=50)
+start_price = st.sidebar.number_input("Start price", value=30000.0, step=1000.0)
+volatility = st.sidebar.slider("Volatility", min_value=0.01, max_value=0.1, value=0.02, step=0.005)
+
+# Grid trading parameters
+st.sidebar.subheader("Grid Trading")
+grid_step = st.sidebar.number_input("Grid step (price increment)", value=100.0, step=10.0)
+num_levels = st.sidebar.slider("Number of levels (each side)", min_value=1, max_value=10, value=3)
+grid_trade_size = st.sidebar.number_input("Trade size (BTC)", value=0.01, step=0.001, format="%.3f")
+max_position = st.sidebar.number_input("Max position (BTC)", value=0.1, step=0.01, format="%.2f")
+
+# TP/SL parameters
+st.sidebar.subheader("TP/SL Trading")
+tp_pct = st.sidebar.slider("Take-profit %", min_value=0.001, max_value=0.1, value=0.01, step=0.001, format="%.3f")
+sl_pct = st.sidebar.slider("Stop-loss %", min_value=0.001, max_value=0.1, value=0.005, step=0.001, format="%.3f")
+level_spacing = st.sidebar.number_input("Level spacing (price)", value=500.0, step=100.0)
+num_tpsl_levels = st.sidebar.slider("Number of horizontal levels", min_value=1, max_value=20, value=5)
+tpsl_trade_size = st.sidebar.number_input("Trade size (BTC) ", value=0.01, step=0.001, format="%.3f", key="tpsl_trade_size")
+
+# Starting balances
+st.sidebar.subheader("Account")
+starting_usdt = st.sidebar.number_input("Starting USDT", value=100000, step=10000)
+starting_btc = st.sidebar.number_input("Starting BTC", value=1.0, step=0.1, format="%.1f")
+
+# Run backtest button
+if st.sidebar.button("Run Backtest Comparison"):
+    with st.spinner("Running backtests..."):
+        # Define instrument
+        if instrument_choice == "BTCUSDT":
+            instrument = TestInstrumentProvider.btcusdt_binance()
+        elif instrument_choice == "ETHUSDT":
+            instrument = TestInstrumentProvider.ethusdt_binance()
+        else:
+            instrument = TestInstrumentProvider.adausdt_binance()  # placeholder
+        
+        instrument_id = instrument.id
+        venue = instrument_id.venue
+        
+        # Map timeframe to bar spec
+        timeframe_map = {
+            "4h": "4-HOUR",
+            "8h": "8-HOUR",
+            "12h": "12-HOUR",
+            "1d": "1-DAY",
+        }
+        bar_spec = timeframe_map.get(timeframe, "4-HOUR")
+        
+        # Define bar type
+        bar_type = BarType.from_str(f"{instrument_id}-{bar_spec}-LAST-EXTERNAL")
+        
+        # Generate synthetic data
+        data = generate_synthetic_bars(
+            instrument_id=instrument_id,
+            bar_spec=bar_spec,
+            start_price=start_price,
+            num_bars=num_bars,
+            volatility=volatility,
+        )
+        
+        # Grid trading config
+        grid_config = GridTradingConfig(
+            instrument_id=instrument_id,
+            grid_step=Price.from_str(str(grid_step)),
+            num_levels=num_levels,
+            trade_size=Quantity(grid_trade_size, precision=6),
+            max_position=Quantity(max_position, precision=6),
+            bar_type=str(bar_type),
+        )
+        
+        # TP/SL trading config
+        # Generate horizontal levels around start price
+        levels = [Price.from_str(str(start_price + i * level_spacing)) for i in range(-num_tpsl_levels, num_tpsl_levels + 1)]
+        tpsl_config = TPSLTradingConfig(
+            instrument_id=instrument_id,
+            bar_type=str(bar_type),
+            horizontal_levels=levels,
+            tp_pct=tp_pct,
+            sl_pct=sl_pct,
+            trade_size=Quantity(tpsl_trade_size, precision=6),
+            max_position=Quantity(max_position, precision=6),
+        )
+        
+        starting_balances = [Money(starting_usdt, USDT), Money(starting_btc, BTC)]
+        
+        # Run backtests with error handling
+        try:
+            with st.spinner("Running backtests... This may take a moment."):
+                # Run grid backtest
+                grid_results = run_backtest(
+                    strategy_class=GridTrading,
+                    strategy_config=grid_config,
+                    data=data,
+                    bar_type=bar_type,
+                    instrument=instrument,
+                    venue=venue,
+                    starting_balances=starting_balances,
+                )
+                
+                # Run TP/SL backtest
+                tpsl_results = run_backtest(
+                    strategy_class=TPSLTrading,
+                    strategy_config=tpsl_config,
+                    data=data,
+                    bar_type=bar_type,
+                    instrument=instrument,
+                    venue=venue,
+                    starting_balances=starting_balances,
+                )
+        except Exception as e:
+            st.error(f"An error occurred during backtest: {str(e)}")
+            st.exception(e)
+            # Set empty results to avoid further errors
+            grid_results = {}
+            tpsl_results = {}
+        
+        # Store results in session state
+        st.session_state['grid_results'] = grid_results
+        st.session_state['tpsl_results'] = tpsl_results
+        st.session_state['data'] = data
+        st.session_state['instrument'] = instrument
+        st.session_state['bar_type'] = bar_type
+        
+        # Save results with user ID
+        def extract_metrics(results, strategy_name):
+            account_report = results['account_report']
+            if isinstance(account_report, dict) and 'total' in account_report:
+                total_series = account_report['total']
+                balances = list(total_series.values())
+                initial = float(balances[0])
+                final = float(balances[-1])
+                returns = (final - initial) / initial * 100
+                # Compute max drawdown
+                peak = initial
+                max_dd = 0
+                for b in balances:
+                    b_float = float(b)
+                    if b_float > peak:
+                        peak = b_float
+                    dd = (peak - b_float) / peak
+                    if dd > max_dd:
+                        max_dd = dd
+                return {
+                    'user_id': user_id,
+                    'strategy': strategy_name,
+                    'timestamp': datetime.now().isoformat(),
+                    'initial_balance': initial,
+                    'final_balance': final,
+                    'total_return_pct': returns,
+                    'max_drawdown_pct': max_dd * 100,
+                }
+            return None
+        
+        grid_metrics = extract_metrics(grid_results, 'grid')
+        tpsl_metrics = extract_metrics(tpsl_results, 'tpsl')
+        
+        # Initialize all_results in session state
+        if 'all_results' not in st.session_state:
+            st.session_state['all_results'] = []
+        
+        # Append new results
+        if grid_metrics:
+            st.session_state['all_results'].append(grid_metrics)
+        if tpsl_metrics:
+            st.session_state['all_results'].append(tpsl_metrics)
+        
+        # Save to file
+        results_file = Path('backtest_results.json')
+        existing = []
+        if results_file.exists():
+            with open(results_file, 'r') as f:
+                existing = json.load(f)
+        if grid_metrics:
+            existing.append(grid_metrics)
+        if tpsl_metrics:
+            existing.append(tpsl_metrics)
+        with open(results_file, 'w') as f:
+            json.dump(existing, f, indent=2)
+
+# Display results if available
+if 'grid_results' in st.session_state and 'tpsl_results' in st.session_state:
+    grid_results = st.session_state['grid_results']
+    tpsl_results = st.session_state['tpsl_results']
+    data = st.session_state['data']
+    instrument = st.session_state['instrument']
+    bar_type = st.session_state['bar_type']
+    
+    st.header("Backtest Results")
+    
+    # Create columns for side-by-side comparison
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Grid Trading")
+        # Extract total balance over time from account report
+        account_report = grid_results['account_report']
+        if isinstance(account_report, dict) and 'total' in account_report:
+            total_series = account_report['total']
+            # Convert to DataFrame for plotting
+            df_grid = pd.DataFrame.from_dict(total_series, orient='index', columns=['Balance'])
+            df_grid.index = pd.to_datetime(df_grid.index)
+            df_grid = df_grid.sort_index()
+            # Calculate total return
+            initial_balance = float(df_grid['Balance'].iloc[0])
+            final_balance = float(df_grid['Balance'].iloc[-1])
+            total_return = (final_balance - initial_balance) / initial_balance * 100
+            st.metric("Total Return", f"{total_return:.2f}%", delta=f"{final_balance:.4f} BTC")
+            fig = px.line(df_grid, y='Balance', title='Grid Trading Balance Over Time')
+            fig.update_xaxes(title_text='Time')
+            fig.update_yaxes(title_text='Balance (BTC)')
+            st.plotly_chart(fig, width='stretch')
+        else:
+            st.write(account_report)
+    
+    with col2:
+        st.subheader("TP/SL Trading")
+        account_report = tpsl_results['account_report']
+        if isinstance(account_report, dict) and 'total' in account_report:
+            total_series = account_report['total']
+            df_tpsl = pd.DataFrame.from_dict(total_series, orient='index', columns=['Balance'])
+            df_tpsl.index = pd.to_datetime(df_tpsl.index)
+            df_tpsl = df_tpsl.sort_index()
+            initial_balance = float(df_tpsl['Balance'].iloc[0])
+            final_balance = float(df_tpsl['Balance'].iloc[-1])
+            total_return = (final_balance - initial_balance) / initial_balance * 100
+            st.metric("Total Return", f"{total_return:.2f}%", delta=f"{final_balance:.4f} BTC")
+            fig = px.line(df_tpsl, y='Balance', title='TP/SL Trading Balance Over Time')
+            fig.update_xaxes(title_text='Time')
+            fig.update_yaxes(title_text='Balance (BTC)')
+            st.plotly_chart(fig, width='stretch')
+        else:
+            st.write(account_report)
+    
+    # Comparison summary
+    st.subheader("Strategy Comparison")
+    # Compute metrics
+    def extract_metrics(results):
+        account_report = results['account_report']
+        if isinstance(account_report, dict) and 'total' in account_report:
+            total_series = account_report['total']
+            balances = list(total_series.values())
+            initial = float(balances[0])
+            final = float(balances[-1])
+            returns = (final - initial) / initial * 100
+            # Compute max drawdown (simplified)
+            peak = initial
+            max_dd = 0
+            for b in balances:
+                b_float = float(b)
+                if b_float > peak:
+                    peak = b_float
+                dd = (peak - b_float) / peak
+                if dd > max_dd:
+                    max_dd = dd
+            return {
+                'total_return_pct': returns,
+                'final_balance': final,
+                'max_drawdown_pct': max_dd * 100,
+            }
+        return {}
+    
+    grid_metrics = extract_metrics(grid_results)
+    tpsl_metrics = extract_metrics(tpsl_results)
+    
+    comparison_df = pd.DataFrame({
+        'Grid Trading': grid_metrics,
+        'TP/SL Trading': tpsl_metrics,
+    })
+    st.table(comparison_df.style.format("{:.2f}"))
+    
+    # Determine winner
+    if grid_metrics.get('total_return_pct', 0) > tpsl_metrics.get('total_return_pct', 0):
+        st.success("🏆 Grid Trading wins!")
+    else:
+        st.success("🏆 TP/SL Trading wins!")
+    
+    # Show price chart with levels
+    st.subheader("Price Chart with Levels")
+    # Convert data to DataFrame
+    df_price = data.copy()
+    df_price.index = pd.to_datetime(df_price.index)
+    df_price = df_price.sort_index()
+    st.line_chart(df_price['close'])
+    
+    # Overlay grid levels (optional)
+    # For simplicity, we just show the price chart
+    
+else:
+    st.info("Adjust parameters in the sidebar and click 'Run Backtest Comparison' to see results.")
+
+# Show all backtest results from all users
+st.header("All Backtest Results")
+results_file = Path('backtest_results.json')
+if results_file.exists():
+    with open(results_file, 'r') as f:
+        all_results = json.load(f)
+    if all_results:
+        df_all = pd.DataFrame(all_results)
+        # Sort by timestamp
+        df_all = df_all.sort_values('timestamp', ascending=False)
+        st.dataframe(df_all)
+    else:
+        st.info("No results yet. Run some backtests!")
+else:
+    st.info("No results file found. Run your first backtest to start tracking results.")
+
+# Add some educational content
+st.markdown("---")
+st.markdown("""
+### How to Play
+1. **Adjust parameters** in the sidebar to configure both strategies.
+2. **Run backtest** to simulate trading on historical (synthetic) data.
+3. **Compare results** to see which strategy performs better.
+4. **Learn** by experimenting with different settings and timeframes.
+
+### About the Strategies
+- **Grid Trading**: Places buy/sell limit orders at fixed price intervals (horizontal levels). Profits from price oscillations within the grid.
+- **TP/SL Trading**: Enters a position when price crosses a horizontal level, with predefined take-profit and stop-loss levels.
+
+### Disclaimer
+This is a simulation for educational purposes only. Past performance does not guarantee future results. Trade responsibly.
+""")

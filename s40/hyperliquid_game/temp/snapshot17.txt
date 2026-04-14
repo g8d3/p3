@@ -1,0 +1,165 @@
+- document:
+  - list:
+    - listitem:
+      - link "app" [ref=e1]:
+        - /url: http://localhost:8501/
+        - paragraph: app
+    - listitem:
+      - link "social feed" [ref=e2]:
+        - /url: http://localhost:8501/social_feed
+        - paragraph: social feed
+  - banner:
+    - button "Deploy" [ref=e3]
+    - button "Main menu" [ref=e4]
+  - heading "Hyperliquid Trading Game" [ref=e5] [level=1]:
+    - text: Hyperliquid Trading Game
+    - link "Link to heading" [ref=e6]:
+      - /url: "#hyperliquid-trading-game"
+  - paragraph:
+    - text: Learn trading by comparing
+    - strong: Grid Trading
+    - text: vs
+    - strong: Take-Profit/Stop-Loss Trading
+    - text: strategies. Adjust parameters, run backtests, and see which strategy performs better!
+  - group:
+    - text: keyboard_arrow_down
+    - paragraph: Data Generation
+    - radiogroup "Data Source":
+      - radio "Synthetic" [ref=e7] [checked]
+      - paragraph: Synthetic
+      - radio "Real" [ref=e8]
+      - paragraph: Real
+    - button "Help for Instrument (trading pair)" [ref=e9]
+    - text: BTCUSDT
+    - combobox "Selected BTCUSDT. Instrument (trading pair)" [ref=e10] [disabled]
+    - img "open"
+    - text: 4h
+    - combobox "Selected 4h. Timeframe" [ref=e11]
+    - img "open"
+    - slider "Number of bars (backtest length)" [ref=e12]:
+      - paragraph: "200"
+    - paragraph: "50"
+    - paragraph: "1000"
+    - spinbutton "Start price" [ref=e13]: "30000.00"
+    - button [ref=e14]
+    - button [ref=e15] [nth=1]
+    - button "Help for Initial volatility (annualized)" [ref=e16]
+    - slider "Initial volatility (annualized)" [ref=e17]:
+      - paragraph: "0.02"
+    - paragraph: "0.01"
+    - paragraph: "1.00"
+    - group:
+      - text: keyboard_arrow_right
+      - paragraph: Advanced Bates Model Parameters
+    - group:
+      - text: keyboard_arrow_right
+      - paragraph: Batch Generation
+  - heading "Strategy Configuration" [ref=e18] [level=2]:
+    - text: Strategy Configuration
+    - link "Link to heading" [ref=e19] [nth=1]:
+      - /url: "#strategy-configuration"
+  - heading "User Settings" [ref=e20] [level=3]:
+    - text: User Settings
+    - link "Link to heading" [ref=e21] [nth=2]:
+      - /url: "#user-settings"
+  - textbox "Your Name/ID" [ref=e22]:
+    - /placeholder: ""
+    - text: Player1
+  - heading "Grid Trading" [ref=e23] [level=3]:
+    - text: Grid Trading
+    - link "Link to heading" [ref=e24] [nth=3]:
+      - /url: "#grid-trading"
+  - spinbutton "Grid step (price increment)" [ref=e25]: "100.00"
+  - button [ref=e26] [nth=2]
+  - button [ref=e27] [nth=3]
+  - slider "Number of levels (each side)" [ref=e28]:
+    - paragraph: "3"
+  - paragraph: "1"
+  - paragraph: "10"
+  - spinbutton "Trade size (BTC)" [ref=e29]: "0.010"
+  - button [ref=e30] [nth=4]
+  - button [ref=e31] [nth=5]
+  - spinbutton "Max position (BTC)" [ref=e32]: "0.10"
+  - button [ref=e33] [nth=6]
+  - button [ref=e34] [nth=7]
+  - heading "TP/SL Trading" [ref=e35] [level=3]:
+    - text: TP/SL Trading
+    - link "Link to heading" [ref=e36] [nth=4]:
+      - /url: "#tp-sl-trading"
+  - slider "Take-profit %" [ref=e37]:
+    - paragraph: "0.010"
+  - paragraph: "0.001"
+  - paragraph: "0.100"
+  - slider "Stop-loss %" [ref=e38]:
+    - paragraph: "0.005"
+  - paragraph: "0.001"
+  - paragraph: "0.100"
+  - spinbutton "Level spacing (price)" [ref=e39]: "500.00"
+  - button [ref=e40] [nth=8]
+  - button [ref=e41] [nth=9]
+  - slider "Number of horizontal levels" [ref=e42]:
+    - paragraph: "5"
+  - paragraph: "1"
+  - paragraph: "20"
+  - spinbutton "Trade size (BTC)" [ref=e43] [nth=1]: "0.010"
+  - button [ref=e44] [nth=10]
+  - button [ref=e45] [nth=11]
+  - heading "Account" [ref=e46] [level=3]:
+    - text: Account
+    - link "Link to heading" [ref=e47] [nth=5]:
+      - /url: "#account"
+  - spinbutton "Starting USDT" [ref=e48]: "100000"
+  - button [ref=e49] [nth=12]
+  - button [ref=e50] [nth=13]
+  - spinbutton "Starting BTC" [ref=e51]: "1.0"
+  - button [ref=e52] [nth=14]
+  - button [ref=e53] [nth=15]
+  - button "Run Backtest Comparison" [ref=e54]:
+    - paragraph: Run Backtest Comparison
+  - alert:
+    - paragraph: Adjust parameters in the sidebar and click 'Run Backtest Comparison' to see results.
+  - heading "All Backtest Results" [ref=e55] [level=2]:
+    - text: All Backtest Results
+    - link "Link to heading" [ref=e56] [nth=6]:
+      - /url: "#all-backtest-results"
+  - group:
+    - text: keyboard_arrow_right
+    - paragraph: "Backtest 1: tpsl - 2026-04-13T14:07:19.426421"
+  - group:
+    - text: keyboard_arrow_right
+    - paragraph: "Backtest 2: grid - 2026-04-13T14:07:19.426385"
+  - separator
+  - heading "How to Play" [ref=e57] [level=3]:
+    - text: How to Play
+    - link "Link to heading" [ref=e58] [nth=7]:
+      - /url: "#how-to-play"
+  - list:
+    - listitem:
+      - strong: Adjust parameters
+      - text: in the sidebar to configure both strategies.
+    - listitem:
+      - strong: Run backtest
+      - text: to simulate trading on historical (synthetic) data.
+    - listitem:
+      - strong: Compare results
+      - text: to see which strategy performs better.
+    - listitem:
+      - strong: Learn
+      - text: by experimenting with different settings and timeframes.
+  - heading "About the Strategies" [ref=e59] [level=3]:
+    - text: About the Strategies
+    - link "Link to heading" [ref=e60] [nth=8]:
+      - /url: "#about-the-strategies"
+  - list:
+    - listitem:
+      - strong: Grid Trading
+      - text: ": Places buy/sell limit orders at fixed price intervals (horizontal levels). Profits from price oscillations within the grid."
+    - listitem:
+      - strong: TP/SL Trading
+      - text: ": Enters a position when price crosses a horizontal level, with predefined take-profit and stop-loss levels."
+  - heading "Disclaimer" [ref=e61] [level=3]:
+    - text: Disclaimer
+    - link "Link to heading" [ref=e62] [nth=9]:
+      - /url: "#disclaimer"
+  - paragraph: This is a simulation for educational purposes only. Past performance does not guarantee future results. Trade responsibly.
+  - img

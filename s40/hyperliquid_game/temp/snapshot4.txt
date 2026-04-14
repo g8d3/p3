@@ -1,0 +1,137 @@
+- document:
+  - list:
+    - listitem:
+      - link "app" [ref=e1]:
+        - /url: http://localhost:8501/
+        - paragraph: app
+    - listitem:
+      - link "social feed" [ref=e2]:
+        - /url: http://localhost:8501/social_feed
+        - paragraph: social feed
+  - heading "Strategy Parameters" [ref=e3] [level=2]
+  - heading "User Settings" [ref=e4] [level=3]
+  - textbox "Your Name/ID" [ref=e5]:
+    - /placeholder: ""
+    - text: Player1
+  - heading "Grid Trading" [ref=e6] [level=3]
+  - spinbutton "Grid step (price increment)" [ref=e7]: "100.00"
+  - button [ref=e8]
+  - button [ref=e9] [nth=1]
+  - slider "Number of levels (each side)" [ref=e10]:
+    - paragraph: "3"
+  - paragraph: "1"
+  - paragraph: "10"
+  - spinbutton "Trade size (BTC)" [ref=e11]: "0.010"
+  - button [ref=e12] [nth=2]
+  - button [ref=e13] [nth=3]
+  - spinbutton "Max position (BTC)" [ref=e14]: "0.10"
+  - button [ref=e15] [nth=4]
+  - button [ref=e16] [nth=5]
+  - heading "TP/SL Trading" [ref=e17] [level=3]
+  - slider "Take-profit %" [ref=e18]:
+    - paragraph: "0.010"
+  - paragraph: "0.001"
+  - paragraph: "0.100"
+  - slider "Stop-loss %" [ref=e19]:
+    - paragraph: "0.005"
+  - paragraph: "0.001"
+  - paragraph: "0.100"
+  - spinbutton "Level spacing (price)" [ref=e20]: "500.00"
+  - button [ref=e21] [nth=6]
+  - button [ref=e22] [nth=7]
+  - slider "Number of horizontal levels" [ref=e23]:
+    - paragraph: "5"
+  - paragraph: "1"
+  - paragraph: "20"
+  - spinbutton "Trade size (BTC)" [ref=e24] [nth=1]: "0.010"
+  - button [ref=e25] [nth=8]
+  - button [ref=e26] [nth=9]
+  - heading "Account" [ref=e27] [level=3]
+  - spinbutton "Starting USDT" [ref=e28]: "100000"
+  - button [ref=e29] [nth=10]
+  - button [ref=e30] [nth=11]
+  - spinbutton "Starting BTC" [ref=e31]: "1.0"
+  - button [ref=e32] [nth=12]
+  - button [ref=e33] [nth=13]
+  - button "Run Backtest Comparison" [ref=e34]:
+    - paragraph: Run Backtest Comparison
+  - banner:
+    - button "Deploy" [ref=e35]
+    - button "Main menu" [ref=e36]
+  - heading "Hyperliquid Trading Game" [ref=e37] [level=1]:
+    - text: Hyperliquid Trading Game
+    - link "Link to heading" [ref=e38]:
+      - /url: "#hyperliquid-trading-game"
+  - paragraph:
+    - text: Learn trading by comparing
+    - strong: Grid Trading
+    - text: vs
+    - strong: Take-Profit/Stop-Loss Trading
+    - text: strategies. Adjust parameters, run backtests, and see which strategy performs better!
+  - group:
+    - text: keyboard_arrow_down
+    - paragraph: Data Generation
+    - text: Synthetic
+    - combobox "Selected Synthetic. Data Source" [ref=e39]
+    - img "open"
+    - text: BTCUSDT
+    - combobox "Selected BTCUSDT. Instrument" [ref=e40]
+    - img "open"
+    - text: 4h
+    - combobox "Selected 4h. Timeframe" [ref=e41]
+    - img "open"
+    - slider "Number of bars (backtest length)" [ref=e42]:
+      - paragraph: "200"
+    - paragraph: "50"
+    - paragraph: "1000"
+    - spinbutton "Start price" [ref=e43]: "30000.00"
+    - button [ref=e44] [nth=14]
+    - button [ref=e45] [nth=15]
+    - slider "Volatility" [ref=e46]:
+      - paragraph: "0.02"
+    - paragraph: "0.01"
+    - paragraph: "0.10"
+  - alert:
+    - paragraph: Adjust parameters in the sidebar and click 'Run Backtest Comparison' to see results.
+  - heading "All Backtest Results" [ref=e47] [level=2]:
+    - text: All Backtest Results
+    - link "Link to heading" [ref=e48] [nth=1]:
+      - /url: "#all-backtest-results"
+  - button "Show/hide columns" [ref=e49]
+  - button "Download as CSV" [ref=e50]
+  - button "Search" [ref=e51]
+  - button "Fullscreen" [ref=e52]
+  - separator
+  - heading "How to Play" [ref=e53] [level=3]:
+    - text: How to Play
+    - link "Link to heading" [ref=e54] [nth=2]:
+      - /url: "#how-to-play"
+  - list:
+    - listitem:
+      - strong: Adjust parameters
+      - text: in the sidebar to configure both strategies.
+    - listitem:
+      - strong: Run backtest
+      - text: to simulate trading on historical (synthetic) data.
+    - listitem:
+      - strong: Compare results
+      - text: to see which strategy performs better.
+    - listitem:
+      - strong: Learn
+      - text: by experimenting with different settings and timeframes.
+  - heading "About the Strategies" [ref=e55] [level=3]:
+    - text: About the Strategies
+    - link "Link to heading" [ref=e56] [nth=3]:
+      - /url: "#about-the-strategies"
+  - list:
+    - listitem:
+      - strong: Grid Trading
+      - text: ": Places buy/sell limit orders at fixed price intervals (horizontal levels). Profits from price oscillations within the grid."
+    - listitem:
+      - strong: TP/SL Trading
+      - text: ": Enters a position when price crosses a horizontal level, with predefined take-profit and stop-loss levels."
+  - heading "Disclaimer" [ref=e57] [level=3]:
+    - text: Disclaimer
+    - link "Link to heading" [ref=e58] [nth=4]:
+      - /url: "#disclaimer"
+  - paragraph: This is a simulation for educational purposes only. Past performance does not guarantee future results. Trade responsibly.

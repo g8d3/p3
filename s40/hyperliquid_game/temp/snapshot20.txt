@@ -1,0 +1,324 @@
+- document:
+  - list:
+    - listitem:
+      - link "app" [ref=e1]:
+        - /url: http://localhost:8501/
+        - paragraph: app
+    - listitem:
+      - link "social feed" [ref=e2]:
+        - /url: http://localhost:8501/social_feed
+        - paragraph: social feed
+  - banner:
+    - button "Deploy" [ref=e3]
+    - button "Main menu" [ref=e4]
+  - heading "Hyperliquid Trading Game" [ref=e5] [level=1]:
+    - text: Hyperliquid Trading Game
+    - link "Link to heading" [ref=e6]:
+      - /url: "#hyperliquid-trading-game"
+  - paragraph:
+    - text: Learn trading by comparing
+    - strong: Grid Trading
+    - text: vs
+    - strong: Take-Profit/Stop-Loss Trading
+    - text: strategies. Adjust parameters, run backtests, and see which strategy performs better!
+  - group:
+    - text: keyboard_arrow_down
+    - paragraph: Data Generation
+    - radiogroup "Data Source":
+      - radio "Synthetic" [ref=e7] [checked]
+      - paragraph: Synthetic
+      - radio "Real" [ref=e8]
+      - paragraph: Real
+    - button "Help for Instrument (trading pair)" [ref=e9]
+    - text: BTCUSDT
+    - combobox "Selected BTCUSDT. Instrument (trading pair)" [ref=e10] [disabled]
+    - img "open"
+    - text: 4h
+    - combobox "Selected 4h. Timeframe" [ref=e11]
+    - img "open"
+    - slider "Number of bars (backtest length)" [ref=e12]:
+      - paragraph: "200"
+    - paragraph: "50"
+    - paragraph: "1000"
+    - spinbutton "Start price" [ref=e13]: "30000.00"
+    - button [ref=e14]
+    - button [ref=e15] [nth=1]
+    - button "Help for Initial volatility (annualized)" [ref=e16]
+    - slider "Initial volatility (annualized)" [ref=e17]:
+      - paragraph: "0.02"
+    - paragraph: "0.01"
+    - paragraph: "1.00"
+    - group:
+      - text: keyboard_arrow_right
+      - paragraph: Advanced Bates Model Parameters
+    - group:
+      - text: keyboard_arrow_right
+      - paragraph: Batch Generation
+  - heading "Strategy Configuration" [ref=e18] [level=2]:
+    - text: Strategy Configuration
+    - link "Link to heading" [ref=e19] [nth=1]:
+      - /url: "#strategy-configuration"
+  - heading "User Settings" [ref=e20] [level=3]:
+    - text: User Settings
+    - link "Link to heading" [ref=e21] [nth=2]:
+      - /url: "#user-settings"
+  - textbox "Your Name/ID" [ref=e22]:
+    - /placeholder: ""
+    - text: Player1
+  - heading "Grid Trading" [ref=e23] [level=3]:
+    - text: Grid Trading
+    - link "Link to heading" [ref=e24] [nth=3]:
+      - /url: "#grid-trading"
+  - spinbutton "Grid step (price increment)" [ref=e25]: "100.00"
+  - button [ref=e26] [nth=2]
+  - button [ref=e27] [nth=3]
+  - slider "Number of levels (each side)" [ref=e28]:
+    - paragraph: "3"
+  - paragraph: "1"
+  - paragraph: "10"
+  - spinbutton "Trade size (BTC)" [ref=e29]: "0.010"
+  - button [ref=e30] [nth=4]
+  - button [ref=e31] [nth=5]
+  - spinbutton "Max position (BTC)" [ref=e32]: "0.10"
+  - button [ref=e33] [nth=6]
+  - button [ref=e34] [nth=7]
+  - heading "TP/SL Trading" [ref=e35] [level=3]:
+    - text: TP/SL Trading
+    - link "Link to heading" [ref=e36] [nth=4]:
+      - /url: "#tp-sl-trading"
+  - slider "Take-profit %" [ref=e37]:
+    - paragraph: "0.010"
+  - paragraph: "0.001"
+  - paragraph: "0.100"
+  - slider "Stop-loss %" [ref=e38]:
+    - paragraph: "0.005"
+  - paragraph: "0.001"
+  - paragraph: "0.100"
+  - spinbutton "Level spacing (price)" [ref=e39]: "500.00"
+  - button [ref=e40] [nth=8]
+  - button [ref=e41] [nth=9]
+  - slider "Number of horizontal levels" [ref=e42]:
+    - paragraph: "5"
+  - paragraph: "1"
+  - paragraph: "20"
+  - spinbutton "Trade size (BTC)" [ref=e43] [nth=1]: "0.010"
+  - button [ref=e44] [nth=10]
+  - button [ref=e45] [nth=11]
+  - heading "Account" [ref=e46] [level=3]:
+    - text: Account
+    - link "Link to heading" [ref=e47] [nth=5]:
+      - /url: "#account"
+  - spinbutton "Starting USDT" [ref=e48]: "100000"
+  - button [ref=e49] [nth=12]
+  - button [ref=e50] [nth=13]
+  - spinbutton "Starting BTC" [ref=e51]: "1.0"
+  - button [ref=e52] [nth=14]
+  - button [ref=e53] [nth=15]
+  - button "Run Backtest Comparison" [ref=e54]:
+    - paragraph: Run Backtest Comparison
+  - heading "Backtest Results" [ref=e55] [level=2]:
+    - text: Backtest Results
+    - link "Link to heading" [ref=e56] [nth=6]:
+      - /url: "#backtest-results"
+  - heading "Grid Trading" [ref=e57] [nth=1] [level=3]:
+    - text: Grid Trading
+    - link "Link to heading" [ref=e58] [nth=7]:
+      - /url: "#grid-trading"
+  - paragraph: Total Return
+  - paragraph: 0.00%
+  - paragraph: 1.0000 BTC
+  - img: Mar 152026 Mar 22 Mar 29 Apr 5 Apr 12 0.9 0.95 1
+  - img: Grid Trading Balance Over Time Time Balance (BTC)
+  - toolbar:
+    - button "Download plot as a PNG" [ref=e59]:
+      - img
+    - button "Zoom" [ref=e60]:
+      - img
+    - button "Pan" [ref=e61]:
+      - img
+    - button "Zoom in" [ref=e62]:
+      - img
+    - button "Zoom out" [ref=e63]:
+      - img
+    - button "Autoscale" [ref=e64]:
+      - img
+    - button "Reset axes" [ref=e65]:
+      - img
+    - button "Fullscreen" [ref=e66]:
+      - img
+  - img
+  - heading "TP/SL Trading" [ref=e67] [nth=1] [level=3]:
+    - text: TP/SL Trading
+    - link "Link to heading" [ref=e68] [nth=8]:
+      - /url: "#tp-sl-trading"
+  - paragraph: Total Return
+  - paragraph: 0.00%
+  - paragraph: 1.0000 BTC
+  - img: Mar 152026 Mar 22 Mar 29 Apr 5 Apr 12 0.99 0.995 1 1.005 1.01
+  - img: TP/SL Trading Balance Over Time Time Balance (BTC)
+  - toolbar:
+    - button "Download plot as a PNG" [ref=e69] [nth=1]:
+      - img
+    - button "Zoom" [ref=e70] [nth=1]:
+      - img
+    - button "Pan" [ref=e71] [nth=1]:
+      - img
+    - button "Zoom in" [ref=e72] [nth=1]:
+      - img
+    - button "Zoom out" [ref=e73] [nth=1]:
+      - img
+    - button "Autoscale" [ref=e74] [nth=1]:
+      - img
+    - button "Reset axes" [ref=e75] [nth=1]:
+      - img
+    - button "Fullscreen" [ref=e76] [nth=1]:
+      - img
+  - img
+  - heading "Strategy Comparison" [ref=e77] [level=3]:
+    - text: Strategy Comparison
+    - link "Link to heading" [ref=e78] [nth=9]:
+      - /url: "#strategy-comparison"
+  - table:
+    - rowgroup:
+      - row "Grid Trading TP/SL Trading":
+        - columnheader:
+          - paragraph
+        - columnheader "Grid Trading" [ref=e79]:
+          - paragraph: Grid Trading
+        - columnheader "TP/SL Trading" [ref=e80]:
+          - paragraph: TP/SL Trading
+    - rowgroup:
+      - row "initial_balance 1.00 1.00":
+        - rowheader "initial_balance" [ref=e81]:
+          - paragraph: initial_balance
+        - cell "1.00" [ref=e82]:
+          - paragraph: "1.00"
+        - cell "1.00" [ref=e83] [nth=1]:
+          - paragraph: "1.00"
+      - row "final_balance 1.00 1.00":
+        - rowheader "final_balance" [ref=e84]:
+          - paragraph: final_balance
+        - cell "1.00" [ref=e85] [nth=2]:
+          - paragraph: "1.00"
+        - cell "1.00" [ref=e86] [nth=3]:
+          - paragraph: "1.00"
+      - row "total_return_pct 0.00 0.00":
+        - rowheader "total_return_pct" [ref=e87]:
+          - paragraph: total_return_pct
+        - cell "0.00" [ref=e88]:
+          - paragraph: "0.00"
+        - cell "0.00" [ref=e89] [nth=1]:
+          - paragraph: "0.00"
+      - row "max_drawdown_pct 13.46 1.98":
+        - rowheader "max_drawdown_pct" [ref=e90]:
+          - paragraph: max_drawdown_pct
+        - cell "13.46" [ref=e91]:
+          - paragraph: "13.46"
+        - cell "1.98" [ref=e92]:
+          - paragraph: "1.98"
+      - row "sharpe_ratio 0.08 0.02":
+        - rowheader "sharpe_ratio" [ref=e93]:
+          - paragraph: sharpe_ratio
+        - cell "0.08" [ref=e94]:
+          - paragraph: "0.08"
+        - cell "0.02" [ref=e95]:
+          - paragraph: "0.02"
+  - alert:
+    - paragraph: TP/SL Trading wins!
+  - heading "Price Chart with Levels" [ref=e96] [level=3]:
+    - text: Price Chart with Levels
+    - link "Link to heading" [ref=e97] [nth=10]:
+      - /url: "#price-chart-with-levels"
+  - button "Show data" [ref=e98]
+  - button "Fullscreen" [ref=e99] [nth=2]
+  - img: Thu 12 Fri 13 Sat 14 Mar 15 Mon 16 Tue 17 Wed 18 Thu 19 Fri 20 Sat 21 Mar 22 Mon 23 Tue 24 Wed 25 Thu 26 Fri 27 Sat 28 Mar 29 Mon 30 Tue 31 April Thu 02 Fri 03 Sat 04 Apr 05 Mon 06 Tue 07 Wed 08 Thu 09 Fri 10 Sat 11 Apr 12 Mon 13 0 5,000 10,000 15,000 20,000 25,000 30,000 35,000
+  - group "Click to view actions":
+    - img
+  - heading "Backtest Details" [ref=e100] [level=2]:
+    - text: Backtest Details
+    - link "Link to heading" [ref=e101] [nth=11]:
+      - /url: "#all-backtest-results"
+  - paragraph: "Result #1"
+  - button "← Back to list" [ref=e102]:
+    - paragraph: ← Back to list
+  - paragraph: Total Return
+  - paragraph: 0.00%
+  - paragraph: Sharpe Ratio
+  - paragraph: "0.02"
+  - paragraph: Max Drawdown
+  - paragraph: 1.98%
+  - paragraph: Profit Factor
+  - paragraph: N/A
+  - paragraph: Initial Balance
+  - paragraph: "1.0000"
+  - paragraph: Final Balance
+  - paragraph: "1.0000"
+  - heading "Price Chart" [ref=e103] [level=3]:
+    - text: Price Chart
+    - link "Link to heading" [ref=e104] [nth=12]:
+      - /url: "#price-chart"
+  - img: Mar 152026 Mar 22 Mar 29 Apr 5 Apr 12 29.95k 30k 30.05k 30.1k 30.15k 30.2k 30.25k
+  - img: Tpsl Price Chart Time Price
+  - toolbar:
+    - button "Download plot as a PNG" [ref=e105] [nth=2]:
+      - img
+    - button "Zoom" [ref=e106] [nth=2]:
+      - img
+    - button "Pan" [ref=e107] [nth=2]:
+      - img
+    - button "Zoom in" [ref=e108] [nth=2]:
+      - img
+    - button "Zoom out" [ref=e109] [nth=2]:
+      - img
+    - button "Autoscale" [ref=e110] [nth=2]:
+      - img
+    - button "Reset axes" [ref=e111] [nth=2]:
+      - img
+    - button "Fullscreen" [ref=e112] [nth=3]:
+      - img
+  - img
+  - heading "Balance Chart" [ref=e113] [level=3]:
+    - text: Balance Chart
+    - link "Link to heading" [ref=e114] [nth=13]:
+      - /url: "#balance-chart"
+  - img: Mar 152026 Mar 22 Mar 29 Apr 5 Apr 12 0.99 0.995 1 1.005 1.01
+  - img: Balance Over Time index Balance
+  - toolbar:
+    - button "Download plot as a PNG" [ref=e115] [nth=3]:
+      - img
+    - button "Zoom" [ref=e116] [nth=3]:
+      - img
+    - button "Pan" [ref=e117] [nth=3]:
+      - img
+    - button "Zoom in" [ref=e118] [nth=3]:
+      - img
+    - button "Zoom out" [ref=e119] [nth=3]:
+      - img
+    - button "Autoscale" [ref=e120] [nth=3]:
+      - img
+    - button "Reset axes" [ref=e121] [nth=3]:
+      - img
+    - button "Fullscreen" [ref=e122] [nth=4]:
+      - img
+  - img
+  - heading "Trades" [ref=e123] [level=3]:
+    - text: Trades
+    - link "Link to heading" [ref=e124] [nth=14]:
+      - /url: "#trades"
+  - button "Show/hide columns" [ref=e125]
+  - button "Download as CSV" [ref=e126]
+  - button "Search" [ref=e127]
+  - button "Fullscreen" [ref=e128] [nth=5]
+  - heading "Summary Metrics" [ref=e129] [level=3]:
+    - text: Summary Metrics
+    - link "Link to heading" [ref=e130] [nth=15]:
+      - /url: "#summary-metrics"
+  - paragraph: Total Return
+  - paragraph: 0.00%
+  - paragraph: Max Drawdown
+  - paragraph: 1.98%
+  - paragraph: Sharpe Ratio
+  - paragraph: "0.02"
+  - paragraph: Profit Factor
+  - paragraph: N/A
+  - img

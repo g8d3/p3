@@ -1,0 +1,132 @@
+- document:
+  - list:
+    - listitem:
+      - link "app" [ref=e1]:
+        - /url: http://localhost:8501/
+        - paragraph: app
+    - listitem:
+      - link "social feed" [ref=e2]:
+        - /url: http://localhost:8501/social_feed
+        - paragraph: social feed
+  - banner:
+    - button "Deploy" [ref=e3]
+    - button "Main menu" [ref=e4]
+  - heading "Hyperliquid Trading Game" [ref=e5] [level=1]:
+    - text: Hyperliquid Trading Game
+    - link "Link to heading" [ref=e6]:
+      - /url: "#hyperliquid-trading-game"
+  - paragraph:
+    - text: Learn trading by comparing
+    - strong: Grid Trading
+    - text: vs
+    - strong: Take-Profit/Stop-Loss Trading
+    - text: strategies. Adjust parameters, run backtests, and see which strategy performs better!
+  - group:
+    - text: keyboard_arrow_down
+    - paragraph: Data Generation
+    - radiogroup "Data Source":
+      - radio "Synthetic" [ref=e7] [checked]
+      - paragraph: Synthetic
+      - radio "Real" [ref=e8]
+      - paragraph: Real
+    - button "Help for Instrument (trading pair)" [ref=e9]
+    - text: BTCUSDT
+    - combobox "Selected BTCUSDT. Instrument (trading pair)" [ref=e10] [disabled]
+    - img "open"
+    - text: 4h
+    - combobox "Selected 4h. Timeframe" [ref=e11]
+    - img "open"
+    - slider "Number of bars (backtest length)" [ref=e12]:
+      - paragraph: "200"
+    - paragraph: "50"
+    - paragraph: "1000"
+    - spinbutton "Start price" [ref=e13]: "30000.00"
+    - button [ref=e14]
+    - button [ref=e15] [nth=1]
+    - button "Help for Initial volatility (annualized)" [ref=e16]
+    - slider "Initial volatility (annualized)" [ref=e17]:
+      - paragraph: "0.02"
+    - paragraph: "0.01"
+    - paragraph: "1.00"
+    - group:
+      - text: keyboard_arrow_right
+      - paragraph: Advanced Bates Model Parameters
+    - group:
+      - text: keyboard_arrow_right
+      - paragraph: Batch Generation
+  - heading "Strategy Configuration" [ref=e18] [level=2]:
+    - text: Strategy Configuration
+    - link "Link to heading" [ref=e19] [nth=1]:
+      - /url: "#strategy-configuration"
+  - heading "User Settings" [ref=e20] [level=3]:
+    - text: User Settings
+    - link "Link to heading" [ref=e21] [nth=2]:
+      - /url: "#user-settings"
+  - textbox "Your Name/ID" [ref=e22]:
+    - /placeholder: ""
+    - text: Player1
+  - heading "Grid Trading" [ref=e23] [level=3]:
+    - text: Grid Trading
+    - link "Link to heading" [ref=e24] [nth=3]:
+      - /url: "#grid-trading"
+  - spinbutton "Grid step (price increment)" [ref=e25]: "100.00"
+  - button [ref=e26] [nth=2]
+  - button [ref=e27] [nth=3]
+  - slider "Number of levels (each side)" [ref=e28]:
+    - paragraph: "3"
+  - paragraph: "1"
+  - paragraph: "10"
+  - spinbutton "Trade size (BTC)" [ref=e29]: "0.010"
+  - button [ref=e30] [nth=4]
+  - button [ref=e31] [nth=5]
+  - spinbutton "Max position (BTC)" [ref=e32]: "0.10"
+  - button [ref=e33] [nth=6]
+  - button [ref=e34] [nth=7]
+  - heading "TP/SL Trading" [ref=e35] [level=3]:
+    - text: TP/SL Trading
+    - link "Link to heading" [ref=e36] [nth=4]:
+      - /url: "#tp-sl-trading"
+  - slider "Take-profit %" [ref=e37]:
+    - paragraph: "0.010"
+  - paragraph: "0.001"
+  - paragraph: "0.100"
+  - slider "Stop-loss %" [ref=e38]:
+    - paragraph: "0.005"
+  - paragraph: "0.001"
+  - paragraph: "0.100"
+  - spinbutton "Level spacing (price)" [ref=e39]: "500.00"
+  - button [ref=e40] [nth=8]
+  - button [ref=e41] [nth=9]
+  - slider "Number of horizontal levels" [ref=e42]:
+    - paragraph: "5"
+  - paragraph: "1"
+  - paragraph: "20"
+  - spinbutton "Trade size (BTC)" [ref=e43] [nth=1]: "0.010"
+  - button [ref=e44] [nth=10]
+  - button [ref=e45] [nth=11]
+  - heading "Account" [ref=e46] [level=3]:
+    - text: Account
+    - link "Link to heading" [ref=e47] [nth=5]:
+      - /url: "#account"
+  - spinbutton "Starting USDT" [ref=e48]: "100000"
+  - button [ref=e49] [nth=12]
+  - button [ref=e50] [nth=13]
+  - spinbutton "Starting BTC" [ref=e51]: "1.0"
+  - button [ref=e52] [nth=14]
+  - button [ref=e53] [nth=15]
+  - button "Run Backtest Comparison" [ref=e54]:
+    - paragraph: Run Backtest Comparison
+  - alert:
+    - paragraph: Adjust parameters in the sidebar and click 'Run Backtest Comparison' to see results.
+  - heading "All Backtest Results" [ref=e55] [level=2]:
+    - text: All Backtest Results
+    - link "Link to heading" [ref=e56] [nth=6]:
+      - /url: "#all-backtest-results"
+  - alert:
+    - text: "json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 164 column 7 (char 4198) Traceback:"
+    - code: File "/home/vuos/code/p3/s40/hyperliquid_game/app.py", line 529, in <module> all_results = json.load(f) ^^^^^^^^^^^^ File "/home/vuos/.local/share/uv/python/cpython-3.12.8-linux-x86_64-gnu/lib/python3.12/json/__init__.py", line 293, in load return loads(fp.read(), ^^^^^^^^^^^^^^^^ File "/home/vuos/.local/share/uv/python/cpython-3.12.8-linux-x86_64-gnu/lib/python3.12/json/__init__.py", line 346, in loads return _default_decoder.decode(s) ^^^^^^^^^^^^^^^^^^^^^^^^^^ File "/home/vuos/.local/share/uv/python/cpython-3.12.8-linux-x86_64-gnu/lib/python3.12/json/decoder.py", line 338, in decode obj, end = self.raw_decode(s, idx=_w(s, 0).end()) ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ File "/home/vuos/.local/share/uv/python/cpython-3.12.8-linux-x86_64-gnu/lib/python3.12/json/decoder.py", line 354, in raw_decode obj, end = self.scan_once(s, idx) ^^^^^^^^^^^^^^^^^^^^^^
+    - button "Copy" [ref=e57]
+    - link "Ask Google" [ref=e58]:
+      - /url: https://www.google.com/search?q=json.decoder.JSONDecodeError%3A%20Expecting%20property%20name%20enclosed%20in%20double%20quotes%3A%20line%20164%20column%207%20(char%204198)
+    - link "Ask ChatGPT" [ref=e59]:
+      - /url: https://chatgpt.com/?q=json.decoder.JSONDecodeError%3A%20Expecting%20property%20name%20enclosed%20in%20double%20quotes%3A%20line%20164%20column%207%20(char%204198)%0A%0AFile%20%22%2Fhome%2Fvuos%2Fcode%2Fp3%2Fs40%2Fhyperliquid_game%2Fapp.py%22%2C%20line%20529%2C%20in%20%3Cmodule%3E%0A%20%20%20%20all_results%20%3D%20json.load(f)%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%0AFile%20%22%2Fhome%2Fvuos%2F.local%2Fshare%2Fuv%2Fpython%2Fcpython-3.12.8-linux-x86_64-gnu%2Flib%2Fpython3.12%2Fjson%2F__init__.py%22%2C%20line%20293%2C%20in%20load%0A%20%20%20%20return%20loads(fp.read()%2C%0A%20%20%20%20%20%20%20%20%20%20%20%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%0AFile%20%22%2Fhome%2Fvuos%2F.local%2Fshare%2Fuv%2Fpython%2Fcpython-3.12.8-linux-x86_64-gnu%2Flib%2Fpython3.12%2Fjson%2F__init__.py%22%2C%20line%20346%2C%20in%20loads%0A%20%20%20%20return%20_default_decoder.decode(s)%0A%20%20%20%20%20%20%20%20%20%20%20%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%0AFile%20%22%2Fhome%2Fvuos%2F.local%2Fshare%2Fuv%2Fpython%2Fcpython-3.12.8-linux-x86_64-gnu%2Flib%2Fpython3.12%2Fjson%2Fdecoder.py%22%2C%20line%20338%2C%20in%20decode%0A%20%20%20%20obj%2C%20end%20%3D%20self.raw_decode(s%2C%20idx%3D_w(s%2C%200).end())%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%0AFile%20%22%2Fhome%2Fvuos%2F.local%2Fshare%2Fuv%2Fpython%2Fcpython-3.12.8-linux-x86_64-gnu%2Flib%2Fpython3.12%2Fjson%2Fdecoder.py%22%2C%20line%20354%2C%20in%20raw_decode%0A%20%20%20%20obj%2C%20end%20%3D%20self.scan_once(s%2C%20idx)%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E%5E

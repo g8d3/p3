@@ -1,0 +1,235 @@
+- document:
+  - button "keyboard_double_arrow_left" [ref=e1]
+  - list:
+    - listitem:
+      - link "app" [ref=e2]:
+        - /url: http://localhost:8501/
+        - paragraph: app
+    - listitem:
+      - link "social feed" [ref=e3]:
+        - /url: http://localhost:8501/social_feed
+        - paragraph: social feed
+  - heading "Strategy Parameters" [ref=e4] [level=2]
+  - heading "Common Settings" [ref=e5] [level=3]
+  - textbox "Your Name/ID" [ref=e6]:
+    - /placeholder: ""
+    - text: Player1
+  - text: BTCUSDT
+  - combobox "Selected BTCUSDT. Instrument" [ref=e7]
+  - img "open"
+  - text: 4h
+  - combobox "Selected 4h. Timeframe" [ref=e8]
+  - img "open"
+  - slider "Number of bars (backtest length)" [ref=e9]:
+    - paragraph: "200"
+  - paragraph: "50"
+  - paragraph: "1000"
+  - spinbutton "Start price" [ref=e10]: "30000.00"
+  - button [ref=e11]
+  - button [ref=e12] [nth=1]
+  - slider "Volatility" [ref=e13]:
+    - paragraph: "0.02"
+  - paragraph: "0.01"
+  - paragraph: "0.10"
+  - heading "Grid Trading" [ref=e14] [level=3]
+  - spinbutton "Grid step (price increment)" [ref=e15]: "100.00"
+  - button [ref=e16] [nth=2]
+  - button [ref=e17] [nth=3]
+  - slider "Number of levels (each side)" [ref=e18]:
+    - paragraph: "3"
+  - paragraph: "1"
+  - paragraph: "10"
+  - spinbutton "Trade size (BTC)" [ref=e19]: "0.010"
+  - button [ref=e20] [nth=4]
+  - button [ref=e21] [nth=5]
+  - spinbutton "Max position (BTC)" [ref=e22]: "0.10"
+  - button [ref=e23] [nth=6]
+  - button [ref=e24] [nth=7]
+  - heading "TP/SL Trading" [ref=e25] [level=3]
+  - slider "Take-profit %" [ref=e26]:
+    - paragraph: "0.010"
+  - paragraph: "0.001"
+  - paragraph: "0.100"
+  - slider "Stop-loss %" [ref=e27]:
+    - paragraph: "0.005"
+  - paragraph: "0.001"
+  - paragraph: "0.100"
+  - spinbutton "Level spacing (price)" [ref=e28]: "500.00"
+  - button [ref=e29] [nth=8]
+  - button [ref=e30] [nth=9]
+  - slider "Number of horizontal levels" [ref=e31]:
+    - paragraph: "5"
+  - paragraph: "1"
+  - paragraph: "20"
+  - spinbutton "Trade size (BTC)" [ref=e32] [nth=1]: "0.010"
+  - button [ref=e33] [nth=10]
+  - button [ref=e34] [nth=11]
+  - heading "Account" [ref=e35] [level=3]
+  - spinbutton "Starting USDT" [ref=e36]: "100000"
+  - button [ref=e37] [nth=12]
+  - button [ref=e38] [nth=13]
+  - spinbutton "Starting BTC" [ref=e39]: "1.0"
+  - button [ref=e40] [nth=14]
+  - button [ref=e41] [nth=15]
+  - button "Run Backtest Comparison" [ref=e42]:
+    - paragraph: Run Backtest Comparison
+  - banner:
+    - button "Deploy" [ref=e43]
+    - button "Main menu" [ref=e44]
+  - heading "Hyperliquid Trading Game" [ref=e45] [level=1]:
+    - text: Hyperliquid Trading Game
+    - link "Link to heading" [ref=e46]:
+      - /url: "#hyperliquid-trading-game"
+  - paragraph:
+    - text: Learn trading by comparing
+    - strong: Grid Trading
+    - text: vs
+    - strong: Take-Profit/Stop-Loss Trading
+    - text: strategies. Adjust parameters, run backtests, and see which strategy performs better!
+  - heading "Backtest Results" [ref=e47] [level=2]:
+    - text: Backtest Results
+    - link "Link to heading" [ref=e48] [nth=1]:
+      - /url: "#backtest-results"
+  - heading "Grid Trading" [ref=e49] [nth=1] [level=3]:
+    - text: Grid Trading
+    - link "Link to heading" [ref=e50] [nth=2]:
+      - /url: "#grid-trading"
+  - paragraph: Total Return
+  - paragraph: 0.00%
+  - paragraph: 1.0000 BTC
+  - img: Mar 152026 Mar 22 Mar 29 Apr 5 Apr 12 0.9 0.95 1 1.05 1.1
+  - img: Grid Trading Balance Over Time Time Balance (BTC)
+  - toolbar:
+    - button "Download plot as a PNG" [ref=e51]:
+      - img
+    - button "Zoom" [ref=e52]:
+      - img
+    - button "Pan" [ref=e53]:
+      - img
+    - button "Zoom in" [ref=e54]:
+      - img
+    - button "Zoom out" [ref=e55]:
+      - img
+    - button "Autoscale" [ref=e56]:
+      - img
+    - button "Reset axes" [ref=e57]:
+      - img
+    - button "Fullscreen" [ref=e58]:
+      - img
+  - img
+  - heading "TP/SL Trading" [ref=e59] [nth=1] [level=3]:
+    - text: TP/SL Trading
+    - link "Link to heading" [ref=e60] [nth=3]:
+      - /url: "#tp-sl-trading"
+  - paragraph: Total Return
+  - paragraph: 0.00%
+  - paragraph: 1.0000 BTC
+  - img: Mar 152026 Mar 22 Mar 29 Apr 5 Apr 12 0.98 0.99 1 1.01 1.02 1.03
+  - img: TP/SL Trading Balance Over Time Time Balance (BTC)
+  - toolbar:
+    - button "Download plot as a PNG" [ref=e61] [nth=1]:
+      - img
+    - button "Zoom" [ref=e62] [nth=1]:
+      - img
+    - button "Pan" [ref=e63] [nth=1]:
+      - img
+    - button "Zoom in" [ref=e64] [nth=1]:
+      - img
+    - button "Zoom out" [ref=e65] [nth=1]:
+      - img
+    - button "Autoscale" [ref=e66] [nth=1]:
+      - img
+    - button "Reset axes" [ref=e67] [nth=1]:
+      - img
+    - button "Fullscreen" [ref=e68] [nth=1]:
+      - img
+  - img
+  - heading "Strategy Comparison" [ref=e69] [level=3]:
+    - text: Strategy Comparison
+    - link "Link to heading" [ref=e70] [nth=4]:
+      - /url: "#strategy-comparison"
+  - table:
+    - rowgroup:
+      - row "Grid Trading TP/SL Trading":
+        - columnheader:
+          - paragraph
+        - columnheader "Grid Trading" [ref=e71]:
+          - paragraph: Grid Trading
+        - columnheader "TP/SL Trading" [ref=e72]:
+          - paragraph: TP/SL Trading
+    - rowgroup:
+      - row "total_return_pct 0.00 0.00":
+        - rowheader "total_return_pct" [ref=e73]:
+          - paragraph: total_return_pct
+        - cell "0.00" [ref=e74]:
+          - paragraph: "0.00"
+        - cell "0.00" [ref=e75] [nth=1]:
+          - paragraph: "0.00"
+      - row "final_balance 1.00 1.00":
+        - rowheader "final_balance" [ref=e76]:
+          - paragraph: final_balance
+        - cell "1.00" [ref=e77]:
+          - paragraph: "1.00"
+        - cell "1.00" [ref=e78] [nth=1]:
+          - paragraph: "1.00"
+      - row "max_drawdown_pct 20.54 3.92":
+        - rowheader "max_drawdown_pct" [ref=e79]:
+          - paragraph: max_drawdown_pct
+        - cell "20.54" [ref=e80]:
+          - paragraph: "20.54"
+        - cell "3.92" [ref=e81]:
+          - paragraph: "3.92"
+  - alert:
+    - paragraph: TP/SL Trading wins!
+  - heading "Price Chart with Levels" [ref=e82] [level=3]:
+    - text: Price Chart with Levels
+    - link "Link to heading" [ref=e83] [nth=5]:
+      - /url: "#price-chart-with-levels"
+  - button "Show data" [ref=e84]
+  - button "Fullscreen" [ref=e85] [nth=2]
+  - img: Thu 12 Fri 13 Sat 14 Mar 15 Mon 16 Tue 17 Wed 18 Thu 19 Fri 20 Sat 21 Mar 22 Mon 23 Tue 24 Wed 25 Thu 26 Fri 27 Sat 28 Mar 29 Mon 30 Tue 31 April Thu 02 Fri 03 Sat 04 Apr 05 Mon 06 Tue 07 Wed 08 Thu 09 Fri 10 Sat 11 Apr 12 Mon 13 0 5,000 10,000 15,000 20,000 25,000 30,000 35,000
+  - group "Click to view actions":
+    - img
+  - heading "All Backtest Results" [ref=e86] [level=2]:
+    - text: All Backtest Results
+    - link "Link to heading" [ref=e87] [nth=6]:
+      - /url: "#all-backtest-results"
+  - button "Show/hide columns" [ref=e88]
+  - button "Download as CSV" [ref=e89]
+  - button "Search" [ref=e90]
+  - button "Fullscreen" [ref=e91] [nth=3]
+  - separator
+  - heading "How to Play" [ref=e92] [level=3]:
+    - text: How to Play
+    - link "Link to heading" [ref=e93] [nth=7]:
+      - /url: "#how-to-play"
+  - list:
+    - listitem:
+      - strong: Adjust parameters
+      - text: in the sidebar to configure both strategies.
+    - listitem:
+      - strong: Run backtest
+      - text: to simulate trading on historical (synthetic) data.
+    - listitem:
+      - strong: Compare results
+      - text: to see which strategy performs better.
+    - listitem:
+      - strong: Learn
+      - text: by experimenting with different settings and timeframes.
+  - heading "About the Strategies" [ref=e94] [level=3]:
+    - text: About the Strategies
+    - link "Link to heading" [ref=e95] [nth=8]:
+      - /url: "#about-the-strategies"
+  - list:
+    - listitem:
+      - strong: Grid Trading
+      - text: ": Places buy/sell limit orders at fixed price intervals (horizontal levels). Profits from price oscillations within the grid."
+    - listitem:
+      - strong: TP/SL Trading
+      - text: ": Enters a position when price crosses a horizontal level, with predefined take-profit and stop-loss levels."
+  - heading "Disclaimer" [ref=e96] [level=3]:
+    - text: Disclaimer
+    - link "Link to heading" [ref=e97] [nth=9]:
+      - /url: "#disclaimer"
+  - paragraph: This is a simulation for educational purposes only. Past performance does not guarantee future results. Trade responsibly.
+  - img
