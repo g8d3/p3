@@ -1,0 +1,13 @@
+[project]
+name = "s41"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    # "dtale>=3.22.0",
+    "eth-account>=0.13.7",
+    "hyperliquid-python-sdk>=0.23.0",
+    "itables>=2.7.3",
+    "pandas>=3.0.2",
+]
