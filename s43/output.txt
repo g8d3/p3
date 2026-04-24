@@ -1,0 +1,18 @@
+Fetching data for ['BTC-USD', 'ETH-USD', 'SOL-USD', 'NVDA', 'AAPL']...
+  BTC-USD: loading from cache (age 0.0 days)
+  ETH-USD: loading from cache (age 0.0 days)
+  SOL-USD: loading from cache (age 0.0 days)
+  NVDA: loading from cache (age 0.0 days)
+  AAPL: loading from cache (age 0.0 days)
+Total events found: 454
+Results columns: ['mae_pct', 'mfe_pct', 'type', 'ticker']
+Results shape: (454, 4)
+    mae_pct   mfe_pct   type   ticker
+0  1.203949  1.002647  short  BTC-USD
+1  0.247032  1.938258  short  BTC-USD
+2  6.607182  1.518221  short  BTC-USD
+3  5.077590  0.580611  short  BTC-USD
+4  4.472370  0.597347  short  BTC-USD
+Plot saved to analysis_plot.png
+Average Reversal (MFE): 3.88%
+75th Percentile Overshoot (MAE): 4.92%

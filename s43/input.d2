@@ -1,0 +1,96 @@
+direction: down
+
+DATA_INGESTION: "1. DATA INGESTION (Multiple Sources)" {
+  D1: "Price/Volume: OHLCV"
+  D2: "Market Depth: Order Book"
+  D3: "Alternative: Social Sentiment"
+  D4: "Fundamental: P/S, Growth, Margin"
+
+  D1 -> FEATURE_ENGINEERING.FE: High Freq
+  D2 -> FEATURE_ENGINEERING.FE: High Freq
+  D3 -> FEATURE_ENGINEERING.FE: Mid Freq
+  D4 -> FEATURE_ENGINEERING.FE: Low Freq
+}
+
+FEATURE_ENGINEERING: "2. FEATURE ENGINEERING (Normalization)" {
+  FE: "Transform Raw Data to\nUniform Features/Z-Scores"
+}
+
+ALPHA_GENERATION: "3. ALPHA SIGNAL GENERATION (Modeling)" {
+  direction: right
+  S1: Microstructure Alpha
+  S2: Momentum Alpha
+  S3: Mean Reversion Alpha
+  S4: Fundamental Alpha
+
+  FEATURE_ENGINEERING.FE -> S1
+  FEATURE_ENGINEERING.FE -> S2
+  FEATURE_ENGINEERING.FE -> S3
+  FEATURE_ENGINEERING.FE -> S4
+}
+
+ALPHA_RESEARCH: "4. ALPHA RESEARCH (Validation & Metrics)" {
+  Val: Cross-Validation / Backtesting
+  IC_calc: Calculate Information Coefficient (Rank Correlation) {
+    shape: parallelogram
+  }
+  IR_calc: Calculate Information Ratio (Avg IC / StdDev IC) {
+    shape: parallelogram
+  }
+
+  ALPHA_GENERATION.S1 -> Val
+  ALPHA_GENERATION.S2 -> Val
+  ALPHA_GENERATION.S3 -> Val
+  ALPHA_GENERATION.S4 -> Val
+
+  Val -> IC_calc
+  Val -> IR_calc
+
+  BR: "Calculate Breadth:\nN Independent Bets"
+  FLAM: "Fundamental Law of Active Management:\nIR ≈ IC * √BR" {
+    shape: hexagon
+  }
+
+  IC_calc -> FLAM: {style.stroke-dash: 5}
+  BR -> FLAM: {style.stroke-dash: 5}
+}
+
+REGIME_DETECTION: "5. MARKET REGIME DETECTION (Switching Engine)" {
+  RD1: "Hurst Exponent:\n> 0.5 Trend, < 0.5 MR"
+  RD2: "Hidden Markov Models:\nState Probability"
+  RD3: "Volatility Thresholds:\nVIX/ATR"
+}
+
+PORTFOLIO_CONSTRUCTION: "6. PORTFOLIO CONSTRUCTION (Blending & Optimization)" {
+  Str1: Trend Following Strategy
+  Str2: Mean Reversion Strategy
+
+  Opt: "Portfolio Optimization:\nRisk Parity or Mean-Variance"
+
+  REGIME_DETECTION.RD1 -> Opt: Dynamic Weights
+  REGIME_DETECTION.RD2 -> Opt
+  REGIME_DETECTION.RD3 -> Opt
+
+  Str1 -> Opt
+  Str2 -> Opt
+
+  ALPHA_RESEARCH.IR_calc -> Opt: Strategy Quality
+
+  Opt -> Weights: "Define Portfolio Percentages:\ne.g., 60% Trend, 40% MR"
+}
+
+EXECUTION: "7. EXECUTION (Order Routing)" {
+  EM: "Execution Model:\nLimit vs Market Orders"
+  Live: Live Market {shape: cylinder}
+
+  PORTFOLIO_CONSTRUCTION.Weights -> EM
+  EM -> Live
+}
+
+# Styling
+*.shape: rectangle
+ALPHA_RESEARCH.IC_calc.style.fill: "#ff9"
+ALPHA_RESEARCH.IR_calc.style.fill: "#ff9"
+ALPHA_RESEARCH.FLAM.style.fill: "#ff9"
+PORTFOLIO_CONSTRUCTION.Weights.style.fill: "#dfd"
+PORTFOLIO_CONSTRUCTION.Weights.style.stroke: "#333"
