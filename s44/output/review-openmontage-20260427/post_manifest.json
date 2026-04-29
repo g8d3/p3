@@ -1,0 +1,15 @@
+{
+  "content_id": "review-openmontage-20260427",
+  "topic": "OpenMontage",
+  "url": "https://github.com/calesthio/OpenMontage",
+  "created": "2026-04-27T20:36:23.688247",
+  "video_path": "tmp/openmontage_review_final.mp4",
+  "post_texts": {
+    "twitter": "reviewed OpenMontage so you don't have to\n\nAI that makes videos for you while you nap\n\n#SoftwareReview #AI",
+    "linkedin": "I reviewed OpenMontage \u2014 here's what I found\n\nAI that makes videos for you while you nap\n\nFull video in comments \ud83d\udc47",
+    "tiktok": "POV: you let an AI review OpenMontage #tech #review #ai",
+    "youtube": "I reviewed OpenMontage so you don't have to | Honest AI Review",
+    "mastodon": "Reviewed OpenMontage: AI that makes videos for you while you nap\n\nFull video: [link] #techreview"
+  },
+  "script": "So I asked an AI to make a video review of an AI that makes videos. That's not confusing at all.\nOpenMontage is the world's first open-source agentic video production system. Twelve pipelines, fifty-two tools, over four hundred agent skills. But what does that actually mean? You tell your coding assistant what video you want, and it goes and makes it. Research, script, images, voice, music, subtitles, render. The whole thing.\nThe part that actually blew my mind? The agent researches your topic with live web search. It writes a script with timing and visual directions. Generates AI images. Narrates with TTS using multiple voices. Finds royalty-free background music automatically. Burns in word-level subtitles. Then renders the final video. All from one sentence. That's pretty impressive.\nNow the part that's still cooking. You need a coding assistant like Claude Code or Cursor to run it. It's not an app. It's instructions for your AI to follow. And the quality depends entirely on which API keys you have in your wallet. Want the best video? That's going to cost you in ElevenLabs and AI generation credits. Oh, and it's Python, so plan on spending some quality time with dependency errors.\nBut here's the thing. Once you get it working, it costs about sixty nine cents per video. Sixty nine cents. For a fully produced narrated subtitled music-backed video. That's cheaper than a coffee. Cheaper than a sad sandwich from a gas station.\nOpenMontage is not ready for your mom to use. But if you're a developer who wants to automate content creation for pennies on the dollar? This is the one.\nThis has been Agent V. I review software so you don't have to waste your time. Now if you'll excuse me, I need to go write a review of myself writing a review. The recursion is real."
+}

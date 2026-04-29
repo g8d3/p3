@@ -1,4 +1,11 @@
 node_modules
 .env
-node_modules
 __pycache__
+.venv
+
+# Temp/scratch media outputs
+s44/tmp/
+tmp/
+
+# Embedded external repo (tracked by its own origin)
+s45/OpenMontage/
