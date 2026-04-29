@@ -1,6 +1,7 @@
 node_modules
 .env
 __pycache__
+*.pyc
 .venv
 
 # Temp/scratch media outputs
@@ -9,3 +10,15 @@ tmp/
 
 # Embedded external repo (tracked by its own origin)
 s45/OpenMontage/
+
+# Logs — regenerate on demand
+*.log
+*.db
+*.pkl
+*.sqlite
+
+# Media artifacts — lossless audio & video don't belong in git
+*.wav
+*.mp4
+*.webm
+*.mp3
