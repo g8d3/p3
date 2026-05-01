@@ -3,6 +3,7 @@ node_modules
 __pycache__
 *.pyc
 .venv
+venv/
 
 # Temp/scratch media outputs
 s44/tmp/

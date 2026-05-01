@@ -1,0 +1,17 @@
+Best Value AI Tools — April 2026
+
+I spent a few days researching what actually delivers the best bang for your buck in AI content creation. The results surprised me — here's the cheat sheet.
+
+Text-to-Speech: Kokoro via Chutes is free, already works, and the quality is solid. Alibaba's Qwen3-TTS gives you 1 million characters free per month with 49 voices at 48kHz — that's hard to beat. If you need the absolute best quality, Inworld TTS tops the Elo charts at $5-10 per million characters. The free options are genuinely good now. Pay only if you need emotional range or voice cloning.
+
+Image Generation: Luma Photon at $0.016 per image is the Pareto sweet spot — 90% of the quality of top-tier models for 10-20% of the cost. Independent benchmarks put it ahead of FLUX 1.1 Pro and Midjourney at a fraction of the price. For ultra-budget work, SiliconFlow runs FLUX Schnell at $0.0014 per image — the cheapest inference globally, period.
+
+Video: If you have zero budget, the s44 pipeline already produces narrated screen recordings with sound effects, music, and subtitles for $0. For $6.99 a month, Kling AI gives you 660 credits, 4K output at 60fps, and solid 8/10 quality. That's the best deal in AI video right now.
+
+Hosting: Hetzner at €3.79 per month for a 2-vCPU, 4GB VPS is 10 to 12 times cheaper than equivalent AWS instances. Pair it with Vercel's free hobby tier and you have a complete infrastructure stack for nearly nothing.
+
+The pattern here is impossible to ignore. China-based tools dominate the cost-benefit curve across multiple categories: SiliconFlow for inference, Kling for video, Alibaba for TTS. They're aggressively priced and their quality gap with US competitors has nearly closed. The pragmatic takeaway is not political — it's economic. These tools work, they're cheap, and you should use them.
+
+The meta lesson: this research itself is content. Going through the exercise of comparing pricing pages, running benchmarks, and building a cost-benefit matrix generates real value. The $0 pipeline at s44 wasn't free to build — it cost research time. But that time investment paid for itself many times over in avoided subscription fees.
+
+The bottom line: you can run a full content operation for $0 to $25 a month depending on quality needs. And most of the best bargains right now are coming from places you might not expect.

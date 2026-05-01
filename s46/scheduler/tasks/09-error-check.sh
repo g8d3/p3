@@ -1,0 +1,26 @@
+#!/bin/bash
+# 09-error-check — Scan for tool errors and register them centrally
+#
+# Checks audio files for validity, scans logs for failures,
+# and updates the error registry at system/error-registry.md.
+
+TASK_PROMPT=$(cat <<'PROMPT'
+You are a systems reliability monitor. Check the content generation system for errors.
+
+1. Check all audio files in /home/vuos/code/p3/s46/content/audio/:
+   - For each .mp3, run: file <path>
+   - If it says "JSON text data" or is smaller than 1000 bytes, it FAILED
+   - List all failed audio files
+
+2. Read the error registry at /home/vuos/code/p3/s46/system/error-registry.md
+
+3. Check scheduler logs for recent failures:
+   - head -50 /home/vuos/code/p3/s46/scheduler/logs/fixer.log
+   - head -30 /home/vuos/code/p3/s46/scheduler/logs/events.log
+
+4. Update the error registry with any new issues found. Add entries in this format:
+   | N | Brief description | today | today | open | Workaround or fix pending |
+
+5. Summarize findings to /home/vuos/code/p3/s46/content/posts/error-check-report.txt
+PROMPT
+)

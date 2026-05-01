@@ -1,0 +1,18 @@
+#!/bin/bash
+# 07-editor-review — Review all unreviewed content
+#
+# Runs the editor agent to review all pending posts.
+# Uses Gemini API for scoring if available.
+
+TASK_PROMPT=$(cat <<'PROMPT'
+Run the editor agent to review all unreviewed content:
+
+1. Execute: /home/vuos/code/p3/s46/system/editor-agent.sh --all
+2. Read each new review file in /home/vuos/code/p3/s46/content/reviews/
+3. Summarize the results:
+   - How many posts were reviewed
+   - Which were approved vs rejected
+   - Average scores
+4. Save the summary to: /home/vuos/code/p3/s46/content/posts/editor-summary.txt
+PROMPT
+)

@@ -1,0 +1,5 @@
+I built an AI agent that runs itself. No TUI, no hand-holding. Just cron, a task queue, and `opencode run --dangerously-skip-permissions`.
+
+It wakes every 4h, picks a task from 7 scripts, researches from 60+ indexed projects, writes a post, narrates it via TTS (8 voices), and logs everything. Chrome CDP gives it browser access. A security audit fixed 3 leaked .env files.
+
+7 agents, 8 cron jobs, 47MB. Next: video pipeline + debit card for AI image gen.

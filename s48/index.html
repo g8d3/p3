@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>Vibe Coding</title>
+<style>
+:root{--bg:#f5f5f5;--surface:#fff;--text:#1a1a2e;--text2:#666;--accent:#6c63ff;--accent2:#e8e7ff;--border:#e0e0e0;--shadow:0 4px 20px rgba(0,0,0,.08);--radius:16px;}
+[data-theme=dark]{--bg:#0f0f23;--surface:#1a1a2e;--text:#e0e0ff;--text2:#8888aa;--accent:#7c73ff;--accent2:#2a2a4e;--border:#333355;--shadow:0 4px 20px rgba(0,0,0,.3);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);transition:background .3s,color .3s;}
+button,input{font:inherit;}
+
+/* Login */
+#login{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:24px;gap:24px;text-align:center;}
+#login h1{font-size:2rem;font-weight:700;background:linear-gradient(135deg,var(--accent),#ff6b9d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+#login p{color:var(--text2);font-size:.9rem;max-width:280px;}
+#login input{width:100%;max-width:300px;padding:14px 18px;border:2px solid var(--border);border-radius:12px;background:var(--surface);color:var(--text);font-size:1rem;outline:none;transition:border .2s;}
+#login input:focus{border-color:var(--accent);}
+.btn-primary{background:var(--accent);color:#fff;border:none;border-radius:12px;padding:14px 48px;font-size:1.05rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;}
+.btn-primary:active{transform:scale(.97);}
+.btn-icon{background:none;border:2px solid var(--border);border-radius:50%;width:44px;height:44px;cursor:pointer;font-size:1.2rem;display:flex;align-items:center;justify-content:center;transition:border .2s;color:var(--text);}
+
+/* Main */
+#main{display:none;flex-direction:column;height:100%;}
+#main.active{display:flex;}
+#top-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;gap:8px;border-bottom:1px solid var(--border);flex-shrink:0;}
+#status{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--text2);}
+#status-dot{width:8px;height:8px;border-radius:50%;background:#ff4444;transition:background .3s;}
+#status-dot.connected{background:#44cc44;}
+#model-label{font-size:.75rem;color:var(--text2);background:var(--accent2);padding:4px 10px;border-radius:20px;}
+
+/* Chat */
+#chat{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth;}
+.bubble{max-width:85%;padding:10px 14px;border-radius:14px;font-size:.95rem;line-height:1.4;word-wrap:break-word;animation:fadeIn .2s ease-out;}
+.bubble.user{align-self:flex-end;background:var(--accent);color:#fff;border-bottom-right-radius:4px;}
+.bubble.ai{align-self:flex-start;background:var(--surface);color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px;}
+.bubble.thinking{align-self:flex-start;background:var(--accent2);color:var(--text2);font-style:italic;font-size:.85rem;}
+.bubble.transcript{align-self:flex-end;background:var(--accent);opacity:.7;color:#fff;font-size:.85rem;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+#thinking-dots::after{content:'';animation:dots 1.5s steps(3,end) infinite;}
+@keyframes dots{0%{content:'';}33%{content:'.';}66%{content:'..';}100%{content:'...';}}
+
+/* Mic */
+#mic-area{flex-shrink:0;padding:12px 16px 20px;display:flex;flex-direction:column;align-items:center;gap:8px;border-top:1px solid var(--border);}
+#mic-btn{width:72px;height:72px;border-radius:50%;border:4px solid var(--accent);background:var(--surface);color:var(--accent);font-size:2rem;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+#mic-btn:active{transform:scale(.92);}
+#mic-btn.recording{background:#ff4444;border-color:#ff4444;color:#fff;box-shadow:0 0 30px rgba(255,68,68,.4);}
+#mic-hint{font-size:.75rem;color:var(--text2);}
+#mic-status{font-size:.7rem;color:var(--text2);min-height:1em;}
+
+/* Code panel */
+#code-panel{display:none;position:fixed;bottom:0;left:0;right:0;max-height:50vh;background:var(--surface);border-top:2px solid var(--accent);border-radius:16px 16px 0 0;z-index:10;overflow:hidden;box-shadow:0 -4px 30px rgba(0,0,0,.15);animation:slideUp .25s ease-out;}
+#code-panel.open{display:flex;flex-direction:column;}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+#code-header{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+#code-header span{font-weight:600;font-size:.9rem;}
+#code-close{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text2);padding:4px;}
+#code-body{overflow:auto;padding:12px 16px;flex:1;}
+#code-body pre{font-family:'SF Mono',SFMono-Regular,Consolas,'Liberation Mono',monospace;font-size:.82rem;white-space:pre-wrap;word-break:break-word;color:var(--text);line-height:1.5;}
+
+/* Blob cursor for streaming */
+#cursor{display:inline-block;width:2px;height:1em;background:var(--accent);margin-left:2px;animation:blink .8s step-end infinite;vertical-align:text-bottom;}
+@keyframes blink{50%{opacity:0;}}
+
+/* Scrollbar */
+#chat::-webkit-scrollbar{width:4px;}
+#chat::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+#code-body::-webkit-scrollbar{width:4px;}
+#code-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* Text input bar */
+#text-bar{display:flex;align-items:center;gap:8px;padding:6px 12px 12px;border-top:1px solid var(--border);flex-shrink:0;}
+#text-input{flex:1;padding:10px 14px;border:2px solid var(--border);border-radius:24px;background:var(--surface);color:var(--text);font-size:.95rem;outline:none;transition:border .2s;}
+#text-input:focus{border-color:var(--accent);}
+#text-input::placeholder{color:var(--text2);opacity:.6;}
+#send-btn{width:40px;height:40px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity .15s;flex-shrink:0;}
+#send-btn:active{opacity:.7;}
+#send-btn:disabled{opacity:.3;cursor:default;}
+
+.lang-select{display:flex;gap:8px;justify-content:center;}
+.lang-btn{padding:8px 16px;border:2px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-size:.9rem;cursor:pointer;transition:all .15s;}
+.lang-btn.active{border-color:var(--accent);background:var(--accent2);font-weight:600;}
+.lang-btn:active{transform:scale(.96);}
+
+@media(min-width:768px){#chat{padding:12px 24px;}.bubble{max-width:70%;}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h1>Vibe Coding</h1>
+  <p id="login-desc">Tap the mic, speak your idea, and AI builds it.</p>
+  <div class="lang-select" id="lang-select">
+    <button class="lang-btn active" data-lang="en">🇬🇧 English</button>
+    <button class="lang-btn" data-lang="es">🇪🇸 Español</button>
+  </div>
+  <input type="text" id="room" placeholder="Room name" value="default" autocomplete="off">
+  <button class="btn-primary" id="join-btn">Start Coding</button>
+  <button class="btn-icon" id="theme-btn" aria-label="Toggle theme">🌙</button>
+</div>
+
+<div id="main">
+  <div id="top-bar">
+    <div id="status">
+      <span id="status-dot"></span>
+      <span id="status-text">Disconnected</span>
+    </div>
+    <span id="model-label">glm-4.5-air</span>
+    <button class="btn-icon" id="theme-btn2" aria-label="Toggle theme" style="width:36px;height:36px;font-size:1rem;">🌙</button>
+  </div>
+  <div id="chat"></div>
+  <div id="mic-area">
+    <div id="mic-status"></div>
+    <button id="mic-btn">🎤</button>
+    <div id="mic-hint">Tap & hold to record</div>
+  </div>
+  <div id="text-bar">
+    <input type="text" id="text-input" placeholder="Type a message..." autocomplete="off">
+    <button id="send-btn">➤</button>
+  </div>
+</div>
+
+<div id="code-panel">
+  <div id="code-header">
+    <span>📄 Generated Code</span>
+    <button id="code-close">✕</button>
+  </div>
+  <div id="code-body"><pre id="code-content"></pre></div>
+</div>
+
+<script>
+// === Theme ===
+const html = document.documentElement;
+const theme = localStorage.getItem('theme') || 'light';
+html.setAttribute('data-theme', theme);
+function toggleTheme() {
+  const cur = html.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+}
+document.querySelectorAll('#theme-btn, #theme-btn2').forEach(b => b.addEventListener('click', toggleTheme));
+if (theme === 'dark') {
+  document.querySelectorAll('#theme-btn, #theme-btn2').forEach(b => { b.textContent = '☀️'; });
+}
+
+// === Language ===
+const LANGS = {
+  en: { label: 'English', micHint: 'Tap & hold to record', micHold: 'Release to send', model: 'glm-4.5-air', desc: 'Tap the mic, speak your idea, and AI builds it.', textPlaceholder: 'Type a message...', textSend: 'Send' },
+  es: { label: 'Español', micHint: 'Mantén pulsado para grabar', micHold: 'Suelta para enviar',  model: 'glm-4.5-air', desc: 'Toca el micrófono, di tu idea y la IA la construye.', textPlaceholder: 'Escribe un mensaje...', textSend: 'Enviar' },
+};
+let selectedLang = localStorage.getItem('lang') || 'en';
+
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedLang = btn.dataset.lang;
+    localStorage.setItem('lang', selectedLang);
+  });
+});
+// Restore saved lang
+document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === selectedLang));
+function updateLoginLang() {
+  const info = LANGS[selectedLang] || LANGS.en;
+  document.getElementById('login-desc').textContent = info.desc;
+  document.getElementById('join-btn').textContent = selectedLang === 'es' ? 'Comenzar' : 'Start Coding';
+}
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', updateLoginLang);
+});
+updateLoginLang();
+
+function applyLangUI(lang) {
+  const info = LANGS[lang] || LANGS.en;
+  document.getElementById('mic-hint').textContent = info.micHint;
+  document.getElementById('model-label').textContent = info.model;
+  document.getElementById('text-input').placeholder = info.textPlaceholder;
+}
+
+// === Audio playback ===
+let audioCtx;
+let playQueue = [];
+let playing = false;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function base64ToArrayBuffer(b64) {
+  const bin = atob(b64);
+  const buf = new ArrayBuffer(bin.length);
+  const u8 = new Uint8Array(buf);
+  for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return buf;
+}
+
+function queueAudio(b64) {
+  playQueue.push(b64);
+  if (!playing) playNext();
+}
+
+function playNext() {
+  if (playQueue.length === 0) { playing = false; return; }
+  playing = true;
+  const b64 = playQueue.shift();
+  const buf = base64ToArrayBuffer(b64);
+  const ctx = getAudioCtx();
+  ctx.decodeAudioData(buf).then(ab => {
+    const src = ctx.createBufferSource();
+    src.buffer = ab;
+    src.connect(ctx.destination);
+    src.onended = playNext;
+    src.start();
+  }).catch(e => { console.error('Audio decode error:', e); playNext(); });
+}
+
+function stopPlayback() {
+  playQueue = [];
+  playing = false;
+}
+
+// === WebSocket ===
+let ws = null;
+let reconnectTimer = null;
+let reconnectDelay = 1000;
+const MAX_RECONNECT_DELAY = 30000;
+
+function getWsUrl() {
+  const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+  return `${proto}//${location.host}/ws`;
+}
+
+function connectWs() {
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
+  const url = getWsUrl();
+  ws = new WebSocket(url);
+  ws.onopen = () => {
+    setConnected(true);
+    reconnectDelay = 1000;
+    addBubble('system', 'Connected');
+    ws.send(JSON.stringify({ type: 'config', lang: selectedLang }));
+    applyLangUI(selectedLang);
+    setupErrorReporting();
+  };
+  ws.onmessage = onMessage;
+  ws.onclose = () => {
+    setConnected(false);
+    scheduleReconnect();
+  };
+  ws.onerror = () => ws.close();
+}
+
+function sendClientError(msg, stack) {
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    try { ws.send(JSON.stringify({ type: 'client_error', message: msg, stack: stack || '' })); } catch(_) {}
+  }
+}
+
+function setupErrorReporting() {
+  // Capture uncaught exceptions
+  window.onerror = function(message, source, lineno, colno, error) {
+    const stack = error ? error.stack : '';
+    sendClientError(String(message) + ' at ' + source + ':' + lineno, stack);
+    return false;
+  };
+  // Capture unhandled promise rejections
+  window.onunhandledrejection = function(e) {
+    sendClientError('Unhandled Promise: ' + (e.reason ? e.reason.message || String(e.reason) : '?'), e.reason ? e.reason.stack : '');
+  };
+  // Pipe console.error to server
+  const origError = console.error;
+  console.error = function() {
+    const msg = Array.from(arguments).map(a => a instanceof Error ? a.message : String(a)).join(' ');
+    const stack = Array.from(arguments).find(a => a instanceof Error)?.stack || new Error().stack;
+    sendClientError(msg, stack);
+    origError.apply(console, arguments);
+  };
+}
+
+function scheduleReconnect() {
+  if (reconnectTimer) return;
+  reconnectTimer = setTimeout(() => {
+    reconnectTimer = null;
+    connectWs();
+  }, reconnectDelay);
+  reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_DELAY);
+}
+
+function setConnected(ok) {
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  dot.classList.toggle('connected', ok);
+  txt.textContent = ok ? 'Connected' : 'Disconnected';
+}
+
+// === Message handling ===
+let currentBubble = null; // the last AI bubble for appending chunks
+let thinkingBubble = null;
+let streamText = ''; // accumulate current response
+let micDisabled = false;
+
+function onMessage(e) {
+  const msg = JSON.parse(e.data);
+  switch (msg.type) {
+    case 'transcript':
+      finishStream(); // finalize previous AI response
+      addBubble('transcript', msg.text);
+      break;
+    case 'thinking':
+      if (thinkingBubble) thinkingBubble.remove();
+      thinkingBubble = addBubble('thinking', msg.text);
+      break;
+    case 'response_chunk':
+      removeThinking();
+      if (!currentBubble) {
+        currentBubble = addBubble('ai', '');
+        currentBubble.id = 'cur-bubble';
+      }
+      streamText += msg.text;
+      const content = streamText.replace(/\[OPencode:[^\]]*\]/g, '').trim();
+      currentBubble.innerHTML = escapeHtml(content) + '<span id="cursor"></span>';
+      scrollChat();
+      break;
+    case 'audio_chunk':
+      queueAudio(msg.data);
+      break;
+    case 'audio_end':
+      finishStream();
+      break;
+    case 'code':
+      finishStream();
+      showCode(msg.code, msg.summary);
+      break;
+    case 'error':
+      addBubble('thinking', '⚠️ ' + msg.message);
+      break;
+  }
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function removeThinking() {
+  if (thinkingBubble) { thinkingBubble.remove(); thinkingBubble = null; }
+}
+
+function finishStream() {
+  if (currentBubble) {
+    const text = streamText.replace(/\[OPencode:[^\]]*\]/g, '').trim();
+    currentBubble.textContent = text;
+    currentBubble.id = '';
+    currentBubble = null;
+    streamText = '';
+  }
+  const c = document.getElementById('cursor');
+  if (c) c.remove();
+}
+
+function addBubble(type, text) {
+  const chat = document.getElementById('chat');
+  const b = document.createElement('div');
+  b.className = 'bubble ' + type;
+  b.textContent = text;
+  chat.appendChild(b);
+  scrollChat();
+  return b;
+}
+
+function scrollChat() {
+  const chat = document.getElementById('chat');
+  chat.scrollTop = chat.scrollHeight;
+}
+
+// === Code panel ===
+function showCode(code, summary) {
+  const panel = document.getElementById('code-panel');
+  const content = document.getElementById('code-content');
+  content.textContent = code;
+  panel.classList.add('open');
+  document.getElementById('code-header').querySelector('span').textContent = '📄 ' + (summary || 'Generated Code');
+}
+document.getElementById('code-close').addEventListener('click', () => {
+  document.getElementById('code-panel').classList.remove('open');
+});
+
+// === Recording ===
+let mediaRecorder = null;
+let recChunks = [];
+let recStream = null;
+let isRecording = false;
+
+const REC_MIME = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
+
+async function startRecording() {
+  if (!ws || ws.readyState !== WebSocket.OPEN) { addBubble('thinking', '⚠️ Not connected'); return; }
+  if (isRecording) return;
+  // Interrupt any ongoing AI response
+  try { ws.send(JSON.stringify({ type: 'interrupt' })); } catch(_) {}
+  stopPlayback();
+  finishStream();
+  try {
+    recStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(recStream, { mimeType: REC_MIME });
+    recChunks = [];
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recChunks.push(e.data); };
+    mediaRecorder.onstop = () => {
+      if (recChunks.length === 0) { cleanupRec(); return; }
+      const blob = new Blob(recChunks, { type: REC_MIME });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const b64 = reader.result.split(',')[1];
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'audio', data: b64 }));
+        }
+        cleanupRec();
+      };
+      reader.readAsDataURL(blob);
+    };
+    mediaRecorder.start();
+    isRecording = true;
+    updateMicUI(true);
+  } catch (e) {
+    addBubble('thinking', '⚠️ Mic access denied: ' + e.message);
+  }
+}
+
+function stopRecording() {
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop();
+  }
+  isRecording = false;
+  updateMicUI(false);
+}
+
+function cleanupRec() {
+  if (recStream) { recStream.getTracks().forEach(t => t.stop()); recStream = null; }
+  mediaRecorder = null;
+  recChunks = [];
+  updateMicUI(false);
+}
+
+function updateMicUI(rec) {
+  const btn = document.getElementById('mic-btn');
+  const status = document.getElementById('mic-status');
+  const hint = document.getElementById('mic-hint');
+  const info = LANGS[selectedLang] || LANGS.en;
+  btn.classList.toggle('recording', rec);
+  status.textContent = rec ? (selectedLang === 'es' ? 'Grabando...' : 'Recording...') : '';
+  hint.textContent = rec ? info.micHold : info.micHint;
+}
+
+// === Mic gesture handling ===
+const micBtn = document.getElementById('mic-btn');
+let pointerId = null;
+
+micBtn.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  pointerId = e.pointerId;
+  startRecording();
+  micBtn.setPointerCapture(e.pointerId);
+});
+
+micBtn.addEventListener('pointerup', (e) => {
+  if (e.pointerId === pointerId) {
+    pointerId = null;
+    stopRecording();
+  }
+});
+
+micBtn.addEventListener('pointercancel', (e) => {
+  if (e.pointerId === pointerId) {
+    pointerId = null;
+    stopRecording();
+  }
+});
+
+// Prevent context menu on long-press
+micBtn.addEventListener('contextmenu', e => e.preventDefault());
+
+// === Text input ===
+const textInput = document.getElementById('text-input');
+const sendBtn = document.getElementById('send-btn');
+
+function sendTextMessage() {
+  const text = textInput.value.trim();
+  if (!text || !ws || ws.readyState !== WebSocket.OPEN) return;
+  if (text.length > 2000) { addBubble('thinking', '⚠️ Message too long (max 2000 chars)'); return; }
+  ws.send(JSON.stringify({ type: 'text', text }));
+  addBubble('user', text);
+  textInput.value = '';
+  sendBtn.disabled = true;
+}
+
+textInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendTextMessage();
+  }
+});
+textInput.addEventListener('input', () => {
+  sendBtn.disabled = !textInput.value.trim();
+});
+sendBtn.addEventListener('click', sendTextMessage);
+sendBtn.disabled = true;
+
+// === Join ===
+document.getElementById('join-btn').addEventListener('click', () => {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('main').classList.add('active');
+  connectWs();
+});
+
+document.getElementById('room').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('join-btn').click();
+});
+
+// === Scroll on new content via MutationObserver ===
+const chatEl = document.getElementById('chat');
+const scrollObserver = new MutationObserver(() => scrollChat());
+scrollObserver.observe(chatEl, { childList: true, subtree: true });
+
+console.log('Vibe Coding ready');
+</script>
+</body>
+</html>

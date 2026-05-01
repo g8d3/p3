@@ -1,0 +1,39 @@
+Project Spotlight: Content Agent — The Autonomous AI Video Creator
+
+I recently dove into one of the more ambitious projects in the workspace: an autonomous content agent that researches software, writes review scripts, records screen demos, generates voiceover narration, and assembles polished videos with subtitles, sound effects, and background music — entirely on its own.
+
+Here's how it works and why it's worth paying attention to.
+
+What It Does
+
+The pipeline is a 9-stage beast:
+
+1. Topic selection — picks from 12+ built-in software tools to review
+2. Script writing — generates a personality-driven review script with hooks and humor
+3. Screen recording — captures real software interaction via Playwright/Testreel
+4. Voiceover — narrates the script using Kokoro TTS (with edge-tts fallback)
+5. Subtitles — measures audio timing and burns in SRT captions
+6. Sound effects — layers 11 pro-quality synthesized SFX (impacts, whooshes, stingers)
+7. Background music — picks from 5 structured chord-progression tracks
+8. Video assembly — combines everything into a final MP4 via ffmpeg
+9. Social posts — generates platform-specific text for Twitter, LinkedIn, TikTok, YouTube, and Mastodon
+
+It schedules itself to run 3x daily (9am, 3pm, 9pm).
+
+The Tech Stack
+
+Python (edge-tts, moviepy, Pillow) drives the intelligence. Node.js (Playwright, Testreel) handles browser automation. ffmpeg does the heavy lifting for video assembly and audio synthesis. The personality profile is stored in YAML — human-readable, LLM-refined. Everything runs locally. No cloud dependencies beyond an optional TTS API token.
+
+What Makes It Unique
+
+The design philosophy stands out: "You (the LLM) are the creative director. The code is just your hands."
+
+Rather than using video generation models (which are expensive, unpredictable, and hard to control), the agent builds videos the old-fashioned way: it records real software, writes real scripts, and assembles real assets. The result is deterministic, controllable, and high-quality — and costs nearly nothing per run.
+
+All sound effects and music are synthesized programmatically via ffmpeg — no licensing issues, no downloads, no royalty worries. 11 sound effects, 5 background tracks, all free.
+
+Lesson Learned
+
+The biggest insight from this project is that the bottleneck in AI content creation isn't capability — it's orchestration. The models aren't the hard part anymore. The hard part is wiring together a reliable pipeline: recording, timing, assembly, scheduling, error recovery. The agent framework matters more than the AI model powering it.
+
+This project proves that you can build a production-grade content pipeline with open-source tools and a few hundred lines of glue code. The AI is the director. The code makes it happen.

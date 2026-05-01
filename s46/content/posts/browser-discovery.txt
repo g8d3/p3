@@ -1,0 +1,9 @@
+I connected my AI agent to a live Chrome browser and explored X.com to see what the AI world is talking about. Here's what surfaced from my feed.
+
+The top story was "69 Best Open-Source AI Repositories in April 2026" — a massive curation by a senior ML engineer who combed through 300+ GitHub repos to find the 69 that actually matter. The thesis: tools funded startups pay $50,000/year for have open-source alternatives with 70,000 to 98,000 stars. This resonated deeply because this very project runs entirely on open-source: DeepSeek V4 via OpenCode, Kokoro TTS, Playwright for browser control, and FFmpeg for media processing. Our entire content pipeline costs $0 in tooling.
+
+Also trending: Sam Hogan's "HALO" — a Hierarchal Agent Loop Optimizer using RL-based agent optimization. It recursively self-improves by analyzing execution traces. We're building similar autonomous loops with OpenCode's cron-based scheduler and task queue.
+
+DeepSeek extended its 75% V4-Pro API discount through May 31 — great news since DeepSeek powers our AI agent. Figure AI is scaling Figure 03 robot production to one per hour, and Gemini now generates downloadable PDFs, docs, and spreadsheets.
+
+The biggest takeaway? AI is moving fast across every layer — open-source tools, agent optimization, robotics, and API discounts. The browser automation that brought me this content is itself part of that open-source wave. We're not just building with these tools; we're documenting the journey in real time.

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Content Agent Dashboard</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --text-muted: #8b949e;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --blue: #58a6ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.5em; margin-bottom: 5px; }
+  .subtitle { color: var(--text-muted); margin-bottom: 20px; font-size: 0.9em; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .card h3 { font-size: 0.8em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+  .card .value { font-size: 2em; font-weight: 600; }
+  .card .detail { font-size: 0.85em; color: var(--text-muted); margin-top: 4px; }
+
+  .ok { color: var(--green); }
+  .warn { color: var(--yellow); }
+  .critical { color: var(--red); }
+
+  .bar-bg { background: #21262d; border-radius: 6px; height: 8px; margin-top: 8px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-muted); font-weight: 500; }
+  td.approved { color: var(--green); }
+  td.pending { color: var(--yellow); }
+  td.file { font-family: monospace; font-size: 0.9em; }
+
+  .section { margin-bottom: 24px; }
+  .section h2 { font-size: 1.1em; margin-bottom: 12px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+
+  .event-log { max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 0.8em; }
+  .event-log .warn-line { color: var(--yellow); }
+  .event-log .info-line { color: var(--text-muted); }
+
+  #last-updated { color: var(--text-muted); font-size: 0.8em; text-align: right; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<h1>🤖 Content Agent Dashboard</h1>
+<p class="subtitle">Autonomous content generation system · <span id="system-name">p3/s46</span></p>
+
+<!-- Resource Metrics -->
+<div class="section">
+  <h2>System Resources</h2>
+  <div class="grid" id="resource-grid">
+    <div class="card"><h3>CPU Load</h3><div class="value" id="cpu-value">—</div><div class="bar-bg"><div class="bar-fill" id="cpu-bar" style="width:0%;background:var(--green)"></div></div></div>
+    <div class="card"><h3>Memory</h3><div class="value" id="mem-value">—</div><div class="bar-bg"><div class="bar-fill" id="mem-bar" style="width:0%;background:var(--green)"></div></div></div>
+    <div class="card"><h3>Disk</h3><div class="value" id="disk-value">—</div><div class="bar-bg"><div class="bar-fill" id="disk-bar" style="width:0%;background:var(--green)"></div></div></div>
+    <div class="card"><h3>OpenCode Processes</h3><div class="value" id="proc-value">—</div><div class="detail" id="agent-detail">— active agents</div></div>
+  </div>
+</div>
+
+<!-- Content Stats -->
+<div class="section">
+  <h2>Content Produced</h2>
+  <div class="grid" id="content-grid">
+    <div class="card"><h3>Posts</h3><div class="value" id="post-count">—</div></div>
+    <div class="card"><h3>Audio Files</h3><div class="value" id="audio-count">—</div></div>
+    <div class="card"><h3>Approved</h3><div class="value ok" id="approved-count">—</div></div>
+    <div class="card"><h3>Total Size</h3><div class="value" id="size-value">—</div></div>
+  </div>
+</div>
+
+<!-- Recent Posts -->
+<div class="section">
+  <h2>Recent Posts</h2>
+  <table id="posts-table">
+    <thead><tr><th>File</th><th>Size</th><th>Words</th><th>Status</th><th>Date</th></tr></thead>
+    <tbody id="posts-body"></tbody>
+  </table>
+</div>
+
+<!-- Events -->
+<div class="section">
+  <h2>Recent Events</h2>
+  <div class="card">
+    <div class="event-log" id="event-log">
+      <div class="info-line">Waiting for data...</div>
+    </div>
+  </div>
+</div>
+
+<div id="last-updated">Last updated: <span id="update-time">—</span></div>
+
+<script>
+// Load state from JSON
+async function refresh() {
+  try {
+    const resp = await fetch('current-state.json?_=' + Date.now());
+    const state = await resp.json();
+    updateResources(state);
+  } catch(e) {
+    console.log('State file not ready yet');
+  }
+  updateContent();
+  updateEvents();
+  document.getElementById('update-time').textContent = new Date().toLocaleString();
+}
+
+function updateResources(s) {
+  if (!s) return;
+  
+  // CPU
+  const cpuEl = document.getElementById('cpu-value');
+  cpuEl.textContent = s.cpu.load.toFixed(2);
+  cpuEl.className = 'value' + (s.cpu.alert ? ' warn' : ' ok');
+  const cpuPct = Math.min(100, (s.cpu.load / s.cpu.cores) * 100);
+  const cpuBar = document.getElementById('cpu-bar');
+  cpuBar.style.width = cpuPct + '%';
+  cpuBar.style.background = s.cpu.alert ? 'var(--yellow)' : 'var(--green)';
+
+  // Memory
+  const memEl = document.getElementById('mem-value');
+  memEl.textContent = s.memory.percent + '%';
+  memEl.className = 'value' + (s.memory.alert ? ' critical' : ' ok');
+  const memBar = document.getElementById('mem-bar');
+  memBar.style.width = s.memory.percent + '%';
+  memBar.style.background = s.memory.percent > 90 ? 'var(--red)' : s.memory.percent > 75 ? 'var(--yellow)' : 'var(--green)';
+
+  // Disk
+  const diskEl = document.getElementById('disk-value');
+  diskEl.textContent = s.disk.percent + '%';
+  diskEl.className = 'value' + (s.disk.alert ? ' warn' : ' ok');
+  const diskBar = document.getElementById('disk-bar');
+  diskBar.style.width = s.disk.percent + '%';
+  diskBar.style.background = s.disk.percent > 85 ? 'var(--red)' : s.disk.percent > 75 ? 'var(--yellow)' : 'var(--green)';
+
+  // Processes
+  document.getElementById('proc-value').textContent = s.opencode_processes || 0;
+  document.getElementById('agent-detail').textContent = (s.active_agents || 0) + ' active agents';
+
+  // Content counts
+  document.getElementById('post-count').textContent = s.content.posts || 0;
+  document.getElementById('audio-count').textContent = s.content.audio || 0;
+}
+
+function updateContent() {
+  // This would ideally come from the state JSON too
+  // For now, needs a server to list files — fallback handled
+}
+
+function updateEvents() {
+  // Events loaded from events.log via fetch
+  fetch('../scheduler/logs/events.log?_=' + Date.now())
+    .then(r => r.text())
+    .then(text => {
+      const log = document.getElementById('event-log');
+      if (!text.trim()) {
+        log.innerHTML = '<div class="info-line">No events recorded.</div>';
+        return;
+      }
+      const lines = text.trim().split('\n').slice(-20);
+      log.innerHTML = lines.map(line => {
+        try {
+          const ev = JSON.parse(line);
+          const cls = ev.severity === 'WARN' ? 'warn-line' : 'info-line';
+          return `<div class="${cls}">[${ev.timestamp}] ${ev.severity}: ${ev.message}</div>`;
+        } catch(e) {
+          return `<div class="info-line">${line}</div>`;
+        }
+      }).join('');
+    })
+    .catch(() => {});
+}
+
+// Auto-refresh
+refresh();
+setInterval(refresh, 10000);
+</script>
+
+</body>
+</html>

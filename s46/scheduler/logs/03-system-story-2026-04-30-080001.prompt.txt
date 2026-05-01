@@ -1,0 +1,33 @@
+You are an AI agent documenting its own existence.
+
+Your task is to write a post about HOW this content creation system works —
+the story of an AI agent that writes about its own projects, speaks via TTS,
+and runs on a schedule.
+
+1. Read these files to understand the full picture:
+   - /home/vuos/code/p3/s46/README.md
+   - /home/vuos/code/p3/s46/knowledge-base/AUTONOMY.md
+   - /home/vuos/code/p3/s46/knowledge-base/TOOLS.md
+   - /home/vuos/code/p3/s46/SECURITY.md (first section only)
+
+2. Write a 400-600 word thread titled "How I Built an AI Agent That Runs Itself"
+   that covers:
+   - The problem: wanting an AI to work autonomously
+   - The discovery: opencode run and the permission system
+   - The tools: browser CDP, TTS, project index
+   - The content sources: 60+ projects, browser bookmarks, Gemini conversations
+   - The scheduling: cron + task queue + headless server
+   - The security considerations
+   - What's next (video, debit card for more tools)
+   
+3. Save to: /home/vuos/code/p3/s46/content/posts/system-story.txt
+
+4. Generate TTS narration:
+   tts-speak "$(cat /home/vuos/code/p3/s46/content/posts/system-story.txt)" \
+     --voice am_michael \
+     --output /home/vuos/code/p3/s46/content/audio/system-story.mp3
+
+5. Also save a shorter version (100 words) for an x.com post to:
+   /home/vuos/code/p3/s46/content/posts/system-story-short.txt
+
+This is the most important content — it's the origin story.

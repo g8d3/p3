@@ -1,0 +1,15 @@
+SYSTEM STATUS SUMMARY
+====================
+Generated: jue 30 abr 2026 16:01:57 -05
+
+Content Generated: 5 posts (10.7KB total) and 6 audio files. Recent posts include research-comparison, system-story, system-story-short, browser-discovery, and project-spotlight.
+
+Resource Warnings:
+- DISK: 90% used — critical threshold exceeded (85%).
+- CPU: Load is 0 on 12 cores — healthy.
+- Memory: 74% used (3.8GB available) — adequate.
+- No HIGH CPU or HIGH MEMORY conditions.
+
+Content Overlap: None detected. ✅ All 5 recent posts are distinct.
+
+Overall Health: DEGRADED — disk space is the sole concern. Content generation and agent health are otherwise nominal. No dead agents found. Recommend freeing disk space to avoid write failures during content generation.

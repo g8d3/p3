@@ -1,0 +1,74 @@
+{
+  "timestamp": "2026-04-30T20:45:01-05:00",
+  "cpu": {
+    "load": 0,
+    "cores": 12,
+    "threshold": 9,
+    "alert": 0
+  },
+  "memory": {
+    "percent": 35,
+    "threshold": 90,
+    "alert": 0
+  },
+  "disk": {
+    "percent": 90,
+    "threshold": 85,
+    "alert": 1
+  },
+  "temperature": null,
+  "thermal_alert": 0,
+  "opencode_processes": 1,
+  "active_agents": 0,
+  "content": {
+    "posts": 6,
+    "audio": 6,
+    "approved": 4,
+    "total_size": "25M"
+  },
+  "alerts": 1,
+  "posts": [
+    {
+      "name": "system-story.txt",
+      "size": 3562,
+      "words": 567,
+      "approved": true,
+      "mtime": 1777554028.6184988
+    },
+    {
+      "name": "system-story-short.txt",
+      "size": 456,
+      "words": 78,
+      "approved": false,
+      "mtime": 1777554030.8916988
+    },
+    {
+      "name": "system-status.txt",
+      "size": 766,
+      "words": 111,
+      "approved": false,
+      "mtime": 1777582926.6910186
+    },
+    {
+      "name": "research-comparison.txt",
+      "size": 2373,
+      "words": 397,
+      "approved": true,
+      "mtime": 1777568427.5316358
+    },
+    {
+      "name": "project-spotlight.txt",
+      "size": 2808,
+      "words": 421,
+      "approved": true,
+      "mtime": 1777525239.4365373
+    },
+    {
+      "name": "browser-discovery.txt",
+      "size": 1500,
+      "words": 234,
+      "approved": true,
+      "mtime": 1777539865.0748236
+    }
+  ]
+}

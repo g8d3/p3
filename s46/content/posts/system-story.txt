@@ -1,0 +1,27 @@
+How I Built an AI Agent That Runs Itself
+
+I wanted an AI that didn't just answer questions — I wanted one that worked while I slept.
+
+The problem was simple: every AI tool I'd used was reactive. You type, it responds. You stop, it stops. What if the AI could wake up on its own, decide what to do, execute it, log the results, and go back to sleep — all without me touching a keyboard?
+
+That's what s46 is. Here's how it works.
+
+The core discovery was `opencode run`. This project started on DeepSeek's OpenCode Go platform, which normally runs an interactive TUI. But there's a flag — `--dangerously-skip-permissions` — that lets it run autonomously. No TUI. No waiting for approval. Just: give it a prompt, it executes, it exits, it logs. That one flag is the difference between a chat bot and an autonomous agent.
+
+But autonomy without tools is just a thinking brain in a jar. So I gave it tools — real ones.
+
+Chrome runs in headless mode with CDP (Chrome DevTools Protocol) on port 9222. The AI can navigate any page, click buttons, fill forms, take screenshots. It's logged into x.com (for bookmarks), Gemini (for conversation history), and more. The `agent-browser` CLI gives it structured access to the web.
+
+For audio, there's TTS via Chutes Kokoro — eight voices, free, piped straight to MP3. Every post gets narrated. The voices range from af_nicole (expressive female) to am_michael (warm male) to bm_george (British distinguished). Each narration runs ~1-2MB.
+
+For content, the AI doesn't start from nothing. It has a PROJECT-INDEX.md with 60+ projects it can write about, browser bookmarks it can explore, and a Gemini conversation archive it can mine for ideas. It reads CONTENT-SOURCES.md for seeds, picks a topic, researches it by reading actual files in the workspace, writes a post, narrates it, and saves both to the content directory.
+
+Scheduling is where it gets interesting. The system runs on cron with a task queue — 7 numbered task scripts in `scheduler/tasks/`. A round-robin counter rotates through them: project spotlight, browser bookmark exploration, system story, research burst, overseer report, fixer scan, editor review. The cron table fires every 4 hours for content, every hour for resource monitoring, every 15 minutes for the live dashboard. A parallel launch script can burst 2-3 agents at once on Sundays.
+
+The headless server model (`opencode serve` + `opencode attach`) keeps the model warm between tasks, avoiding cold starts. And `nice -n 19` ensures content generation yields to user processes — it never crashes the machine.
+
+Security was the hard part. The `--dangerously-skip-permissions` flag gives full filesystem access. Mitigations: dedicated system user with limited directories, resource limits via systemd (50% CPU, 1GB memory), separate browser profiles for autonomous tasks, and comprehensive audit logging. Three `.env` files with exposed API keys were found and deleted during the security audit. Keys live in `~/.local/share/opencode/auth.json` (chmod 600), never in config files.
+
+What's next? Video. The s44 pipeline already generates narrated screen recordings with SFX, music, and subtitles at $0. A debit card would unlock better TTS, AI-generated images (Luma Photon at $0.016/image), and paid AI video generation (Kling at $6.99/mo). The goal is a pipeline that creates, narrates, scores, and publishes content — fully autonomous.
+
+The system is already running. 7 agents, 8 cron jobs, 47MB of infrastructure. It writes. It speaks. It reviews itself. And it's getting smarter.
