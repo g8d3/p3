@@ -1,0 +1,51 @@
+Error Check Report — 2026-05-01
+===================================
+
+1. AUDIO FILE CHECK
+-------------------
+All 6 audio files in content/audio/ checked:
+  - research-comparison.mp3       — valid MP3 (1.6 MB)
+  - research-comparison-inworld.mp3 — valid MP3 (2.4 MB)
+  - system-story-inworld.mp3      — valid MP3 (4.1 MB)
+  - project-spotlight-inworld.mp3 — valid MP3 (3.1 MB)
+  - system-story.mp3              — valid WAVE (12.9 MB)
+  - project-spotlight.mp3         — valid MP3 (1.2 MB)
+
+Result: NO FAILED AUDIO FILES. All pass type and size checks.
+
+2. ERROR REGISTRY STATUS
+-------------------------
+  - 4 issues resolved (1-4)
+  - Issue 5 (browser-discovery.mp3): stale broken file no longer exists — resolved
+  - Issue 6 (Inworld single voice): still open, pending investigation
+  - 2 NEW issues registered (7, 8)
+
+3. SCHEDULER LOG FINDINGS
+--------------------------
+  Fixer log: TTS JSON escaping fix applied 5 times across 2 runs.
+    Suggests the root cause (special chars in text) may not be fully
+    eliminated — same fix keeps re-applying.
+
+  Events log: CRITICAL — Disk at 89-90% since Apr 29 22:01 (48+ hours).
+    Escalated from 89% to 90% on Apr 30 11:15.
+    Monitoring frequency increased to 30s intervals on May 1.
+    Still ongoing as of this check (May 1 20:00).
+
+4. NEW ISSUES REGISTERED
+-------------------------
+  | 7 | Disk critically full (89-90%, sustained 48+ hours) | 2026-04-29 | 2026-05-01 | open
+  | 8 | Fixer applying redundant TTS JSON escaping fixes    | 2026-04-29 | 2026-04-30 | open
+
+5. SUMMARY
+-----------
+  All audio files are healthy. The content generation system is producing
+  valid output. The most pressing issue is disk usage at 90% — sustained
+  for over 48 hours with a worsening trend. Immediate investigation and
+  cleanup recommended. The fixer's repeated TTS JSON fix also warrants
+  investigation to avoid redundant cycles.
+
+  Next steps recommended:
+  - Identify largest directories: du -sh /*
+  - Remove temporary/build artifacts
+  - Archive old audio or log files
+  - Verify tts-safe.sh is consistently used for all TTS calls

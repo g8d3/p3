@@ -1,0 +1,73 @@
+Editor Summary
+==============
+Generated: Fri May 1 12:00 UTC 2026
+Command:   editor-agent.sh --all
+
+---
+
+Posts reviewed: 6 / 6
+
+  Approved: 4
+  Revise:    2 (system-status.txt, system-story-short.txt)
+
+---
+
+Per-Post Breakdown
+
+  system-status.txt
+    Review: heuristic (Gemini API key not set)
+    Heuristic Score: 0/1
+    Word Count: 111 (target 200-500)
+    Verdict: REVISE — too short
+
+  system-story-short.txt
+    Review: heuristic (Gemini API key not set)
+    Heuristic Score: 0/1
+    Word Count: 78 (target 200-500)
+    Verdict: REVISE — too short
+
+  browser-discovery.txt
+    Review: heuristic (auto-approve)
+    Heuristic Score: 1/1
+    Word Count: 234
+    Verdict: APPROVE
+
+  project-spotlight.txt
+    Model: gemini-2.5-flash
+    Scores: clarity 5, hook 5, substance 5, formatting 4, length 5, originality 5
+    Total: 29/30
+    Verdict: APPROVE
+
+  research-comparison.txt
+    Models: gemini-3-flash-preview + gemini-2.5-flash (council)
+    Scores:
+      - gemini-3-flash-preview: clarity 5, hook 3, substance 5, formatting 4, length 4, originality 4 = 25/30
+      - gemini-2.5-flash: clarity 5, hook 4, substance 5, formatting 4, length 5, originality 5 = 28/30
+    Average: 26.5/30
+    Verdict: APPROVE (consensus)
+
+  system-story.txt
+    Model: gemini-3-flash-preview
+    Scores: clarity 4, hook 4, substance 5, formatting 5, length 5, originality 4
+    Total: 27/30
+    (gemini-3.1-flash-lite and gemini-3.1-pro reviews failed due to API errors)
+    Verdict: APPROVE
+
+---
+
+Average Scores (posts with numeric ratings only)
+
+  project-spotlight   29.0/30
+  research-comparison 26.5/30
+  system-story        27.0/30
+  ─────────────────────────
+  Mean                27.5/30
+
+---
+
+Notes
+  - No Gemini API key was configured, so the two newly reviewed posts
+    (system-status.txt, system-story-short.txt) received only heuristic
+    (word-count) checks instead of LLM-based reviews.
+  - system-story.txt had two review failures (503 and parse errors) but
+    was still approved via the gemini-3-flash-preview review.
