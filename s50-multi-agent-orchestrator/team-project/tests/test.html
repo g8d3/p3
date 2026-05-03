@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Todo App – Unit Tests</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; padding: 2rem; }
+  h1 { margin-bottom: 1rem; font-size: 1.4rem; }
+  #results { list-style: none; }
+  #results li { padding: .35rem .6rem; border-radius: 4px; margin-bottom: 4px; font-size: .9rem; font-family: monospace; }
+  #results li.pass { background: #0e4d2f; color: #6fef9e; }
+  #results li.fail { background: #5c1a1a; color: #ff8888; }
+  #summary { margin-top: 1rem; font-size: 1.1rem; font-weight: 600; }
+  /* hide the real app DOM during tests */
+  #app-dom { display: none; }
+</style>
+</head>
+<body>
+
+<h1>Todo App – Unit Tests</h1>
+<ul id="results"></ul>
+<div id="summary"></div>
+
+<!-- Minimal DOM the app code expects -->
+<div id="app-dom">
+  <ul id="todo-list"></ul>
+  <input id="todo-input" />
+  <button id="add-btn">Add</button>
+  <span id="counter"></span>
+  <button data-filter="all">All</button>
+  <button data-filter="active">Active</button>
+  <button data-filter="completed">Completed</button>
+</div>
+
+<script>
+// ── Test Runner ──────────────────────────────────────────────
+const resultsEl = document.getElementById("results");
+let pass = 0, fail = 0;
+
+function assert(cond, msg) {
+  const li = document.createElement("li");
+  if (cond) {
+    li.className = "pass";
+    li.textContent = "✓ " + msg;
+    pass++;
+  } else {
+    li.className = "fail";
+    li.textContent = "✗ " + msg;
+    fail++;
+  }
+  resultsEl.appendChild(li);
+}
+
+function assertEqual(a, b, msg) {
+  assert(a === b, msg + ` (got ${JSON.stringify(a)}, expected ${JSON.stringify(b)})`);
+}
+
+function assertDeepEqual(a, b, msg) {
+  assert(JSON.stringify(a) === JSON.stringify(b),
+    msg + ` (got ${JSON.stringify(a)}, expected ${JSON.stringify(b)})`);
+}
+
+// ── Todo Logic (extracted & testable) ────────────────────────
+const STORAGE_KEY = "todos";
+
+const loadTodos = () => JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+const saveTodos = (todos) => localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+
+let todos = [];
+let filter = "all";
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+const filteredTodos = () => {
+  if (filter === "active") return todos.filter(t => !t.done);
+  if (filter === "completed") return todos.filter(t => t.done);
+  return todos;
+};
+
+const addTodo = (text) => {
+  text = text.trim();
+  if (!text) return;
+  todos = [...todos, { id: uid(), text, done: false }];
+  saveTodos(todos);
+};
+
+const toggleTodo = (id) => {
+  todos = todos.map(t => t.id === id ? { ...t, done: !t.done } : t);
+  saveTodos(todos);
+};
+
+const removeTodo = (id) => {
+  todos = todos.filter(t => t.id !== id);
+  saveTodos(todos);
+};
+
+const reset = () => {
+  todos = [];
+  filter = "all";
+  localStorage.removeItem(STORAGE_KEY);
+};
+
+// ── Tests ────────────────────────────────────────────────────
+
+// -- Add --
+(function testAddSingle() {
+  reset();
+  addTodo("Buy milk");
+  assertEqual(todos.length, 1, "add: creates one todo");
+  assertEqual(todos[0].text, "Buy milk", "add: stores correct text");
+  assertEqual(todos[0].done, false, "add: new todo is not done");
+  assert(todos[0].id, "add: assigns an id");
+})();
+
+(function testAddMultiple() {
+  reset();
+  addTodo("A");
+  addTodo("B");
+  addTodo("C");
+  assertEqual(todos.length, 3, "add: three todos created");
+  assertEqual(todos[2].text, "C", "add: third todo text correct");
+})();
+
+(function testAddEmpty() {
+  reset();
+  addTodo("");
+  assertEqual(todos.length, 0, "add: empty string is ignored");
+  addTodo("   ");
+  assertEqual(todos.length, 0, "add: whitespace-only is ignored");
+})();
+
+(function testAddTrims() {
+  reset();
+  addTodo("  hello  ");
+  assertEqual(todos[0].text, "hello", "add: trims whitespace");
+})();
+
+// -- Toggle --
+(function testToggle() {
+  reset();
+  addTodo("Task");
+  const id = todos[0].id;
+  toggleTodo(id);
+  assertEqual(todos[0].done, true, "toggle: marks as done");
+  toggleTodo(id);
+  assertEqual(todos[0].done, false, "toggle: marks as not done again");
+})();
+
+(function testToggleOnlyTarget() {
+  reset();
+  addTodo("A");
+  addTodo("B");
+  toggleTodo(todos[0].id);
+  assertEqual(todos[0].done, true, "toggle: target is done");
+  assertEqual(todos[1].done, false, "toggle: other todo unchanged");
+})();
+
+// -- Delete --
+(function testDelete() {
+  reset();
+  addTodo("Keep");
+  addTodo("Remove");
+  const removeId = todos[1].id;
+  removeTodo(removeId);
+  assertEqual(todos.length, 1, "delete: one todo remains");
+  assertEqual(todos[0].text, "Keep", "delete: correct todo remains");
+})();
+
+(function testDeleteIdempotent() {
+  reset();
+  addTodo("Only");
+  const id = todos[0].id;
+  removeTodo(id);
+  removeTodo(id); // deleting again should not error
+  assertEqual(todos.length, 0, "delete: deleting same id twice is safe");
+})();
+
+// -- Filter --
+(function testFilterAll() {
+  reset();
+  addTodo("A");
+  addTodo("B");
+  toggleTodo(todos[0].id);
+  filter = "all";
+  assertEqual(filteredTodos().length, 2, "filter all: returns all todos");
+})();
+
+(function testFilterActive() {
+  reset();
+  addTodo("A");
+  addTodo("B");
+  toggleTodo(todos[0].id);
+  filter = "active";
+  const result = filteredTodos();
+  assertEqual(result.length, 1, "filter active: returns only active");
+  assertEqual(result[0].text, "B", "filter active: correct item");
+})();
+
+(function testFilterCompleted() {
+  reset();
+  addTodo("A");
+  addTodo("B");
+  toggleTodo(todos[0].id);
+  filter = "completed";
+  const result = filteredTodos();
+  assertEqual(result.length, 1, "filter completed: returns only completed");
+  assertEqual(result[0].text, "A", "filter completed: correct item");
+})();
+
+(function testFilterNoneMatch() {
+  reset();
+  addTodo("A");
+  filter = "completed";
+  assertEqual(filteredTodos().length, 0, "filter: returns empty when none match");
+})();
+
+// -- localStorage --
+(function testSaveLoad() {
+  reset();
+  addTodo("Persist me");
+  toggleTodo(todos[0].id);
+  const loaded = loadTodos();
+  assertEqual(loaded.length, 1, "localStorage: saved one item");
+  assertEqual(loaded[0].text, "Persist me", "localStorage: text persisted");
+  assertEqual(loaded[0].done, true, "localStorage: done state persisted");
+})();
+
+(function testClearStorage() {
+  reset();
+  addTodo("Gone");
+  assertEqual(loadTodos().length, 1, "localStorage: data exists before clear");
+  reset();
+  assertEqual(loadTodos().length, 0, "localStorage: data cleared after reset");
+})();
+
+(function testStorageRoundtrip() {
+  reset();
+  addTodo("X");
+  addTodo("Y");
+  // simulate reload by loading from storage into fresh array
+  const reloaded = loadTodos();
+  assertEqual(reloaded.length, 2, "localStorage: roundtrip preserves count");
+  assertEqual(reloaded[0].text, "X", "localStorage: roundtrip preserves order");
+})();
+
+// ── Summary ──────────────────────────────────────────────────
+const summary = document.getElementById("summary");
+const total = pass + fail;
+summary.textContent = fail === 0
+  ? `✅ All ${total} tests passed`
+  : `❌ ${fail} of ${total} tests failed`;
+summary.style.color = fail === 0 ? "#6fef9e" : "#ff8888";
+</script>
+</body>
+</html>

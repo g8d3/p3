@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo App</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header role="banner">
+    <h1>Todo App</h1>
+    <nav role="navigation" aria-label="Main navigation">
+      <ul>
+        <li><a href="#" aria-current="page">All</a></li>
+        <li><a href="#">Active</a></li>
+        <li><a href="#">Completed</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main role="main" aria-label="Todo list">
+    <form id="add-todo-form" aria-label="Add a new todo">
+      <label for="todo-input" class="visually-hidden">New todo</label>
+      <input
+        type="text"
+        id="todo-input"
+        name="todo"
+        placeholder="What needs to be done?"
+        required
+        aria-required="true"
+      >
+      <button type="submit">Add</button>
+    </form>
+
+    <section aria-label="Todo items">
+      <ul id="todo-list" role="list">
+        <!-- Todo items will be rendered here -->
+      </ul>
+    </section>
+  </main>
+
+  <footer role="contentinfo" aria-label="Footer">
+    <p>&copy; 2026 Todo App</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
