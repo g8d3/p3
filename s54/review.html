@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Revisar Clasificación · AI Agent Repos</title>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@15.0.7/marked.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--green:#3fb950;--orange:#d29922;--red:#f85149;--purple:#bc8cff;--pink:#f778ba}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);padding:0;min-height:100vh}
+.header{position:sticky;top:0;z-index:10;background:var(--bg);padding:12px 16px;border-bottom:1px solid var(--border)}
+.header h1{font-size:18px;font-weight:600;margin-bottom:8px}
+.header .stats{font-size:13px;color:var(--muted)}
+.filter-bar{display:flex;gap:6px;overflow-x:auto;padding:8px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.filter-bar::-webkit-scrollbar{display:none}
+.filter-btn{white-space:nowrap;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;flex-shrink:0;transition:all .2s}
+.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.filter-btn .count{font-size:11px;opacity:.7;margin-left:4px}
+
+.repo-list{padding:8px 12px 80px}
+.repo-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .2s,transform .1s;position:relative}
+.repo-card:active{transform:scale(.98)}
+.repo-card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.repo-card .name{font-size:15px;font-weight:600;color:var(--accent);word-break:break-all}
+.repo-card .stars{font-size:13px;color:var(--muted);white-space:nowrap}
+.repo-card .stars::before{content:'★';color:var(--orange);margin-right:3px}
+.repo-card .desc{font-size:13px;color:var(--muted);margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.4}
+.repo-card .meta{display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.lang-dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0}
+.lang-label{font-size:12px;color:var(--muted)}
+.badge{font-size:11px;padding:3px 8px;border-radius:10px;font-weight:500;background:rgba(88,166,255,.15);color:var(--accent)}
+.badge.runtime{background:rgba(63,185,80,.15);color:var(--green)}
+.badge.cli{background:rgba(210,153,34,.15);color:var(--orange)}
+.badge.security{background:rgba(248,81,73,.15);color:var(--red)}
+.badge.mcp{background:rgba(188,140,255,.15);color:var(--purple)}
+.badge.database{background:rgba(247,120,186,.15);color:var(--pink)}
+.badge.orchestration{background:rgba(88,166,255,.15);color:var(--accent)}
+.badge.memory{background:rgba(63,185,80,.15);color:var(--green)}
+.badge.browser{background:rgba(210,153,34,.15);color:var(--orange)}
+.badge.devtool{background:rgba(188,140,255,.15);color:var(--purple)}
+.badge.infra{background:rgba(139,148,158,.15);color:var(--muted)}
+.badge.office{background:rgba(247,120,186,.15);color:var(--pink)}
+.badge.integration{background:rgba(88,166,255,.15);color:var(--accent)}
+.badge.network{background:rgba(63,185,80,.15);color:var(--green)}
+
+/* Detail modal */
+.modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.7);display:none;justify-content:flex-end}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);width:100%;max-width:480px;height:100%;overflow-y:auto;padding:0;animation:slideIn .25s ease}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.modal-header{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--border);padding:16px;display:flex;align-items:center;gap:12px;z-index:5}
+.modal-back{background:none;border:none;color:var(--accent);font-size:24px;cursor:pointer;padding:4px;line-height:1;display:flex}
+.modal-header h2{font-size:16px;font-weight:600;flex:1;word-break:break-all}
+.modal-body{padding:16px}
+.modal-body .field{margin-bottom:16px}
+.modal-body .field-label{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.modal-body .field-value{font-size:14px;line-height:1.5}
+.modal-body .topic-tag{display:inline-block;padding:2px 8px;margin:2px;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.2);border-radius:6px;font-size:12px;color:var(--accent)}
+
+.readme-section{margin-top:16px;border-top:1px solid var(--border);padding-top:16px}
+.readme-content{font-size:13px;line-height:1.6;color:var(--text);overflow-wrap:break-word}
+.readme-content h1{font-size:18px;margin:16px 0 8px}
+.readme-content h2{font-size:16px;margin:14px 0 6px}
+.readme-content h3{font-size:14px;margin:12px 0 4px}
+.readme-content p{margin:6px 0}
+.readme-content code{background:rgba(255,255,255,.05);padding:1px 5px;border-radius:4px;font-size:12px}
+.readme-content pre{background:rgba(255,255,255,.03);padding:12px;border-radius:8px;overflow-x:auto;font-size:12px;margin:8px 0}
+.readme-content img{max-width:100%;height:auto;border-radius:6px;margin:8px 0}
+.readme-content video{max-width:100%;height:auto;border-radius:6px}
+.readme-content pre code{white-space:pre-wrap;word-break:break-word}
+.readme-content a{color:var(--accent)}
+.readme-loading{text-align:center;padding:20px;color:var(--muted);font-size:14px}
+.readme-content ul,.readme-content ol{padding-left:20px;margin:6px 0}
+.readme-content li{margin:3px 0}
+.readme-content blockquote{border-left:3px solid var(--accent);padding:4px 12px;margin:8px 0;color:var(--muted);background:rgba(88,166,255,.05);border-radius:0 4px 4px 0}
+.readme-content table{border-collapse:collapse;width:100%;margin:8px 0;font-size:13px}
+.readme-content th,.readme-content td{border:1px solid var(--border);padding:6px 10px;text-align:left}
+.readme-content th{background:rgba(255,255,255,.03);font-weight:600}
+.readme-content hr{border:none;border-top:1px solid var(--border);margin:16px 0}
+.readme-content details{margin:8px 0;background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:6px;padding:8px 12px}
+
+select.classification-select{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;appearance:none;cursor:pointer;margin-top:4px}
+select.classification-select:focus{outline:none;border-color:var(--accent)}
+.save-badge{font-size:12px;color:var(--green);margin-left:8px;opacity:0;transition:opacity .3s}
+.save-badge.show{opacity:1}
+
+.loading{text-align:center;padding:40px;color:var(--muted)}
+.loading .spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>📋 Revisar Clasificación</h1>
+  <div class="stats" id="stats">Cargando...</div>
+  <div class="filter-bar" id="filterBar"></div>
+</div>
+<div class="repo-list" id="repoList">
+  <div class="loading"><div class="spinner"></div>Cargando repositorios...</div>
+</div>
+
+<!-- Detail modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <button class="modal-back" id="modalBack">‹</button>
+      <h2 id="modalName"></h2>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+let allRepos = [];
+let filteredRepos = [];
+let activeFilter = 'all';
+let customCategories = JSON.parse(localStorage.getItem('customCategories') || '[]');
+const OVERRIDES = JSON.parse(localStorage.getItem('classificationOverrides') || '{}');
+
+// Color helpers
+const LANG_COLORS = {
+  'rust':'#dea584','go':'#00add8','python':'#3572a5','typescript':'#3178c6',
+  'javascript':'#f1e05a','shell':'#89e051','java':'#b07219','html':'#e34c26',
+  'jupyter notebook':'#da5b0f','swift':'#f05138','css':'#563d7c','c':'#555555',
+  'c++':'#f34b7d','ruby':'#701516'
+};
+
+function badgeClass(cat) {
+  const c = cat.toLowerCase();
+  if(c.includes('runtime')||c.includes('sandbox')) return 'runtime';
+  if(c.includes('cli')||c.includes('terminal')) return 'cli';
+  if(c.includes('security')||c.includes('pentest')) return 'security';
+  if(c.includes('mcp')||c.includes('protocol')) return 'mcp';
+  if(c.includes('database')||c.includes('warehouse')) return 'database';
+  if(c.includes('orchestrat')||c.includes('workflow')) return 'orchestration';
+  if(c.includes('memory')||c.includes('rag')||c.includes('knowledge')) return 'memory';
+  if(c.includes('browser')||c.includes('web')) return 'browser';
+  if(c.includes('devkit')||c.includes('sdk')) return 'devtool';
+  if(c.includes('infra')||c.includes('devops')) return 'infra';
+  if(c.includes('office')||c.includes('productivity')) return 'office';
+  if(c.includes('integration')||c.includes('pipeline')) return 'integration';
+  if(c.includes('network')||c.includes('observ')) return 'network';
+  return '';
+}
+
+function getEffectiveCategory(repo) {
+  return OVERRIDES[repo.name] || repo.clasificacion_ia;
+}
+
+function getCategories() {
+  const cats = [...new Set(allRepos.map(r => r.clasificacion_ia))].sort();
+  return [...cats, ...customCategories.filter(c => !cats.includes(c))];
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function renderFilterBar() {
+  const bar = document.getElementById('filterBar');
+  const cats = getCategories();
+  const counts = {};
+  allRepos.forEach(r => {
+    const c = getEffectiveCategory(r);
+    counts[c] = (counts[c] || 0) + 1;
+  });
+  let html = `<button class="filter-btn${activeFilter==='all'?' active':''}" data-cat="all">Todos <span class="count">${allRepos.length}</span></button>`;
+  cats.forEach(c => {
+    const cnt = counts[c] || 0;
+    if(cnt === 0) return;
+    html += `<button class="filter-btn${activeFilter===c?' active':''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)} <span class="count">${cnt}</span></button>`;
+  });
+  bar.innerHTML = html;
+  bar.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeFilter = btn.dataset.cat;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilter();
+    });
+  });
+}
+
+function applyFilter() {
+  filteredRepos = activeFilter === 'all' ? [...allRepos] : allRepos.filter(r => getEffectiveCategory(r) === activeFilter);
+  renderList();
+  document.getElementById('stats').textContent = `${filteredRepos.length} / ${allRepos.length} repositorios`;
+}
+
+function renderList() {
+  const list = document.getElementById('repoList');
+  if(!filteredRepos.length) {
+    list.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">No hay repositorios en esta categoría</div>';
+    return;
+  }
+  let html = '';
+  filteredRepos.forEach(r => {
+    const cat = getEffectiveCategory(r);
+    const bc = badgeClass(cat);
+    const lc = LANG_COLORS[r.language] || '#8b949e';
+    const desc = r.description || 'Sin descripción';
+    html += `<div class="repo-card" data-name="${escapeHtml(r.name)}">
+      <div class="top">
+        <div class="name">${escapeHtml(r.name)}</div>
+        <div class="stars">${r.stars}</div>
+      </div>
+      <div class="desc">${escapeHtml(desc)}</div>
+      <div class="meta">
+        <span class="lang-dot" style="background:${lc}"></span>
+        <span class="lang-label">${escapeHtml(r.language || '?')}</span>
+        <span class="badge ${bc}">${escapeHtml(cat)}</span>
+      </div>
+    </div>`;
+  });
+  list.innerHTML = html;
+  list.querySelectorAll('.repo-card').forEach(card => {
+    card.addEventListener('click', () => openModal(card.dataset.name));
+  });
+}
+
+function openModal(name) {
+  const repo = allRepos.find(r => r.name === name);
+  if(!repo) return;
+  const modal = document.getElementById('modal');
+  const body = document.getElementById('modalBody');
+  const nameEl = document.getElementById('modalName');
+  nameEl.textContent = repo.name;
+  
+  const cat = getEffectiveCategory(repo);
+  const cats = getCategories();
+  const allOptions = [...cats];
+  if(!allOptions.includes(cat)) allOptions.unshift(cat);
+  
+  let html = `
+    <div class="field">
+      <div class="field-label">Descripción</div>
+      <div class="field-value">${escapeHtml(repo.description || '—')}</div>
+    </div>
+    ${repo.topics ? `<div class="field">
+      <div class="field-label">Temas</div>
+      <div class="field-value">${repo.topics.split(';').map(t => `<span class="topic-tag">${escapeHtml(t.trim())}</span>`).join('')}</div>
+    </div>` : ''}
+    <div class="field">
+      <div class="field-label">Lenguaje · Estrellas · Actualizado</div>
+      <div class="field-value">${escapeHtml(repo.language || '?')} · ${repo.stars} · ${repo.last_updated || '—'}</div>
+    </div>
+    <div class="field">
+      <div class="field-label">Clasificación IA</div>
+      <select class="classification-select" id="classSelect">
+        ${allOptions.map(c => `<option value="${escapeHtml(c)}"${c===cat?' selected':''}>${escapeHtml(c)}</option>`).join('')}
+        <option value="__custom__">✏️ Personalizar...</option>
+      </select>
+      <span class="save-badge" id="saveBadge">✓ Guardado</span>
+    </div>
+    <div class="field" id="customField" style="display:none">
+      <div class="field-label">Nueva categoría</div>
+      <input type="text" id="customInput" style="width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px;margin-top:4px" placeholder="Escribe el nombre...">
+    </div>
+    <div class="readme-section">
+      <div class="field-label">README</div>
+      <div class="readme-content" id="readmeContent"><div class="readme-loading">Cargando README...</div></div>
+    </div>`;
+  
+  body.innerHTML = html;
+  modal.classList.add('open');
+  
+  // Classification select handler
+  const sel = document.getElementById('classSelect');
+  const customField = document.getElementById('customField');
+  const customInput = document.getElementById('customInput');
+  const saveBadge = document.getElementById('saveBadge');
+  
+  sel.addEventListener('change', () => {
+    if(sel.value === '__custom__') {
+      customField.style.display = 'block';
+      customInput.focus();
+    } else {
+      customField.style.display = 'none';
+      saveOverride(repo.name, sel.value);
+      saveBadge.classList.add('show');
+      setTimeout(() => saveBadge.classList.remove('show'), 1500);
+    }
+  });
+  
+  customInput.addEventListener('change', () => {
+    const val = customInput.value.trim();
+    if(val) {
+      if(!customCategories.includes(val)) {
+        customCategories.push(val);
+        localStorage.setItem('customCategories', JSON.stringify(customCategories));
+      }
+      saveOverride(repo.name, val);
+      sel.innerHTML = `<option value="${escapeHtml(val)}" selected>${escapeHtml(val)}</option>${getCategories().filter(c => c !== val).map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}<option value="__custom__">✏️ Personalizar...</option>`;
+      customField.style.display = 'none';
+      customInput.value = '';
+      renderFilterBar();
+      applyFilter();
+      saveBadge.classList.add('show');
+      setTimeout(() => saveBadge.classList.remove('show'), 1500);
+    }
+  });
+  
+  // Load README
+  loadReadme(repo.name);
+}
+
+function saveOverride(name, category) {
+  OVERRIDES[name] = category;
+  localStorage.setItem('classificationOverrides', JSON.stringify(OVERRIDES));
+  // Update the card badge if visible
+  document.querySelectorAll('.repo-card').forEach(card => {
+    if(card.dataset.name === name) {
+      const badge = card.querySelector('.badge');
+      if(badge) {
+        const bc = badgeClass(category);
+        badge.className = `badge ${bc}`;
+        badge.textContent = category;
+      }
+    }
+  });
+}
+
+async function loadReadme(name) {
+  const el = document.getElementById('readmeContent');
+  const fname = name.replace('/', '_') + '.md';
+  try {
+    const resp = await fetch(`repo_readmes/${encodeURIComponent(fname)}`);
+    if(!resp.ok) throw new Error('Not found');
+    const text = await resp.text();
+    el.innerHTML = renderMarkdown(text);
+  } catch(e) {
+    // Try to find in CSV readme column
+    const repo = allRepos.find(r => r.name === name);
+    if(repo && repo.readme) {
+      el.innerHTML = renderMarkdown(repo.readme);
+    } else {
+      el.innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted)">README no disponible</div>';
+    }
+  }
+}
+
+function renderMarkdown(text) {
+  if(!text) return '<div style="color:var(--muted)">—</div>';
+  try {
+    return marked.parse(text, {breaks: true, gfm: true});
+  } catch(e) {
+    return '<pre>' + escapeHtml(text) + '</pre>';
+  }
+}
+
+// Close modal
+document.getElementById('modalBack').addEventListener('click', () => {
+  document.getElementById('modal').classList.remove('open');
+});
+document.getElementById('modal').addEventListener('click', (e) => {
+  if(e.target === e.currentTarget) document.getElementById('modal').classList.remove('open');
+});
+
+// Load CSV
+async function init() {
+  try {
+    const resp = await fetch('gh_search_results.csv');
+    const csv = await resp.text();
+    const parsed = Papa.parse(csv, {header: true, skipEmptyLines: true});
+    allRepos = parsed.data.filter(r => r.name && r.name.includes('/'));
+    filteredRepos = [...allRepos];
+    
+    // Apply overrides
+    Object.keys(OVERRIDES).forEach(k => {
+      if(!allRepos.find(r => r.name === k)) delete OVERRIDES[k];
+    });
+    localStorage.setItem('classificationOverrides', JSON.stringify(OVERRIDES));
+    
+    document.getElementById('stats').textContent = `${allRepos.length} repositorios`;
+    renderFilterBar();
+    applyFilter();
+  } catch(e) {
+    document.getElementById('stats').textContent = 'Error al cargar';
+    document.getElementById('repoList').innerHTML = `<div style="text-align:center;padding:40px;color:var(--red)">Error: ${e.message}</div>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>
