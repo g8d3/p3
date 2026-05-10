@@ -1,0 +1,6 @@
+file '/home/vuos/code/p3/s51/output/audio/scene1_es.aac'
+file '/home/vuos/code/p3/s51/output/audio/scene2_es.aac'
+file '/home/vuos/code/p3/s51/output/audio/scene3_es.aac'
+file '/home/vuos/code/p3/s51/output/audio/scene4_es.aac'
+file '/home/vuos/code/p3/s51/output/audio/scene5_es.aac'
+file '/home/vuos/code/p3/s51/output/audio/scene6_es.aac'

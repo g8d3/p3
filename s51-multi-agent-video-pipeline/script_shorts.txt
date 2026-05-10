@@ -1,0 +1,141 @@
+# 🎬 Shorts Script - "La historia del Universo en 60 segundos"
+# Generado por Grupo D - Shorts Automáticos
+# Formato: 9:16 vertical, ritmo rápido, hooks cada 2-4s
+
+## ESCENA 1 - EL BIG BANG (8s → dividido en 4 sub-segmentos)
+
+[HOOK 0-2s]
+"¡El universo comenzó con una explosión!"
+▸ Visual: BIG BANG - luz blanca cegadora + zoom out violento
+▸ SFX: Explosión cósmica + whoosh rápido
+▸ Texto: "HACE 13.8 MIL MILLONES DE AÑOS"
+
+[CONTENT 2-5s]
+"Un punto infinitamente pequeño y denso explotó."
+▸ Visual: Partículas dispersándose + espacio-tiempo expandiéndose
+▸ SFX: Rumble profundo + crescendo
+▸ Texto: "UN PUNTITO EXPLOTÓ 🔥"
+
+[CONTENT 5-8s]
+"Nació todo el universo."
+▸ Visual: Colores primigenios (blanco, azul, naranja)
+▸ SFX: Rising crescendo orquestal
+▸ Texto: "NACIÓ EL UNIVERSO 🌌"
+
+## ESCENA 2 - ESTRELLAS Y GALAXIAS (12s → dividido en 4 sub-segmentos)
+
+[CONTENT 8-11s]
+"El universo se expandió y enfrió..."
+▸ Visual: Nebulosas púrpura y naranja + fly-through
+▸ SFX: Whoosh espacial + ambiente estelar
+▸ Texto: "EL UNIVERSO SE ENFRIÓ ❄️"
+
+[CONTENT 11-14s]
+"La gravedad unió el gas y el polvo cósmico"
+▸ Visual: Galaxias espirales formándose + rotación lenta
+▸ SFX: Pulsar lejano
+▸ Texto: "LA GRAVEDAD UNIÓ EL POLVO ⚡"
+
+[CONTENT 14-17s]
+"Encendió miles de millones de estrellas."
+▸ Visual: Estrellas brillando en la oscuridad
+▸ SFX: Ambiente etéreo + coro
+▸ Texto: "BILLONES DE ESTRELLAS ✨"
+
+[CONTENT 17-20s]
+"Nacieron las galaxias: islas de luz."
+▸ Visual: Vía Láctea + polvo estelar brillante
+▸ SFX: Transición con glitch
+▸ Texto: "ISLAS DE LUZ 🌟"
+
+## ESCENA 3 - SISTEMA SOLAR (8s → dividido en 3 sub-segmentos)
+
+[CONTENT 20-23s]
+"Una estrella llamada Sol encendió su fuego."
+▸ Visual: Sol furioso + llamaradas termonucleares
+▸ SFX: Impacto solar + fuego crepitante
+▸ Texto: "EL SOL SE ENCENDIÓ ☀️"
+
+[CONTENT 23-26s]
+"Planetas de roca y gas danzando a su alrededor."
+▸ Visual: Sistema solar orbitando + planetas formándose
+▸ SFX: Rumble orbital
+▸ Texto: "PLANETAS DANZANDO 🪐"
+
+[CONTENT 26-28s]
+"Nuestro sistema solar tomó forma."
+▸ Visual: Todos los planetas alineados + Tierra azul
+▸ SFX: Metales heroicos
+▸ Texto: "NUESTRO SISTEMA SOLAR 🌍"
+
+## ESCENA 4 - TIERRA Y ORIGEN DE LA VIDA (12s → dividido en 4 sub-segmentos)
+
+[CONTENT 28-31s]
+"La Tierra primitiva: océanos hirvientes, volcanes."
+▸ Visual: Tierra primitiva + volcanes erupcionando
+▸ SFX: Trueno + agua hirviendo
+▸ Texto: "TIERRA PRIMITIVA 🌋"
+
+[CONTENT 31-34s]
+"Rayos cruzaban el cielo de azufre."
+▸ Visual: Tormenta eléctrica + cielo tóxico
+▸ SFX: Rayo eléctrico
+▸ Texto: "RAYOS EN EL CIELO ⚡"
+
+[CONTENT 34-37s]
+"En el agua primigenia, moléculas brillaron."
+▸ Visual: Océano primordial + moléculas orgánicas brillando
+▸ SFX: Ambiente misterioso + burbujeo
+▸ Texto: "LA VIDA EMERGIÓ 🧬"
+
+[CONTENT 37-40s]
+"El caos químico dio paso al milagro."
+▸ Visual: Primeras células formándose
+▸ SFX: Build-up dramático
+▸ Texto: "EL MILAGRO DE LA VIDA 🌱"
+
+## ESCENA 5 - EVOLUCIÓN HUMANA (8s → dividido en 3 sub-segmentos)
+
+[CONTENT 40-43s]
+"La vida evolucionó durante millones de años."
+▸ Visual: Time-lapse evolución + células → peces → dinosaurios
+▸ SFX: Whoosh rápido + tiempo pasando
+▸ Texto: "EVOLUCIÓN 🦕"
+
+[CONTENT 43-46s]
+"Entre todas las especies, una desarrolló conciencia."
+▸ Visual: Humanos modernos + fuego → rueda → electricidad
+▸ SFX: Impacto metálico
+▸ Texto: "LA CONCIENCIA HUMANA 🧠"
+
+[CONTENT 46-48s]
+"El ser humano miró al cielo y preguntó: ¿qué somos?"
+▸ Visual: Cohete despegando + espacio
+▸ SFX: Fuego + despegue
+▸ Texto: "¿QUÉ SOMOS? 🤔"
+
+## ESCENA 6 - REFLEXIÓN FINAL (12s → dividido en 3 sub-segmentos + CTA)
+
+[CONTENT 48-52s]
+"Somos polvo de estrellas."
+▸ Visual: Tierra desde el espacio + cámara alejándose lentamente
+▸ SFX: Ambiente espacial + latido de corazón
+▸ Texto: "SOMOS POLVO DE ESTRELLAS ✨"
+
+[CONTENT 52-55s]
+"El universo creó ojos para contemplarse a sí mismo."
+▸ Visual: Vía Láctea extendiéndose + luz cálida
+▸ SFX: Coro angelical
+▸ Texto: "EL UNIVERSO SE CONTEMPLA 👁️"
+
+[CONTENT 55-57s]
+"Y el viaje continúa..."
+▸ Visual: Punto azul pálido + fundido
+▸ SFX: Suspiro + fade out musical
+▸ Texto: "EL VIAJE CONTINÚA... 🚀"
+
+[CTA 57-60s]
+"Sígueme para más historias cósmicas 🚀"
+▸ Visual: Logo + fondo estelar + zoom in
+▸ SFX: Stinger final + logo reveal
+▸ Texto: "SÍGUEME PARA MÁS 🚀"

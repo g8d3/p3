@@ -1,0 +1,6 @@
+file '/home/vuos/code/p3/s51/output/clips/escena1.mp4'
+file '/home/vuos/code/p3/s51/output/clips/escena2.mp4'
+file '/home/vuos/code/p3/s51/output/clips/escena3.mp4'
+file '/home/vuos/code/p3/s51/output/clips/escena4.mp4'
+file '/home/vuos/code/p3/s51/output/clips/escena5.mp4'
+file '/home/vuos/code/p3/s51/output/clips/escena6.mp4'

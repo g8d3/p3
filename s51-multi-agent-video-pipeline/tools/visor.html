@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎬 Visor de Reportes - Video Pipeline</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  h1 { font-size: 1.5em; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  h1 small { font-size: 0.6em; color: var(--text-muted); font-weight: normal; }
+  
+  .stats-bar {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 20px;
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+  }
+  .stat .number { font-size: 1.8em; font-weight: bold; color: var(--accent); }
+  .stat .label { font-size: 0.8em; color: var(--text-muted); margin-top: 4px; }
+  
+  .filters {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filters input, .filters select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-size: 0.9em;
+  }
+  .filters input { flex: 1; min-width: 150px; }
+  .filters label { color: var(--text-muted); font-size: 0.85em; }
+  .filters .badge {
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75em;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  th {
+    background: #1c2333;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 0.8em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  th:hover { color: var(--accent); }
+  th .sort-arrow { margin-left: 4px; opacity: 0.5; }
+  td {
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    font-size: 0.9em;
+  }
+  tr:hover td { background: rgba(88,166,255,0.05); }
+  
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.75em;
+    font-weight: 500;
+  }
+  .tag-ok { background: rgba(63,185,80,0.15); color: var(--green); }
+  .tag-error { background: rgba(248,81,73,0.15); color: var(--red); }
+  .tag-warn { background: rgba(210,153,34,0.15); color: var(--yellow); }
+  .tag-estilo {
+    background: rgba(188,140,255,0.15);
+    color: var(--purple);
+    margin-right: 4px;
+  }
+  
+  .detail-panel {
+    display: none;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+    position: relative;
+  }
+  .detail-panel.visible { display: block; }
+  .detail-panel .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+  }
+  .detail-panel .close:hover { color: var(--text); }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  .detail-field { margin-bottom: 8px; }
+  .detail-field .label { font-size: 0.8em; color: var(--text-muted); }
+  .detail-field .value { font-size: 1em; }
+  
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  .pagination button {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .pagination button:hover { background: #1c2333; }
+  .pagination button:disabled { opacity: 0.3; cursor: default; }
+  .pagination .current { color: var(--accent); font-weight: bold; }
+  
+  .auto-refresh {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85em;
+    color: var(--text-muted);
+  }
+  .auto-refresh input { margin: 0; }
+  
+  @media (max-width: 768px) {
+    body { padding: 10px; }
+    .stats-bar { flex-direction: column; }
+    .filters { flex-direction: column; }
+    .filters input { width: 100%; }
+    .detail-grid { grid-template-columns: 1fr; }
+    table { font-size: 0.8em; }
+    th, td { padding: 6px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<h1>
+  🎬 Visor de Reportes
+  <small>Pipeline de Video</small>
+</h1>
+
+<div class="stats-bar" id="statsBar">
+  <div class="stat"><div class="number" id="statAgentes">0</div><div class="label">Agentes</div></div>
+  <div class="stat"><div class="number" id="statVariaciones">0</div><div class="label">Variaciones</div></div>
+  <div class="stat"><div class="number" id="statEscenas">0</div><div class="label">Escenas</div></div>
+  <div class="stat"><div class="number" id="statErrores">0</div><div class="label">Errores</div></div>
+  <div class="stat"><div class="number" id="statOK">0</div><div class="label">✅ OK</div></div>
+</div>
+
+<div class="filters">
+  <input type="text" id="searchInput" placeholder="🔍 Buscar (agente, estilo, archivo...)" oninput="filtrar()">
+  
+  <label>Agente:
+    <select id="filtroAgente" onchange="filtrar()">
+      <option value="">Todos</option>
+    </select>
+  </label>
+  
+  <label>Estado:
+    <select id="filtroEstado" onchange="filtrar()">
+      <option value="">Todos</option>
+      <option value="ok">✅ OK</option>
+      <option value="error">❌ Error</option>
+    </select>
+  </label>
+
+  <div class="auto-refresh">
+    <input type="checkbox" id="autoRefresh" checked onchange="toggleAutoRefresh()">
+    <label for="autoRefresh">Auto-refresh (5s)</label>
+    <span id="refreshCountdown" style="font-size:0.8em"></span>
+  </div>
+</div>
+
+<table id="tabla">
+  <thead>
+    <tr>
+      <th onclick="ordenar('agente')">Agente <span class="sort-arrow">▼</span></th>
+      <th onclick="ordenar('tipo')">Tipo <span class="sort-arrow">▼</span></th>
+      <th onclick="ordenar('archivo')">Archivo/ID <span class="sort-arrow">▼</span></th>
+      <th onclick="ordenar('estilo')">Estilo <span class="sort-arrow">▼</span></th>
+      <th onclick="ordenar('duracion')">Dur(s) <span class="sort-arrow">▼</span></th>
+      <th onclick="ordenar('calidad')">Calidad <span class="sort-arrow">▼</span></th>
+      <th onclick="ordenar('estado')">Estado <span class="sort-arrow">▼</span></th>
+    </tr>
+  </thead>
+  <tbody id="tablaBody"></tbody>
+</table>
+
+<div class="pagination">
+  <button onclick="cambiarPag(-1)" id="prevBtn">◀ Anterior</button>
+  <span>Página <span id="currentPage" class="current">1</span> de <span id="totalPages">1</span></span>
+  <button onclick="cambiarPag(1)" id="nextBtn">Siguiente ▶</button>
+</div>
+
+<div class="detail-panel" id="detailPanel">
+  <button class="close" onclick="cerrarDetalle()">✕</button>
+  <h2 id="detailTitle">Detalle</h2>
+  <div id="detailContent"></div>
+</div>
+
+<script>
+// Estado
+let datos = [];
+let filtrados = [];
+let pagina = 1;
+let columnaOrden = 'agente';
+let ordenAsc = true;
+let refreshInterval = null;
+let countdown = 0;
+const POR_PAGINA = 15;
+
+// Cargar reportes
+async function cargarReportes() {
+  try {
+    const response = await fetch('/reportes/');
+    // Como no podemos listar directorios directamente, hacemos un approach diferente
+    // Lista fija de posibles reportes
+    const agentes = ['director', 'remotion', 'aigen', 'audio', 'shorts', 'editor', 'quality'];
+    datos = [];
+    
+    for (const agente of agentes) {
+      try {
+        const res = await fetch(`reportes/${agente}.json?_=${Date.now()}`);
+        if (res.ok) {
+          const data = await res.json();
+          datos.push({ agente, data });
+        }
+      } catch(e) {
+        // No existe, ignorar
+      }
+    }
+    
+    procesarDatos();
+  } catch(e) {
+    console.error('Error cargando reportes:', e);
+  }
+}
+
+function procesarDatos() {
+  const filas = [];
+  const agentesSet = new Set();
+  
+  for (const { agente, data } of datos) {
+    agentesSet.add(agente);
+    
+    // Variaciones
+    if (data.variaciones) {
+      for (const v of data.variaciones) {
+        filas.push({
+          agente,
+          tipo: 'variación',
+          archivo: v.id || '—',
+          estilo: v.estilo || '—',
+          duracion: v.duracion || '—',
+          fps: v.fps || '—',
+          calidad: v.puntuacion_calidad || '—',
+          estado: 'ok',
+          transiciones: (v.transiciones_usadas || []).join(', '),
+          camaras: (v.movimientos_camara || []).join(', '),
+          musica: v.musica || '—',
+          sfx: v.sfx_por_transicion ? '✅' : '❌',
+          tts: v.tts_idioma || '—',
+          detalle: v
+        });
+      }
+    }
+    
+    // Resultados (escenas)
+    if (data.resultados) {
+      for (const r of data.resultados) {
+        filas.push({
+          agente,
+          tipo: r.tipo || 'resultado',
+          archivo: `Escena ${r.id}`,
+          estilo: r.descripcion || '—',
+          duracion: r.duracion_seg || '—',
+          calidad: '—',
+          estado: r.estado || 'ok',
+          transiciones: r.transicion || '—',
+          camaras: r.camara || '—',
+          musica: '—',
+          sfx: (r.sfx || []).join(', '),
+          detalle: r
+        });
+      }
+    }
+    
+    // Errores
+    if (data.errores && data.errores.length > 0) {
+      for (const err of data.errores) {
+        filas.push({
+          agente,
+          tipo: 'error',
+          archivo: '—',
+          estilo: err.substring(0, 50),
+          duracion: '—',
+          calidad: '—',
+          estado: 'error',
+          detalle: { error: err }
+        });
+      }
+    }
+    
+    // Si no hay ni variaciones ni resultados, mostrar el resumen
+    if (!data.variaciones && !data.resultados) {
+      filas.push({
+        agente,
+        tipo: 'resumen',
+        archivo: '—',
+        estilo: data.resumen || 'Sin datos',
+        duracion: data.metricas?.duracion_total || '—',
+        calidad: '—',
+        estado: data.errores?.length > 0 ? 'error' : 'ok',
+        detalle: data
+      });
+    }
+  }
+  
+  datosFiltrables = filas;
+  
+  // Actualizar filtro de agente
+  const select = document.getElementById('filtroAgente');
+  const currentVal = select.value;
+  select.innerHTML = '<option value="">Todos</option>';
+  for (const a of [...agentesSet].sort()) {
+    select.innerHTML += `<option value="${a}">${a}</option>`;
+  }
+  select.value = currentVal;
+  
+  // Stats
+  document.getElementById('statAgentes').textContent = agentesSet.size;
+  document.getElementById('statVariaciones').textContent = filas.filter(f => f.tipo === 'variación').length;
+  document.getElementById('statEscenas').textContent = filas.filter(f => f.tipo === 'escena').length;
+  document.getElementById('statErrores').textContent = filas.filter(f => f.estado === 'error').length;
+  document.getElementById('statOK').textContent = filas.filter(f => f.estado === 'ok').length;
+  
+  filtrar();
+}
+
+// Filtrar y renderizar
+function filtrar() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const agenteFiltro = document.getElementById('filtroAgente').value;
+  const estadoFiltro = document.getElementById('filtroEstado').value;
+  
+  filtrados = datosFiltrables.filter(f => {
+    if (search && !f.archivo.toLowerCase().includes(search) && 
+        !f.agente.toLowerCase().includes(search) && 
+        !f.estilo.toLowerCase().includes(search)) return false;
+    if (agenteFiltro && f.agente !== agenteFiltro) return false;
+    if (estadoFiltro === 'ok' && f.estado !== 'ok') return false;
+    if (estadoFiltro === 'error' && f.estado !== 'error') return false;
+    return true;
+  });
+  
+  ordenar(columnaOrden);
+}
+
+function ordenar(col) {
+  if (col === columnaOrden) {
+    ordenAsc = !ordenAsc;
+  } else {
+    columnaOrden = col;
+    ordenAsc = true;
+  }
+  
+  filtrados.sort((a, b) => {
+    let va = a[col] ?? '';
+    let vb = b[col] ?? '';
+    if (typeof va === 'string') va = va.toLowerCase();
+    if (typeof vb === 'string') vb = vb.toLowerCase();
+    if (va < vb) return ordenAsc ? -1 : 1;
+    if (va > vb) return ordenAsc ? 1 : -1;
+    return 0;
+  });
+  
+  pagina = 1;
+  renderizar();
+}
+
+function renderizar() {
+  const start = (pagina - 1) * POR_PAGINA;
+  const end = start + POR_PAGINA;
+  const page = filtrados.slice(start, end);
+  const tbody = document.getElementById('tablaBody');
+  
+  tbody.innerHTML = page.map(f => {
+    const estadoTag = f.estado === 'ok' ? 'tag-ok' : 'tag-error';
+    const estadoText = f.estado === 'ok' ? '✅ OK' : '❌ Error';
+    const estiloTag = f.estilo !== '—' ? `tag tag-estilo` : '';
+    
+    return `<tr onclick="abrirDetalle('${f.agente}', '${f.archivo}')" style="cursor:pointer">
+      <td><strong>${f.agente}</strong></td>
+      <td><span class="tag ${estiloTag}">${f.tipo}</span></td>
+      <td>${f.archivo}</td>
+      <td>${f.estilo.substring(0, 30)}${f.estilo.length > 30 ? '…' : ''}</td>
+      <td>${f.duracion}</td>
+      <td>${f.calidad}</td>
+      <td><span class="tag ${estadoTag}">${estadoText}</span></td>
+    </tr>`;
+  }).join('');
+  
+  if (page.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)">📭 No hay datos que coincidan con los filtros</td></tr>';
+  }
+  
+  document.getElementById('currentPage').textContent = pagina;
+  document.getElementById('totalPages').textContent = Math.max(1, Math.ceil(filtrados.length / POR_PAGINA));
+  document.getElementById('prevBtn').disabled = pagina <= 1;
+  document.getElementById('nextBtn').disabled = pagina >= Math.ceil(filtrados.length / POR_PAGINA);
+}
+
+function cambiarPag(delta) {
+  pagina = Math.max(1, Math.min(Math.ceil(filtrados.length / POR_PAGINA), pagina + delta));
+  renderizar();
+}
+
+function abrirDetalle(agente, archivo) {
+  const panel = document.getElementById('detailPanel');
+  panel.classList.add('visible');
+  document.getElementById('detailTitle').textContent = `${agente} / ${archivo}`;
+  
+  // Buscar en datos
+  for (const { data } of datos) {
+    if (data.variaciones) {
+      const v = data.variaciones.find(x => x.id === archivo);
+      if (v) {
+        document.getElementById('detailContent').innerHTML = `
+          <div class="detail-grid">
+            ${Object.entries(v).map(([k, val]) => `
+              <div class="detail-field">
+                <div class="label">${k}</div>
+                <div class="value">${Array.isArray(val) ? val.join(', ') : (val ?? '—')}</div>
+              </div>
+            `).join('')}
+          </div>`;
+        return;
+      }
+    }
+    if (data.resultados) {
+      const r = data.resultados.find(x => `Escena ${x.id}` === archivo);
+      if (r) {
+        document.getElementById('detailContent').innerHTML = `
+          <div class="detail-grid">
+            ${Object.entries(r).map(([k, val]) => `
+              <div class="detail-field">
+                <div class="label">${k}</div>
+                <div class="value">${Array.isArray(val) ? val.join(', ') : (val ?? '—')}</div>
+              </div>
+            `).join('')}
+          </div>`;
+        return;
+      }
+    }
+  }
+  
+  document.getElementById('detailContent').innerHTML = `<p>No hay detalle disponible</p>`;
+}
+
+function cerrarDetalle() {
+  document.getElementById('detailPanel').classList.remove('visible');
+}
+
+function toggleAutoRefresh() {
+  if (document.getElementById('autoRefresh').checked) {
+    countdown = 5;
+    refreshInterval = setInterval(() => {
+      countdown--;
+      document.getElementById('refreshCountdown').textContent = `(${countdown}s)`;
+      if (countdown <= 0) {
+        cargarReportes();
+        countdown = 5;
+      }
+    }, 1000);
+  } else {
+    clearInterval(refreshInterval);
+    document.getElementById('refreshCountdown').textContent = '';
+  }
+}
+
+// Inicializar
+cargarReportes();
+toggleAutoRefresh();
+</script>
+</body>
+</html>

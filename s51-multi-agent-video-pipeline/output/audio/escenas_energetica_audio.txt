@@ -1,0 +1,6 @@
+file '/home/vuos/code/p3/s51/output/audio/escena1_energetica_final.wav'
+file '/home/vuos/code/p3/s51/output/audio/escena2_energetica_final.wav'
+file '/home/vuos/code/p3/s51/output/audio/escena3_energetica_final.wav'
+file '/home/vuos/code/p3/s51/output/audio/escena4_energetica_final.wav'
+file '/home/vuos/code/p3/s51/output/audio/escena5_energetica_final.wav'
+file '/home/vuos/code/p3/s51/output/audio/escena6_energetica_final.wav'

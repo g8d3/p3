@@ -1,0 +1,140 @@
+{
+  "agente": "editor",
+  "grupo": "E",
+  "fecha": "2026-05-04T21:27:15.581243+00:00",
+  "sesion": "video-001",
+  "resumen": "5/5 variaciones de edición generadas",
+  "variaciones": [
+    {
+      "id": "video_e1.mp4",
+      "estilo": "documental",
+      "duracion": 60,
+      "fps": 30,
+      "resolucion": "576x1024",
+      "transiciones_usadas": [
+        "corte directo"
+      ],
+      "movimientos_camara": [
+        "zoom lento (Ken Burns)"
+      ],
+      "color_grading": "natural",
+      "efectos_aplicados": [
+        "contraste 1.05",
+        "saturación 0.95",
+        "viñeta suave"
+      ],
+      "puntuacion_calidad": 7.0,
+      "generado": true
+    },
+    {
+      "id": "video_e2.mp4",
+      "estilo": "cinematic",
+      "duracion": 60,
+      "fps": 30,
+      "resolucion": "576x1024",
+      "transiciones_usadas": [
+        "corte directo"
+      ],
+      "movimientos_camara": [
+        "zoom suave"
+      ],
+      "color_grading": "teal/orange",
+      "efectos_aplicados": [
+        "colorbalance teal shadows + orange highlights",
+        "contraste 1.3",
+        "viñeta",
+        "gamma 1.05"
+      ],
+      "puntuacion_calidad": 8.0,
+      "generado": true
+    },
+    {
+      "id": "video_e3.mp4",
+      "estilo": "tiktok",
+      "duracion": 60,
+      "fps": 30,
+      "resolucion": "576x1024",
+      "transiciones_usadas": [
+        "corte directo rápido"
+      ],
+      "movimientos_camara": [
+        "zoom rápido"
+      ],
+      "color_grading": "vibrante",
+      "efectos_aplicados": [
+        "saturación 1.5",
+        "unsharp 5:5:1.0",
+        "vibrance 1.5",
+        "brightness +0.05"
+      ],
+      "puntuacion_calidad": 7.5,
+      "generado": true
+    },
+    {
+      "id": "video_e4.mp4",
+      "estilo": "vaporwave",
+      "duracion": 60,
+      "fps": 30,
+      "resolucion": "576x1024",
+      "transiciones_usadas": [
+        "corte directo"
+      ],
+      "movimientos_camara": [
+        "zoom"
+      ],
+      "color_grading": "neón púrpura/cian",
+      "efectos_aplicados": [
+        "saturación 2.0",
+        "hue rotación temporal",
+        "colorbalance neón",
+        "gamma 0.85",
+        "viñeta oscura"
+      ],
+      "puntuacion_calidad": 7.5,
+      "generado": true
+    },
+    {
+      "id": "video_e5.mp4",
+      "estilo": "acción rápida",
+      "duracion": 39,
+      "fps": 30,
+      "resolucion": "576x1024",
+      "transiciones_usadas": [
+        "corte directo rápido"
+      ],
+      "movimientos_camara": [
+        "cámara shake",
+        "crop dinámico sinusoidal"
+      ],
+      "color_grading": "contraste alto",
+      "efectos_aplicados": [
+        "speed ramp (1.54x)",
+        "shake sinusoidal",
+        "recorte dinámico",
+        "contraste 1.2"
+      ],
+      "puntuacion_calidad": 7.0,
+      "generado": true
+    }
+  ],
+  "metricas": {
+    "estilos": [
+      "documental",
+      "cinematic",
+      "vaporwave",
+      "tiktok",
+      "acción"
+    ],
+    "herramientas": [
+      "FFmpeg"
+    ],
+    "archivos_generados": [
+      "output/renders/video_e1.mp4",
+      "output/renders/video_e2.mp4",
+      "output/renders/video_e3.mp4",
+      "output/renders/video_e4.mp4",
+      "output/renders/video_e5.mp4"
+    ]
+  },
+  "errores": []
+}

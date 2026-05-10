@@ -1,0 +1,194 @@
+# Prompts Generados - Grupo B (AI Gen)
+# Fecha: 2026-05-04
+# Modelos: Wan2.2, HunyuanVideo, CogVideo
+
+## ESCENA 1: "Big Bang - Explosión de energía" (8s)
+### Diálogo: "Hace 13.8 mil millones de años, todo comenzó con una explosión."
+
+### Wan2.2 (Realista) - video_b1
+- Prompt 1a: "Cosmic big bang explosion, bright energy particles expanding outward, 
+  top-down camera fast zoom out, 8K realistic, bright flash illumination, 
+  cinematic space style, epic scale, volumetric lighting"
+- Prompt 1b: "Big bang singularity, bright white light expanding, cosmic dust and 
+  particles, top-down view explosive zoom out, realistic space cinematography, 
+  HDR, 60fps"
+- Prompt 1c: "Primordial universe explosion, intense bright energy burst, 
+  expanding plasma, top-down crane shot zooming out, photorealistic, 
+  8K, God rays, cosmic scale"
+
+### HunyuanVideo (Cinematic) - video_b2
+- Prompt 2a: "Cinematic big bang sequence, dramatic cosmic explosion, bright energy 
+  waves, top-down camera fast zoom out, cinematic color grading teal/orange, 
+  24fps film look, anamorphic flares"
+- Prompt 2b: "Epic universe creation, big bang fireball expanding, cinematic lighting, 
+  top-down dolly zoom out, film grain, cinematic scope, 4K"
+
+### CogVideo (Artístico) - video_b3
+- Prompt 3a: "Artistic interpretation of big bang, abstract cosmic explosion, 
+  oil painting style, bright warm colors, top-down view rotating zoom out, 
+  painterly textures, golden ratio composition"
+- Prompt 3b: "Big bang as watercolor painting, cosmic colors bleeding, 
+  top-down perspective expanding circles, artistic blur, dreamlike quality"
+
+### Variación de semillas/ángulos - video_b4
+- Prompt 4a (Seed 42): "Big bang explosion, low angle view looking up, 
+  energy expanding upward, dramatic lighting, realistic"
+- Prompt 4b (Seed 99): "Big bang cosmic event, Dutch angle tilted, 
+  fast zoom out with rotation, neon bright colors"
+
+---
+
+## ESCENA 2: "Formación de estrellas - Nebulosas" (10s)
+### Diálogo: "Las primeras estrellas encendieron la oscuridad del cosmos."
+
+### Wan2.2 (Realista)
+- Prompt 1a: "Nebula star formation, cosmic gas clouds glowing, first stars igniting, 
+  slow side dolly camera movement, neon cosmic lighting, realistic space, 
+  8K, volumetric fog, stellar nurseries"
+- Prompt 1b: "Orion nebula style star birth, colorful gas clouds, young stars 
+  forming, left-to-right pan slowly, vivid cosmic neon lighting, 
+  photorealistic deep space, HDR"
+
+### HunyuanVideo (Cinematic)
+- Prompt 2a: "Cinematic nebula formation, dramatic star birth, colorful cosmic 
+  clouds, side dolly movement slow, cinematic lighting with lens flares, 
+  filmic color grading, anamorphic, 24fps"
+- Prompt 2b: "Epic stellar nursery, glowing gas pillars, newborn stars, 
+  slow tracking shot through nebula, dramatic backlighting, cinematic"
+
+### CogVideo (Artístico)
+- Prompt 3a: "Vaporwave style nebula, pastel cosmic colors, retro 80s aesthetic, 
+  slow panning shot, neon purple and pink, glitch effects, dreamlike"
+- Prompt 3b: "Impressionist painting of star formation, soft brush strokes, 
+  cosmic colors blending, gentle camera movement, artistic"
+
+### Variación de semillas/ángulos
+- Prompt 4a (Seed 42): "Nebula star formation, top-down view, gas clouds below, 
+  stars twinkling, slow zoom in, natural lighting"
+- Prompt 4b (Seed 99): "Star birth, extreme low angle looking up through gas clouds, 
+  dramatic contrast, fast dolly movement"
+
+---
+
+## ESCENA 3: "Galaxias - Vía Láctea" (8s)
+### Diálogo: "Nuestra galaxia, la Vía Láctea, alberga cien mil millones de estrellas."
+
+### Wan2.2 (Realista)
+- Prompt 1a: "Milky Way galaxy spiral arms, billions of stars, low angle view 
+  looking up, zoom in with circular pan, dramatic lighting, realistic deep 
+  space, 8K, star clusters, cosmic dust lanes"
+- Prompt 1b: "Spiral galaxy rotating slowly, stars glowing, zoom in towards 
+  galactic center, realistic space photography style, HDR, detailed"
+
+### HunyuanVideo (Cinematic)
+- Prompt 2a: "Cinematic Milky Way shot, galactic spiral arms glowing, dramatic 
+  low angle, zoom in with circular motion, cinematic teal/orange grade, 
+  anamorphic lens flares, film grain, 24fps epic"
+- Prompt 2b: "Epic galaxy reveal, stars swirling, dramatic crane shot rising, 
+  cinematic lighting, lens flare, filmic depth of field"
+
+### CogVideo (Artístico)
+- Prompt 3a: "Van Gogh style Milky Way, swirling star patterns, thick brush strokes, 
+  vibrant blues and yellows, circular camera movement, artistic"
+- Prompt 3b: "Cyberpunk galaxy, neon spiral arms, glowing digital particles, 
+  low angle view with glitch effects, futuristic aesthetic"
+
+### Variación de semillas/ángulos
+- Prompt 4a (Seed 42): "Milky Way, normal angle straight on, steady zoom in, 
+  natural star lighting, documentary style"
+- Prompt 4b (Seed 99): "Galaxy, Dutch angle tilted 45°, fast whip pan around, 
+  high contrast dramatic lighting"
+
+---
+
+## ESCENA 4: "Sistema Solar - Planetas" (8s)
+### Diálogo: "Ocho planetas orbitan nuestro Sol, cada uno un mundo único."
+
+### Wan2.2 (Realista)
+- Prompt 1a: "Solar system planets orbiting Sun, realistic scale, fly-through 
+  camera between planets, bright sunlight illumination, 3D animation style, 
+  detailed textures, 8K, space documentary"
+- Prompt 1b: "Sun with orbiting planets, fast fly-through past Jupiter and Saturn, 
+  realistic planetary textures, solar illumination, documentary style"
+
+### HunyuanVideo (Cinematic)
+- Prompt 2a: "Cinematic solar system fly-through, dramatic Sun corona, planets 
+  gliding past, fast camera movement, cinematic lens flares, dramatic 
+  lighting, filmic color grade, epic orchestral feel"
+- Prompt 2b: "Epic planet parade, all eight planets aligned, fast fly-by 
+  camera, dramatic backlight from Sun, cinematic anamorphic"
+
+### CogVideo (Artístico)
+- Prompt 3a: "Retro sci-fi solar system, vintage space art style, warm colors, 
+  planets with rings, steady fly-through, painterly aesthetic"
+- Prompt 3b: "Minimalist solar system, geometric planets, clean lines, 
+  smooth camera fly-through, modern art style"
+
+### Variación de semillas/ángulos
+- Prompt 4a (Seed 42): "Solar system, top-down view looking down on orbital plane, 
+  slow zoom out, natural lighting"
+- Prompt 4b (Seed 99): "Planets, first person POV flying past each planet, 
+  speed ramp effect, dynamic lighting"
+
+---
+
+## ESCENA 5: "Tierra - Planeta azul" (8s)
+### Diálogo: "Y aquí, en la Tierra, surgió la vida."
+
+### Wan2.2 (Realista)
+- Prompt 1a: "Earth from orbit, blue planet with clouds, zoom in to surface, 
+  slow to fast camera movement, natural blue lighting, realistic, 
+  documentary style, 8K, atmospheric haze"
+- Prompt 1b: "Earth rotating in space, continents visible, slow zoom towards 
+  surface breaking through clouds, photorealistic, HDR, natural colors"
+
+### HunyuanVideo (Cinematic)
+- Prompt 2a: "Cinematic Earth shot, dramatic planet reveal, blue atmosphere 
+  glowing, zoom from orbit to surface, cinematic color grading, 
+  lens flare, anamorphic, filmic"
+- Prompt 2b: "Epic Earthrise, planet rising over lunar horizon, dramatic 
+  lighting, slow zoom, cinematic scope, 24fps film look"
+
+### CogVideo (Artístico)
+- Prompt 3a: "Earth as watercolor painting, soft blues and greens, 
+  atmospheric clouds bleeding, slow zoom in, artistic dreamlike quality"
+- Prompt 3b: "Pixel art Earth, retro game style, 8-bit planet, 
+  zoom in animation, chiptune aesthetic, colorful"
+
+### Variación de semillas/ángulos
+- Prompt 4a (Seed 42): "Earth, low angle from below the atmosphere looking up, 
+  slow tilt up, natural blue lighting"
+- Prompt 4b (Seed 99): "Earth, extreme close-up of ocean waves, 
+  then zoom out rapidly to space, speed ramp"
+
+---
+
+## ESCENA 6: "Humanidad - Desde el fuego hasta las estrellas" (18s)
+### Diálogo: "La humanidad pasó del fuego a las estrellas en un instante cósmico."
+
+### Wan2.2 (Realista)
+- Prompt 1a: "Montage of human civilization: primitive fire, ancient temples, 
+  industrial revolution, rocket launch, city lights from space, 
+  fast sequence of angles, varied lighting day to night, realistic, 8K"
+- Prompt 1b: "Human progress timelapse: cave paintings to skyscrapers, 
+  fast camera transitions, varied lighting, documentary style, 
+  photorealistic historical recreation"
+
+### HunyuanVideo (Cinematic)
+- Prompt 2a: "Cinematic human civilization montage, fire to space, dramatic 
+  transitions, varied camera angles, epic lighting changes day to night, 
+  filmic color grading, anamorphic flares, emotional"
+- Prompt 2b: "Epic human journey montage, quick cuts between eras, dramatic 
+  lighting evolution from firelight to neon, cinematic, orchestral"
+
+### CogVideo (Artístico)
+- Prompt 3a: "Abstract human evolution, silhouettes transitioning through history, 
+  artistic style, warm to cool color palette, dynamic montage"
+- Prompt 3b: "Kinetic typography style, human achievements as text and icons, 
+  fast animated transitions, modern graphic design aesthetic"
+
+### Variación de semillas/ángulos
+- Prompt 4a (Seed 42): "Humanity montage, all first person POV, 
+  experiencing each era directly, immersive"
+- Prompt 4b (Seed 99): "Human civilization, all Dutch angle tilted shots, 
+  chaotic energy, fast cuts, dramatic tension"

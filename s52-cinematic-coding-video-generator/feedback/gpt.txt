@@ -1,0 +1,296 @@
+Auditoría Forense de Audio y Sincronización
+
+1. Mapa de Silencios (audio nulo / prácticamente nulo)
+
+Detecté silencios reales o casi absolutos (< -50 dB) en estos segmentos:
+
+Timestamp	Duración	Observación QA
+
+00:00:00.000 → 00:01:207	1.20 s	Intro excesivamente vacía. La pantalla ya muestra actividad visual mínima, pero el audio no acompaña. Sensación de arranque “muerto”.
+00:01:574 → 00:01:641	67 ms	Microcorte perceptible en auriculares.
+00:01:873 → 00:01:927	54 ms	Otro hueco breve; rompe continuidad rítmica.
+00:05:378 → 00:05:468	91 ms	Corte seco dentro de la secuencia de typing.
+00:05:581 → 00:05:651	71 ms	Repite el problema anterior.
+00:05:909 → 00:06:383	475 ms	Vacío notable. Aquí la imagen sigue “procesando”, pero el soundtrack cae demasiado.
+00:08:030 → 00:08:091	60 ms	Microdrop.
+00:09:225 → 00:09:280	54 ms	Corte perceptible si se monitorea con atención.
+00:09:410 → 00:09:484	75 ms	Nuevo microcorte.
+00:09:649 → 00:15:146	5.49 s	Problema crítico: el video sigue vivo visualmente mientras el audio prácticamente desaparece por completo. La retención cae aquí.
+
+
+Evaluación del ritmo
+
+El problema más fuerte es el último bloque (9.65s → final).
+La pista sonora “abandona” el video demasiado temprano. Eso genera sensación de export incompleto o de cola vacía accidental.
+
+El inicio también está demasiado desnudo para el tipo de pieza. Hay imagen, cursor y expectativa de typing, pero el audio tarda demasiado en entrar.
+
+
+---
+
+2. Sincronía de Foley (Teclado)
+
+Resultado general
+
+La sincronía NO es consistente frame a frame.
+
+Hay tres problemas principales:
+
+A. El teclado entra correctamente al inicio…
+
+…pero deja de corresponder exactamente al ritmo visual después de los primeros segundos.
+
+Durante el primer bloque:
+
+el Foley parece sincronizado con la aparición de caracteres,
+
+especialmente entre ~1.2s y ~3.5s.
+
+
+Después:
+
+el typing visual continúa,
+
+pero el patrón sonoro se vuelve más genérico y menos ligado a letras individuales.
+
+
+
+---
+
+B. El Foley se “desacopla” del texto
+
+Detecté que:
+
+varias letras aparecen sin transient de teclado correspondiente,
+
+especialmente en frases largas y comandos completos,
+
+mientras el audio mantiene un patrón uniforme.
+
+
+Eso produce el típico efecto:
+
+> “se puso un loop de teclado encima”.
+
+
+
+No parece un teclado grabado siguiendo exactamente cada pulsación.
+
+
+---
+
+C. El sonido termina antes que la acción visual
+
+Problema importante:
+
+Hacia el final:
+
+todavía hay actividad visual/cambio de estado,
+
+pero el teclado prácticamente desaparece.
+
+
+Eso rompe la ilusión de causalidad:
+
+> la interfaz sigue trabajando pero el mundo sonoro murió.
+
+
+
+
+---
+
+Diagnóstico técnico de Foley
+
+El audio parece:
+
+un bloque continuo de typing,
+
+editado como textura,
+
+no como sincronización puntual.
+
+
+No encontré precisión “keystroke-to-keystroke”.
+
+
+---
+
+3. Continuidad y Mezcla
+
+Cortes abruptos
+
+Sí hay cortes perceptibles.
+
+Especialmente:
+
+5.90s → 6.38s
+
+y toda la transición posterior a 9.65s.
+
+
+La caída de energía sonora no tiene fade natural.
+
+Se siente:
+
+truncada,
+
+no diseñada.
+
+
+
+---
+
+Cambios de ambiente
+
+El ambiente general es extremadamente seco.
+
+No hay:
+
+room tone,
+
+hiss,
+
+cama ambiente,
+
+ni cola de reverb.
+
+
+Eso hace que cada silencio se perciba artificialmente.
+
+
+---
+
+Relación teclado vs voz
+
+No hay conflicto grave de masking porque la mezcla es minimalista.
+
+Pero sí ocurre otro problema:
+
+el teclado domina demasiado el foco cuando aparece,
+
+y luego desaparece demasiado abruptamente.
+
+
+La dinámica global no está nivelada.
+
+
+---
+
+4. Análisis de Retención
+
+Segmentos con riesgo de desconexión
+
+Riesgo moderado — inicio (0s → 1.2s)
+
+Hay muy poca recompensa auditiva al principio.
+
+En shorts/reels eso es peligroso:
+
+el usuario todavía no entiende el payoff,
+
+y el silencio reduce engagement.
+
+
+
+---
+
+Riesgo alto — 5.9s → 6.38s
+
+El procesamiento visual continúa, pero el audio pierde impulso.
+
+La mente espera:
+
+clicks,
+
+ticks,
+
+scroll,
+
+typing,
+
+UI feedback.
+
+
+No ocurre.
+
+
+---
+
+Riesgo crítico — 9.65s → final
+
+Este es el fallo principal del video.
+
+Visualmente:
+
+todavía existe escena,
+
+todavía hay composición,
+
+todavía no parece “terminado”.
+
+
+Pero sonoramente:
+
+el video ya acabó.
+
+
+Eso genera:
+
+sensación amateur,
+
+caída de tensión,
+
+percepción de export roto o silencio accidental.
+
+
+
+---
+
+Veredicto QA Final
+
+Problemas detectados
+
+Críticos
+
+Cola final silenciosa excesiva (~5.5 s)
+
+Foley no sincronizado letra por letra
+
+Audio termina antes de que termine la sensación visual
+
+
+Moderados
+
+Microcortes perceptibles
+
+Ritmo inconsistente del typing
+
+Mezcla demasiado seca
+
+
+Menores
+
+Inicio demasiado vacío
+
+Falta de ambiente continuo
+
+
+
+---
+
+Conclusión técnica
+
+Tu sospecha era correcta:
+
+> El teclado sí parece sincronizar parcialmente al inicio, pero luego deja de acompañar realmente cada aparición de texto.
+
+
+
+Después de los primeros segundos:
+
+el typing sonoro funciona más como “textura genérica”
+
+que como Foley sincronizado frame a frame.
+
+
+Además, el abandono sonoro del último tercio del video es muy evidente en QA profesional.

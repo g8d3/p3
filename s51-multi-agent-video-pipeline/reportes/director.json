@@ -1,0 +1,80 @@
+{
+  "agente": "director",
+  "fecha": "2026-05-04T00:00:00Z",
+  "sesion": "video-001",
+  "resumen": "Video: La historia del Universo en 60 segundos, 60 segundos, 6 escenas",
+  "resultados": [
+    {
+      "tipo": "escena",
+      "id": 1,
+      "descripcion": "Big Bang - Explosión de energía pura",
+      "duracion_seg": 8,
+      "camara": "zoom out con shake",
+      "iluminacion": "dramática",
+      "transicion": "glitch",
+      "sfx": ["explosión_cósmica", "rumble_profundo", "rising_crescendo"],
+      "estado": "ok"
+    },
+    {
+      "tipo": "escena",
+      "id": 2,
+      "descripcion": "Estrellas y galaxias - Vuelo entre nebulosas",
+      "duracion_seg": 12,
+      "camara": "fly-through",
+      "iluminacion": "crepúsculo",
+      "transicion": "barrido",
+      "sfx": ["whoosh_espacial", "ambiente_estelar", "pulsar_lejano"],
+      "estado": "ok"
+    },
+    {
+      "tipo": "escena",
+      "id": 3,
+      "descripcion": "Sistema Solar - Formación planetaria",
+      "duracion_seg": 8,
+      "camara": "orbital",
+      "iluminacion": "luz dura",
+      "transicion": "zoom",
+      "sfx": ["impacto_solar", "rumble", "fuego_crepitante"],
+      "estado": "ok"
+    },
+    {
+      "tipo": "escena",
+      "id": 4,
+      "descripcion": "Tierra primitiva - Origen de la vida",
+      "duracion_seg": 12,
+      "camara": "dolly in",
+      "iluminacion": "low-key",
+      "transicion": "wipe",
+      "sfx": ["trueno", "agua_hirviendo", "rayo_electrico"],
+      "estado": "ok"
+    },
+    {
+      "tipo": "escena",
+      "id": 5,
+      "descripcion": "Evolución humana - Time-lapse acelerado",
+      "duracion_seg": 8,
+      "camara": "dolly out",
+      "iluminacion": "high-key",
+      "transicion": "dissolve",
+      "sfx": ["whoosh_rapido", "impacto_metalico", "fuego"],
+      "estado": "ok"
+    },
+    {
+      "tipo": "escena",
+      "id": 6,
+      "descripcion": "Reflexión final - Polvo de estrellas",
+      "duracion_seg": 12,
+      "camara": "crane up",
+      "iluminacion": "crepúsculo",
+      "transicion": "fundido a negro",
+      "sfx": ["ambiente_espacial", "corazon_latido", "suspiro"],
+      "estado": "ok"
+    }
+  ],
+  "metricas": {
+    "duracion_total": 60,
+    "escenas": 6,
+    "archivos_generados": ["templates/escenas.yaml"]
+  },
+  "errores": []
+}

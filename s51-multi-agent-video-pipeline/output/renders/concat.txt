@@ -1,0 +1,6 @@
+file '/home/vuos/code/p3/s51/output/renders/scene1_tmp.mp4'
+file '/home/vuos/code/p3/s51/output/renders/scene2_tmp.mp4'
+file '/home/vuos/code/p3/s51/output/renders/scene3_tmp.mp4'
+file '/home/vuos/code/p3/s51/output/renders/scene4_tmp.mp4'
+file '/home/vuos/code/p3/s51/output/renders/scene5_tmp.mp4'
+file '/home/vuos/code/p3/s51/output/renders/scene6_tmp.mp4'

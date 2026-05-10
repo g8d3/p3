@@ -1,0 +1,6 @@
+file '/home/vuos/code/p3/s51/output/audio/escena1_ambient_final.wav'
+file '/home/vuos/code/p3/s51/output/audio/escena2_ambient_final.wav'
+file '/home/vuos/code/p3/s51/output/audio/escena3_ambient_final.wav'
+file '/home/vuos/code/p3/s51/output/audio/escena4_ambient_final.wav'
+file '/home/vuos/code/p3/s51/output/audio/escena5_ambient_final.wav'
+file '/home/vuos/code/p3/s51/output/audio/escena6_ambient_final.wav'

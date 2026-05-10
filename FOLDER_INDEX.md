@@ -50,3 +50,8 @@
 | `s47-vibe-coding-livekit` | Vibe Coding — voice-controlled AI coding assistant using Deepgram STT, choice of LLM providers, code generation via OpenCode CLI, and Kokoro TTS, with a Python LiveKit agent and React/Vite web client |
 | `s48-vibe-coding-ws` | Vibe Coding (WebSocket variant) — Python WebSocket server + single-page vanilla HTML/JS frontend where users speak or type ideas, processed through Deepgram STT → z.ai GLM-4.5 LLM → Kokoro TTS |
 | `s49-scratch` | Empty placeholder directory |
+| `s50-multi-agent-orchestrator` | Parallel multi-agent orchestration system that spawns specialized AI agents via pi CLI for collaborative software development and video production with a real-time monitoring dashboard. |
+| `s51-multi-agent-video-pipeline` | Multi-agent AI video generation pipeline with specialized agents for direction, Remotion compositing, AI video generation, TTS audio, ShortGPT shorts, and editing for short-form cinematic content. |
+| `s52-cinematic-coding-video-generator` | Premium cinematic coding interface video generator (Python/Pillow) that produces short film-style demo videos of terminal/coding sessions with synchronized audio. |
+| `s53-cinematic-ide-video-generator` | Full HD cinematic programming interface video generator using Python, Pillow, and MoviePy for premium tech-oriented coding demo videos with synchronized audio. |
+| `s54-scratch` | Empty placeholder directory. |

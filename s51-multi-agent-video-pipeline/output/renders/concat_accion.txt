@@ -1,0 +1,6 @@
+file '/home/vuos/code/p3/s51/output/renders/accion_1.mp4'
+file '/home/vuos/code/p3/s51/output/renders/accion_2.mp4'
+file '/home/vuos/code/p3/s51/output/renders/accion_3.mp4'
+file '/home/vuos/code/p3/s51/output/renders/accion_4.mp4'
+file '/home/vuos/code/p3/s51/output/renders/accion_5.mp4'
+file '/home/vuos/code/p3/s51/output/renders/accion_6.mp4'

@@ -1,0 +1,67 @@
+{
+  "agente": "audio",
+  "grupo": "C",
+  "fecha": "2026-05-04T16:18:48-05:00",
+  "sesion": "video-001",
+  "resumen": "5 pistas de audio generadas (3 idiomas + 2 variantes musicales)",
+  "variaciones": [
+    {
+      "id": "audio_a_es.mp3",
+      "idioma": "es",
+      "voz": "am_adam",
+      "musica": "Original por escena (orquestal/cuerdas/heroica/tensa/electrónica/emotiva)",
+      "sfx": ["explosión_cósmica", "rumble_profundo", "rising_crescendo", "whoosh_espacial", "ambiente_estelar", "pulsar_lejano", "impacto_solar", "fuego_crepitante", "trueno", "agua_hirviendo", "rayo_electrico", "whoosh_rapido", "impacto_metalico", "ambiente_espacial", "corazon_latido", "suspiro"],
+      "duracion": 59.0,
+      "calidad": "44100Hz stereo mp3"
+    },
+    {
+      "id": "audio_b_en.mp3",
+      "idioma": "en",
+      "voz": "am_michael",
+      "musica": "Misma que audio_a",
+      "sfx": "mismos 16 SFX",
+      "duracion": 58.5,
+      "calidad": "44100Hz stereo mp3"
+    },
+    {
+      "id": "audio_c_pt.mp3",
+      "idioma": "pt",
+      "voz": "am_adam",
+      "musica": "Misma que audio_a",
+      "sfx": "mismos 16 SFX",
+      "duracion": 58.7,
+      "calidad": "44100Hz stereo mp3"
+    },
+    {
+      "id": "audio_d_ambient.mp3",
+      "idioma": "none",
+      "voz": "none",
+      "musica": "Misma que audio_a (volumen elevado, sin TTS)",
+      "sfx": "mismos 16 SFX (volumen elevado)",
+      "duracion": 60.0,
+      "calidad": "44100Hz stereo mp3"
+    },
+    {
+      "id": "audio_e_energetica.mp3",
+      "idioma": "es",
+      "voz": "am_adam",
+      "musica": "Versión enérgica (más percusión, tempo rápido, electrónica agresiva)",
+      "sfx": "mismos 16 SFX",
+      "duracion": 59.0,
+      "calidad": "44100Hz stereo mp3"
+    }
+  ],
+  "metricas": {
+    "idiomas": ["es", "en", "pt"],
+    "voces_usadas": ["am_adam (es, pt)", "am_michael (en)"],
+    "sfx_generados": 16,
+    "archivos_generados": [
+      "output/renders/audio_a_es.mp3",
+      "output/renders/audio_b_en.mp3",
+      "output/renders/audio_c_pt.mp3",
+      "output/renders/audio_d_ambient.mp3",
+      "output/renders/audio_e_energetica.mp3"
+    ]
+  },
+  "errores": []
+}

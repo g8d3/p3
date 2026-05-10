@@ -1,0 +1,100 @@
+{
+  "agente": "shorts",
+  "grupo": "D",
+  "sesion": "video-001",
+  "fecha": "2026-05-04T16:21:00",
+  "resumen": "5 shorts generados desde escenas.yaml: 'La historia del Universo en 60 segundos'",
+  "variaciones": [
+    {
+      "id": "video_d1.mp4",
+      "estilo": "informativo",
+      "idioma": "es",
+      "voz": "masculina",
+      "duracion": 59.2,
+      "fps": 30,
+      "resolucion": "1080x1920",
+      "tamano_kb": 1415,
+      "subtitulos": true,
+      "musica": true,
+      "hook_segundos": 3,
+      "calidad": 8.0
+    },
+    {
+      "id": "video_d2.mp4",
+      "estilo": "entretenimiento",
+      "idioma": "en",
+      "voz": "femenina",
+      "duracion": 60.0,
+      "fps": 30,
+      "resolucion": "1080x1920",
+      "tamano_kb": 1299,
+      "subtitulos": true,
+      "musica": true,
+      "hook_segundos": 3,
+      "calidad": 8.0
+    },
+    {
+      "id": "video_d3.mp4",
+      "estilo": "kinetic-typography",
+      "idioma": "es",
+      "voz": "masculina",
+      "duracion": 59.2,
+      "fps": 30,
+      "resolucion": "1080x1920",
+      "tamano_kb": 1767,
+      "subtitulos": true,
+      "musica": true,
+      "hook_segundos": 3,
+      "calidad": 7.5
+    },
+    {
+      "id": "video_d4.mp4",
+      "estilo": "ultra-rapido",
+      "idioma": "es",
+      "voz": "masculina",
+      "duracion": 60.0,
+      "fps": 30,
+      "resolucion": "1080x1920",
+      "tamano_kb": 1191,
+      "subtitulos": true,
+      "musica": true,
+      "hook_segundos": 3,
+      "calidad": 7.5
+    },
+    {
+      "id": "video_d5.mp4",
+      "estilo": "tiktok",
+      "idioma": "es",
+      "voz": "masculina",
+      "duracion": 59.2,
+      "fps": 30,
+      "resolucion": "1080x1920",
+      "tamano_kb": 1403,
+      "subtitulos": true,
+      "musica": true,
+      "hook_segundos": 3,
+      "calidad": 7.5
+    }
+  ],
+  "metricas": {
+    "estilos": [
+      "informativo",
+      "entretenimiento",
+      "kinetic-typography",
+      "ultra-rapido",
+      "tiktok"
+    ],
+    "idiomas": [
+      "es",
+      "en"
+    ],
+    "archivos_generados": [
+      "output/renders/video_d1.mp4",
+      "output/renders/video_d2.mp4",
+      "output/renders/video_d3.mp4",
+      "output/renders/video_d4.mp4",
+      "output/renders/video_d5.mp4"
+    ]
+  },
+  "errores": []
+}

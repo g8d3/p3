@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>🎬 Pipeline v5</title>
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_midnight.min.css" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; padding: 8px; font-size: 14px; }
+  h1 { font-size: 1.1em; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .meta { font-size: 0.75em; color: #8b949e; margin-bottom: 6px; display: flex; gap: 8px; flex-wrap: wrap; }
+  .meta span { background: #161b22; padding: 2px 8px; border-radius: 4px; }
+  .meta .num { color: #58a6ff; font-weight: 600; }
+  .pipeline-bar { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 5px 8px; margin-bottom: 6px; font-size: 0.78em; }
+  .pipe-step { display: flex; align-items: center; gap: 3px; }
+  .done { color: #3fb950; } .pending { color: #8b949e; } .arrow { color: #30363d; margin: 0 2px; }
+  .controls { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; align-items: center; }
+  .controls label { font-size: 0.75em; color: #8b949e; display: flex; align-items: center; gap: 4px; }
+  .controls select { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 4px 6px; color: #c9d1d9; font-size: 0.78em; }
+  .controls button { background: #161b22; border: 1px solid #30363d; border-radius: 4px; padding: 4px 8px; color: #c9d1d9; cursor: pointer; font-size: 0.75em; }
+  .controls button:hover { background: #1c2333; }
+
+  #event-table { border-radius: 6px; overflow: hidden; }
+
+  .tabulator { background: #161b22 !important; border: 1px solid #30363d !important; border-radius: 6px !important; font-size: 0.82em !important; }
+  .tabulator .tabulator-header { background: #1c2333 !important; border-bottom: 1px solid #30363d !important; }
+  .tabulator .tabulator-header .tabulator-col { background: #1c2333 !important; border-right: 1px solid #21262d !important; }
+  .tabulator .tabulator-header .tabulator-col .tabulator-col-content { padding: 5px 7px !important; }
+  .tabulator .tabulator-header .tabulator-col .tabulator-col-title { font-size: 0.7em !important; font-weight: 600 !important; color: #8b949e !important; text-transform: uppercase !important; letter-spacing: 0.3px !important; }
+  .tabulator .tabulator-tableholder { background: #161b22 !important; }
+  .tabulator .tabulator-tableholder .tabulator-table { background: #161b22 !important; }
+  .tabulator .tabulator-row { border-bottom: 1px solid #21262d !important; min-height: 26px !important; }
+  .tabulator .tabulator-row .tabulator-cell { padding: 3px 7px !important; font-size: 0.8em !important; color: #c9d1d9 !important; border-right: 1px solid #21262d !important; }
+  .tabulator .tabulator-row.tabulator-row-even { background: rgba(255,255,255,0.015) !important; }
+  .tabulator .tabulator-row:hover { background: rgba(88,166,255,0.08) !important; }
+  .tabulator .tabulator-footer { background: #1c2333 !important; border-top: 1px solid #30363d !important; }
+  .tabulator .tabulator-footer .tabulator-paginator { color: #8b949e !important; font-size: 0.7em !important; }
+  .tabulator .tabulator-footer .tabulator-page-size, .tabulator .tabulator-footer .tabulator-page { background: #0d1117 !important; color: #c9d1d9 !important; border: 1px solid #30363d !important; }
+  .tabulator .tabulator-footer .tabulator-page.active { background: #58a6ff !important; color: #fff !important; }
+
+  .tag { display: inline-block; padding: 1px 5px; border-radius: 3px; font-size: 0.7em; font-weight: 500; white-space: nowrap; }
+  .tag-accion { background: rgba(88,166,255,0.15); color: #58a6ff; }
+  .tag-variacion { background: rgba(188,140,255,0.15); color: #bc8cff; }
+  .tag-evaluacion { background: rgba(63,185,80,0.15); color: #3fb950; }
+  .tag-error { background: rgba(248,81,73,0.15); color: #f85149; }
+  .tag-advertencia { background: rgba(210,153,34,0.15); color: #d29922; }
+  .tag-escena { background: rgba(88,166,255,0.1); color: #58a6ff; }
+
+  .popup-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
+  .popup-overlay.open { display: flex; }
+  .popup { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; max-width: 90vw; max-height: 80vh; overflow: auto; position: relative; }
+  .popup h3 { font-size: 0.9em; margin-bottom: 8px; padding-right: 30px; }
+  .popup .close { position: absolute; top: 8px; right: 12px; background: none; border: none; color: #8b949e; font-size: 1.3em; cursor: pointer; }
+  .popup .close:hover { color: #c9d1d9; }
+  .popup pre { background: #0d1117; padding: 8px; border-radius: 4px; font-size: 0.8em; max-height: 60vh; overflow: auto; white-space: pre-wrap; word-break: break-all; }
+
+  @media (max-width: 600px) { body { padding: 4px; font-size: 12px; } }
+</style>
+</head>
+<body>
+
+<h1>🎬 Pipeline v5 <span style="font-size:0.6em;color:#8b949e;font-weight:normal" id="clock"></span></h1>
+<div class="meta">
+  <span>📁 renders: <span class="num" id="numRenders">0</span></span>
+  <span>📄 agentes: <span class="num" id="numAgentes">0</span></span>
+  <span>❌ errores: <span class="num" id="numErrores">0</span></span>
+  <span>📋 eventos: <span class="num" id="numEventos">0</span></span>
+</div>
+
+<div class="pipeline-bar" id="pipelineBar">
+  <span class="pipe-step pending">🎬 Director</span><span class="arrow">→</span>
+  <span class="pipe-step pending">🎞️ Grupos</span><span class="arrow">→</span>
+  <span class="pipe-step pending">✅ Quality</span>
+</div>
+
+<div class="controls">
+  <label>Agrupar por:
+    <select id="groupSelect" onchange="changeGroup()">
+      <option value="">— Sin agrupar —</option>
+      <option value="agent">Agente</option>
+      <option value="type">Tipo</option>
+      <option value="status">Estado</option>
+      <option value="agent,type">Agente → Tipo</option>
+      <option value="type,agent">Tipo → Agente</option>
+      <option value="agent,status">Agente → Estado</option>
+    </select>
+  </label>
+  <button onclick="toggleErrors()">❌ Solo errores</button>
+  <button onclick="exportCSV()">⬇ CSV</button>
+</div>
+
+<div id="event-table"></div>
+
+<!-- Popup -->
+<div class="popup-overlay" id="popupOverlay" onclick="if(event.target===this)closePopup()">
+  <div class="popup">
+    <button class="close" onclick="closePopup()">✕</button>
+    <h3 id="popupTitle">Detalle</h3>
+    <pre id="popupBody"></pre>
+  </div>
+</div>
+
+<script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+<script>
+let table = null;
+let fullData = [];
+let errorOnly = false;
+let agentFilterVal = '';
+let typeFilterVal = '';
+let statusFilterVal = '';
+
+function closePopup() { document.getElementById('popupOverlay').classList.remove('open'); }
+function showPopup(title, body) {
+  document.getElementById('popupTitle').textContent = title;
+  document.getElementById('popupBody').textContent = body;
+  document.getElementById('popupOverlay').classList.add('open');
+}
+
+async function fetchReports() {
+  const agents = ['director', 'remotion', 'aigen', 'audio', 'shorts', 'editor', 'quality'];
+  const icons = { 'director': '🎬', 'remotion': '🎞️', 'aigen': '🤖', 'audio': '🔊', 'shorts': '⚡', 'editor': '✂️', 'quality': '✅' };
+  const reports = [];
+  
+  for (const name of agents) {
+    try {
+      const r = await fetch(`/reportes/${name}.json?_=${Date.now()}`);
+      if (r.ok) reports.push(await r.json());
+    } catch(e) {}
+  }
+  return { reports, icons };
+}
+
+async function buildData() {
+  try {
+    // Get live.json for pipeline + renders count
+    const liveResp = await fetch('/reportes/live.json?_=' + Date.now());
+    const live = liveResp.ok ? await liveResp.json() : null;
+    
+    const { reports, icons } = await fetchReports();
+    
+    document.getElementById('numAgentes').textContent = reports.length;
+    
+    if (live) {
+      document.getElementById('numRenders').textContent = live.archivos?.renders || 0;
+      const steps = document.querySelectorAll('.pipe-step');
+      if (steps.length >= 3) {
+        steps[0].className = `pipe-step ${live.archivos?.escenas_yaml ? 'done' : 'pending'}`;
+        steps[0].innerHTML = live.archivos?.escenas_yaml ? '✅ Director' : '🎬 Director';
+        steps[1].className = `pipe-step ${(live.archivos?.renders || 0) > 0 ? 'done' : 'pending'}`;
+        steps[1].innerHTML = (live.archivos?.renders || 0) > 0 ? `✅ Grupos (${live.archivos.renders})` : '🎞️ Grupos';
+        steps[2].className = `pipe-step ${live.archivos?.final_mp4 ? 'done' : 'pending'}`;
+        steps[2].innerHTML = live.archivos?.final_mp4 ? '✅ Quality' : '✅ Quality';
+      }
+    }
+    
+    // Build structured events from reports
+    const events = [];
+    let totalErrors = 0;
+    
+    // Add Orquestador (this pi instance) from live.json
+    if (live) {
+      const orq = live.agentes?.find(a => a.nombre === 'Orquestador');
+      if (orq) {
+        events.push({
+          time: live.timestamp_human || '—',
+          agent: 'Orquestador',
+          agentIcon: '🎮',
+          type: 'estado',
+          typeLabel: '📊 estado',
+          event: orq.estado === 'ocioso' ? '💤 Esperando instrucciones (chat vacío, 0 tokens)' : `Estado: ${orq.estado}`,
+          detail: JSON.stringify(orq, null, 2),
+          status: orq.estado === 'error' ? 'error' : 'ok'
+        });
+        (orq.acciones || []).forEach(act => {
+          events.push({
+            time: live.timestamp_human || '—',
+            agent: 'Orquestador',
+            agentIcon: '🎮',
+            type: act.tipo || 'info',
+            typeLabel: act.tipo === 'action' ? '🔧 tool' : act.tipo === 'thinking' ? '🤔 thinking' : '📝 info',
+            event: act.text?.substring(0, 100) || '—',
+            detail: act.text || '',
+            status: act.tipo === 'error' ? 'error' : 'ok'
+          });
+        });
+      }
+    }
+    
+    for (const report of reports) {
+      const agent = report.agente || '?';
+      const icon = icons[agent] || '•';
+      
+      // 1. Resumen del agente
+      events.push({
+        time: report.fecha ? report.fecha.substring(11, 19) : '—',
+        agent: agent,
+        agentIcon: icon,
+        type: 'estado',
+        typeLabel: '📊 estado',
+        event: report.resumen || 'Sin resumen',
+        detail: '',
+        status: report.errores && report.errores.length > 0 ? 'error' : 'ok',
+        _sortTime: report.fecha || ''
+      });
+      
+      // 2. Variaciones
+      if (report.variaciones) {
+        for (const v of report.variaciones) {
+          const estilo = v.estilo || v.id || '—';
+          const calidad = v.puntuacion_calidad ? `⭐ ${v.puntuacion_calidad}/10` : '';
+          events.push({
+            time: '',
+            agent: agent,
+            agentIcon: icon,
+            type: 'variacion',
+            typeLabel: '🔀 variación',
+            event: `${v.id || '—'} — ${estilo}`,
+            detail: JSON.stringify(v, null, 2),
+            status: 'ok'
+          });
+        }
+      }
+      
+      // 3. Resultados (escenas, evaluaciones)
+      if (report.resultados) {
+        for (const r of report.resultados) {
+          if (r.tipo === 'escena') {
+            events.push({
+              time: '',
+              agent: agent,
+              agentIcon: icon,
+              type: 'escena',
+              typeLabel: '🎬 escena',
+              event: `Escena ${r.id}: ${(r.descripcion || '').substring(0, 60)}`,
+              detail: JSON.stringify(r, null, 2),
+              status: r.estado === 'error' ? 'error' : 'ok'
+            });
+          } else if (r.tipo === 'evaluacion') {
+            const pts = r.puntuacion_total ? ` — ${r.puntuacion_total}/10` : '';
+            events.push({
+              time: '',
+              agent: agent,
+              agentIcon: icon,
+              type: 'evaluacion',
+              typeLabel: '✅ evaluación',
+              event: `${r.video || '?'}: ${r.puntuacion_total || '?'}/10${r.decision === 'aprobado' ? ' ✅' : ' ❌'}`,
+              detail: JSON.stringify(r, null, 2),
+              status: r.decision === 'aprobado' ? 'ok' : 'error'
+            });
+          }
+        }
+      }
+      
+      // 4. Errores
+      if (report.errores) {
+        for (const err of report.errores) {
+          totalErrors++;
+          const errText = typeof err === 'string' ? err : (err.mensaje || JSON.stringify(err));
+          events.push({
+            time: '',
+            agent: agent,
+            agentIcon: icon,
+            type: 'error',
+            typeLabel: '❌ error',
+            event: errText.substring(0, 100),
+            detail: JSON.stringify(err, null, 2),
+            status: 'error'
+          });
+        }
+      }
+      
+      // 5. Métricas como eventos
+      if (report.metricas) {
+        for (const [k, v] of Object.entries(report.metricas)) {
+          if (k === 'archivos_generados') continue;
+          events.push({
+            time: '',
+            agent: agent,
+            agentIcon: icon,
+            type: 'metrica',
+            typeLabel: '📊 métrica',
+            event: `${k}: ${Array.isArray(v) ? v.join(', ') : v}`,
+            detail: JSON.stringify(report.metricas, null, 2),
+            status: 'ok'
+          });
+        }
+      }
+    }
+    
+    document.getElementById('numErrores').textContent = totalErrors;
+    document.getElementById('numEventos').textContent = events.length;
+    
+    fullData = events;
+    updateTable();
+    
+  } catch(e) {
+    console.error('Error:', e);
+  }
+}
+
+function updateTable() {
+  let data = fullData;
+  if (errorOnly) data = data.filter(d => d.status === 'error');
+  
+  if (!table) {
+    table = new Tabulator('#event-table', {
+      data: data,
+      layout: 'fitColumns',
+      pagination: 'local',
+      paginationSize: 25,
+      paginationSizeSelector: [10, 25, 50, 100, 500],
+      movableColumns: true,
+      resizableColumns: true,
+      groupBy: getGroupBy(),
+      groupHeader: (value, count, data, group) => {
+        const icon = data[0]?.agentIcon || '';
+        const groupLabels = {
+          'agent': 'Agente',
+          'type': 'Tipo',
+          'status': 'Estado'
+        };
+        const label = groupLabels[getGroupField()] || '';
+        return `${icon || ''} <strong>${value}</strong> <span style="color:#8b949e;font-size:0.85em">(${count})</span>`;
+      },
+      columnDefaults: {
+        headerFilter: true,
+        headerFilterPlaceholder: ' '
+      },
+      columns: [
+        { title: '⏱️', field: 'time', width: 50, hozAlign: 'center', sorter: 'string' },
+        { 
+          title: 'Agente', field: 'agent', width: 100, sorter: 'string',
+          headerFilter: 'select',
+          headerFilterParams: { values: true, sortValues: 'asc' },
+          formatter: (cell) => {
+            const row = cell.getData();
+            return `${row.agentIcon || ''} ${row.agent}`;
+          }
+        },
+        { 
+          title: 'Tipo', field: 'type', width: 90, sorter: 'string',
+          headerFilter: 'select',
+          headerFilterParams: { 
+            values: { 'estado': '📊 estado', 'variacion': '🔀 variación', 'escena': '🎬 escena', 'evaluacion': '✅ evaluación', 'error': '❌ error', 'metrica': '📊 métrica' },
+            sortValues: 'asc'
+          },
+          formatter: (cell) => {
+            const row = cell.getData();
+            return `<span class="tag tag-${row.type}">${row.typeLabel || row.type}</span>`;
+          }
+        },
+        { 
+          title: 'Evento', field: 'event', sorter: 'string',
+          headerFilter: 'input',
+          formatter: (cell) => {
+            const val = cell.getValue() || '';
+            const row = cell.getData();
+            if (val.length > 80) {
+              return `<span style="cursor:pointer;border-bottom:1px dotted #8b949e" onclick="showPopup('${row.agent} — Evento', \`${val.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">${val.substring(0, 80)}…</span>`;
+            }
+            return val;
+          }
+        },
+        {
+          title: 'Detalle', field: 'detail', width: 60, sorter: 'string',
+          formatter: (cell) => {
+            const val = cell.getValue() || '';
+            if (!val) return '';
+            const row = cell.getData();
+            return `<span style="cursor:pointer;color:#58a6ff;font-size:0.85em" onclick="showPopup('${row.agent} — Detalle', \`${val.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`)">📋 ver</span>`;
+          }
+        },
+        { 
+          title: '', field: 'status', width: 35, hozAlign: 'center',
+          headerFilter: 'select',
+          headerFilterParams: { values: { 'ok': '✅', 'error': '❌' }, sortValues: 'asc' },
+          formatter: (cell) => cell.getValue() === 'error' ? '<span style="color:#f85149">❌</span>' : '<span style="color:#3fb950">✅</span>',
+          sorter: 'string'
+        }
+      ]
+    });
+  } else {
+    table.replaceData(data);
+  }
+}
+
+function getGroupBy() {
+  const val = document.getElementById('groupSelect').value;
+  if (!val) return false;
+  if (val.includes(',')) {
+    const fields = val.split(',');
+    return field => {
+      return fields.map(f => dataItem[f] || '').join(' — ');
+    };
+  }
+  return val;
+}
+
+function getGroupField() {
+  const val = document.getElementById('groupSelect').value;
+  if (!val) return '';
+  return val.split(',')[0];
+}
+
+function changeGroup() {
+  if (table) {
+    table.setGroupBy(getGroupBy());
+  }
+}
+
+function toggleErrors() {
+  errorOnly = !errorOnly;
+  updateTable();
+}
+
+function exportCSV() {
+  if (table) table.download('csv', 'pipeline-eventos.csv');
+}
+
+// Build initial data, then refresh every 5s (scroll-preserving)
+let refreshTimer = null;
+async function refresh() {
+  // Save scroll state
+  const scrollEl = document.querySelector('.tabulator-tableholder');
+  const scrollTop = scrollEl ? scrollEl.scrollTop : 0;
+  const scrollLeft = scrollEl ? scrollEl.scrollLeft : 0;
+  
+  await buildData();
+  
+  // Restore scroll after data update
+  setTimeout(() => {
+    const el = document.querySelector('.tabulator-tableholder');
+    if (el) { el.scrollTop = scrollTop; el.scrollLeft = scrollLeft; }
+  }, 50);
+}
+
+buildData();
+setInterval(refresh, 5000);
+</script>
+</body>
+</html>

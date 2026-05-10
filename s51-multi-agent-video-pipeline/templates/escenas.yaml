@@ -1,0 +1,189 @@
+# Especificación de Video - Generada por el Agente Director
+# "La historia del Universo en 60 segundos"
+# Formato: 9:16 (Shorts), 30fps, Cinematic
+# Música épica, TTS en español, efectos de sonido sincronizados
+
+video:
+  titulo: "La historia del Universo en 60 segundos"
+  duracion_seg: 60
+  idioma: "es"
+  formato: "9:16"
+  fps: 30
+
+escenas:
+  # ─────────────────────────────────────────────────────────────
+  # ESCENA 1 - EL BIG BANG (8s)
+  # Ritmo: DRAMA. Ángulo: CONTROPICADO. Iluminación: DRAMÁTICA
+  # ─────────────────────────────────────────────────────────────
+  - id: 1
+    duracion_seg: 8
+    descripcion: >
+      Punto infinitesimal de energía pura explota en una cegadora luz blanca.
+       Partículas subatómicas se dispersan en todas direcciones mientras el
+       tejido del espacio-tiempo se expande violentamente. Colores primigenios:
+       blanco cegador, azul eléctrico, naranja incandescente.
+    dialogo: >
+      "Al principio, todo era un punto infinitamente pequeño y denso.
+       Hace 13.8 mil millones de años... ese punto explotó. Nació el universo."
+    camara:
+      angulo: "contrapicado"
+      movimiento: "zoom out con shake"
+      velocidad_movimiento: "rápido"
+    iluminacion: "dramática"
+    transicion_entrada: "fundido desde negro"
+    transicion_salida: "glitch"
+    audio:
+      musica: >
+        Épica orquestal. Metales y percusión en crescendo violento desde
+        silencio absoluto hasta fortísimo en 3 segundos. Explosión de cuerdas.
+      tts: true
+      efectos: ["explosión_cósmica", "rumble_profundo", "rising_crescendo"]
+    estilo_visual: "cinematic"
+
+  # ─────────────────────────────────────────────────────────────
+  # ESCENA 2 - ESTRELLAS Y GALAXIAS (12s)
+  # Ritmo: CONTEMPLATIVO. Ángulo: CENITAL. Iluminación: CREPÚSCULO
+  # ─────────────────────────────────────────────────────────────
+  - id: 2
+    duracion_seg: 12
+    descripcion: >
+      Cámara vuela majestuosamente entre nebulosas de colores púrpura y
+       naranja. Galaxias espirales giran lentamente en la inmensidad del cosmos.
+       Polvo estelar brilla como diamantes. El caos primigenio se organiza en
+       estructuras cósmicas cada vez más grandes.
+    dialogo: >
+      "El universo se expandió y enfrió. La gravedad unió el gas y el polvo
+       cósmico, encendiendo miles de millones de estrellas. Nacieron las
+       galaxias: inmensas islas de luz en la oscuridad infinita."
+    camara:
+      angulo: "cenital"
+      movimiento: "fly-through"
+      velocidad_movimiento: "lento"
+    iluminacion: "crepúsculo"
+    transicion_entrada: "fundido cruzado"
+    transicion_salida: "barrido"
+    audio:
+      musica: >
+        Cuerdas melódicas con sintetizadores suaves. Sensación de asombro y
+        vastedad. Tempo medio, evolución tonal hacia tonos cálidos.
+      tts: true
+      efectos: ["whoosh_espacial", "ambiente_estelar", "pulsar_lejano"]
+    estilo_visual: "cinematic"
+
+  # ─────────────────────────────────────────────────────────────
+  # ESCENA 3 - SISTEMA SOLAR (8s)
+  # Ritmo: ENERGÍA. Ángulo: NORMAL. Iluminación: LUZ DURA
+  # ─────────────────────────────────────────────────────────────
+  - id: 3
+    duracion_seg: 8
+    descripcion: >
+      El Sol se enciende con furia termonuclear. A su alrededor, los planetas
+       toman forma: Júpiter con sus tormentas, Saturno con sus anillos, la
+       Tierra azul emergiendo. Cámara orbita alrededor del sistema solar en
+       formación, revelando la danza gravitacional de los astros.
+    dialogo: >
+      "En un brazo de una galaxia ordinaria, una estrella llamada Sol encendió
+       su fuego. A su alrededor, planetas de roca y gas comenzaron a danzar:
+       nuestro sistema solar."
+    camara:
+      angulo: "normal"
+      movimiento: "orbital"
+      velocidad_movimiento: "medio"
+    iluminacion: "luz dura"
+    transicion_entrada: "zoom"
+    transicion_salida: "fundido a negro"
+    audio:
+      musica: >
+        Metales heroicos con tema ascendente. Crescendo moderado que transmite
+        maravilla y grandeza. Trompetas y cornos franceses.
+      tts: true
+      efectos: ["impacto_solar", "rumble", "fuego_crepitante"]
+    estilo_visual: "cinematic"
+
+  # ─────────────────────────────────────────────────────────────
+  # ESCENA 4 - TIERRA Y ORIGEN DE LA VIDA (12s)
+  # Ritmo: DRAMA. Ángulo: PICADO. Iluminación: LOW-KEY
+  # ─────────────────────────────────────────────────────────────
+  - id: 4
+    duracion_seg: 12
+    descripcion: >
+      La Tierra primitiva: océanos hirvientes, volcanes en erupción lanzando
+       lava incandescente, rayos cruzando un cielo tormentoso de azufre.
+       En el agua primigenia, primeras moléculas orgánicas brillan con luz
+       propia. La vida emerge del caos químico.
+    dialogo: >
+      "En la Tierra, el caos químico dio paso al milagro. Moléculas simples se
+       combinaron para crear vida. Primeras células, primeros océanos llenos
+       de posibilidades. La vida encontró su camino."
+    camara:
+      angulo: "picado"
+      movimiento: "dolly in"
+      velocidad_movimiento: "lento"
+    iluminacion: "low-key"
+    transicion_entrada: "fundido cruzado"
+    transicion_salida: "wipe"
+    audio:
+      musica: >
+        Misteriosa y tensa. Cuerdas graves y timbales con build-up gradual.
+        Tensión que crece hacia el momento del origen. Piano preparado.
+      tts: true
+      efectos: ["trueno", "agua_hirviendo", "rayo_electrico"]
+    estilo_visual: "cinematic"
+
+  # ─────────────────────────────────────────────────────────────
+  # ESCENA 5 - EVOLUCIÓN HUMANA (8s)
+  # Ritmo: ACELERACIÓN. Ángulo: PRIMERA PERSONA. Iluminación: HIGH-KEY
+  # ─────────────────────────────────────────────────────────────
+  - id: 5
+    duracion_seg: 8
+    descripcion: >
+      Time-lapse vertiginoso de la evolución: desde células unicelulares
+       pasando por peces, anfibios, dinosaurios, hasta primates y humanos
+       modernos. Explosión de civilización: fuego, rueda, electricidad, cohetes
+       al espacio. Todo en una aceleración imparable.
+    dialogo: >
+      "La vida evolucionó, y entre todas las especies, una desarrolló
+       conciencia. El ser humano miró al cielo y se preguntó: ¿qué somos?"
+    camara:
+      angulo: "primera-persona"
+      movimiento: "dolly out"
+      velocidad_movimiento: "rápido"
+    iluminacion: "high-key"
+    transicion_entrada: "fundido cruzado"
+    transicion_salida: "dissolve"
+    audio:
+      musica: >
+        Ritmo acelerado con percusión intensa. Fusión de orquesta y
+        electrónica. Crescendo hacia clímax. Build-up de 8 segundos.
+      tts: true
+      efectos: ["whoosh_rapido", "impacto_metalico", "fuego"]
+    estilo_visual: "cinematic"
+
+  # ─────────────────────────────────────────────────────────────
+  # ESCENA 6 - REFLEXIÓN FINAL - POLVO DE ESTRELLAS (12s)
+  # Ritmo: ÉPICO-CONTEMPLATIVO. Ángulo: DUTCH. Iluminación: CREPÚSCULO
+  # ─────────────────────────────────────────────────────────────
+  - id: 6
+    duracion_seg: 12
+    descripcion: >
+      La Tierra vista desde el espacio, el punto azul pálido. Cámara se
+       aleja lentamente mostrando la inmensidad del universo. El Sol se
+       empequeñece, la Vía Láctea se extiende. Una luz cálida de esperanza
+       ilumina el cosmos. El viaje continúa.
+    dialogo: >
+      "Somos polvo de estrellas. El universo no solo creó galaxias y planetas...
+       también creó ojos para contemplarse a sí mismo. Y el viaje continúa."
+    camara:
+      angulo: "dutch"
+      movimiento: "crane up"
+      velocidad_movimiento: "lento"
+    iluminacion: "crepúsculo"
+    transicion_entrada: "wipe"
+    transicion_salida: "fundido a negro"
+    audio:
+      musica: >
+        Épica pero emotiva. Cuerdas suaves con coro angelical en resolución
+        mayor. Fade out muy lento que deja una sensación de asombro y esperanza.
+      tts: true
+      efectos: ["ambiente_espacial", "corazon_latido", "suspiro"]
+    estilo_visual: "cinematic"

@@ -1,0 +1,49 @@
+{
+  "agente": "remotion",
+  "grupo": "A",
+  "fecha": "2026-05-04T16:40:05-05:00",
+  "sesion": "video-001",
+  "resumen": "1 variación generada con Remotion + post-procesado FFmpeg",
+  "variaciones": [
+    {
+      "id": "video_a1.mp4",
+      "estilo": "cinematic",
+      "duracion": 60,
+      "resolucion": "1080x1920",
+      "fps": 30,
+      "tamaño_mb": 8.5,
+      "transiciones_usadas": ["fundido", "fundido cruzado", "zoom", "wipe", "dissolve", "glitch"],
+      "movimientos_camara": ["zoom out con shake", "fly-through", "orbital", "dolly in", "dolly out", "crane up"],
+      "sfx_por_transicion": true,
+      "musica": "Épica orquestal con metales, cuerdas, percusión, sintetizadores y coro",
+      "tts_idioma": "es",
+      "tts_textos": [
+        "Al principio, todo era un punto infinitamente pequeño y denso...",
+        "El universo se expandió y enfrió...",
+        "En un brazo de una galaxia ordinaria...",
+        "En la Tierra, el caos químico dio paso al milagro...",
+        "La vida evolucionó...",
+        "Somos polvo de estrellas..."
+      ],
+      "puntuacion_calidad": 8.0
+    }
+  ],
+  "metricas": {
+    "tiempo_renderizado_min": 7,
+    "archivos_generados": [
+      "output/renders/video_a1.mp4",
+      "output/renders/video_a1_raw.mp4",
+      "output/renders/video_a1_graded.mp4"
+    ],
+    "escenas_procesadas": 6,
+    "fases_completadas": [
+      "Fase 1: Setup de Remotion",
+      "Fase 2: Lectura de especificación (escenas.yaml)",
+      "Fase 3: Generación de 6 componentes React por escena",
+      "Fase 4: Renderizado con Remotion (1800 frames, 30fps, 1080x1920)",
+      "Fase 5: Post-procesado FFmpeg (color grading + letterbox)",
+      "Fase 6: Exportado a output/renders/"
+    ]
+  },
+  "errores": []
+}

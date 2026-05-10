@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Mejoras Visuales para Agentes de Terminal</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Mejoras Visuales para Agentes de Terminal</h1>
+</header>
+<h1 id="mejoras-visuales-para-agentes-de-terminal">🎨 Mejoras Visuales
+para Agentes de Terminal</h1>
+<blockquote>
+<p>Hallazgos, paquetes, skins, extensiones y propuestas para mejorar la
+legibilidad y visualización de agentes de terminal como
+<strong>pi</strong>, <strong>OpenCode</strong> y
+<strong>Hermes</strong>.</p>
+</blockquote>
+<hr />
+<h2 id="pi-paquetes-y-extensiones">📦 Pi — Paquetes y extensiones</h2>
+<h3 id="amp-themes-la-solución-más-completa">1. <code>amp-themes</code>
+⭐ — La solución más completa</h3>
+<p><strong>npm:</strong> <a
+href="https://www.npmjs.com/package/amp-themes"><code>amp-themes</code></a><br />
+<strong>Instalación:</strong> <code>pi install npm:amp-themes</code></p>
+<blockquote>
+<p><em>“Amp-inspired Pi UI suite: theme, editor chrome, and compact tool
+display.”</em></p>
+</blockquote>
+<p>Incluye:</p>
+<ul>
+<li>🎭 <strong>3 temas:</strong> <code>amp-dark</code>,
+<code>amp-light</code>, <code>amp-gruvbox-dark-hard</code></li>
+<li>🖼️ <strong>Editor chrome</strong> con bordes redondeados que
+muestran: modelo, nivel de thinking, costos, % de contexto, directorio
+actual, rama git y resumen de cambios</li>
+<li>📦 <strong>Compact tool rendering</strong> — los outputs de
+herramientas se muestran de forma compacta (menos texto abrumador)</li>
+<li>💬 <strong>Mensajes de usuario compactos</strong> con colores
+sincronizados al nivel de thinking</li>
+<li>⚡ Spinner de working status integrado en el borde del editor</li>
+</ul>
+<figure>
+<img
+src="https://raw.githubusercontent.com/me-frankan/amp-themes/main/screenshots/amp-gruvbox-dark-hard.png"
+alt="amp-gruvbox-dark-hard screenshot" />
+<figcaption aria-hidden="true">amp-gruvbox-dark-hard
+screenshot</figcaption>
+</figure>
+<p><strong>Uso:</strong></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pi</span> install npm:amp-themes</span></code></pre></div>
+<p>En <code>~/.pi/agent/settings.json</code>:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;theme&quot;</span><span class="fu">:</span> <span class="st">&quot;amp-dark&quot;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<hr />
+<h3 id="ifioh-pi-themes-colección-de-temas">2.
+<code>@ifi/oh-pi-themes</code> — Colección de temas</h3>
+<p><strong>npm:</strong> <a
+href="https://www.npmjs.com/package/@ifi/oh-pi-themes"><code>@ifi/oh-pi-themes</code></a><br />
+<strong>Instalación:</strong>
+<code>pi install npm:@ifi/oh-pi-themes</code></p>
+<blockquote>
+<p><em>“Color themes for pi: cyberpunk, nord, gruvbox, tokyo-night,
+catppuccin, and more.”</em></p>
+</blockquote>
+<p>Temas incluidos: Catppuccin Mocha, Cyberpunk, Gruvbox Dark, Nord, Oh
+P Dark, Tokyo Night.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pi</span> install npm:@ifi/oh-pi-themes</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span> <span class="dt">&quot;theme&quot;</span><span class="fu">:</span> <span class="st">&quot;tokyo-night&quot;</span> <span class="fu">}</span></span></code></pre></div>
+<hr />
+<h3 id="pi-tool-display-compact-tool-rendering">3.
+<code>pi-tool-display</code> — Compact Tool Rendering</h3>
+<p><strong>npm:</strong> <a
+href="https://www.npmjs.com/package/pi-tool-display"><code>pi-tool-display</code></a><br />
+<em>(ya incluido en <code>amp-themes</code>, no instalar por separado si
+ya tienes amp-themes)</em></p>
+<p>Extensión que sobreescribe los renderers de herramientas para mostrar
+modo colapsado (solo título) o expandido (output completo). Atajo
+<code>Ctrl+O</code>.</p>
+<hr />
+<h3 id="extensiones-de-ejemplo-vienen-con-pi">4. Extensiones de ejemplo
+(vienen con pi)</h3>
+<p>Todas en <a
+href="https://github.com/badlogic/pi-mono/tree/main/examples/extensions"><code>examples/extensions/</code></a>
+del repo de pi.</p>
+<table>
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 27%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Extensión</th>
+<th>Enlace</th>
+<th>Qué hace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong><code>minimal-mode.ts</code></strong></td>
+<td><a
+href="https://github.com/badlogic/pi-mono/blob/main/examples/extensions/minimal-mode.ts">🔗</a></td>
+<td>Override total de tools con rendering colapsado/expandido</td>
+</tr>
+<tr class="even">
+<td><strong><code>border-status-editor.ts</code></strong></td>
+<td><a
+href="https://github.com/badlogic/pi-mono/blob/main/examples/extensions/border-status-editor.ts">🔗</a></td>
+<td>Editor con bordes: spinner, modelo, thinking, contexto, cwd,
+git</td>
+</tr>
+<tr class="odd">
+<td><strong><code>custom-footer.ts</code></strong></td>
+<td><a
+href="https://github.com/badlogic/pi-mono/blob/main/examples/extensions/custom-footer.ts">🔗</a></td>
+<td>Footer con tokens, costos, rama, modelo</td>
+</tr>
+<tr class="even">
+<td><strong><code>rainbow-editor.ts</code></strong></td>
+<td><a
+href="https://github.com/badlogic/pi-mono/blob/main/examples/extensions/rainbow-editor.ts">🔗</a></td>
+<td>Efecto arcoíris animado en el editor</td>
+</tr>
+<tr class="odd">
+<td><strong><code>status-line.ts</code></strong></td>
+<td><a
+href="https://github.com/badlogic/pi-mono/blob/main/examples/extensions/status-line.ts">🔗</a></td>
+<td>Indicador persistente en footer</td>
+</tr>
+<tr class="even">
+<td><strong><code>plan-mode/</code></strong></td>
+<td><a
+href="https://github.com/badlogic/pi-mono/tree/main/examples/extensions/plan-mode">🔗</a></td>
+<td>Widgets persistentes sobre el editor</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="hermes-agent-skins-nativos-web-ui">🌊 Hermes Agent — Skins
+nativos + Web UI</h2>
+<p>Hermes tiene un <strong>sistema de skins nativo</strong> y una
+<strong>Web UI</strong> separada. Es el que mejor soporte visual tiene
+de los tres.</p>
+<h3 id="sistema-de-skins-nativo-sin-plugins">Sistema de Skins (nativo,
+sin plugins)</h3>
+<p>Documentación: <a
+href="https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/features/skins.md"><code>skins.md</code></a><br />
+Engine: <a
+href="https://github.com/NousResearch/hermes-agent/blob/main/hermes_cli/skin_engine.py"><code>skin_engine.py</code></a></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">/skin</span>                   <span class="co"># Ver skin actual y listar disponibles</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">/skin</span> ares              <span class="co"># Cambiar a skin &quot;ares&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">/skin</span> mytheme           <span class="co"># Cambiar a skin personalizada</span></span></code></pre></div>
+<p>O en <code>~/.hermes/config.yaml</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">display</span><span class="kw">:</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">skin</span><span class="kw">:</span><span class="at"> ares</span></span></code></pre></div>
+<h4 id="skins-incluidas">Skins incluidas</h4>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 44%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Skin</th>
+<th>Descripción</th>
+<th>Branding</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>default</code></td>
+<td>Hermes clásico — dorado y kawaii</td>
+<td><code>Hermes Agent</code></td>
+</tr>
+<tr class="even">
+<td><code>ares</code></td>
+<td>Dios de la guerra — carmesí y bronce</td>
+<td><code>Ares Agent</code></td>
+</tr>
+<tr class="odd">
+<td><code>mono</code></td>
+<td>Monocromático — escala de grises limpio</td>
+<td><code>Hermes Agent</code></td>
+</tr>
+<tr class="even">
+<td><code>slate</code></td>
+<td>Azul frío — enfocado a desarrolladores</td>
+<td><code>Hermes Agent</code></td>
+</tr>
+<tr class="odd">
+<td><code>poseidon</code></td>
+<td>Dios del mar — azul profundo y espuma</td>
+<td><code>Poseidon Agent</code></td>
+</tr>
+<tr class="even">
+<td><code>sisyphus</code></td>
+<td>Austero gris con persistencia</td>
+<td><code>Sisyphus Agent</code></td>
+</tr>
+<tr class="odd">
+<td><code>charizard</code></td>
+<td>Volcánico — naranja quemado y brasa</td>
+<td><code>Charizard Agent</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="skins-personalizadas">Skins personalizadas</h4>
+<p>Crea archivos YAML en <code>~/.hermes/skins/</code>. Heredan lo que
+no especifiques de <code>default</code>:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> cyberpunk</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">description</span><span class="kw">:</span><span class="at"> Neon terminal theme</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">colors</span><span class="kw">:</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">banner_border</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;#FF00FF&quot;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">banner_title</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;#00FFFF&quot;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">banner_accent</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;#FF1493&quot;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">spinner</span><span class="kw">:</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">thinking_verbs</span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">&quot;jacking in&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;decrypting&quot;</span><span class="kw">,</span><span class="at"> </span><span class="st">&quot;uploading&quot;</span><span class="kw">]</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="fu">branding</span><span class="kw">:</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">agent_name</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;Cyber Agent&quot;</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">response_label</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot; ⚡ Cyber &quot;</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="fu">tool_prefix</span><span class="kw">:</span><span class="at"> </span><span class="st">&quot;▏&quot;</span></span></code></pre></div>
+<h4 id="opción-compacta">Opción compacta</h4>
+<p>En <code>~/.hermes/config.yaml</code>:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">display</span><span class="kw">:</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">compact</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span><span class="co">           # Modo compacto (menos verbose)</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">show_cost</span><span class="kw">:</span><span class="at"> </span><span class="ch">true</span><span class="co">         # Mostrar costos por turno</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">show_reasoning</span><span class="kw">:</span><span class="at"> </span><span class="ch">false</span><span class="co">   # Mostrar/ocultar reasoning del modelo</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">tool_progress</span><span class="kw">:</span><span class="at"> all</span><span class="co">      # Cómo mostrar progreso de tools</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">skin</span><span class="kw">:</span><span class="at"> default</span></span></code></pre></div>
+<h3 id="hermes-web-ui-dashboard-web-completo">Hermes Web UI — Dashboard
+web completo</h3>
+<p><strong>npm:</strong> <a
+href="https://www.npmjs.com/package/hermes-web-ui"><code>hermes-web-ui</code></a><br />
+<strong>Instalación:</strong>
+<code>npm install -g hermes-web-ui &amp;&amp; hermes-web-ui start</code></p>
+<figure>
+<img
+src="https://github.com/EKKOLearnAI/hermes-web-ui/blob/main/packages/client/src/assets/image1.png"
+alt="Hermes Web UI" />
+<figcaption aria-hidden="true">Hermes Web UI</figcaption>
+</figure>
+<p>Características:</p>
+<ul>
+<li>🤖 Chat con streaming SSE y gestión de sesiones</li>
+<li>📂 Base de datos SQLite local con sincronización automática</li>
+<li>🎨 Renderizado Markdown con resaltado de sintaxis</li>
+<li>🔧 Tool call detail expansion (argumentos / resultados)</li>
+<li>📊 Analíticas de uso: tokens, costos, hits de caché, gráficos de 30
+días</li>
+<li>🕐 Cron jobs programables</li>
+<li>🧠 Descubrimiento automático de modelos</li>
+<li>🔌 Configuración visual de 8 plataformas (Telegram, Discord, Slack,
+WhatsApp, etc.)</li>
+</ul>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">hermes-web-ui</span> start</span></code></pre></div>
+<hr />
+<h2 id="opencode-plugins-web-ui-nativa">⚡ OpenCode — Plugins + Web UI
+nativa</h2>
+<h3 id="web-ui-nativa">Web UI nativa</h3>
+<p>OpenCode trae web UI incorporada:</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">opencode</span> web                     <span class="co"># Inicia server + abre navegador</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="ex">opencode</span> web <span class="at">--port</span> 8080         <span class="co"># Puerto específico</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="ex">opencode</span> web <span class="at">--mdns</span>              <span class="co"># mDNS discovery (opencode.local)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="ex">opencode</span> serve                   <span class="co"># Headless server (sin UI)</span></span></code></pre></div>
+<p>Por defecto escucha en <code>127.0.0.1:0</code> (puerto aleatorio).
+Usa <code>--hostname 0.0.0.0</code> para acceso remoto.</p>
+<h3 id="oh-my-opencode-el-plugin-baterías-incluidas">oh-my-opencode — El
+plugin “baterías incluidas”</h3>
+<p><strong>npm:</strong> <a
+href="https://www.npmjs.com/package/oh-my-opencode"><code>oh-my-opencode</code></a><br />
+<strong>Instalación:</strong>
+<code>opencode plugin install oh-my-opencode</code></p>
+<blockquote>
+<p><em>“The Best AI Agent Harness — multi-model orchestration, parallel
+background agents, LSP/AST tools”</em></p>
+</blockquote>
+<ul>
+<li>🔄 Orquestación multi-modelo (Claude, GPT, Kimi, Gemini en
+paralelo)</li>
+<li>🧠 <strong>Ultrawork mode</strong>: agente persistente que trabaja
+hasta terminar</li>
+<li>🖥️ <strong>Tmux integration</strong>: REPL, debuggers, TUI tools en
+sesiones reales</li>
+<li>✅ <strong>Todo enforcement</strong>: mantiene el agente enfocado en
+la tarea</li>
+<li>💬 <strong>Comment reviewer</strong>: elimina comentarios con “olor
+a IA”</li>
+<li>🔌 Compatible con hooks, comandos, skills, MCP de Claude Code</li>
+</ul>
+<h3 id="oh-my-opencode-slim-versión-ligera">oh-my-opencode-slim —
+Versión ligera</h3>
+<p><strong>npm:</strong> <a
+href="https://www.npmjs.com/package/oh-my-opencode-slim"><code>oh-my-opencode-slim</code></a><br />
+Versión reducida del orquestador multi-modelo.</p>
+<h3 id="tarquinenopencode-dcp-context-pruning"><span class="citation"
+data-cites="tarquinen/opencode-dcp">@tarquinen/opencode-dcp</span> —
+Context Pruning</h3>
+<p><strong>npm:</strong> <a
+href="https://www.npmjs.com/package/@tarquinen/opencode-dcp"><code>@tarquinen/opencode-dcp</code></a><br />
+Plugin que optimiza tokens podando outputs obsoletos de herramientas del
+contexto de conversación. Ayuda a mantener la sesión manejable y
+legible.</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="ex">opencode</span> plugin install @tarquinen/opencode-dcp</span></code></pre></div>
+<h3 id="otros-plugins-relevantes">Otros plugins relevantes</h3>
+<table>
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 32%" />
+<col style="width: 36%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Plugin</th>
+<th>Enlace</th>
+<th>Función</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>oh-my-opencode-slim</code></td>
+<td><a
+href="https://www.npmjs.com/package/oh-my-opencode-slim">npm</a></td>
+<td>Orquestador ligero multi-modelo</td>
+</tr>
+<tr class="even">
+<td><code>opencode-skills-collection</code></td>
+<td><a
+href="https://www.npmjs.com/package/opencode-skills-collection">npm</a></td>
+<td>Auto-descarga y actualización de skills</td>
+</tr>
+<tr class="odd">
+<td><code>@devtheops/opencode-plugin-otel</code></td>
+<td><a
+href="https://www.npmjs.com/package/@devtheops/opencode-plugin-otel">npm</a></td>
+<td>Telemetría OpenTelemetry</td>
+</tr>
+<tr class="even">
+<td><code>@braintrust/trace-opencode</code></td>
+<td><a
+href="https://www.npmjs.com/package/@braintrust/trace-opencode">npm</a></td>
+<td>Trazado de conversaciones a Braintrust</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="comparativa-rápida">📊 Comparativa rápida</h2>
+<table>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 12%" />
+<col style="width: 25%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Aspecto</th>
+<th>Pi</th>
+<th>Hermes</th>
+<th>OpenCode</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Skins/Temas</strong></td>
+<td>✅ Temas JSON (51 tokens de color)</td>
+<td>✅ Skins YAML nativos (7 incluidos)</td>
+<td>❌ No tiene sistema de temas TUI</td>
+</tr>
+<tr class="even">
+<td><strong>Compact mode</strong></td>
+<td>✅ <code>amp-themes</code> / <code>pi-tool-display</code></td>
+<td>✅ <code>display.compact: true</code> nativo</td>
+<td>❌ No tiene modo compacto</td>
+</tr>
+<tr class="odd">
+<td><strong>Web UI</strong></td>
+<td>❌ No tiene (se puede construir)</td>
+<td>✅ <code>hermes-web-ui</code> (dashboard completo)</td>
+<td>✅ <code>opencode web</code> (nativa)</td>
+</tr>
+<tr class="even">
+<td><strong>Costos visibles</strong></td>
+<td>✅ En footer/widget</td>
+<td>✅ <code>display.show_cost: true</code></td>
+<td>❌ No en TUI</td>
+</tr>
+<tr class="odd">
+<td><strong>Tool rendering</strong></td>
+<td>✅ Customizable vía extensiones</td>
+<td>✅ Skins controlan tool_prefix y emojis</td>
+<td>❌ No personalizable</td>
+</tr>
+<tr class="even">
+<td><strong>Thinking level</strong></td>
+<td>✅ Colores en bordes del editor</td>
+<td>✅ <code>display.show_reasoning</code></td>
+<td>❌ No aplica</td>
+</tr>
+<tr class="odd">
+<td><strong>Plugin system</strong></td>
+<td>✅ Extensiones TypeScript</td>
+<td>✅ Plugins Git</td>
+<td>✅ Plugins npm</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="propuestas-transversales">💡 Propuestas transversales</h2>
+<h3 id="fáciles-extensión-para-cualquier-agente">🟢 Fáciles (extensión
+para cualquier agente)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 12%" />
+<col style="width: 24%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Propuesta</th>
+<th>Pi</th>
+<th>Hermes</th>
+<th>OpenCode</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Modo Compacto Total</strong></td>
+<td>✅ Existe (<code>minimal-mode.ts</code>)</td>
+<td>✅ Nativo (<code>compact: true</code>)</td>
+<td>❌ Faltaría plugin</td>
+</tr>
+<tr class="even">
+<td><strong>Diff Visual para edits</strong></td>
+<td>✅ Posible (colores <code>toolDiff*</code>)</td>
+<td>❌ No tiene</td>
+<td>❌ No tiene</td>
+</tr>
+<tr class="odd">
+<td><strong>Resumen Inteligente</strong></td>
+<td>🔧 Por construir</td>
+<td>🔧 Por construir</td>
+<td>🔧 Por construir</td>
+</tr>
+<tr class="even">
+<td><strong>Reader Mode</strong></td>
+<td>🔧 Por construir</td>
+<td>🔧 Por construir</td>
+<td>🔧 Por construir</td>
+</tr>
+</tbody>
+</table>
+<h3 id="medias">🟡 Medias</h3>
+<table>
+<colgroup>
+<col style="width: 45%" />
+<col style="width: 54%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Propuesta</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Vista Árbol de Herramientas</strong></td>
+<td>Árbol colapsable de tool calls con iconos y resultados anidados</td>
+</tr>
+<tr class="even">
+<td><strong>Timeline View</strong></td>
+<td>Línea de tiempo visual con iconos, duración, colores por estado</td>
+</tr>
+<tr class="odd">
+<td><strong>Dashboard Footer</strong></td>
+<td>Footer denso:
+<code>ctx 34%/128k │ ↑1.2k ↓892 │ $0.023 │ claude-3.5 │ main</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="avanzadas">🔴 Avanzadas</h3>
+<table>
+<colgroup>
+<col style="width: 45%" />
+<col style="width: 54%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Propuesta</th>
+<th>Descripción</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Web UI Local universal</strong></td>
+<td>Servidor web que muestra la sesión con búsqueda, árbol, syntax
+highlighting</td>
+</tr>
+<tr class="even">
+<td><strong>Breadcrumbs de Contexto</strong></td>
+<td>Barra minimalista en borde del editor con ruta, rama, mensaje
+actual</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="cómo-ver-este-archivo">🖥️ Cómo ver este archivo</h2>
+<h3 id="en-la-terminal-local">En la terminal (local)</h3>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Con glow (recomendado, instalado en este sistema)</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="ex">glow</span> mejoras-visuales-pi.md</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Con pandoc + w3m</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="ex">pandoc</span> mejoras-visuales-pi.md <span class="kw">|</span> <span class="ex">w3m</span> <span class="at">-T</span> text/html <span class="at">-dump</span></span></code></pre></div>
+<h3 id="en-el-navegador-vía-servidor-http">En el navegador (vía servidor
+HTTP)</h3>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Ya hay HTML generado</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> /home/vuos/code/p3/s51</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> http.server 8080</span></code></pre></div>
+<p>Luego desde tu máquina local: - Si tienes acceso a la IP:
+<code>http://&lt;IP-DEL-SERVIDOR&gt;:8080/mejoras-visuales-pi.html</code>
+- Con túnel SSH: <code>ssh -L 8080:localhost:8080 usuario@host</code> →
+<code>http://localhost:8080/mejoras-visuales-pi.html</code></p>
+<hr />
+<h2 id="enlaces-rápidos">🔗 Enlaces rápidos</h2>
+<table>
+<colgroup>
+<col style="width: 52%" />
+<col style="width: 47%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Recurso</th>
+<th>Enlace</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>PI</strong></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Pi (npm)</td>
+<td>https://www.npmjs.com/package/<span class="citation"
+data-cites="mariozechner/pi-coding-agent">@mariozechner/pi-coding-agent</span></td>
+</tr>
+<tr class="odd">
+<td>Pi GitHub</td>
+<td>https://github.com/badlogic/pi-mono</td>
+</tr>
+<tr class="even">
+<td><code>amp-themes</code></td>
+<td>https://www.npmjs.com/package/amp-themes</td>
+</tr>
+<tr class="odd">
+<td><code>@ifi/oh-pi-themes</code></td>
+<td>https://www.npmjs.com/package/<span class="citation"
+data-cites="ifi/oh-pi-themes">@ifi/oh-pi-themes</span></td>
+</tr>
+<tr class="even">
+<td><code>pi-tool-display</code></td>
+<td>https://www.npmjs.com/package/pi-tool-display</td>
+</tr>
+<tr class="odd">
+<td>Extensiones ejemplo</td>
+<td>https://github.com/badlogic/pi-mono/tree/main/examples/extensions</td>
+</tr>
+<tr class="even">
+<td>Screenshot amp-themes</td>
+<td>https://raw.githubusercontent.com/me-frankan/amp-themes/main/screenshots/amp-gruvbox-dark-hard.png</td>
+</tr>
+<tr class="odd">
+<td><strong>HERMES</strong></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Hermes Agent GitHub</td>
+<td>https://github.com/NousResearch/hermes-agent</td>
+</tr>
+<tr class="odd">
+<td>Hermes Skins docs</td>
+<td>https://github.com/NousResearch/hermes-agent/blob/main/website/docs/user-guide/features/skins.md</td>
+</tr>
+<tr class="even">
+<td>Hermes Web UI (npm)</td>
+<td>https://www.npmjs.com/package/hermes-web-ui</td>
+</tr>
+<tr class="odd">
+<td>Hermes Skin Engine</td>
+<td>https://github.com/NousResearch/hermes-agent/blob/main/hermes_cli/skin_engine.py</td>
+</tr>
+<tr class="even">
+<td><strong>OPENCODE</strong></td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>OpenCode (npm)</td>
+<td>https://www.npmjs.com/package/opencode</td>
+</tr>
+<tr class="even">
+<td><code>oh-my-opencode</code></td>
+<td>https://www.npmjs.com/package/oh-my-opencode</td>
+</tr>
+<tr class="odd">
+<td><code>oh-my-opencode-slim</code></td>
+<td>https://www.npmjs.com/package/oh-my-opencode-slim</td>
+</tr>
+<tr class="even">
+<td><code>@tarquinen/opencode-dcp</code></td>
+<td>https://www.npmjs.com/package/<span class="citation"
+data-cites="tarquinen/opencode-dcp">@tarquinen/opencode-dcp</span></td>
+</tr>
+<tr class="odd">
+<td><code>opencode-skills-collection</code></td>
+<td>https://www.npmjs.com/package/opencode-skills-collection</td>
+</tr>
+<tr class="even">
+<td><code>@braintrust/trace-opencode</code></td>
+<td>https://www.npmjs.com/package/<span class="citation"
+data-cites="braintrust/trace-opencode">@braintrust/trace-opencode</span></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Creado: 2026-05-03 · pi-agent session s51 · Actualizado con info
+de Hermes y OpenCode</em></p>
+</body>
+</html>
