@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -e
+# ============================================================
+#  csv-tabulator — Servidor web CSV
+#  Uso:   csv-tabulator [directorio]
+#  Ej:    csv-tabulator .                    (directorio actual)
+#         csv-tabulator /ruta/a/mis/csvs     (directorio específico)
+#
+#  Por defecto usa el directorio actual.
+#  Abre http://localhost:8080 en tu navegador.
+# ============================================================
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+JAR="$SCRIPT_DIR/dist/csv-tabulator.jar"
+
+if [ ! -f "$JAR" ]; then
+  echo "[csv-tabulator] Error: no encuentro csv-tabulator.jar"
+  echo "  Busqué en: $JAR"
+  echo "  Para compilarlo: ./gradlew :server:fatJar"
+  echo "  Luego: cp server/build/libs/csv-tabulator.jar dist/"
+  exit 1
+fi
+
+DATA_DIR="${1:-.}"
+
+if [ ! -d "$DATA_DIR" ]; then
+  echo "[csv-tabulator] Error: '$DATA_DIR' no es un directorio"
+  exit 1
+fi
+
+DATA_DIR="$(cd "$DATA_DIR" && pwd)"
+
+echo "[csv-tabulator] Iniciando..."
+echo "  Directorio: $DATA_DIR"
+echo "  URL:        http://localhost:8080"
+echo "  Ctrl+C     para detener"
+echo ""
+
+java -jar "$JAR" "$DATA_DIR"

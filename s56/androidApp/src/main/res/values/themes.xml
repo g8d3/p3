@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.CsvTabulator" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">#FF2C3E50</item>
+        <item name="android:navigationBarColor">#FF2C3E50</item>
+    </style>
+</resources>

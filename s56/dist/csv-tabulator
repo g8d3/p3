@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -e
+# ============================================================
+#  csv-tabulator — Servidor web CSV
+#  Uso:   csv-tabulator [directorio]
+#  Ej:    csv-tabulator .                    (directorio actual)
+#         csv-tabulator /ruta/a/mis/csvs     (directorio específico)
+#
+#  Por defecto usa el directorio actual.
+#  Abre http://localhost:8080 en tu navegador.
+# ============================================================
+
+# Encuentra el JAR en el mismo directorio que este script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+JAR="$SCRIPT_DIR/csv-tabulator.jar"
+
+if [ ! -f "$JAR" ]; then
+  echo "[csv-tabulator] Error: no encuentro csv-tabulator.jar"
+  echo "  Debe estar en el mismo directorio que este script."
+  echo "  Descárgalo desde: https://github.com/csv-tabulator/releases"
+  exit 1
+fi
+
+# Directorio: primer argumento o directorio actual
+DATA_DIR="${1:-.}"
+
+if [ ! -d "$DATA_DIR" ]; then
+  echo "[csv-tabulator] Error: '$DATA_DIR' no es un directorio"
+  exit 1
+fi
+
+DATA_DIR="$(cd "$DATA_DIR" && pwd)"
+
+echo "[csv-tabulator] Iniciando..."
+echo "  Directorio: $DATA_DIR"
+echo "  URL:        http://localhost:8080"
+echo "  Ctrl+C     para detener"
+echo ""
+
+java -jar "$JAR" "$DATA_DIR"

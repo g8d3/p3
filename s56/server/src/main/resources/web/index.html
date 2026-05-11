@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CSV Tabulator</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f5f5; --surface: #fff; --border: #ddd;
+  --primary: #2c3e50; --accent: #3498db; --danger: #e74c3c;
+  --text: #333; --text-light: #888; --header-bg: #f0f0f0;
+  --selected-bg: #cce0ff; --selected-header: #99c2ff;
+  --cell-min-w: 120px; --row-hdr-w: 44px; --radius: 6px;
+  --toolbar-h: 48px; --status-h: 32px;
+}
+html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; overflow: hidden; }
+button { cursor: pointer; font-family: inherit; font-size: 13px; border: none; border-radius: var(--radius); padding: 6px 12px; background: var(--surface); color: var(--text); border: 1px solid var(--border); white-space: nowrap; }
+button:hover { background: #e8e8e8; }
+button:active { transform: scale(0.97); }
+button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+button.primary:hover { background: #2980b9; }
+button.danger { color: var(--danger); border-color: var(--danger); }
+button:disabled { opacity: 0.4; cursor: default; transform: none; }
+input, select, textarea { font-family: inherit; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 10px; outline: none; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(52,152,219,0.2); }
+
+/* Layout */
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+/* Toolbar */
+#toolbar { display: flex; align-items: center; gap: 4px; padding: 4px 8px; background: var(--primary); color: #fff; min-height: var(--toolbar-h); flex-wrap: wrap; }
+#toolbar button { background: rgba(255,255,255,0.15); color: #fff; border-color: transparent; font-size: 12px; padding: 4px 10px; }
+#toolbar button:hover { background: rgba(255,255,255,0.25); }
+#toolbar .sep { width: 1px; height: 24px; background: rgba(255,255,255,0.3); margin: 0 4px; }
+#toolbar .title { font-weight: 600; font-size: 14px; margin-right: 8px; white-space: nowrap; }
+#menu-toggle { display: none; background: rgba(255,255,255,0.2); font-size: 20px; padding: 2px 10px; }
+
+/* Content area */
+#content { display: flex; flex: 1; min-height: 0; }
+
+/* File bar */
+#file-bar { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--surface); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+#file-bar input { flex: 1; min-width: 120px; }
+#file-bar .hint { font-size: 11px; color: var(--text-light); }
+
+/* Editor area */
+#editor { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+/* Table container */
+#table-wrap { flex: 1; overflow: auto; position: relative; background: var(--surface); }
+#table-wrap.loading::after { content: "Loading..."; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.7); font-size: 18px; color: var(--text-light); }
+
+table { border-collapse: collapse; width: max-content; min-width: 100%; table-layout: fixed; }
+th, td { border: 1px solid var(--border); padding: 2px 6px; height: 30px; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; user-select: none; min-width: var(--cell-min-w); max-width: 300px; }
+th { background: var(--header-bg); font-weight: 600; font-size: 12px; position: sticky; top: 0; z-index: 2; }
+th.col-hdr { min-width: var(--cell-min-w); }
+th.row-hdr { min-width: var(--row-hdr-w); max-width: var(--row-hdr-w); position: sticky; left: 0; z-index: 3; font-weight: normal; font-size: 11px; color: var(--text-light); }
+td.row-hdr { min-width: var(--row-hdr-w); max-width: var(--row-hdr-w); position: sticky; left: 0; z-index: 1; background: var(--surface); text-align: center; font-size: 11px; color: var(--text-light); }
+th.corner { min-width: var(--row-hdr-w); max-width: var(--row-hdr-w); position: sticky; top: 0; left: 0; z-index: 4; font-size: 10px; color: var(--text-light); }
+th.selected { background: var(--selected-header); }
+td.selected { background: var(--selected-bg); }
+td.editing { padding: 0; }
+td.editing input { width: 100%; height: 100%; border: 2px solid var(--accent); border-radius: 0; padding: 2px 6px; font-size: 13px; box-shadow: none; }
+td.dimmed { color: #bbb; }
+
+/* Actions sidebar */
+#sidebar { width: 280px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; transition: transform 0.2s; }
+#sidebar.hidden { display: none; }
+#sidebar-header { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+#sidebar-header h3 { font-size: 14px; }
+#sidebar-content { flex: 1; padding: 8px; overflow-y: auto; }
+.section-title { font-size: 12px; font-weight: 600; margin: 8px 0 4px; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+.action-btn { display: block; width: 100%; text-align: left; padding: 8px 10px; margin: 3px 0; font-size: 12px; border-radius: var(--radius); background: var(--bg); border: 1px solid var(--border); }
+.action-btn:hover { background: #e8e8e8; }
+.action-btn .desc { font-size: 10px; color: var(--text-light); display: block; margin-top: 2px; }
+.action-card { padding: 8px; margin: 4px 0; border: 1px solid var(--border); border-radius: var(--radius); display: flex; align-items: center; justify-content: space-between; }
+.action-card .name { font-size: 12px; font-weight: 500; }
+.action-card .type { font-size: 10px; color: var(--text-light); }
+.action-card .btns { display: flex; gap: 4px; }
+.action-card .btns button { font-size: 16px; padding: 2px 6px; line-height: 1; }
+
+/* Selection info */
+#sel-info { font-size: 11px; color: var(--text-light); padding: 4px 12px; border-bottom: 1px solid var(--border); }
+
+/* Status bar */
+#status { display: flex; justify-content: space-between; padding: 4px 12px; background: var(--bg); border-top: 1px solid var(--border); font-size: 11px; color: var(--text-light); min-height: var(--status-h); align-items: center; }
+
+/* Modal overlay */
+#modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+#modal-overlay.open { display: flex; }
+#modal { background: var(--surface); border-radius: 12px; padding: 24px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; }
+#modal h2 { font-size: 18px; margin-bottom: 16px; }
+#modal .field { margin-bottom: 12px; }
+#modal label { display: block; font-size: 12px; font-weight: 500; margin-bottom: 3px; color: var(--text-light); }
+#modal input, #modal select, #modal textarea { width: 100%; }
+#modal textarea { min-height: 60px; resize: vertical; font-family: monospace; }
+#modal .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+#modal .hint { font-size: 11px; color: var(--text-light); margin-top: 3px; }
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  #sidebar { position: fixed; top: 0; right: 0; height: 100%; z-index: 50; transform: translateX(100%); width: 300px; box-shadow: -4px 0 12px rgba(0,0,0,0.15); }
+  #sidebar.open { transform: translateX(0); }
+  #sidebar.hidden { display: flex; }
+  #menu-toggle { display: inline-flex; }
+  #sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 49; }
+  #sidebar-backdrop.open { display: block; }
+  :root { --cell-min-w: 100px; }
+  #toolbar .title { font-size: 12px; }
+  #modal { width: 95%; padding: 16px; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <!-- Toolbar -->
+  <div id="toolbar">
+    <span class="title">CSV Tabulator</span>
+    <button onclick="fileNew()">New</button>
+    <button onclick="fileOpen()">Open</button>
+    <button onclick="fileSave()">Save</button>
+    <span class="sep"></span>
+    <button onclick="rowAdd()">+Row</button>
+    <button id="btn-del-row" onclick="rowDelete()" disabled>-Row</button>
+    <span class="sep"></span>
+    <button onclick="colAdd()">+Col</button>
+    <button id="btn-del-col" onclick="colDelete()" disabled>-Col</button>
+    <span style="flex:1"></span>
+    <button id="menu-toggle" onclick="toggleSidebar()">☰</button>
+  </div>
+
+  <!-- File bar -->
+  <div id="file-bar">
+    <input id="file-path" placeholder="Path to CSV file..." value="data/untitled.csv" />
+    <button onclick="fileBrowse()">Browse</button>
+    <button class="primary" onclick="fileLoad()">Load</button>
+    <span class="hint" id="file-hint"></span>
+    <select id="file-list" onchange="if(this.value)document.getElementById('file-path').value='data/'+this.value" style="font-size:11px;padding:4px;">
+      <option value="">— saved CSVs —</option>
+    </select>
+  </div>
+
+  <!-- Content -->
+  <div id="content">
+    <!-- Editor -->
+    <div id="editor">
+      <div id="sel-info">No selection</div>
+      <div id="table-wrap" class="loading"></div>
+    </div>
+
+    <!-- Sidebar backdrop (mobile) -->
+    <div id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+    <!-- Actions sidebar -->
+    <div id="sidebar">
+      <div id="sidebar-header">
+        <h3>Actions</h3>
+        <button onclick="closeSidebar()" style="font-size:20px;padding:0 4px;">&times;</button>
+      </div>
+      <div id="sidebar-content"></div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div id="status">
+    <span id="status-msg">Ready</span>
+    <span id="status-info">Rows: 0  Cols: 0</span>
+  </div>
+</div>
+
+<!-- Modal overlay -->
+<div id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div id="modal"></div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────
+let state = { headers: [], rows: [], selection: { type: 'NONE', indices: [], cells: [] }, status: 'Ready', fileName: '', filePath: '' };
+let customActions = [];
+let editingCell = null;
+
+// ── API calls ──────────────────────────────────────────────────
+async function api(method, path, body) {
+  const opts = { method, headers: {} };
+  if (body !== undefined) { opts.headers['Content-Type'] = 'application/json'; opts.body = typeof body === 'string' ? body : JSON.stringify(body); }
+  const r = await fetch(path, opts);
+  return r.json();
+}
+
+async function loadData() {
+  showLoading(true);
+  state = await api('GET', '/api/data');
+  customActions = await api('GET', '/api/actions');
+  render();
+  showLoading(false);
+}
+
+// ── File operations ────────────────────────────────────────────
+function fileNew() { api('POST', '/api/file', { action: 'new' }).then(loadData); }
+function fileOpen() { api('POST', '/api/file', { action: 'open', path: document.getElementById('file-path').value }).then(loadData); }
+function fileLoad() { fileOpen(); }
+async function fileSave() { await api('POST', '/api/save', { path: document.getElementById('file-path').value || undefined }); loadData(); }
+function fileBrowse() {
+  // On mobile, let user type path. On desktop could use file input.
+  document.getElementById('file-path').value = prompt('Enter full path to CSV file:') || '';
+  if (document.getElementById('file-path').value) fileOpen();
+}
+
+// ── Row/Column ops ─────────────────────────────────────────────
+async function rowAdd() { await api('POST', '/api/row', { action: 'add' }); loadData(); }
+async function rowDelete() {
+  const sel = state.selection;
+  if (sel.type === 'ROWS' && sel.indices.length > 0) {
+    // Delete from last to first
+    const indices = [...sel.indices].sort((a,b)=>b-a);
+    for (const idx of indices) await api('POST', '/api/row', { action: 'delete', index: idx });
+    loadData();
+  }
+}
+async function colAdd() {
+  const h = prompt('Column name:', `Column ${state.colCount+1}`);
+  if (h) await api('POST', '/api/column', { action: 'add', header: h });
+  loadData();
+}
+async function colDelete() {
+  const sel = state.selection;
+  if (sel.type === 'COLUMNS' && sel.indices.length > 0) {
+    const indices = [...sel.indices].sort((a,b)=>b-a);
+    for (const idx of indices) await api('POST', '/api/column', { action: 'delete', index: idx });
+    loadData();
+  }
+}
+
+// ── Selection ──────────────────────────────────────────────────
+function getSelectionFromUI() {
+  return state.selection;
+}
+
+function setSelection(sel) {
+  state.selection = sel;
+  updateSelectionUI();
+  renderTable(); // re-render to show selection
+}
+
+function toggleCellSelection(row, col) {
+  let sel = state.selection;
+  if (sel.type !== 'CELLS') sel = { type: 'CELLS', indices: [], cells: [] };
+  const key = `${row},${col}`;
+  const exists = sel.cells.some(c => c.row === row && c.col === col);
+  if (exists) sel.cells = sel.cells.filter(c => !(c.row === row && c.col === col));
+  else sel.cells = [...sel.cells, { row, col }];
+  sel.indices = [...new Set(sel.cells.map(c => c.row))];
+  setSelection(sel);
+}
+
+function toggleRowSelection(row) {
+  let sel = state.selection;
+  if (sel.type !== 'ROWS') sel = { type: 'ROWS', indices: [], cells: [] };
+  const idx = sel.indices.indexOf(row);
+  if (idx >= 0) sel.indices.splice(idx, 1);
+  else sel.indices.push(row);
+  if (sel.indices.length === 0) sel.type = 'NONE';
+  setSelection(sel);
+}
+
+function toggleColSelection(col) {
+  let sel = state.selection;
+  if (sel.type !== 'COLUMNS') sel = { type: 'COLUMNS', indices: [], cells: [] };
+  const idx = sel.indices.indexOf(col);
+  if (idx >= 0) sel.indices.splice(idx, 1);
+  else sel.indices.push(col);
+  if (sel.indices.length === 0) sel.type = 'NONE';
+  setSelection(sel);
+}
+
+function isCellSelected(row, col) {
+  const sel = state.selection;
+  if (sel.type === 'CELLS') return sel.cells.some(c => c.row === row && c.col === col);
+  if (sel.type === 'ROWS') return sel.indices.includes(row);
+  if (sel.type === 'COLUMNS') return sel.indices.includes(col);
+  return false;
+}
+
+function isRowSelected(row) { return state.selection.type === 'ROWS' && state.selection.indices.includes(row); }
+function isColSelected(col) { return state.selection.type === 'COLUMNS' && state.selection.indices.includes(col); }
+
+function updateSelectionUI() {
+  const sel = state.selection;
+  const info = document.getElementById('sel-info');
+  if (sel.type === 'NONE') info.textContent = 'No selection';
+  else if (sel.type === 'ROWS') info.textContent = `${sel.indices.length} row(s) selected`;
+  else if (sel.type === 'COLUMNS') info.textContent = `${sel.indices.length} column(s) selected`;
+  else if (sel.type === 'CELLS') info.textContent = `${sel.cells.length} cell(s) selected`;
+
+  document.getElementById('btn-del-row').disabled = !(sel.type === 'ROWS' && sel.indices.length > 0);
+  document.getElementById('btn-del-col').disabled = !(sel.type === 'COLUMNS' && sel.indices.length > 0);
+}
+
+// ── Cell editing ───────────────────────────────────────────────
+function startEditing(row, col, value) {
+  if (editingCell) return;
+  editingCell = { row, col };
+  renderTable();
+  setTimeout(() => {
+    const input = document.querySelector('td.editing input');
+    if (input) { input.focus(); input.select(); }
+  }, 50);
+}
+
+async function commitEdit(row, col, value) {
+  editingCell = null;
+  await api('POST', '/api/cell', { row, col, value });
+  loadData();
+}
+
+function cancelEdit() { editingCell = null; renderTable(); }
+
+// ── Render ─────────────────────────────────────────────────────
+function render() {
+  document.getElementById('status-msg').textContent = state.status || 'Ready';
+  document.getElementById('status-info').textContent = `Rows: ${state.rowCount}  Cols: ${state.colCount}`;
+  document.getElementById('file-hint').textContent = state.fileName ? `${state.fileName}` : '';
+  if (state.filePath) document.getElementById('file-path').value = state.filePath;
+  updateSelectionUI();
+  renderTable();
+  renderSidebar();
+}
+
+function renderTable() {
+  const wrap = document.getElementById('table-wrap');
+  if (!state.headers || state.headers.length === 0) { wrap.innerHTML = '<div style="padding:40px;text-align:center;color:#aaa;">Empty — create a new file or open a CSV</div>'; return; }
+
+  let html = '<table><thead><tr>';
+  // Corner cell
+  html += `<th class="corner" onclick="toggleColSelection(-1)">${state.rowCount} rows</th>`;
+  // Column headers
+  state.headers.forEach((h, ci) => {
+    const cls = isColSelected(ci) ? 'col-hdr selected' : 'col-hdr';
+    html += `<th class="${cls}" onclick="toggleColSelection(${ci})">${esc(h)}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  state.rows.forEach((row, ri) => {
+    html += '<tr>';
+    // Row header
+    const rcls = isRowSelected(ri) ? 'row-hdr selected' : 'row-hdr';
+    html += `<td class="${rcls}" onclick="toggleRowSelection(${ri})">${ri + 1}</td>`;
+    // Cells
+    row.forEach((val, ci) => {
+      if (editingCell && editingCell.row === ri && editingCell.col === ci) {
+        html += `<td class="editing"><input type="text" value="${esc(val)}" 
+          onblur="commitEdit(${ri},${ci},this.value)" 
+          onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')cancelEdit()" /></td>`;
+      } else {
+        const cls = isCellSelected(ri, ci) ? 'selected' : '';
+        html += `<td class="${cls}" 
+          onclick="toggleCellSelection(${ri},${ci})" 
+          ondblclick="startEditing(${ri},${ci},'${esc(val)}')">${esc(val)}</td>`;
+      }
+    });
+    html += '</tr>';
+  });
+
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+function renderSidebar() {
+  const container = document.getElementById('sidebar-content');
+  let html = '';
+
+  html += `<div class="section-title">Selection</div>`;
+  html += `<div style="font-size:11px;color:#888;margin-bottom:8px;" id="sidebar-sel">${getSelectionDesc()}</div>`;
+
+  html += `<div class="section-title">Built-in</div>`;
+  for (const a of ['To Uppercase', 'To Lowercase', 'Trim Whitespace']) {
+    html += `<button class="action-btn" onclick="execBuiltin('${esc(a)}')">${esc(a)}</button>`;
+  }
+
+  html += `<div class="section-title" style="margin-top:12px;">Custom Actions <button onclick="showActionEditor()" style="float:right;font-size:11px;padding:2px 8px;">+ New</button></div>`;
+
+  if (customActions.length === 0) {
+    html += `<div style="font-size:11px;color:#888;margin-top:4px;">No custom actions yet.</div>`;
+  } else {
+    for (const a of customActions) {
+      const sel = state.selection;
+      const disabled = sel.type === 'NONE' ? 'disabled' : '';
+      html += `<div class="action-card">
+        <div><div class="name">${esc(a.name)}</div><div class="type">${esc(a.type)}</div></div>
+        <div class="btns">
+          <button ${disabled} onclick="execCustom('${a.id}')">▶</button>
+          <button onclick="showActionEditor('${a.id}')">✎</button>
+          <button onclick="deleteAction('${a.id}')" style="color:var(--danger)">✕</button>
+        </div>
+      </div>`;
+    }
+  }
+
+  container.innerHTML = html;
+}
+
+function getSelectionDesc() {
+  const sel = state.selection;
+  if (sel.type === 'NONE') return 'No selection — click cells/rows/cols';
+  const count = sel.type === 'CELLS' ? sel.cells.length : sel.indices.length;
+  return `${count} ${sel.type.toLowerCase()} selected`;
+}
+
+function showLoading(v) {
+  document.getElementById('table-wrap').classList.toggle('loading', v);
+}
+
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+}
+
+// ── Action execution ───────────────────────────────────────────
+function getActionDefByName(name) {
+  const map = { 'To Uppercase': 'TO_UPPER', 'To Lowercase': 'TO_LOWER', 'Trim Whitespace': 'TRIM' };
+  const type = map[name];
+  return { id: name, name, description: '', type, commandTemplate: '', findText: '', replaceText: '', transformExpression: '', includeHeader: false };
+}
+
+async function execBuiltin(name) {
+  const def = getActionDefByName(name);
+  await api('POST', '/api/action/execute', { action: def, selection: state.selection });
+  loadData();
+}
+
+async function execCustom(id) {
+  const def = customActions.find(a => a.id === id);
+  if (!def) return;
+  await api('POST', '/api/action/execute', { action: def, selection: state.selection });
+  loadData();
+}
+
+async function deleteAction(id) {
+  if (!confirm('Delete this action?')) return;
+  await api('DELETE', `/api/actions/${id}`);
+  loadData();
+}
+
+// ── Action Editor Modal ────────────────────────────────────────
+function showActionEditor(id) {
+  const def = id ? customActions.find(a => a.id === id) : null;
+  const modal = document.getElementById('modal');
+  const desc = def?.description || '';
+  const types = ['SHELL_COMMAND','FIND_REPLACE','TRANSFORM','TO_UPPER','TO_LOWER','TRIM','PREFIX','SUFFIX'];
+
+  let extraFields = '';
+  const type = def?.type || 'SHELL_COMMAND';
+
+  // Shell command
+  extraFields = `
+    <div id="ae-shell" ${type !== 'SHELL_COMMAND' ? 'style="display:none"' : ''}>
+      <div class="field"><label>Command Template</label><textarea id="ae-cmd" placeholder="echo {cell} | wc -w">${esc(def?.commandTemplate||'')}</textarea></div>
+      <div class="hint">Use {cell} as placeholder for cell content, or leave empty to pipe to stdin.</div>
+      <div class="field"><label><input type="checkbox" id="ae-hdr" ${def?.includeHeader?'checked':''}/> Include header row</label></div>
+    </div>
+    <div id="ae-replace" ${type !== 'FIND_REPLACE' ? 'style="display:none"' : ''}>
+      <div class="field"><label>Find</label><input id="ae-find" value="${esc(def?.findText||'')}" /></div>
+      <div class="field"><label>Replace With</label><input id="ae-repl" value="${esc(def?.replaceText||'')}" /></div>
+    </div>
+    <div id="ae-transform" ${type !== 'TRANSFORM' ? 'style="display:none"' : ''}>
+      <div class="field"><label>Transform Expression</label><input id="ae-expr" value="${esc(def?.transformExpression||'')}" placeholder="reverse, length, substr(0,3), ..." /></div>
+      <div class="hint">reverse | length | substr(start,len) | replace("old","new") | repeat(n) | padLeft(n,c) | padRight(n,c)</div>
+    </div>
+    <div id="ae-prefix" ${type !== 'PREFIX' ? 'style="display:none"' : ''}>
+      <div class="field"><label>Prefix Text</label><input id="ae-pfx" value="${esc(def?.findText||'')}" /></div>
+    </div>
+    <div id="ae-suffix" ${type !== 'SUFFIX' ? 'style="display:none"' : ''}>
+      <div class="field"><label>Suffix Text</label><input id="ae-sfx" value="${esc(def?.findText||'')}" /></div>
+    </div>
+    <div id="ae-simple" ${!['TO_UPPER','TO_LOWER','TRIM'].includes(type) ? 'style="display:none"' : ''}>
+      <div class="hint">No additional configuration needed. Applies directly to selected cells.</div>
+    </div>`;
+
+  modal.innerHTML = `
+    <h2>${def ? 'Edit' : 'Create'} Custom Action</h2>
+    <div class="field"><label>Action Name</label><input id="ae-name" value="${esc(def?.name||'')}" placeholder="My Action" /></div>
+    <div class="field"><label>Description (optional)</label><input id="ae-desc" value="${esc(desc)}" placeholder="What does this action do?" /></div>
+    <div class="field"><label>Type</label>
+      <select id="ae-type" onchange="onActionTypeChange()">
+        ${types.map(t => `<option value="${t}" ${t===type?'selected':''}>${t}</option>`).join('')}
+      </select>
+    </div>
+    ${extraFields}
+    <div class="btns">
+      <button onclick="closeModal()">Cancel</button>
+      <button class="primary" onclick="saveAction('${def?.id||''}')">${def ? 'Save' : 'Create'}</button>
+    </div>`;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function onActionTypeChange() {
+  const t = document.getElementById('ae-type').value;
+  ['ae-shell','ae-replace','ae-transform','ae-prefix','ae-suffix','ae-simple'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  const map = { 'SHELL_COMMAND':'ae-shell', 'FIND_REPLACE':'ae-replace', 'TRANSFORM':'ae-transform', 'PREFIX':'ae-prefix', 'SUFFIX':'ae-suffix' };
+  const target = map[t] || 'ae-simple';
+  const el = document.getElementById(target);
+  if (el) el.style.display = '';
+}
+
+async function saveAction(id) {
+  const name = document.getElementById('ae-name').value.trim();
+  if (!name) { alert('Action name is required'); return; }
+  const type = document.getElementById('ae-type').value;
+  const def = {
+    id: id || '',
+    name,
+    description: document.getElementById('ae-desc').value.trim(),
+    type,
+    commandTemplate: document.getElementById('ae-cmd')?.value?.trim() || '',
+    findText: document.getElementById('ae-find')?.value?.trim() || document.getElementById('ae-pfx')?.value?.trim() || document.getElementById('ae-sfx')?.value?.trim() || '',
+    replaceText: document.getElementById('ae-repl')?.value?.trim() || '',
+    transformExpression: document.getElementById('ae-expr')?.value?.trim() || '',
+    includeHeader: document.getElementById('ae-hdr')?.checked || false
+  };
+  if (id) {
+    await api('PUT', `/api/actions/${id}`, def);
+  } else {
+    await api('POST', '/api/actions', def);
+  }
+  closeModal();
+  loadData();
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+// ── Sidebar toggle (mobile) ────────────────────────────────────
+function toggleSidebar() {
+  const s = document.getElementById('sidebar');
+  const b = document.getElementById('sidebar-backdrop');
+  s.classList.toggle('open');
+  b.classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-backdrop').classList.remove('open');
+}
+
+// ── File list ──────────────────────────────────────────────────
+async function loadFileList() {
+  try {
+    const files = await api('GET', '/api/files');
+    const sel = document.getElementById('file-list');
+    sel.innerHTML = '<option value="">— saved CSVs —</option>';
+    for (const f of files) {
+      sel.innerHTML += `<option value="${esc(f)}">${esc(f)}</option>`;
+    }
+  } catch(e) { /* ignore */ }
+}
+setInterval(loadFileList, 5000);
+
+// ── Init ───────────────────────────────────────────────────────
+loadData();
+loadFileList();
+</script>
+</body>
+</html>

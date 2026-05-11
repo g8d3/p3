@@ -1,0 +1,17 @@
+# Go binary
+go-server/csv-tabulator
+
+# Java/Kotlin build artifacts
+composeApp/build/
+server/build/
+androidApp/build/
+
+# User data
+data/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store

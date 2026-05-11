@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>CSV Tabulator</title>
+<link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator.min.css" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f5f5f5; --surface: #fff; --border: #ddd;
+  --primary: #2c3e50; --accent: #3498db; --danger: #e74c3c;
+  --text: #333; --text-light: #888; --radius: 6px;
+  --toolbar-h: 48px; --status-h: 32px;
+}
+html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; overflow: hidden; }
+button { cursor: pointer; font-family: inherit; font-size: 13px; border-radius: var(--radius); padding: 6px 12px; background: var(--surface); color: var(--text); border: 1px solid var(--border); white-space: nowrap; }
+button:hover { background: #e8e8e8; }
+button:active { transform: scale(0.97); }
+button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+button.primary:hover { background: #2980b9; }
+button:disabled { opacity: 0.4; cursor: default; transform: none; }
+input, select, textarea { font-family: inherit; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 10px; outline: none; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(52,152,219,0.2); }
+#app { display: flex; flex-direction: column; height: 100vh; }
+#toolbar { display: flex; align-items: center; gap: 4px; padding: 4px 8px; background: var(--primary); color: #fff; min-height: var(--toolbar-h); flex-wrap: wrap; }
+#toolbar button { background: rgba(255,255,255,0.15); color: #fff; border-color: transparent; font-size: 12px; padding: 4px 10px; }
+#toolbar button:hover { background: rgba(255,255,255,0.25); }
+#toolbar .sep { width: 1px; height: 24px; background: rgba(255,255,255,0.3); margin: 0 4px; }
+#toolbar .title { font-weight: 600; font-size: 14px; margin-right: 8px; white-space: nowrap; }
+#menu-toggle { display: none; background: rgba(255,255,255,0.2); font-size: 20px; padding: 2px 10px; }
+#content { display: flex; flex: 1; min-height: 0; }
+#file-bar { display: flex; align-items: center; gap: 6px; padding: 6px 12px; background: var(--surface); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+#file-bar input { flex: 1; min-width: 120px; }
+#file-bar .hint { font-size: 11px; color: var(--text-light); }
+#editor { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+#table-wrap { flex: 1; overflow: hidden; position: relative; }
+#sel-info { font-size: 11px; color: var(--text-light); padding: 4px 12px; border-bottom: 1px solid var(--border); background: var(--surface); }
+#sidebar { width: 300px; background: var(--surface); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; transition: transform 0.2s; }
+#sidebar.hidden { display: none; }
+#sidebar-header { padding: 10px 12px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+#sidebar-header h3 { font-size: 14px; }
+#sidebar-content { flex: 1; padding: 8px; overflow-y: auto; }
+.section-title { font-size: 12px; font-weight: 600; margin: 8px 0 4px; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; }
+.action-btn { display: block; width: 100%; text-align: left; padding: 8px 10px; margin: 3px 0; font-size: 12px; border-radius: var(--radius); background: var(--bg); border: 1px solid var(--border); }
+.action-btn:hover { background: #e8e8e8; }
+.action-card { padding: 8px; margin: 4px 0; border: 1px solid var(--border); border-radius: var(--radius); display: flex; align-items: center; justify-content: space-between; }
+.action-card .name { font-size: 12px; font-weight: 500; }
+.action-card .type { font-size: 10px; color: var(--text-light); }
+.action-card .btns { display: flex; gap: 4px; }
+.action-card .btns button { font-size: 16px; padding: 2px 6px; line-height: 1; }
+#status { display: flex; justify-content: space-between; padding: 4px 12px; background: var(--bg); border-top: 1px solid var(--border); font-size: 11px; color: var(--text-light); min-height: var(--status-h); align-items: center; }
+#toast { display: none; position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%); padding: 10px 20px; border-radius: var(--radius); font-size: 13px; z-index: 200; max-width: 90%; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+#toast.error { background: #e74c3c; color: #fff; }
+#toast.info { background: #3498db; color: #fff; }
+#toast.success { background: #27ae60; color: #fff; }
+#modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+#modal-overlay.open { display: flex; }
+#modal { background: var(--surface); border-radius: 12px; padding: 24px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; }
+#modal h2 { font-size: 18px; margin-bottom: 16px; }
+#modal .field { margin-bottom: 12px; }
+#modal label { display: block; font-size: 12px; font-weight: 500; margin-bottom: 3px; color: var(--text-light); }
+#modal input, #modal select, #modal textarea { width: 100%; }
+#modal textarea { min-height: 60px; resize: vertical; font-family: monospace; }
+#modal .btns { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+#modal .hint { font-size: 11px; color: var(--text-light); margin-top: 3px; }
+.tabulator-cell.sel-cell { background: #cce0ff !important; }
+.tabulator-col { cursor: pointer; }
+.tabulator-col:hover { background: #e3e8f0; }
+@media (max-width: 768px) {
+  #sidebar { position: fixed; top: 0; right: 0; height: 100%; z-index: 50; transform: translateX(100%); width: 300px; box-shadow: -4px 0 12px rgba(0,0,0,0.15); }
+  #sidebar.open { transform: translateX(0); }
+  #sidebar.hidden { display: flex; }
+  #menu-toggle { display: inline-flex; }
+  #sidebar-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 49; }
+  #sidebar-backdrop.open { display: block; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="toolbar">
+    <span class="title">CSV Tabulator</span>
+    <button onclick="fileNew()">New</button>
+    <button onclick="fileSave()">Save</button>
+    <span class="sep"></span>
+    <button onclick="rowAdd()">+Row</button>
+    <button id="btn-del-row" onclick="rowDelete()" disabled>-Row</button>
+    <span class="sep"></span>
+    <button onclick="colAdd()">+Col</button>
+    <button id="btn-del-col" onclick="colDelete()" disabled>-Col</button>
+    <span style="flex:1"></span>
+    <button id="menu-toggle" onclick="toggleSidebar()">☰</button>
+  </div>
+
+  <div id="file-bar">
+    <div style="display:flex;align-items:center;gap:4px;width:100%;">
+      <span id="file-path-display" style="font-size:10px;color:#888;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;max-width:40%;" title="">📁</span>
+      <select id="file-list" onchange="if(this.value)fileOpen()" style="flex:1;font-size:12px;padding:4px;min-width:0;">
+        <option value="">📂 Files...</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="content">
+    <div id="editor">
+      <div id="sel-info">Tap cells to select. Use sidebar for Row/Column select</div>
+      <div id="table-wrap"></div>
+    </div>
+    <div id="sidebar-backdrop" onclick="closeSidebar()"></div>
+    <div id="sidebar">
+      <div id="sidebar-header">
+        <h3>Actions</h3>
+        <button onclick="closeSidebar()" style="font-size:20px;padding:0 4px;">&times;</button>
+      </div>
+      <div id="sidebar-content"></div>
+    </div>
+  </div>
+
+  <div id="status">
+    <span id="status-msg">Ready</span>
+    <span id="status-info">Rows: 0 Cols: 0</span>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="modal-overlay" onclick="if(event.target===this)closeModal()"><div id="modal"></div></div>
+
+<script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+var state = { headers: [], rowCount: 0, colCount: 0, status: 'Ready', fileName: '', filePath: '' };
+var customActions = [];
+var table = null;
+var dataDir = '';  // Directorio de datos (fijo, provisto por el servidor)
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST / STATUS
+// ═══════════════════════════════════════════════════════════════
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + (type || 'info');
+  t.style.display = 'block'; setTimeout(() => { t.style.display = 'none'; }, 4000);
+}
+function showError(msg) { console.error('[csv-tab]', msg);
+  document.getElementById('status-msg').innerHTML = '⚠️ ' + msg;
+  document.getElementById('status-msg').style.color = '#c0392b';
+  showToast(msg, 'error'); }
+function showStatus(msg) { console.log('[csv-tab]', msg);
+  document.getElementById('status-msg').textContent = msg;
+  document.getElementById('status-msg').style.color = ''; }
+
+// ═══════════════════════════════════════════════════════════════
+// API
+// ═══════════════════════════════════════════════════════════════
+async function api(method, path, body) {
+  const opts = { method, headers: {} };
+  if (body !== undefined) { opts.headers['Content-Type'] = 'application/json'; opts.body = typeof body === 'string' ? body : JSON.stringify(body); }
+  try {
+    const r = await fetch(path, opts);
+    if (!r.ok) { showError('HTTP ' + r.status + ' en ' + path); return null; }
+    return await r.json();
+  } catch (e) { showError('Error de red: ' + e.message); return null; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABULATOR
+// ═══════════════════════════════════════════════════════════════
+var selectedCells = [];
+var isDragging = false;
+var dragStart = null;
+
+function buildColumns(headers) {
+  return headers.map(function(h) {
+    return { title: h, field: h, editor: "input", headerFilter: true, sorter: "string", width: 120, minWidth: 60 };
+  });
+}
+
+function createTable(data) {
+  if (table) { try { table.destroy(); } catch(e) {} table = null; }
+  var cols = buildColumns(state.headers);
+  var self = this;
+  table = new Tabulator("#table-wrap", {
+    data: data,
+    layout: "fitDataStretch",
+    height: "100%",
+    columns: cols,
+    movableColumns: false,
+    resizable: "header",
+    pagination: "local",
+    paginationSize: 100,
+    paginationSizeSelector: [25, 50, 100, 500, 1000],
+    headerFilter: true,
+    headerFilterPlaceholder: "filter...",
+    clipboard: true,
+    groupBy: false,
+    groupToggleElement: "header",
+    cellEdited: function(cell) {
+      var rowData = cell.getRow().getData();
+      var rowIdx = rowData._rowid;
+      var colField = cell.getColumn().getField();
+      var colIdx = state.headers.indexOf(colField);
+      if (rowIdx >= 0 && colIdx >= 0) {
+        api('POST', '/api/cell', { row: rowIdx, col: colIdx, value: cell.getValue() });
+      }
+    },
+    cellClick: function(e, cell) {
+      var row = cell.getRow().getData()._rowid;
+      var col = cell.getColumn().getField();
+      var colIdx = state.headers.indexOf(col);
+      if (colIdx < 0) return;
+
+      // Sin teclado: tap toggle. Si no hay nada seleccionado, selecciona.
+      // Si ya hay selección, agrega/quita esta celda.
+      if (selectedCells.length === 0) {
+        clearSelection();
+        addCell(row, colIdx);
+      } else {
+        toggleCellSel(row, colIdx);
+      }
+      if (selectedCells.length === 0) clearSelection();
+      updateSelInfo();
+    },
+    dataLoaded: function() {
+      try {
+        table.on('headerDblClick', function(e, column) {
+          var field = column.getField();
+          if (!field || field === '_rowid') return;
+          var colIdx = state.headers.indexOf(field);
+          if (colIdx < 0) return;
+          var headerEl = column.getElement();
+          var titleEl = headerEl.querySelector('.tabulator-col-title');
+          if (!titleEl) return;
+          var oldName = titleEl.textContent;
+          var input = document.createElement('input');
+          input.type = 'text';
+          input.value = oldName;
+          input.style.cssText = 'width:100%;border:none;background:transparent;font:inherit;padding:0;margin:0;outline:none;text-align:center;';
+          titleEl.textContent = '';
+          titleEl.appendChild(input);
+          input.focus();
+          input.select();
+          var finish = function() {
+            var newName = input.value.trim();
+            if (newName && newName !== oldName) {
+              api('POST', '/api/column', { action: 'rename', index: colIdx, header: newName })
+                .then(function(r) { if (r) reloadTable(); });
+            } else {
+              titleEl.textContent = oldName;
+            }
+          };
+          input.addEventListener('blur', finish);
+          input.addEventListener('keydown', function(ev) {
+            if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); }
+            if (ev.key === 'Escape') { ev.preventDefault(); titleEl.textContent = oldName; }
+          });
+        });
+      } catch(e) { console.error('header dblclick error', e); }
+    },
+  });
+}
+
+function loadData() {
+  api('GET', '/api/data').then(function(resp) {
+    if (!resp || !resp.rows) { showError('No data from server'); return; }
+    state.headers = resp.headers;
+    state.rowCount = resp.rowCount;
+    state.colCount = resp.colCount;
+    state.status = resp.status;
+    state.fileName = resp.fileName || '';
+    var data = resp.rows.map(function(row, idx) {
+      var obj = { _rowid: idx };
+      resp.headers.forEach(function(h, i) { obj[h] = row[i]; });
+      return obj;
+    });
+    createTable(data);
+    updateFileHint();
+    setTimeout(function() {
+      try { initDragSelection(); } catch(e) { console.error('drag init error', e); }
+      try { renderSidebar(); } catch(e) { console.error('sidebar error', e); }
+      try { updateStatusBar(); } catch(e) { console.error('status error', e); }
+    }, 200);
+  });
+}
+
+// ── Cell selection ────────────────────────────────────────────────
+function addCell(row, col) {
+  selectedCells.push({row: row, col: col});
+  highlightSelectedCells();
+}
+function removeCell(row, col) {
+  selectedCells = selectedCells.filter(function(c) { return c.row !== row || c.col !== col; });
+  highlightSelectedCells();
+}
+function toggleCellSel(row, col) {
+  var idx = selectedCells.findIndex(function(c) { return c.row === row && c.col === col; });
+  if (idx >= 0) selectedCells.splice(idx, 1);
+  else selectedCells.push({row: row, col: col});
+  highlightSelectedCells();
+}
+function clearSelection() {
+  selectedCells = [];
+  highlightSelectedCells();
+}
+function updateSelInfo() {
+  var el = document.getElementById('sel-info');
+  if (selectedCells.length === 0) el.textContent = 'Click cells to select, Shift+drag for range';
+  else if (selectedCells.length === 1) el.textContent = '1 cell selected';
+  else el.textContent = selectedCells.length + ' cells selected';
+}
+function highlightSelectedCells() {
+  if (!table) return;
+  // Remove old highlights
+  document.querySelectorAll('.tabulator-cell.sel-cell').forEach(function(el) {
+    el.classList.remove('sel-cell');
+  });
+  // Add highlights
+  selectedCells.forEach(function(c) {
+    var rows = table.getRows();
+    if (c.row < rows.length) {
+      var cells = rows[c.row].getCells();
+      if (c.col < cells.length) {
+        var el = cells[c.col].getElement();
+        if (el) el.classList.add('sel-cell');
+      }
+    }
+  });
+  updateSelInfo();
+}
+
+// ── Drag selection ───────────────────────────────────────────────
+function initDragSelection() {
+  var wrap = document.getElementById('table-wrap');
+  wrap.addEventListener('mousedown', function(e) {
+    var cellEl = e.target.closest('.tabulator-cell');
+    if (!cellEl || e.shiftKey || e.ctrlKey || e.metaKey) return;
+    // Determine row/col from element
+    var allCells = document.querySelectorAll('.tabulator-cell');
+    var idx = Array.from(allCells).indexOf(cellEl);
+    if (idx < 0) return;
+    // Find row/col by counting cells per row
+    var rowCells = 0;
+    if (table) {
+      var r = table.getRows();
+      if (r.length > 0) rowCells = r[0].getCells().length;
+    }
+    if (rowCells < 1) return;
+    var row = Math.floor(idx / rowCells);
+    var col = idx % rowCells;
+    if (col >= state.headers.length) return;
+    isDragging = true;
+    dragStart = {row: row, col: col};
+    clearSelection();
+    addCell(row, col);
+  });
+
+  wrap.addEventListener('mousemove', function(e) {
+    if (!isDragging || !dragStart) return;
+    var cellEl = e.target.closest('.tabulator-cell');
+    if (!cellEl) return;
+    var allCells = document.querySelectorAll('.tabulator-cell');
+    var idx = Array.from(allCells).indexOf(cellEl);
+    if (idx < 0) return;
+    var rowCells = 0;
+    if (table) {
+      var r = table.getRows();
+      if (r.length > 0) rowCells = r[0].getCells().length;
+    }
+    if (rowCells < 1) return;
+    var row = Math.floor(idx / rowCells);
+    var col = idx % rowCells;
+    if (col >= state.headers.length) return;
+
+    // Range from dragStart to current
+    var r1 = Math.min(dragStart.row, row), r2 = Math.max(dragStart.row, row);
+    var c1 = Math.min(dragStart.col, col), c2 = Math.max(dragStart.col, col);
+    selectedCells = [];
+    for (var r = r1; r <= r2; r++) {
+      for (var c = c1; c <= c2; c++) {
+        selectedCells.push({row: r, col: c});
+      }
+    }
+    highlightSelectedCells();
+  });
+
+  document.addEventListener('mouseup', function() {
+    if (isDragging) {
+      isDragging = false;
+      dragStart = null;
+    }
+  });
+}
+
+function updateStatusBar() {
+  document.getElementById('status-info').textContent =
+    'Rows: ' + state.rowCount + '  Cols: ' + state.colCount + '  File: ' + (state.fileName || '(new)');
+  if (state.status) showStatus(state.status);
+}
+
+function updateFileHint() {
+  // La ruta del directorio se obtiene del servidor al inicio y es fija
+  var fp = document.getElementById('file-path-display');
+  if (dataDir) {
+    fp.textContent = '📁 ' + dataDir;
+    fp.title = dataDir;
+  }
+  // Marcar archivo actual en el dropdown
+  var sel = document.getElementById('file-list');
+  if (state.fileName) {
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === state.fileName) {
+        sel.value = state.fileName;
+        break;
+      }
+    }
+  }
+}
+
+function updateFileSuggestions(files) {
+  var sel = document.getElementById('file-list');
+  sel.innerHTML = '<option value="">📂 Files...</option>';
+  (files || []).forEach(function(f) {
+    var opt = document.createElement('option');
+    opt.value = f;
+    opt.textContent = f;
+    sel.appendChild(opt);
+  });
+}
+
+function reloadTable() {
+  loadData();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FILE OPERATIONS
+// ═══════════════════════════════════════════════════════════════
+async function fileNew() {
+  var r = await api('POST', '/api/file', { action: 'new' });
+  if (r) { state = r; reloadTable(); showToast('New file created', 'success'); }
+}
+async function fileOpen() {
+  var sel = document.getElementById('file-list');
+  var filename = sel.value;
+  if (!filename) return;
+  var r = await api('POST', '/api/file', { action: 'open', path: filename });
+  if (r) { state = r; if (r.status && !r.status.startsWith('Error')) { reloadTable(); showToast('Loaded: ' + filename, 'success'); } }
+}
+
+async function fileSave() {
+  var r = await api('POST', '/api/save', { path: undefined });
+  if (r) { state = r; showToast('Saved', 'success'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ROW / COLUMN OPS
+// ═══════════════════════════════════════════════════════════════
+async function rowAdd() {
+  var r = await api('POST', '/api/row', { action: 'add' });
+  if (r) { state = r; reloadTable(); }
+}
+async function rowDelete() {
+  var rows = getUniqueSelectedRows();
+  if (rows.length === 0) { showError('Select cells in the rows to delete'); return; }
+  var indices = rows.sort(function(a,b){return b-a});
+  for (var i = 0; i < indices.length; i++) {
+    var r = await api('POST', '/api/row', { action: 'delete', index: indices[i] });
+    if (!r) return;
+  }
+  reloadTable();
+}
+function getUniqueSelectedRows() {
+  return [...new Set(selectedCells.map(function(c){return c.row;}))];
+}
+async function colAdd() {
+  var r = await api('POST', '/api/column', { action: 'add', header: '' });
+  if (r) { state = r; reloadTable(); }
+}
+async function colDelete() {
+  var colName = prompt('Delete column by name:');
+  if (!colName) return;
+  var colIdx = state.headers.indexOf(colName);
+  if (colIdx < 0) { showError('Column "' + colName + '" not found'); return; }
+  var r = await api('POST', '/api/column', { action: 'delete', index: colIdx });
+  if (r) { state = r; reloadTable(); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════════════════════════
+function getSelectedCells() {
+  return selectedCells || [];
+}
+
+async function execBuiltin(name) {
+  var cells = getSelectedCells();
+  if (cells.length === 0) { showError('Select cells first'); return; }
+  var map = { 'To Uppercase': 'TO_UPPER', 'To Lowercase': 'TO_LOWER', 'Trim Whitespace': 'TRIM' };
+  var def = { name: name, type: map[name] };
+  showToast('Running: ' + name + '...', 'info');
+  var r = await api('POST', '/api/action/execute', {
+    action: def,
+    selection: { type: 'CELLS', indices: [], cells: cells }
+  });
+  if (r) { showToast('✅ ' + name + ' done', 'success'); reloadTable(); }
+}
+
+async function execCustom(id) {
+  var cells = getSelectedCells();
+  if (cells.length === 0) { showError('Select cells first'); return; }
+  var def = customActions.find(function(a) { return a.id === id; });
+  if (!def) { showError('Action not found'); return; }
+  showToast('Running: ' + def.name + '...', 'info');
+  var r = await api('POST', '/api/action/execute', {
+    action: def,
+    selection: { type: 'CELLS', indices: [], cells: cells }
+  });
+  if (r) { showToast('✅ ' + def.name + ' done', 'success'); reloadTable(); }
+}
+
+async function deleteAction(id) {
+  if (!confirm('Delete this action?')) return;
+  var r = await api('DELETE', '/api/actions/' + id);
+  if (r) { customActions = r; renderSidebar(); showToast('Action deleted', 'info'); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIDEBAR
+// ═══════════════════════════════════════════════════════════════
+function selectEntireRow() {
+  if (selectedCells.length === 0) { showError('Select a cell first'); return; }
+  var row = selectedCells[0].row;
+  clearSelection();
+  for (var c = 0; c < state.headers.length; c++) addCell(row, c);
+  updateSelInfo();
+}
+function selectEntireColumn() {
+  if (selectedCells.length === 0) { showError('Select a cell first'); return; }
+  var col = selectedCells[0].col;
+  clearSelection();
+  for (var r = 0; r < state.rowCount; r++) addCell(r, col);
+  updateSelInfo();
+}
+function renderSidebar() {
+  var c = document.getElementById('sidebar-content');
+  var cells = getSelectedCells();
+  var html = '<div class="section-title">Selection</div>';
+  html += '<div style="font-size:11px;color:#888;margin-bottom:8px;">' +
+    (cells.length === 0 ? 'Click cells or drag to select' :
+     cells.length === 1 ? '1 cell selected' : cells.length + ' cells selected') + '</div>';
+  if (cells.length > 0) {
+    html += '<div style="margin-bottom:8px;display:flex;gap:4px;flex-wrap:wrap;">';
+    html += '<button onclick="selectEntireRow()" style="flex:1;font-size:11px;min-width:70px;">📋 Row</button>';
+    html += '<button onclick="selectEntireColumn()" style="flex:1;font-size:11px;min-width:70px;">📊 Column</button>';
+    html += '<button onclick="clearSelection();updateSelInfo();renderSidebar();" style="font-size:11px;padding:4px 6px;">✕ Clear</button></div>';
+  }
+
+  html += '<div class="section-title">Built-in</div>';
+  html += '<button class="action-btn" onclick="execBuiltin(\'To Uppercase\')">To Uppercase</button>';
+  html += '<button class="action-btn" onclick="execBuiltin(\'To Lowercase\')">To Lowercase</button>';
+  html += '<button class="action-btn" onclick="execBuiltin(\'Trim Whitespace\')">Trim Whitespace</button>';
+
+  html += '<div class="section-title" style="margin-top:12px;">Custom Actions';
+  html += ' <button onclick="showActionEditor()" style="float:right;font-size:11px;padding:2px 8px;">+ New</button></div>';
+
+  if (customActions.length === 0) {
+    html += '<div style="font-size:11px;color:#888;margin-top:4px;">No custom actions yet.</div>';
+  } else {
+    for (var i = 0; i < customActions.length; i++) {
+      var a = customActions[i];
+      html += '<div class="action-card"><div><div class="name">' + esc(a.name) + '</div><div class="type">' + (a.type || '') + '</div></div>';
+      html += '<div class="btns"><button onclick="execCustom(\'' + a.id + '\')">▶</button>';
+      html += '<button onclick="showActionEditor(\'' + a.id + '\')">✎</button>';
+      html += '<button onclick="deleteAction(\'' + a.id + '\')" style="color:var(--danger)">✕</button></div></div>';
+    }
+  }
+  c.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════════════
+function showActionEditor(id) {
+  var def = id ? customActions.find(function(a){return a.id===id}) : null;
+  var m = document.getElementById('modal');
+  var type = (def && def.type) || 'SHELL_COMMAND';
+  var types = ['SHELL_COMMAND','FIND_REPLACE','TRANSFORM','TO_UPPER','TO_LOWER','TRIM','PREFIX','SUFFIX'];
+
+  var extra = '';
+  extra += type === 'SHELL_COMMAND' ? '' : ' style="display:none"';
+  var shellBlock = '<div id="ae-shell"' + extra + '>';
+  shellBlock += '<div class="field"><label>Command Template</label><textarea id="ae-cmd" placeholder="echo {cell} | wc -w">' + esc(def?.commandTemplate||'') + '</textarea></div>';
+  shellBlock += '<div class="hint">Use {cell} as placeholder for cell value.</div>';
+  shellBlock += '<div class="field"><label><input type="checkbox" id="ae-hdr" ' + (def?.includeHeader?'checked':'') + '/> Include header row</label></div></div>';
+
+  var replaceBlock = '<div id="ae-replace"' + (type!=='FIND_REPLACE'?' style="display:none"':'') + '>';
+  replaceBlock += '<div class="field"><label>Find</label><input id="ae-find" value="' + esc(def?.findText||'') + '" /></div>';
+  replaceBlock += '<div class="field"><label>Replace With</label><input id="ae-repl" value="' + esc(def?.replaceText||'') + '" /></div></div>';
+
+  var xformBlock = '<div id="ae-transform"' + (type!=='TRANSFORM'?' style="display:none"':'') + '>';
+  xformBlock += '<div class="field"><label>Expression</label><input id="ae-expr" value="' + esc(def?.transformExpression||'') + '" placeholder="reverse, length, substr(0,3)" /></div>';
+  xformBlock += '<div class="hint">reverse | length | substr(start,len) | replace(\"old\",\"new\") | repeat(n) | padLeft(n,c) | padRight(n,c)</div></div>';
+
+  var pfxBlock = '<div id="ae-prefix"' + (type!=='PREFIX'?' style="display:none"':'') + '>';
+  pfxBlock += '<div class="field"><label>Prefix Text</label><input id="ae-pfx" value="' + esc(def?.findText||'') + '" /></div></div>';
+
+  var sfxBlock = '<div id="ae-suffix"' + (type!=='SUFFIX'?' style="display:none"':'') + '>';
+  sfxBlock += '<div class="field"><label>Suffix Text</label><input id="ae-sfx" value="' + esc(def?.findText||'') + '" /></div></div>';
+
+  m.innerHTML = '<h2>' + (def ? 'Edit' : 'Create') + ' Custom Action</h2>' +
+    '<div class="field"><label>Name</label><input id="ae-name" value="' + esc(def?.name||'') + '" /></div>' +
+    '<div class="field"><label>Description</label><input id="ae-desc" value="' + esc(def?.description||'') + '" /></div>' +
+    '<div class="field"><label>Type</label><select id="ae-type" onchange="onActionTypeChange()">' +
+    types.map(function(t){return '<option value="'+t+'"'+(t===type?' selected':'')+'>'+t+'</option>';}).join('') + '</select></div>' +
+    shellBlock + replaceBlock + xformBlock + pfxBlock + sfxBlock +
+    '<div id="ae-simple"' + (!['TO_UPPER','TO_LOWER','TRIM'].includes(type) ? ' style="display:none"' : '') + '><div class="hint">No extra config needed.</div></div>' +
+    '<div class="btns"><button onclick="closeModal()">Cancel</button>' +
+    '<button class="primary" onclick="saveAction(\'' + (def?.id||'') + '\')">' + (def ? 'Save' : 'Create') + '</button></div>';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function onActionTypeChange() {
+  var t = document.getElementById('ae-type').value;
+  ['ae-shell','ae-replace','ae-transform','ae-prefix','ae-suffix','ae-simple'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+  var map = { 'SHELL_COMMAND':'ae-shell', 'FIND_REPLACE':'ae-replace', 'TRANSFORM':'ae-transform', 'PREFIX':'ae-prefix', 'SUFFIX':'ae-suffix' };
+  var el = document.getElementById(map[t] || 'ae-simple');
+  if (el) el.style.display = '';
+}
+
+async function saveAction(id) {
+  var name = document.getElementById('ae-name').value.trim();
+  if (!name) { showError('Name is required'); return; }
+  var def = {
+    id: id || '', name: name,
+    description: document.getElementById('ae-desc').value.trim(),
+    type: document.getElementById('ae-type').value,
+    commandTemplate: (document.getElementById('ae-cmd')?.value || '').trim(),
+    findText: (document.getElementById('ae-find')?.value || document.getElementById('ae-pfx')?.value || document.getElementById('ae-sfx')?.value || '').trim(),
+    replaceText: (document.getElementById('ae-repl')?.value || '').trim(),
+    transformExpression: (document.getElementById('ae-expr')?.value || '').trim(),
+    includeHeader: document.getElementById('ae-hdr')?.checked || false
+  };
+  var r;
+  if (id) r = await api('PUT', '/api/actions/' + id, def);
+  else r = await api('POST', '/api/actions', def);
+  if (r) { customActions = r; renderSidebar(); closeModal(); showToast('Action saved', 'success'); }
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+
+// ═══════════════════════════════════════════════════════════════
+// FILE LIST
+// ═══════════════════════════════════════════════════════════════
+async function loadFileList() {
+  try {
+    var files = await api('GET', '/api/files');
+    if (files) updateFileSuggestions(files);
+  } catch(e) { /* ignore */ }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIDEBAR TOGGLE (mobile)
+// ═══════════════════════════════════════════════════════════════
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-backdrop').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-backdrop').classList.remove('open');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITY
+// ═══════════════════════════════════════════════════════════════
+function esc(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+// Obtener directorio de datos del servidor
+api('GET', '/api/info').then(function(info) {
+  if (info && info.dataDir) {
+    dataDir = info.dataDir;
+    updateFileHint();
+  }
+});
+
+loadData();  // Inicializa tabla + carga datos
+loadFileList();
+// Solo refrescar la lista de archivos, NO los datos
+setInterval(loadFileList, 5000);
+</script>
+</body>
+</html>
