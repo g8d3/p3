@@ -1,0 +1,500 @@
+#!/usr/bin/env python3
+"""
+agent-watch: Daemon de monitoreo de sesiones de AI agents.
+===========================================================
+Vigila fuentes de datos y escribe al CSV para el Monitor TUI.
+
+Fuentes:
+ 1. ~/.local/state/opencode/prompt-history.jsonl  → mensajes del USUARIO (automático)
+ 2. /tmp/agent-watch.fifo                          → mensajes del ASISTENTE (via FIFO)
+
+Uso:
+    agent-watch                        # Inicia el daemon en foreground
+    agent-watch --daemon               # Inicia como daemon (background)
+    agent-watch --status               # Muestra si está corriendo
+    agent-watch --stop                 # Detiene el daemon
+
+El daemon escribe en <project>/s57/data/ (agents.csv, tasks.csv, logs.csv)
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import select
+import signal
+import stat
+import sys
+import time
+import threading
+from datetime import datetime, timezone
+from pathlib import Path
+
+# ── Config ────────────────────────────────────────────────────────
+
+HISTORY_PATH = Path.home() / ".local/state/opencode/prompt-history.jsonl"
+ASSISTANT_PATH = Path.home() / ".local/state/opencode/assistant-history.jsonl"
+FIFO_PATH = Path("/tmp/agent-watch.fifo")
+PID_PATH = Path("/tmp/agent-watch.pid")
+DATA_DIR = Path.home() / "code/p3/s57/data"
+POLL_INTERVAL = 2.0  # segundos
+
+# ── CSV writer (inline para no depender de writer.py) ─────────────
+
+import csv
+import threading
+
+_lock = threading.Lock()
+
+
+def _read_csv(filename: str) -> list[dict]:
+    path = DATA_DIR / filename
+    if not path.exists():
+        return []
+    with _lock:
+        with open(path, newline="") as f:
+            reader = csv.DictReader(f)
+            return list(reader)
+
+
+def _write_csv(filename: str, rows: list[dict]) -> None:
+    path = DATA_DIR / filename
+    if not rows:
+        path.unlink(missing_ok=True)
+        return
+    with _lock:
+        fieldnames = list(rows[0].keys())
+        with open(path, "w", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(rows)
+
+
+def _next_counter(csv_file: str, prefix: str) -> int:
+    """Obtiene el siguiente contador desde el CSV (task_001, log_0001, etc)."""
+    max_n = 0
+    for row in _read_csv(csv_file):
+        rid = row.get(f"{prefix}_id", "")
+        if rid.startswith(f"{prefix}_"):
+            try:
+                n = int(rid.split("_")[1])
+                if n > max_n:
+                    max_n = n
+            except (IndexError, ValueError):
+                pass
+    return max_n + 1
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+
+
+# ── Agente por defecto ───────────────────────────────────────────
+
+AGENT_ID = "orchestrator"
+AGENT_NAME = "Orchestrator"
+AGENT_ROLE = "coordinator"
+AGENT_MODEL = "opencode-go/deepseek-v4-flash"
+
+
+def _ensure_agent():
+    """Asegura que el agente orquestrador exista en agents.csv."""
+    rows = _read_csv("agents.csv")
+    for r in rows:
+        if r["agent_id"] == AGENT_ID:
+            r["updated_at"] = _now()
+            _write_csv("agents.csv", rows)
+            return
+    rows.append({
+        "agent_id": AGENT_ID,
+        "name": AGENT_NAME,
+        "role": AGENT_ROLE,
+        "status": "active",
+        "model": AGENT_MODEL,
+        "created_at": _now(),
+        "updated_at": _now(),
+    })
+    _write_csv("agents.csv", rows)
+
+
+def _ensure_task(task_description: str, parent_id: str = "") -> str:
+    """Asegura que exista una tarea. Devuelve task_id."""
+    rows = _read_csv("tasks.csv")
+    # Buscar si ya existe
+    for r in rows:
+        if r["description"] == task_description and r["agent_id"] == AGENT_ID:
+            return r["task_id"]
+    # Crear nueva
+    n = _next_counter("tasks.csv", "task")
+    task_id = f"task_{n:03d}"
+    rows.append({
+        "task_id": task_id,
+        "agent_id": AGENT_ID,
+        "parent_task_id": parent_id,
+        "description": task_description,
+        "status": "active",
+        "priority": "medium",
+        "started_at": _now(),
+        "completed_at": "",
+        "result": "",
+    })
+    _write_csv("tasks.csv", rows)
+    return task_id
+
+
+def add_log(agent_id: str, task_id: str, level: str, message: str) -> None:
+    """Añade una entrada de log al CSV."""
+    _ensure_agent()
+    n = _next_counter("logs.csv", "log")
+    log_id = f"log_{n:04d}"
+    rows = _read_csv("logs.csv")
+    rows.append({
+        "log_id": log_id,
+        "agent_id": agent_id,
+        "task_id": task_id,
+        "timestamp": _now(),
+        "level": level.upper(),
+        "message": message,
+    })
+    _write_csv("logs.csv", rows)
+
+
+# ── Watcher de prompt-history.jsonl ───────────────────────────────
+
+class PromptHistoryWatcher(threading.Thread):
+    """Monitorea prompt-history.jsonl — solo captura líneas ENVIADAS.
+
+    Detecta envíos observando cuándo la última línea cambia y la
+    anterior aparece en la penúltima posición (señal de Enter).
+    """
+
+    def __init__(self):
+        super().__init__(daemon=True)
+        self._conversation_task_id = _ensure_task("Conversación")
+        self._prev_last: str | None = None  # última línea del ciclo anterior
+
+    def run(self):
+        log(f"👀 Vigilando {HISTORY_PATH} (detección por desplazamiento)")
+        while True:
+            try:
+                self._check_for_new_messages()
+            except Exception as e:
+                log(f"⚠️ Error en watcher: {e}")
+            time.sleep(POLL_INTERVAL)
+
+    def _get_lines(self) -> list[str]:
+        if not HISTORY_PATH.exists():
+            return []
+        with open(HISTORY_PATH) as f:
+            return [line.strip() for line in f if line.strip()]
+
+    def _log_line(self, raw: str):
+        try:
+            data = json.loads(raw)
+            msg = data.get("input", "")
+            if msg.strip():
+                short = msg[:120] + ("…" if len(msg) > 120 else "")
+                add_log(AGENT_ID, self._conversation_task_id, "USER", short)
+                log(f"📨 Usuario: {short}")
+        except json.JSONDecodeError:
+            pass
+
+    def _check_for_new_messages(self):
+        lines = self._get_lines()
+        if not lines:
+            self._prev_last = None
+            return
+
+        current_last = lines[-1]
+
+        if self._prev_last is not None and current_last != self._prev_last:
+            # La última línea cambió → ver si la anterior ahora está en [-2] (Enter)
+            if len(lines) >= 2 and lines[-2] == self._prev_last:
+                self._log_line(self._prev_last)
+            # Si no está en [-2], fue edición del borrador en el mismo slot — ignorar
+
+        self._prev_last = current_last
+
+
+# ── Watcher de assistant-history.jsonl ───────────────────────────
+
+class AssistantHistoryWatcher(threading.Thread):
+    """Monitorea assistant-history.jsonl (append-only) del plugin."""
+
+    def __init__(self):
+        super().__init__(daemon=True)
+        self._conversation_task_id = _ensure_task("Conversación")
+        self._last_position = 0
+        if ASSISTANT_PATH.exists():
+            self._last_position = ASSISTANT_PATH.stat().st_size
+
+    def run(self):
+        log(f"🤖 Vigilando {ASSISTANT_PATH}")
+        while True:
+            try:
+                self._check_for_new()
+            except Exception as e:
+                log(f"⚠️ Error en assistant watcher: {e}")
+            time.sleep(POLL_INTERVAL)
+
+    def _check_for_new(self):
+        if not ASSISTANT_PATH.exists():
+            return
+        size = ASSISTANT_PATH.stat().st_size
+        if size <= self._last_position:
+            return
+        with open(ASSISTANT_PATH) as f:
+            f.seek(self._last_position)
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    data = json.loads(line)
+                    content = data.get("content", "")
+                    if content.strip():
+                        short = content[:200] + ("…" if len(content) > 200 else "")
+                        add_log(
+                            data.get("agent", AGENT_ID),
+                            self._conversation_task_id,
+                            data.get("level", "ASSISTANT"),
+                            short,
+                        )
+                        log(f"📨 Asistente: {short[:60]}…")
+                except json.JSONDecodeError:
+                    pass
+        self._last_position = size
+
+
+# ── FIFO listener ─────────────────────────────────────────────────
+
+class FIFOListener(threading.Thread):
+    """Escucha en el FIFO para mensajes del ASISTENTE."""
+
+    def __init__(self):
+        super().__init__(daemon=True)
+
+    def run(self):
+        log(f"🎧 Escuchando en {FIFO_PATH}")
+        while True:
+            try:
+                self._ensure_fifo()
+                self._read_fifo()
+            except Exception as e:
+                log(f"⚠️ Error en FIFO: {e}")
+                time.sleep(1)
+
+    def _ensure_fifo(self):
+        if FIFO_PATH.exists():
+            if not FIFO_PATH.is_fifo():
+                FIFO_PATH.unlink()
+                os.mkfifo(FIFO_PATH)
+        else:
+            os.mkfifo(FIFO_PATH)
+
+    def _read_fifo(self):
+        """Lee del FIFO (bloqueante hasta que hay datos)."""
+        with open(FIFO_PATH, "r") as fifo:
+            while True:
+                line = fifo.readline()
+                if not line:
+                    break  # FIFO cerrado, hay que reabrir
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    msg = json.loads(line)
+                    self._handle_message(msg)
+                except json.JSONDecodeError:
+                    # Si no es JSON, tratar como mensaje directo
+                    add_log(AGENT_ID, "", "INFO", line)
+
+    def _handle_message(self, msg: dict):
+        msg_type = msg.get("type", "log")
+        agent = msg.get("agent", AGENT_ID)
+        task_desc = msg.get("task", "Conversación")
+        task_id = msg.get("task_id", "") or _ensure_task(task_desc)
+
+        if msg_type == "assistant":
+            content = msg.get("content", "")
+            level = msg.get("level", "INFO")
+            short = content[:200] + ("…" if len(content) > 200 else "")
+            add_log(agent, task_id, "ASSISTANT", short)
+
+        elif msg_type == "reasoning":
+            content = msg.get("content", "")
+            short = content[:200] + ("…" if len(content) > 200 else "")
+            add_log(agent, task_id, "REASONING", short)
+
+        elif msg_type == "tool":
+            tool_name = msg.get("tool", "")
+            args = msg.get("args", "")
+            short_args = str(args)[:150] + ("…" if len(str(args)) > 150 else "")
+            add_log(agent, task_id, "TOOL", f"{tool_name}({short_args})")
+
+        elif msg_type == "tool_result":
+            result = msg.get("result", "")
+            short = str(result)[:200] + ("…" if len(str(result)) > 200 else "")
+            add_log(agent, task_id, "TOOL_RESULT", short)
+
+        elif msg_type == "error":
+            content = msg.get("content", "")
+            add_log(agent, task_id, "CRITICAL", content)
+
+        elif msg_type == "task":
+            desc = msg.get("description", "")
+            status = msg.get("status", "active")
+            parent = msg.get("parent", "")
+            tid = _ensure_task(desc, parent)
+            if status in ("completed", "success", "failure", "error", "cancelled"):
+                rows = _read_csv("tasks.csv")
+                for r in rows:
+                    if r["task_id"] == tid:
+                        r["status"] = status
+                        r["completed_at"] = _now()
+                        if "result" in msg:
+                            r["result"] = msg["result"]
+                        break
+                _write_csv("tasks.csv", rows)
+            add_log(agent, tid, "INFO", f"📋 {desc} → {status}")
+
+        elif msg_type == "log":
+            add_log(agent, msg.get("task_id", ""),
+                    msg.get("level", "INFO"),
+                    msg.get("message", ""))
+
+
+# ── Daemon control ────────────────────────────────────────────────
+
+def log(msg: str):
+    ts = datetime.now().strftime("%H:%M:%S")
+    print(f"[{ts}] {msg}", flush=True)
+
+
+def write_pid():
+    PID_PATH.write_text(str(os.getpid()))
+
+
+def read_pid() -> int | None:
+    if not PID_PATH.exists():
+        return None
+    try:
+        return int(PID_PATH.read_text().strip())
+    except (ValueError, OSError):
+        return None
+
+
+def is_running() -> bool:
+    pid = read_pid()
+    if pid is None:
+        return False
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        PID_PATH.unlink(missing_ok=True)
+        return False
+
+
+def stop_daemon():
+    pid = read_pid()
+    if pid is None:
+        print("❌ agent-watch no está corriendo")
+        return
+    try:
+        os.kill(pid, signal.SIGTERM)
+        print(f"✅ agent-watch (PID {pid}) detenido")
+    except OSError as e:
+        print(f"❌ Error al detener: {e}")
+    PID_PATH.unlink(missing_ok=True)
+
+
+def run_foreground():
+    """Corre el daemon en foreground."""
+    write_pid()
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    _ensure_agent()
+
+    # Iniciar watchers
+    history_watcher = PromptHistoryWatcher()
+    assistant_watcher = AssistantHistoryWatcher()
+    fifo_listener = FIFOListener()
+
+    history_watcher.start()
+    assistant_watcher.start()
+    fifo_listener.start()
+
+    log(f"✅ agent-watch iniciado (PID {os.getpid()})")
+    log(f"   FIFO: {FIFO_PATH}")
+    log(f"   Data: {DATA_DIR}/")
+
+    # Señales para shutdown limpio
+    shutdown_event = threading.Event()
+
+    def _shutdown(signum, frame):
+        log("⏹ Deteniendo agent-watch...")
+        shutdown_event.set()
+
+    signal.signal(signal.SIGTERM, _shutdown)
+    signal.signal(signal.SIGINT, _shutdown)
+
+    try:
+        shutdown_event.wait()
+    except KeyboardInterrupt:
+        pass
+
+    PID_PATH.unlink(missing_ok=True)
+    log("✅ agent-watch detenido")
+
+
+def daemonize():
+    """Forkea al background."""
+    pid = os.fork()
+    if pid > 0:
+        # Padre: ya salió
+        return
+    # Hijo: nuevo session leader
+    os.setsid()
+    # Segundo fork para desvincular terminal
+    pid2 = os.fork()
+    if pid2 > 0:
+        sys.exit(0)
+    # Cerrar fds de terminal
+    for fd in (0, 1, 2):
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+    # Redirigir a /dev/null
+    devnull = os.open("/dev/null", os.O_RDWR)
+    os.dup2(devnull, 0)
+    os.dup2(devnull, 1)
+    os.dup2(devnull, 2)
+    os.close(devnull)
+
+    run_foreground()
+
+
+# ── Main ──────────────────────────────────────────────────────────
+
+def main():
+    if len(sys.argv) > 1:
+        cmd = sys.argv[1]
+        if cmd == "--stop":
+            stop_daemon()
+            return
+        if cmd == "--status":
+            if is_running():
+                print(f"✅ agent-watch corriendo (PID {read_pid()})")
+            else:
+                print("❌ agent-watch no está corriendo")
+            return
+        if cmd == "--daemon":
+            daemonize()
+            return
+
+    run_foreground()
+
+
+if __name__ == "__main__":
+    main()

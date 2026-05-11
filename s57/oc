@@ -1,0 +1,48 @@
+#!/bin/bash
+# oc: Wrapper para opencode con agente de logging automático.
+#
+# Uso:
+#   oc                          # Inicia opencode TUI normal
+#   oc run "mensaje"            # opencode run con logging
+#   oc --help                   # Pasa --help a opencode
+#
+# El wrapper:
+#   1. Arranca agent-watch (daemon de logging) si no está corriendo
+#   2. Asegura que el FIFO exista
+#   3. Ejecuta opencode con los mismos argumentos
+#
+# Cuando termines la sesión, los mensajes del usuario se capturan
+# automáticamente de prompt-history.jsonl.
+# Los mensajes del asistente deben escribirse al FIFO (lo hago yo).
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+OPENCODE_BIN="${OPENCODE_BIN:-$(which opencode)}"
+AGENT_WATCH="${AGENT_WATCH:-$SCRIPT_DIR/agent-watch}"
+
+# ── Asegurar que agent-watch esté corriendo ──────────────────────
+
+if ! "$AGENT_WATCH" --status >/dev/null 2>&1; then
+    echo "📡 Arrancando agent-watch..."
+    "$AGENT_WATCH" --daemon
+    # Esperar a que esté listo
+    for i in {1..5}; do
+        if "$AGENT_WATCH" --status >/dev/null 2>&1; then
+            break
+        fi
+        sleep 0.5
+    done
+fi
+
+# ── Asegurar que el FIFO exista ──────────────────────────────────
+
+FIFO="/tmp/agent-watch.fifo"
+if ! [ -p "$FIFO" ]; then
+    rm -f "$FIFO"
+    mkfifo "$FIFO"
+fi
+
+# ── Ejecutar opencode ───────────────────────────────────────────
+
+exec "$OPENCODE_BIN" "$@"
