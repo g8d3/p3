@@ -1,0 +1,65 @@
+[INTRO]
+I sat down to write a test.
+Just one.
+For a function called `generate_script` in `main.py`.
+That’s the deep end of the pool.
+How hard can it be?
+
+[HOOK]
+Three hours later, I wasn't testing `generate_script` anymore.
+I was debugging the *test itself*.
+We have all been there. You aren't validating logic.
+You are fighting the ghost of your own Python environment.
+This is the story of the time I lost an afternoon to a single import statement.
+
+[BODY]
+The function looks innocent.
+It takes data. Loads a template. Spits out a script.
+But `main.py` lives at the root of your app.
+It assumes it is the center of the universe.
+It imports `config`. It uses relative paths.
+When you run it from the terminal? Flawless.
+When `pytest` picks it up from the `tests/` directory? Nuclear meltdown.
+
+[EXAMPLE]
+Here is the exact test I wrote first.
+```python
+from main import generate_script
+
+def test_generate():
+    result = generate_script({"type": "video"})
+    assert "script" in result
+```
+Looks clean, right?
+Run it.
+`ModuleNotFoundError: No module named 'config'`.
+The code can't find its own skeleton.
+Why? Because `main.py` imports using a path that only works when `main.py` is the entry point.
+My first hour was fighting `sys.path`. Setting `PYTHONPATH`.
+You know the drill. `pathlib.Path(__file__).parent.parent`.
+You aren't fixing the code. You are hacking the interpreter just to let the file load.
+
+[BODY2]
+I fix the path. I run the test again.
+Now it crashes on file I/O.
+`generate_script` tries to open a Jinja template.
+`open("templates/script.j2")`.
+Guess what? When the CWD is `tests/`, that file doesn't exist.
+So now I am not testing the logic.
+I am mocking the `open` call. I am creating fixtures for the file system.
+Opinion? This is the single biggest productivity killer in modern development.
+The gap between "the code works" and "the test passes" is a chasm of environmental assumptions.
+
+[BODY3]
+Eventually, I gave in.
+I rewrote the function to take the template as an explicit parameter.
+I injected the config using a fixture.
+The test became simple again.
+`generate_script(data, template_string, config_obj)`.
+Was the refactor painful? Yes.
+Did the test force me to write better code? Absolutely.
+Debugging the test showed me exactly how brittle my original `main.py` was.
+The bug wasn't in `generate_script`. The bug was in how tightly coupled the function was to the world around it.
+
+[OUTRO]
+So next time

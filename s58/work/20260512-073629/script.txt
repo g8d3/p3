@@ -1,0 +1,68 @@
+[INTRO]
+The internet is a paradox.
+Always connected, yet deeply lonely.
+You find a killer video.
+The first instinct is to share it.
+But sharing a link is a dead end.
+You want to watch *at the same time*.
+Rtwatch is the answer.
+Built on WebRTC.
+Peer-to-peer viewing that actually works.
+
+[HOOK]
+I am extremely picky about my tools.
+If an app asks for my email, I close the tab.
+If it wants a login, I block the site.
+Rtwatch passes the vibe check instantly.
+No signup. No tracking.
+Just a link and a promise.
+The promise is simple: You and your friend see the exact same frame at the exact same time.
+It delivers on that promise flawlessly.
+
+[BODY]
+The secret is WebRTC.
+Real-time communication between browsers.
+It cuts out the corporate middleman completely.
+When you press pause, a signal goes *directly* to your friend's browser.
+No server handshake. No database write. No polling every three seconds.
+Just pure, low-latency action.
+It makes the experience feel intimate.
+Like you are passing the remote control on a real couch.
+This is how technology should feel. Immediate.
+
+[EXAMPLE]
+Paint this picture.
+Friday night.
+Your buddy is in Berlin. You're in Austin.
+You want to watch a terrible 90s action movie on a random streaming site.
+You pull up Rtwatch.
+You drop the direct link to the video.
+That is it.
+The interface is brutally simple.
+You send the generated link to your friend.
+They open it.
+Boom. Synced perfectly.
+No "Can you hear me?" No "Is it playing for you?"
+Just shared cultural chaos in real-time.
+
+[BODY2]
+Why doesn't every app do this?
+Because big platforms don't want you to have direct connections.
+They want you in their walled garden.
+They want to serve you ads.
+They want to data mine your chat history.
+Rtwatch is a political statement disguised as a simple utility.
+It says the internet belongs to the users again.
+It prioritizes human connection over the corporate bottom line.
+That radical subtraction is exactly why I love it.
+
+[BODY3]
+For the developers watching.
+Look at this project.
+It is a masterclass in restraint.
+Solve one problem perfectly.
+Respect the user's privacy obsessively.
+Use the right tool for the job.
+WebRTC is notoriously tricky.
+NAT traversal is a nightmare.
+Rtwatch handles the complexity so you don't have to

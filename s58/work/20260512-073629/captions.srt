@@ -1,0 +1,252 @@
+1
+00:00:00,000 --> 00:00:00,357
+[INTRO]
+
+2
+00:00:00,657 --> 00:00:02,442
+The internet is a paradox.
+
+3
+00:00:02,742 --> 00:00:04,528
+Always connected, yet deeply lonely.
+
+4
+00:00:04,828 --> 00:00:06,614
+You find a killer video.
+
+5
+00:00:06,914 --> 00:00:09,414
+The first instinct is to share it.
+
+6
+00:00:09,714 --> 00:00:12,571
+But sharing a link is a dead end.
+
+7
+00:00:12,871 --> 00:00:15,728
+You want to watch *at the same time*.
+
+8
+00:00:16,028 --> 00:00:17,457
+Rtwatch is the answer.
+
+9
+00:00:17,757 --> 00:00:18,828
+Built on WebRTC.
+
+10
+00:00:19,128 --> 00:00:20,914
+Peer-to-peer viewing that actually works.
+
+11
+00:00:21,214 --> 00:00:21,571
+[HOOK]
+
+12
+00:00:21,871 --> 00:00:24,371
+I am extremely picky about my tools.
+
+13
+00:00:24,671 --> 00:00:28,600
+If an app asks for my email, I close the tab.
+
+14
+00:00:28,899 --> 00:00:32,114
+If it wants a login, I block the site.
+
+15
+00:00:32,414 --> 00:00:34,557
+Rtwatch passes the vibe check instantly.
+
+16
+00:00:34,857 --> 00:00:36,285
+No signup. No tracking.
+
+17
+00:00:36,585 --> 00:00:38,728
+Just a link and a promise.
+
+18
+00:00:39,028 --> 00:00:45,457
+The promise is simple: You and your friend see the exact same frame at the exact same time.
+
+19
+00:00:45,757 --> 00:00:47,899
+It delivers on that promise flawlessly.
+
+20
+00:00:48,199 --> 00:00:48,557
+[BODY]
+
+21
+00:00:48,857 --> 00:00:50,285
+The secret is WebRTC.
+
+22
+00:00:50,585 --> 00:00:52,014
+Real-time communication between browsers.
+
+23
+00:00:52,314 --> 00:00:54,814
+It cuts out the corporate middleman completely.
+
+24
+00:00:55,114 --> 00:00:59,399
+When you press pause, a signal goes *directly* to your friend's browser.
+
+25
+00:00:59,699 --> 00:01:03,628
+No server handshake. No database write. No polling every three seconds.
+
+26
+00:01:03,928 --> 00:01:05,357
+Just pure, low-latency action.
+
+27
+00:01:05,657 --> 00:01:07,799
+It makes the experience feel intimate.
+
+28
+00:01:08,099 --> 00:01:12,028
+Like you are passing the remote control on a real couch.
+
+29
+00:01:12,328 --> 00:01:14,828
+This is how technology should feel. Immediate.
+
+30
+00:01:15,128 --> 00:01:15,485
+[EXAMPLE]
+
+31
+00:01:15,785 --> 00:01:16,857
+Paint this picture.
+
+32
+00:01:17,157 --> 00:01:17,871
+Friday night.
+
+33
+00:01:18,171 --> 00:01:21,028
+Your buddy is in Berlin. You're in Austin.
+
+34
+00:01:21,328 --> 00:01:26,328
+You want to watch a terrible 90s action movie on a random streaming site.
+
+35
+00:01:26,628 --> 00:01:28,057
+You pull up Rtwatch.
+
+36
+00:01:28,357 --> 00:01:31,214
+You drop the direct link to the video.
+
+37
+00:01:31,514 --> 00:01:32,585
+That is it.
+
+38
+00:01:32,885 --> 00:01:34,671
+The interface is brutally simple.
+
+39
+00:01:34,971 --> 00:01:37,828
+You send the generated link to your friend.
+
+40
+00:01:38,128 --> 00:01:39,199
+They open it.
+
+41
+00:01:39,499 --> 00:01:40,571
+Boom. Synced perfectly.
+
+42
+00:01:40,871 --> 00:01:44,799
+No "Can you hear me?" No "Is it playing for you?"
+
+43
+00:01:45,099 --> 00:01:47,242
+Just shared cultural chaos in real-time.
+
+44
+00:01:47,542 --> 00:01:47,899
+[BODY2]
+
+45
+00:01:48,199 --> 00:01:50,342
+Why doesn't every app do this?
+
+46
+00:01:50,642 --> 00:01:54,214
+Because big platforms don't want you to have direct connections.
+
+47
+00:01:54,514 --> 00:01:57,014
+They want you in their walled garden.
+
+48
+00:01:57,314 --> 00:01:59,457
+They want to serve you ads.
+
+49
+00:01:59,757 --> 00:02:02,614
+They want to data mine your chat history.
+
+50
+00:02:02,914 --> 00:02:06,485
+Rtwatch is a political statement disguised as a simple utility.
+
+51
+00:02:06,785 --> 00:02:09,999
+It says the internet belongs to the users again.
+
+52
+00:02:10,299 --> 00:02:13,514
+It prioritizes human connection over the corporate bottom line.
+
+53
+00:02:13,814 --> 00:02:17,028
+That radical subtraction is exactly why I love it.
+
+54
+00:02:17,328 --> 00:02:17,685
+[BODY3]
+
+55
+00:02:17,985 --> 00:02:19,414
+For the developers watching.
+
+56
+00:02:19,714 --> 00:02:21,142
+Look at this project.
+
+57
+00:02:21,442 --> 00:02:23,585
+It is a masterclass in restraint.
+
+58
+00:02:23,885 --> 00:02:25,314
+Solve one problem perfectly.
+
+59
+00:02:25,614 --> 00:02:27,399
+Respect the user's privacy obsessively.
+
+60
+00:02:27,699 --> 00:02:30,199
+Use the right tool for the job.
+
+61
+00:02:30,499 --> 00:02:31,928
+WebRTC is notoriously tricky.
+
+62
+00:02:32,228 --> 00:02:34,014
+NAT traversal is a nightmare.
+
+63
+00:02:34,314 --> 00:02:37,528
+Rtwatch handles the complexity so you don't have to
+

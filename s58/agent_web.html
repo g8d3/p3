@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Agent Web</title>
+<link href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.min.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#1a1a2e;--surface:#16213e;--accent:#0f3460;--text:#e0e0e0;--text2:#a0a0a0;--border:#2a2a4a;--success:#4CAF50;--warn:#FF9800;--danger:#c62828}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+
+/* Login */
+.login-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100dvh;padding:24px}
+.login-screen h1{font-size:24px;margin-bottom:8px}
+.login-screen p{color:var(--text2);margin-bottom:24px;text-align:center}
+.login-screen input{width:100%;max-width:300px;padding:12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:16px;margin-bottom:12px}
+.login-screen button{width:100%;max-width:300px;padding:12px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-size:16px;cursor:pointer}
+.login-screen .error{color:var(--warn);margin-top:8px}
+.login-screen.hidden{display:none!important}
+
+/* App */
+.app{display:none;flex-direction:column;height:100dvh}
+.app.show{display:flex}
+.tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
+.tab{padding:8px 14px;cursor:pointer;color:var(--text2);border-bottom:2px solid transparent;white-space:nowrap;font-size:13px;transition:all .2s}
+.tab.active{color:var(--text);border-bottom-color:var(--accent)}
+.tab .badge{font-size:10px;opacity:.5;margin-left:4px}
+.term-wrap{flex:1;display:none;position:relative;background:#000;min-height:0}
+.term-wrap.active{display:flex}
+.term-wrap #term-contents{width:100%;height:100%}
+
+/* Controls */
+.controls{flex-shrink:0;background:var(--surface);border-top:1px solid var(--border);padding:6px;display:flex;flex-wrap:wrap;gap:4px;overflow-y:auto;max-height:35vh}
+.btn{padding:6px 12px;border-radius:8px;border:none;font-size:12px;cursor:pointer;color:#fff;transition:transform .1s;white-space:nowrap;user-select:none;touch-action:manipulation}
+.btn:active{transform:scale(.95)}
+.btn.recording{animation:pulse .8s infinite}
+@keyframes pulse{0%{opacity:1}50%{opacity:.5}100%{opacity:1}}
+
+/* Bottom */
+.bottom-bar{display:flex;align-items:center;gap:6px;padding:4px 6px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;font-size:11px;color:var(--text2)}
+.bottom-bar input[type=range]{flex:1;min-width:50px;height:4px;accent-color:var(--accent)}
+.bottom-bar .gran-val{min-width:16px;text-align:center}
+.gran-label-s{margin-left:2px;opacity:.6;font-size:10px}
+
+/* Settings */
+.settings-panel{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.85);z-index:100;padding:12px;overflow-y:auto}
+.settings-panel.open{display:block}
+.settings-panel .inner{background:var(--surface);border-radius:12px;padding:16px;max-width:600px;margin:20px auto}
+.settings-panel h3{margin-bottom:8px;font-size:16px}
+.settings-panel label{display:block;margin:8px 0 2px;font-size:12px;color:var(--text2)}
+.settings-panel input,.settings-panel select{width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px}
+.settings-panel textarea{width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;font-family:monospace;min-height:80px}
+.settings-panel .section{margin-bottom:16px}
+.settings-panel .section h4{font-size:13px;margin-bottom:4px;color:var(--text2)}
+.btn-row{display:flex;gap:8px;margin-top:12px}
+.btn-row button{flex:1;padding:10px;border-radius:8px;border:none;cursor:pointer;font-size:14px;color:#fff}
+
+/* Responsive */
+@media(max-width:600px){.btn{font-size:11px;padding:5px 10px}.controls{gap:3px}.tab{font-size:12px;padding:6px 10px}}
+</style>
+</head>
+<body>
+<div class="login-screen" id="loginScreen">
+  <h1>🔐 Agent Web</h1>
+  <p>Ingresa la contraseña para acceder al panel de control multi-agente</p>
+  <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="current-password">
+  <button id="loginBtn">Ingresar</button>
+  <div class="error" id="loginError"></div>
+</div>
+
+<div class="app" id="app">
+  <div class="tabs" id="tabs"></div>
+  <div class="term-container" id="termContainer" style="flex:1;display:flex;flex-direction:column;min-height:0"></div>
+  <div class="controls" id="controls"></div>
+  <div class="bottom-bar">
+    <label>🎤</label>
+    <button class="btn" id="speechBtn" style="background:#555;font-size:16px;padding:2px 10px">🎤</button>
+    <label>Granularidad</label>
+    <input type="range" id="granSlider" min="1" max="5" value="3" step="1">
+    <span class="gran-val" id="granLabel">3</span>
+    <span class="gran-label-s">(1=resumen 5=detalle)</span>
+    <button class="btn" id="settingsBtn" style="background:#555;font-size:16px;padding:2px 10px">⚙️</button>
+  </div>
+</div>
+
+<div class="settings-panel" id="settingsPanel">
+  <div class="inner">
+    <h3>⚙️ Configuración</h3>
+    <div class="section">
+      <h4>Contraseña de acceso</h4>
+      <input type="password" id="settPassword" placeholder="Nueva contraseña (dejar vacío = sin cambios)">
+    </div>
+    <div class="section">
+      <h4>Conexiones SSH</h4>
+      <textarea id="settConnections" rows="4" placeholder='[{"id":"serv1","name":"Mi server","host":"192.168.x.x","user":"root","key_path":"/home/user/.ssh/id_rsa"}]'></textarea>
+      <p style="font-size:11px;color:var(--text2);margin-top:2px">Tipo: "local" para ejecución local, "ssh" para remoto</p>
+    </div>
+    <div class="section">
+      <h4>Agentes</h4>
+      <textarea id="settAgents" rows="4"></textarea>
+    </div>
+    <div class="section">
+      <h4>Botones</h4>
+      <textarea id="settButtons" rows="6"></textarea>
+    </div>
+    <div class="section">
+      <h4>Voz</h4>
+      <select id="settSpeechMode"><option value="auto">Auto (por silencio)</option><option value="push">Push to talk</option></select>
+      <label>Timeout silencio (ms)</label>
+      <input type="number" id="settSilence" min="500" max="10000" step="100">
+    </div>
+    <div class="btn-row">
+      <button id="settingsSave" style="background:var(--accent)">Guardar</button>
+      <button id="settingsClose" style="background:#555">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.min.js"></script>
+<script>
+// ── State ────────────────────────────────────────────────────────────────
+let token = localStorage.getItem('agent_web_token') || '';
+let config = {connections:[],agents:[],buttons:[],speech:{},appearance:{}};
+let terminals = {};
+let sockets = {};
+let currentTab = 0;
+let speechRec = null;
+let isRecording = false;
+let silenceTimer = null;
+
+// ── Auth ──────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const pw = document.getElementById('loginPassword').value;
+  document.getElementById('loginError').textContent = '';
+  try {
+    const r = await fetch('/api/auth', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
+    const data = await r.json();
+    if (data.status === 'ok') {
+      token = data.token;
+      localStorage.setItem('agent_web_token', token);
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('app').classList.add('show');
+      init();
+    } else {
+      document.getElementById('loginError').textContent = data.msg || 'Error';
+    }
+  } catch(e) {
+    document.getElementById('loginError').textContent = 'Error de conexión';
+  }
+}
+
+// ── API ───────────────────────────────────────────────────────────────────
+async function api(path, opts = {}) {
+  const headers = {'X-Auth-Token': token, ...(opts.headers || {})};
+  if (opts.body) headers['Content-Type'] = 'application/json';
+  const r = await fetch(path, {...opts, headers});
+  if (r.status === 401) {
+    document.getElementById('app').classList.remove('show');
+    document.getElementById('loginScreen').classList.remove('hidden');
+    localStorage.removeItem('agent_web_token');
+    throw new Error('Sesión expirada');
+  }
+  return r.json();
+}
+
+async function loadConfig() {
+  try { config = await api('/api/config'); } catch(e) { console.warn(e); }
+}
+
+// ── Terminal ──────────────────────────────────────────────────────────────
+function spawnTerminal(agentId, connId) {
+  const container = document.getElementById('termContainer');
+  const wrap = document.createElement('div');
+  wrap.className = 'term-wrap';
+  wrap.id = 'term-' + agentId;
+  const inner = document.createElement('div');
+  inner.style.cssText = 'width:100%;height:100%';
+  wrap.appendChild(inner);
+  container.appendChild(wrap);
+
+  const term = new Terminal({cursorBlink:true,fontSize:13,theme:{background:'#0a0a15',foreground:'#e0e0e0'},allowTransparency:true});
+  const fit = new FitAddon.FitAddon();
+  term.loadAddon(fit);
+  term.open(inner);
+  setTimeout(() => fit.fit(), 200);
+
+  const wsUrl = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/ws?agent=${agentId}&connection=${connId}&token=${token}`;
+  const ws = new WebSocket(wsUrl);
+  ws.onopen = () => term.write('\x1b[32m▸ Conectado\x1b[0m\r\n');
+  ws.onmessage = e => {
+    try {
+      const msg = JSON.parse(e.data);
+      if (msg.type === 'stdout') term.write(msg.data);
+    } catch(_) {}
+  };
+  ws.onclose = () => term.write('\x1b[31m▸ Desconectado\x1b[0m\r\n');
+
+  term.onData(data => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({action:'stdin', data}));
+    }
+  });
+
+  terminals[agentId] = term;
+  sockets[agentId] = ws;
+
+  new ResizeObserver(() => { try { fit.fit(); } catch(e) {} }).observe(wrap);
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────
+function renderTabs() {
+  const el = document.getElementById('tabs');
+  el.innerHTML = '';
+  (config.agents || []).forEach((a, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (i === 0 ? ' active' : '');
+    const conns = config.connections || [];
+    const conn = conns.find(c => c.id === a.connection);
+    tab.innerHTML = `${a.name || a.id} <span class="badge">${conn ? conn.name : '?'}</span>`;
+    tab.onclick = () => switchTab(i);
+    el.appendChild(tab);
+    spawnTerminal(a.id, a.connection);
+  });
+  switchTab(0);
+}
+
+function switchTab(idx) {
+  currentTab = idx;
+  document.querySelectorAll('.term-wrap').forEach((el, i) => el.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab').forEach((el, i) => el.classList.toggle('active', i === idx));
+}
+
+// ── Buttons ───────────────────────────────────────────────────────────────
+function renderButtons() {
+  const el = document.getElementById('controls');
+  el.innerHTML = '';
+  (config.buttons || []).forEach(b => {
+    const btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.style.background = b.color || '#555';
+    btn.textContent = b.label || b.command;
+    btn.onclick = () => execButton(b);
+    el.appendChild(btn);
+  });
+}
+
+async function execButton(b) {
+  const agent = b.agent || (config.agents || [])[currentTab]?.id;
+  const conn = b.connection || 'local';
+  const ws = sockets[agent];
+  if (ws && ws.readyState === WebSocket.OPEN && b.command !== 'clear') {
+    ws.send(JSON.stringify({action:'stdin', data: b.command + '\n'}));
+  } else if (b.command === 'clear' && terminals[agent]) {
+    terminals[agent].clear();
+  } else {
+    // Ejecutar por REST y mostrar resultado
+    try {
+      const res = await api('/api/exec', {method:'POST',body:JSON.stringify({command:b.command,connection:conn,agent:agent||''})});
+      if (res.output && terminals[agent]) {
+        terminals[agent].write(res.output.replace(/\n/g,'\r\n'));
+      }
+    } catch(e) { console.warn(e); }
+  }
+}
+
+// ── Speech ────────────────────────────────────────────────────────────────
+function initSpeech() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { document.getElementById('speechBtn').textContent = '🎤❌'; return; }
+  speechRec = new SR();
+  speechRec.continuous = true;
+  speechRec.interimResults = true;
+  speechRec.lang = config.speech?.language || 'es-ES';
+  speechRec.onresult = e => {
+    clearTimeout(silenceTimer);
+    let final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++)
+      if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
+    if (final.trim()) {
+      const agent = (config.agents || [])[currentTab];
+      if (agent && sockets[agent.id]?.readyState === WebSocket.OPEN)
+        sockets[agent.id].send(JSON.stringify({action:'stdin', data: final.trim() + '\n'}));
+    }
+    if (config.speech?.mode === 'auto')
+      silenceTimer = setTimeout(() => speechRec?.stop(), config.speech?.silence_timeout_ms || 1500);
+  };
+  speechRec.onerror = () => { isRecording = false; updateSpeechBtn(); };
+}
+
+function toggleSpeech() {
+  if (!speechRec) return;
+  isRecording ? (speechRec.stop(), isRecording = false) : (speechRec.start(), isRecording = true);
+  updateSpeechBtn();
+}
+
+function updateSpeechBtn() {
+  const btn = document.getElementById('speechBtn');
+  btn.textContent = isRecording ? '🔴' : '🎤';
+  btn.classList.toggle('recording', isRecording);
+}
+
+// ── Settings ──────────────────────────────────────────────────────────────
+function openSettings() {
+  document.getElementById('settPassword').value = '';
+  document.getElementById('settConnections').value = JSON.stringify(config.connections || [], null, 2);
+  document.getElementById('settAgents').value = JSON.stringify(config.agents || [], null, 2);
+  document.getElementById('settButtons').value = JSON.stringify(config.buttons || [], null, 2);
+  document.getElementById('settSpeechMode').value = config.speech?.mode || 'auto';
+  document.getElementById('settSilence').value = config.speech?.silence_timeout_ms || 1500;
+  document.getElementById('settingsPanel').classList.add('open');
+}
+
+async function saveSettings() {
+  try {
+    const update = {};
+    if (document.getElementById('settPassword').value)
+      update.web_password = document.getElementById('settPassword').value;
+    update.connections = JSON.parse(document.getElementById('settConnections').value);
+    update.agents = JSON.parse(document.getElementById('settAgents').value);
+    update.buttons = JSON.parse(document.getElementById('settButtons').value);
+    update.speech = {mode: document.getElementById('settSpeechMode').value, silence_timeout_ms: parseInt(document.getElementById('settSilence').value), language: config.speech?.language || 'es-ES'};
+    await api('/api/config', {method:'POST', body:JSON.stringify(update)});
+    alert('✅ Config guardada (recarga la página)');
+    closeSettings();
+  } catch(e) { alert('❌ ' + e.message); }
+}
+
+function closeSettings() {
+  document.getElementById('settingsPanel').classList.remove('open');
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+async function init() {
+  await loadConfig();
+  renderTabs();
+  renderButtons();
+  initSpeech();
+  document.getElementById('speechBtn').onclick = toggleSpeech;
+  document.getElementById('settingsBtn').onclick = openSettings;
+  document.getElementById('settingsSave').onclick = saveSettings;
+  document.getElementById('settingsClose').onclick = closeSettings;
+  setInterval(() => {
+    Object.values(sockets).forEach(ws => {
+      if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({action:'ping'}));
+    });
+  }, 30000);
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────
+document.getElementById('loginBtn').onclick = doLogin;
+document.getElementById('loginPassword').onkeydown = e => { if (e.key === 'Enter') doLogin(); };
+
+// Auto-login si token guardado
+if (token) {
+  (async () => {
+    try {
+      config = await api('/api/config');
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('app').classList.add('show');
+      init();
+    } catch(e) { /* token inválido, mostrar login */ }
+  })();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+[INTRO] Google made a new AI that can write computer code.
+[HOOK] This AI is so good, it writes code better than people do.
+[BODY] The AI learns from lots of code and can fix bugs or make new programs.
+[EXAMPLE] For example, it can create a game where you guess a number.
+[BODY2] Humans can write code too, but this AI does it faster and with fewer mistakes.
+[BODY3] This could help people build apps and websites more easily.
+[OUTRO] Technology like this is changing how we create things.
+[CTA] Try learning to code yourself to see how awesome it is!

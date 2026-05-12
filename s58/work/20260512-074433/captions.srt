@@ -1,0 +1,32 @@
+1
+00:00:00,000 --> 00:00:05,357
+[INTRO] So something big happened involving HN: A HN post with negative points – how?.
+
+2
+00:00:05,657 --> 00:00:09,585
+[HOOK] Here's the context you need to understand why it matters.
+
+3
+00:00:09,885 --> 00:00:18,100
+[BODY] The details are still emerging but the implications are clear. The numbers don't lie — and they tell a pretty clear story.
+
+4
+00:00:18,400 --> 00:00:24,471
+[EXAMPLE] According to the report, adoption rates have tripled in Q1. That's not incremental. That's a shift.
+
+5
+00:00:24,771 --> 00:00:31,200
+[BODY2] Industry experts are already weighing in on what this means. The early movers are already pulling ahead.
+
+6
+00:00:31,500 --> 00:00:37,214
+[BODY3] Early reactions range from optimistic to skeptical. The ones who wait will be playing catch-up.
+
+7
+00:00:37,514 --> 00:00:42,157
+[OUTRO] Here's the bottom line: pay attention to this space. It's moving fast.
+
+8
+00:00:42,457 --> 00:00:45,671
+[CTA] This has been vuos. Stay informed. Stay ahead.
+

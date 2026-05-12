@@ -1,0 +1,32 @@
+1
+00:00:00,000 --> 00:00:03,928
+[INTRO] So you want to talk about Test fixes and cleanup.
+
+2
+00:00:04,228 --> 00:00:08,871
+[HOOK] Here's what nobody tells you. The tools got cheaper, the barriers lower.
+
+3
+00:00:09,171 --> 00:00:13,814
+[BODY] First, the obvious stuff. But the real insight? Everything changed last year.
+
+4
+00:00:14,114 --> 00:00:18,042
+[EXAMPLE] Costs dropped 80% while quality doubled. That's a paradigm shift.
+
+5
+00:00:18,342 --> 00:00:22,271
+[BODY2] Here's the catch. Most people optimize for the wrong metrics.
+
+6
+00:00:22,571 --> 00:00:25,428
+[BODY3] The winners automated everything except the creativity.
+
+7
+00:00:25,728 --> 00:00:30,014
+[OUTRO] Stop waiting for permission. Pick one thing, go deep, ship it.
+
+8
+00:00:30,314 --> 00:00:33,885
+[CTA] Follow for more unfiltered takes. See you next week.
+

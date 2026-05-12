@@ -1,0 +1,136 @@
+1
+00:00:00,000 --> 00:00:00,357
+[INTRO]
+
+2
+00:00:00,657 --> 00:00:02,085
+You open the laptop.
+
+3
+00:00:02,385 --> 00:00:03,457
+The screen glows.
+
+4
+00:00:03,757 --> 00:00:05,185
+Pure logic. Clean. Instant.
+
+5
+00:00:05,485 --> 00:00:07,628
+You write five lines of code.
+
+6
+00:00:07,928 --> 00:00:10,428
+It works perfectly on the first try.
+
+7
+00:00:10,728 --> 00:00:12,514
+You feel like a wizard.
+
+8
+00:00:12,814 --> 00:00:16,385
+Then you close the laptop and reach for the iron.
+
+9
+00:00:16,685 --> 00:00:17,757
+The spell breaks.
+
+10
+00:00:18,057 --> 00:00:18,414
+[HOOK]
+
+11
+00:00:18,714 --> 00:00:22,285
+Everyone thinks you hate soldering because you burn your thumb.
+
+12
+00:00:22,585 --> 00:00:24,371
+Or the joint is cold.
+
+13
+00:00:24,671 --> 00:00:26,099
+Or the pad lifts.
+
+14
+00:00:26,399 --> 00:00:26,757
+No.
+
+15
+00:00:27,057 --> 00:00:28,485
+You hate it existentially.
+
+16
+00:00:28,785 --> 00:00:31,642
+Code exists in a Platonic realm of ideas.
+
+17
+00:00:31,942 --> 00:00:35,157
+Soldering is a negotiation with raw, sweating, awkward physics.
+
+18
+00:00:35,457 --> 00:00:38,671
+It reminds you that making is not just thinking.
+
+19
+00:00:38,971 --> 00:00:40,399
+It is a fight.
+
+20
+00:00:40,699 --> 00:00:41,057
+[BODY]
+
+21
+00:00:41,357 --> 00:00:44,214
+That fight is the source of the hate.
+
+22
+00:00:44,514 --> 00:00:48,442
+In software, every mistake is a thought you can take back.
+
+23
+00:00:48,742 --> 00:00:49,814
+Ctrl+Z. Instant grace.
+
+24
+00:00:50,114 --> 00:00:52,971
+In hardware, the solder wicks where it wants.
+
+25
+00:00:53,271 --> 00:00:54,342
+The flux spits.
+
+26
+00:00:54,642 --> 00:00:55,714
+The joint solidifies.
+
+27
+00:00:56,014 --> 00:00:59,585
+You look at it and know: this is permanent now.
+
+28
+00:00:59,885 --> 00:01:01,671
+That permanence is the anxiety.
+
+29
+00:01:01,971 --> 00:01:07,685
+The fear of the irreversible is what you actually smell when the smoke hits the air.
+
+30
+00:01:07,985 --> 00:01:08,342
+[EXAMPLE]
+
+31
+00:01:08,642 --> 00:01:10,428
+I built a split keyboard.
+
+32
+00:01:10,728 --> 00:01:12,871
+The layout code was a symphony.
+
+33
+00:01:13,171 --> 00:01:14,600
+Perfect layers. Perfect combos.
+
+34
+00:01:14,900 --> 00:01:17,042
+The PCBs arrived. Thin. Green. Fragile.
+

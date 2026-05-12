@@ -1,0 +1,60 @@
+{
+  "web_password": "admin",
+  "connections": [
+    {
+      "id": "local",
+      "name": "Local (este servidor)",
+      "host": "localhost",
+      "port": 22,
+      "user": "vuos",
+      "key_path": "",
+      "type": "local"
+    },
+    {
+      "id": "server1",
+      "name": "Servidor remoto",
+      "host": "192.168.0.31",
+      "port": 22,
+      "user": "vuos",
+      "key_path": "/home/vuos/.ssh/id_rsa",
+      "type": "ssh"
+    }
+  ],
+  "agents": [
+    {
+      "id": "creator",
+      "name": "Creator",
+      "connection": "local",
+      "model": "deepseek-v4-flash",
+      "color": "#4CAF50",
+      "workdir": "/home/vuos/code/p3/s58",
+      "startup": "cd /home/vuos/code/p3/s58 && export OPENCODE_GO_MODEL=deepseek-v4-flash && opencode -m opencode-go/deepseek-v4-flash"
+    },
+    {
+      "id": "critic",
+      "name": "Critic",
+      "connection": "local",
+      "model": "qwen3.6-plus",
+      "color": "#FF9800",
+      "workdir": "/home/vuos/code/p3/s58",
+      "startup": "cd /home/vuos/code/p3/s58 && export OPENCODE_GO_MODEL=qwen3.6-plus && opencode -m opencode-go/qwen3.6-plus"
+    }
+  ],
+  "buttons": [
+    {"label": "🎬 Generar noticia", "command": "cd /home/vuos/code/p3/s58 && python3 -B pipeline.py --news --skip-upload", "connection": "local", "agent": "creator", "color": "#4CAF50"},
+    {"label": "📝 Ver script", "command": "ls -dt /home/vuos/code/p3/s58/work/2* | head -1 | xargs -I{} cat {}/script.txt", "connection": "local", "agent": "creator", "color": "#2196F3"},
+    {"label": "🔍 Revisar", "command": "cd /home/vuos/code/p3/s58 && python3 -B produce.py --no-review --skip-upload", "connection": "local", "agent": "critic", "color": "#FF9800"},
+    {"label": "📊 Review", "command": "ls -dt /home/vuos/code/p3/s58/work/2* | head -1 | xargs -I{} cat {}/review.txt", "connection": "local", "agent": "critic", "color": "#9C27B0"},
+    {"label": "🧹 Limpiar pantalla", "command": "clear", "connection": "local", "color": "#607D8B"}
+  ],
+  "speech": {
+    "mode": "auto",
+    "silence_timeout_ms": 1500,
+    "language": "es-ES"
+  },
+  "appearance": {
+    "theme": "dark",
+    "show_timestamps": true,
+    "max_log_lines": 1000
+  }
+}

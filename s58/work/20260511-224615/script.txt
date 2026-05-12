@@ -1,0 +1,8 @@
+[INTRO] So you want to talk about Test fixes and cleanup.
+[HOOK] Here's what nobody tells you. The tools got cheaper, the barriers lower.
+[BODY] First, the obvious stuff. But the real insight? Everything changed last year.
+[EXAMPLE] Costs dropped 80% while quality doubled. That's a paradigm shift.
+[BODY2] Here's the catch. Most people optimize for the wrong metrics.
+[BODY3] The winners automated everything except the creativity.
+[OUTRO] Stop waiting for permission. Pick one thing, go deep, ship it.
+[CTA] Follow for more unfiltered takes. See you next week.

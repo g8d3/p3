@@ -1,0 +1,49 @@
+[INTRO]
+Most people aren’t testing their models.
+They are vibing them.
+That isn’t engineering, it’s hoping.
+You need a full two-model test via produce.
+
+[HOOK]
+Vibe checks are a dead man walking.
+You can’t ship a product on “feels good.”
+A two-model test is a duel.
+Your production data is the referee.
+
+[BODY]
+This isn’t a cherry-picked demo.
+You take the incumbent model and the challenger.
+You fire the exact same prompts at both.
+Then you judge the outputs.
+
+[EXAMPLE]
+Say you run an e-commerce bot.
+Model A is cheap and fast.
+Model B is expensive and smart.
+You grab 500 real refund tickets from prod.
+You don’t guess which is better. You score them.
+Hallucinations. Tone. Resolution rate.
+The winner shows up instantly.
+
+[BODY2]
+“Via produce” is the non-negotiable part.
+Synthetic data is a sterile lab.
+Your users are a mosh pit.
+Test the models in the mosh pit.
+If they survive production, they survive anything.
+
+[BODY3]
+This eliminates the debate.
+“I like Model A better.”
+Who cares?
+The data on your actual user distribution doesn’t lie.
+Vibes are subjective. Prod data is objective.
+
+[OUTRO]
+Stop guessing.
+Stop trusting the hype cycle.
+A full two-model test on your own produce is the only way to ship faster.
+
+[CTA]
+Grab your production logs today.
+Run the eval. Let the data win.

@@ -1,0 +1,304 @@
+1
+00:00:00,000 --> 00:00:00,357
+[INTRO]
+
+2
+00:00:00,657 --> 00:00:01,371
+Hey everyone.
+
+3
+00:00:01,671 --> 00:00:04,528
+I’ve been obsessed with game audio for years.
+
+4
+00:00:04,828 --> 00:00:06,971
+The one thing that breaks immersion?
+
+5
+00:00:07,271 --> 00:00:08,342
+A robot voice.
+
+6
+00:00:08,642 --> 00:00:11,500
+Or parroting the same line over and over.
+
+7
+00:00:11,799 --> 00:00:12,514
+Enter Inworld.
+
+8
+00:00:12,814 --> 00:00:15,671
+They just changed the rules for NPC dialogue.
+
+9
+00:00:15,971 --> 00:00:16,328
+[HOOK]
+
+10
+00:00:16,628 --> 00:00:19,128
+They shipped a massive TTS integration update.
+
+11
+00:00:19,428 --> 00:00:21,571
+I spent the weekend torturing it.
+
+12
+00:00:21,871 --> 00:00:22,942
+Complex emotions? Check.
+
+13
+00:00:23,242 --> 00:00:24,314
+Fast quips? Check.
+
+14
+00:00:24,614 --> 00:00:27,471
+Making an NPC whisper a threat? Weird check.
+
+15
+00:00:27,771 --> 00:00:29,199
+The result is impressive.
+
+16
+00:00:29,499 --> 00:00:31,999
+But it comes with a massive asterisk.
+
+17
+00:00:32,299 --> 00:00:32,657
+[BODY]
+
+18
+00:00:32,957 --> 00:00:34,385
+Let’s talk architecture first.
+
+19
+00:00:34,685 --> 00:00:36,471
+Inworld has a character brain.
+
+20
+00:00:36,771 --> 00:00:38,557
+That brain tracks the conversation.
+
+21
+00:00:38,857 --> 00:00:42,071
+It knows if the NPC is losing an argument.
+
+22
+00:00:42,371 --> 00:00:45,228
+It knows if the player is being rude.
+
+23
+00:00:45,528 --> 00:00:49,100
+When you hit “speak”, the brain sends a data bundle.
+
+24
+00:00:49,400 --> 00:00:51,900
+Text + Emotion + Intent + Style.
+
+25
+00:00:52,200 --> 00:00:54,342
+Standard TTS just reads the sentence.
+
+26
+00:00:54,642 --> 00:00:56,071
+Inworld TTS *performs* it.
+
+27
+00:00:56,371 --> 00:00:59,942
+This is the single biggest leap in NPC dialogue tech.
+
+28
+00:01:00,242 --> 00:01:00,600
+[EXAMPLE]
+
+29
+00:01:00,900 --> 00:01:02,328
+Scenario: A tavern brawl.
+
+30
+00:01:02,628 --> 00:01:04,057
+NPC: The nervous bartender.
+
+31
+00:01:04,357 --> 00:01:05,785
+Setup 1: Standard TTS.
+
+32
+00:01:06,085 --> 00:01:09,657
+Input: “Hey! Take it outside before I call the guards!”
+
+33
+00:01:09,957 --> 00:01:11,742
+Output: Clean. Slightly annoyed. Flat.
+
+34
+00:01:12,042 --> 00:01:13,471
+Setup 2: Inworld TTS.
+
+35
+00:01:13,771 --> 00:01:16,628
+Backstory: Ex-adventurer. Hates violence. Scared of a lawsuit.
+
+36
+00:01:16,928 --> 00:01:19,428
+Context: The player threw the first punch.
+
+37
+00:01:19,728 --> 00:01:22,942
+Response: *Voice raises an octave.* “HEY! Knock it off!”
+
+38
+00:01:23,242 --> 00:01:25,742
+*Voice drops, trembles slightly.* “…Take it outside.”
+
+39
+00:01:26,042 --> 00:01:29,257
+*Frustrated exhale.* “Before I… before I call the guards.”
+
+40
+00:01:29,557 --> 00:01:32,057
+It didn’t read the line. It *reacted*.
+
+41
+00:01:32,357 --> 00:01:34,500
+The TTS engine applied dynamic prosody.
+
+42
+00:01:34,799 --> 00:01:36,228
+It changed the rhythm.
+
+43
+00:01:36,528 --> 00:01:38,314
+This is the secret sauce.
+
+44
+00:01:38,614 --> 00:01:38,971
+[BODY2]
+
+45
+00:01:39,271 --> 00:01:40,342
+Let’s talk practicalities.
+
+46
+00:01:40,642 --> 00:01:42,785
+Latency is the killer of conversation.
+
+47
+00:01:43,085 --> 00:01:45,228
+Lowest latency mode? Sub 500ms. Instant.
+
+48
+00:01:45,528 --> 00:01:47,671
+High quality mode? A bit heavier.
+
+49
+00:01:47,971 --> 00:01:50,114
+The real magic is emotional mapping.
+
+50
+00:01:50,414 --> 00:01:52,557
+You can define parameters. “Anger: High.”
+
+51
+00:01:52,857 --> 00:01:55,357
+Or you can let the brain decide.
+
+52
+00:01:55,657 --> 00:01:59,585
+I found letting the brain decide gave the most natural results.
+
+53
+00:01:59,885 --> 00:02:02,028
+It doesn’t scream every angry line.
+
+54
+00:02:02,328 --> 00:02:04,471
+It gets quiet. It gets scary.
+
+55
+00:02:04,771 --> 00:02:06,199
+This is intelligent audio.
+
+56
+00:02:06,499 --> 00:02:06,857
+[BODY3]
+
+57
+00:02:07,157 --> 00:02:08,228
+Okay. Opinion time.
+
+58
+00:02:08,528 --> 00:02:11,028
+Is this the best raw TTS engine?
+
+59
+00:02:11,328 --> 00:02:13,828
+ElevenLabs still rules for pure voice cloning.
+
+60
+00:02:14,128 --> 00:02:16,271
+PlayHT still wins for voice variety.
+
+61
+00:02:16,571 --> 00:02:20,142
+But if you need a character that *lives and breathes*?
+
+62
+00:02:20,442 --> 00:02:21,871
+The gap is enormous.
+
+63
+00:02:22,171 --> 00:02:23,957
+Inworld wins by a landslide.
+
+64
+00:02:24,257 --> 00:02:26,399
+The trade off is ecosystem lock-in.
+
+65
+00:02:26,699 --> 00:02:29,199
+You cannot buy the voice engine standalone.
+
+66
+00:02:29,500 --> 00:02:31,642
+You buy the whole character suite.
+
+67
+00:02:31,942 --> 00:02:33,728
+This is perfect for games.
+
+68
+00:02:34,028 --> 00:02:36,528
+This is restrictive for animatics or ads.
+
+69
+00:02:36,828 --> 00:02:38,257
+Know your use case.
+
+70
+00:02:38,557 --> 00:02:38,914
+[OUTRO]
+
+71
+00:02:39,214 --> 00:02:42,785
+I believe the next generation of RPGs will use this.
+
+72
+00:02:43,085 --> 00:02:46,300
+Baldur’s Gate 4? Mix this with a dialogue tree.
+
+73
+00:02:46,599 --> 00:02:48,385
+Infinite variety. Real emotional payoff.
+
+74
+00:02:48,685 --> 00:02:51,542
+The tech is mature enough to build on.
+
+75
+00:02:51,842 --> 00:02:53,985
+I am genuinely excited about this.
+
+76
+00:02:54,285 --> 00:02:54,642
+[CTA
+

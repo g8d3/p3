@@ -1,0 +1,32 @@
+1
+00:00:00,000 --> 00:00:03,379
+Google made a new AI that can write computer code.
+
+2
+00:00:03,679 --> 00:00:08,439
+This AI is so good, it writes code better than people do.
+
+3
+00:00:08,739 --> 00:00:13,879
+The AI learns from lots of code and can fix bugs or make new programs.
+
+4
+00:00:14,179 --> 00:00:17,179
+For example, it can create a game where you guess a number.
+
+5
+00:00:17,479 --> 00:00:23,839
+Humans can write code too, but this AI does it faster and with fewer mistakes.
+
+6
+00:00:24,139 --> 00:00:27,839
+This could help people build apps and websites more easily.
+
+7
+00:00:28,139 --> 00:00:31,959
+Technology like this is changing how we create things.
+
+8
+00:00:32,259 --> 00:00:35,939
+Try learning to code yourself to see how awesome it is!
+

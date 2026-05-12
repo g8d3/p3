@@ -1,0 +1,37 @@
+[INTRO]
+You open the laptop.
+The screen glows.
+Pure logic. Clean. Instant.
+You write five lines of code.
+It works perfectly on the first try.
+You feel like a wizard.
+Then you close the laptop and reach for the iron.
+The spell breaks.
+
+[HOOK]
+Everyone thinks you hate soldering because you burn your thumb.
+Or the joint is cold.
+Or the pad lifts.
+No.
+You hate it existentially.
+Code exists in a Platonic realm of ideas.
+Soldering is a negotiation with raw, sweating, awkward physics.
+It reminds you that making is not just thinking.
+It is a fight.
+
+[BODY]
+That fight is the source of the hate.
+In software, every mistake is a thought you can take back.
+Ctrl+Z. Instant grace.
+In hardware, the solder wicks where it wants.
+The flux spits.
+The joint solidifies.
+You look at it and know: this is permanent now.
+That permanence is the anxiety.
+The fear of the irreversible is what you actually smell when the smoke hits the air.
+
+[EXAMPLE]
+I built a split keyboard.
+The layout code was a symphony.
+Perfect layers. Perfect combos.
+The PCBs arrived. Thin. Green. Fragile.

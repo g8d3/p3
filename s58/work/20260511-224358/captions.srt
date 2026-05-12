@@ -1,0 +1,32 @@
+1
+00:00:00,000 --> 00:00:07,142
+[INTRO] So you want to talk about Govee’s new portable smart lamp is on sale for the first time .
+
+2
+00:00:07,442 --> 00:00:12,085
+[HOOK] Here's what nobody tells you. The tools got cheaper, the barriers lower.
+
+3
+00:00:12,385 --> 00:00:17,028
+[BODY] First, the obvious stuff. But the real insight? Everything changed last year.
+
+4
+00:00:17,328 --> 00:00:21,257
+[EXAMPLE] Costs dropped 80% while quality doubled. That's a paradigm shift.
+
+5
+00:00:21,557 --> 00:00:25,485
+[BODY2] Here's the catch. Most people optimize for the wrong metrics.
+
+6
+00:00:25,785 --> 00:00:28,642
+[BODY3] The winners automated everything except the creativity.
+
+7
+00:00:28,942 --> 00:00:33,228
+[OUTRO] Stop waiting for permission. Pick one thing, go deep, ship it.
+
+8
+00:00:33,528 --> 00:00:37,099
+[CTA] Follow for more unfiltered takes. See you next week.
+

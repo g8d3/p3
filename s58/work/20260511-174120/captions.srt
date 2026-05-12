@@ -1,0 +1,232 @@
+1
+00:00:00,000 --> 00:00:00,357
+[INTRO]
+
+2
+00:00:00,657 --> 00:00:03,157
+I sat down to write a test.
+
+3
+00:00:03,457 --> 00:00:04,171
+Just one.
+
+4
+00:00:04,471 --> 00:00:06,971
+For a function called `generate_script` in `main.py`.
+
+5
+00:00:07,271 --> 00:00:09,771
+That’s the deep end of the pool.
+
+6
+00:00:10,071 --> 00:00:11,857
+How hard can it be?
+
+7
+00:00:12,157 --> 00:00:12,514
+[HOOK]
+
+8
+00:00:12,814 --> 00:00:15,671
+Three hours later, I wasn't testing `generate_script` anymore.
+
+9
+00:00:15,971 --> 00:00:18,114
+I was debugging the *test itself*.
+
+10
+00:00:18,414 --> 00:00:21,628
+We have all been there. You aren't validating logic.
+
+11
+00:00:21,928 --> 00:00:25,499
+You are fighting the ghost of your own Python environment.
+
+12
+00:00:25,799 --> 00:00:31,514
+This is the story of the time I lost an afternoon to a single import statement.
+
+13
+00:00:31,814 --> 00:00:32,171
+[BODY]
+
+14
+00:00:32,471 --> 00:00:33,899
+The function looks innocent.
+
+15
+00:00:34,199 --> 00:00:37,771
+It takes data. Loads a template. Spits out a script.
+
+16
+00:00:38,071 --> 00:00:41,285
+But `main.py` lives at the root of your app.
+
+17
+00:00:41,585 --> 00:00:44,799
+It assumes it is the center of the universe.
+
+18
+00:00:45,099 --> 00:00:47,599
+It imports `config`. It uses relative paths.
+
+19
+00:00:47,899 --> 00:00:50,757
+When you run it from the terminal? Flawless.
+
+20
+00:00:51,057 --> 00:00:54,985
+When `pytest` picks it up from the `tests/` directory? Nuclear meltdown.
+
+21
+00:00:55,285 --> 00:00:55,642
+[EXAMPLE]
+
+22
+00:00:55,942 --> 00:00:58,799
+Here is the exact test I wrote first.
+
+23
+00:00:59,099 --> 00:00:59,457
+```python
+
+24
+00:00:59,757 --> 00:01:01,185
+from main import generate_script
+
+25
+00:01:01,485 --> 00:01:02,199
+def test_generate():
+
+26
+00:01:02,499 --> 00:01:03,928
+result = generate_script({"type": "video"})
+
+27
+00:01:04,228 --> 00:01:05,657
+assert "script" in result
+
+28
+00:01:05,957 --> 00:01:06,314
+```
+
+29
+00:01:06,614 --> 00:01:07,685
+Looks clean, right?
+
+30
+00:01:07,985 --> 00:01:08,699
+Run it.
+
+31
+00:01:09,000 --> 00:01:10,785
+`ModuleNotFoundError: No module named 'config'`.
+
+32
+00:01:11,085 --> 00:01:13,585
+The code can't find its own skeleton.
+
+33
+00:01:13,885 --> 00:01:19,599
+Why? Because `main.py` imports using a path that only works when `main.py` is the entry point.
+
+34
+00:01:19,900 --> 00:01:22,757
+My first hour was fighting `sys.path`. Setting `PYTHONPATH`.
+
+35
+00:01:23,057 --> 00:01:24,842
+You know the drill. `pathlib.Path(__file__).parent.parent`.
+
+36
+00:01:25,142 --> 00:01:30,857
+You aren't fixing the code. You are hacking the interpreter just to let the file load.
+
+37
+00:01:31,157 --> 00:01:31,514
+[BODY2]
+
+38
+00:01:31,814 --> 00:01:35,028
+I fix the path. I run the test again.
+
+39
+00:01:35,328 --> 00:01:37,471
+Now it crashes on file I/O.
+
+40
+00:01:37,771 --> 00:01:40,271
+`generate_script` tries to open a Jinja template.
+
+41
+00:01:40,571 --> 00:01:40,928
+`open("templates/script.j2")`.
+
+42
+00:01:41,228 --> 00:01:45,157
+Guess what? When the CWD is `tests/`, that file doesn't exist.
+
+43
+00:01:45,457 --> 00:01:48,314
+So now I am not testing the logic.
+
+44
+00:01:48,614 --> 00:01:53,614
+I am mocking the `open` call. I am creating fixtures for the file system.
+
+45
+00:01:53,914 --> 00:01:57,842
+Opinion? This is the single biggest productivity killer in modern development.
+
+46
+00:01:58,142 --> 00:02:03,857
+The gap between "the code works" and "the test passes" is a chasm of environmental assumptions.
+
+47
+00:02:04,157 --> 00:02:04,514
+[BODY3]
+
+48
+00:02:04,814 --> 00:02:06,242
+Eventually, I gave in.
+
+49
+00:02:06,542 --> 00:02:10,828
+I rewrote the function to take the template as an explicit parameter.
+
+50
+00:02:11,128 --> 00:02:13,628
+I injected the config using a fixture.
+
+51
+00:02:13,928 --> 00:02:15,714
+The test became simple again.
+
+52
+00:02:16,014 --> 00:02:17,085
+`generate_script(data, template_string, config_obj)`.
+
+53
+00:02:17,385 --> 00:02:19,171
+Was the refactor painful? Yes.
+
+54
+00:02:19,471 --> 00:02:23,042
+Did the test force me to write better code? Absolutely.
+
+55
+00:02:23,342 --> 00:02:27,628
+Debugging the test showed me exactly how brittle my original `main.py` was.
+
+56
+00:02:27,928 --> 00:02:35,071
+The bug wasn't in `generate_script`. The bug was in how tightly coupled the function was to the world around it.
+
+57
+00:02:35,371 --> 00:02:35,728
+[OUTRO]
+
+58
+00:02:36,028 --> 00:02:37,100
+So next time
+

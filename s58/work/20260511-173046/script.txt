@@ -1,0 +1,83 @@
+[INTRO]
+Hey everyone.
+I’ve been obsessed with game audio for years.
+The one thing that breaks immersion?
+A robot voice.
+Or parroting the same line over and over.
+Enter Inworld.
+They just changed the rules for NPC dialogue.
+
+[HOOK]
+They shipped a massive TTS integration update.
+I spent the weekend torturing it.
+Complex emotions? Check.
+Fast quips? Check.
+Making an NPC whisper a threat? Weird check.
+The result is impressive.
+But it comes with a massive asterisk.
+
+[BODY]
+Let’s talk architecture first.
+Inworld has a character brain.
+That brain tracks the conversation.
+It knows if the NPC is losing an argument.
+It knows if the player is being rude.
+When you hit “speak”, the brain sends a data bundle.
+Text + Emotion + Intent + Style.
+Standard TTS just reads the sentence.
+Inworld TTS *performs* it.
+This is the single biggest leap in NPC dialogue tech.
+
+[EXAMPLE]
+Scenario: A tavern brawl.
+NPC: The nervous bartender.
+Setup 1: Standard TTS.
+Input: “Hey! Take it outside before I call the guards!”
+Output: Clean. Slightly annoyed. Flat.
+Setup 2: Inworld TTS.
+Backstory: Ex-adventurer. Hates violence. Scared of a lawsuit.
+Context: The player threw the first punch.
+Response: *Voice raises an octave.* “HEY! Knock it off!”
+*Voice drops, trembles slightly.* “…Take it outside.”
+*Frustrated exhale.* “Before I… before I call the guards.”
+It didn’t read the line. It *reacted*.
+The TTS engine applied dynamic prosody.
+It changed the rhythm.
+This is the secret sauce.
+
+[BODY2]
+Let’s talk practicalities.
+Latency is the killer of conversation.
+Lowest latency mode? Sub 500ms. Instant.
+High quality mode? A bit heavier.
+The real magic is emotional mapping.
+You can define parameters. “Anger: High.”
+Or you can let the brain decide.
+I found letting the brain decide gave the most natural results.
+It doesn’t scream every angry line.
+It gets quiet. It gets scary.
+This is intelligent audio.
+
+[BODY3]
+Okay. Opinion time.
+Is this the best raw TTS engine?
+ElevenLabs still rules for pure voice cloning.
+PlayHT still wins for voice variety.
+But if you need a character that *lives and breathes*?
+The gap is enormous.
+Inworld wins by a landslide.
+The trade off is ecosystem lock-in.
+You cannot buy the voice engine standalone.
+You buy the whole character suite.
+This is perfect for games.
+This is restrictive for animatics or ads.
+Know your use case.
+
+[OUTRO]
+I believe the next generation of RPGs will use this.
+Baldur’s Gate 4? Mix this with a dialogue tree.
+Infinite variety. Real emotional payoff.
+The tech is mature enough to build on.
+I am genuinely excited about this.
+
+[CTA
