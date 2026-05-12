@@ -1,0 +1,167 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0f0f1a;
+  --surface: #1a1a2e;
+  --surface2: #252540;
+  --border: #333355;
+  --text: #e0e0f0;
+  --text2: #8888aa;
+  --accent: #6c63ff;
+  --accent2: #5a52e0;
+  --danger: #ff4757;
+  --success: #2ed573;
+  --radius: 10px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ─── Loading ─────────────────────────────────────────────────── */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 1rem;
+}
+.loading h1 { font-size: 2rem; color: var(--accent); }
+.loading p  { color: var(--text2); }
+
+/* ─── App layout ───────────────────────────────────────────────── */
+.app { max-width: 1100px; margin: 0 auto; padding: 1rem; }
+
+/* ─── Header ───────────────────────────────────────────────────── */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background: var(--surface);
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+}
+.header-left  { display: flex; align-items: center; gap: 1rem; }
+.header-left h1 { font-size: 1.25rem; color: var(--accent); }
+.header-right { display: flex; align-items: center; gap: 0.75rem; }
+.status { font-size: 0.8rem; color: var(--text2); }
+.status.connected { color: var(--success); }
+.identity {
+  font-family: monospace; font-size: 0.75rem;
+  color: var(--text2); background: var(--surface2);
+  padding: 0.25rem 0.5rem; border-radius: 4px;
+}
+
+/* ─── Toast ────────────────────────────────────────────────────── */
+.toast {
+  position: fixed; top: 1rem; right: 1rem;
+  background: var(--accent); color: #fff;
+  padding: 0.6rem 1.2rem; border-radius: var(--radius);
+  z-index: 999; font-size: 0.9rem;
+  animation: fadeIn 0.2s;
+}
+
+/* ─── Buttons ──────────────────────────────────────────────────── */
+button {
+  background: var(--accent); color: #fff; border: none;
+  padding: 0.5rem 1rem; border-radius: 6px;
+  cursor: pointer; font-size: 0.85rem;
+  transition: background 0.15s;
+}
+button:hover { background: var(--accent2); }
+button.danger { background: var(--danger); }
+button.danger:hover { background: #e8394a; }
+button.btn-small { padding: 0.3rem 0.6rem; font-size: 0.75rem; }
+
+/* ─── Sections ─────────────────────────────────────────────────── */
+.section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin: 1.5rem 0 1rem;
+}
+.section-header h2 { font-size: 1.15rem; color: var(--text); }
+.empty { color: var(--text2); padding: 2rem 0; text-align: center; }
+
+/* ─── Model grid / cards ───────────────────────────────────────── */
+.model-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem;
+  transition: border-color 0.15s;
+}
+.card:hover { border-color: var(--accent); }
+.card-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0.5rem;
+}
+.card-header strong { font-size: 1rem; }
+.vis-badge {
+  font-size: 0.7rem; background: var(--surface2);
+  padding: 0.15rem 0.5rem; border-radius: 4px; color: var(--text2);
+}
+.card-desc { font-size: 0.85rem; color: var(--text2); margin-bottom: 0.5rem; }
+.card-meta { font-size: 0.75rem; color: var(--text2); margin-bottom: 0.75rem; }
+.card-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+
+/* ─── Model info ───────────────────────────────────────────────── */
+.model-info {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;
+  font-size: 0.85rem; color: var(--text2);
+}
+.model-info p + p { margin-top: 0.4rem; }
+
+/* ─── Table ────────────────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; }
+table {
+  width: 100%; border-collapse: collapse;
+  background: var(--surface); border-radius: var(--radius);
+  overflow: hidden; border: 1px solid var(--border);
+}
+th, td {
+  padding: 0.6rem 0.75rem; text-align: left;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+th { background: var(--surface2); color: var(--text2); font-weight: 600; }
+td { color: var(--text); }
+.cell-actions { display: flex; gap: 0.3rem; }
+.cell-actions button { padding: 0.2rem 0.5rem; font-size: 0.75rem; }
+
+/* ─── Modal ────────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+}
+.modal {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.5rem;
+  width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto;
+}
+.modal h3 { margin-bottom: 1rem; }
+.modal label {
+  display: block; font-size: 0.8rem; color: var(--text2);
+  margin-bottom: 0.25rem;
+}
+.modal input, .modal select {
+  width: 100%; padding: 0.5rem 0.75rem;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text); font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+.modal input:focus { outline: none; border-color: var(--accent); }
+.form-actions { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+.field-group { margin-bottom: 0.5rem; }
+
+/* ─── Animations ───────────────────────────────────────────────── */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
