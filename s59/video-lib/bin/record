@@ -1,0 +1,6 @@
+#!/bin/bash
+# record - Screen recording
+# Usage: ./record <duration> [output_name]
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+"$SCRIPT_DIR/produce" record "$@"

@@ -1,0 +1,317 @@
+#!/bin/bash
+# ==============================================================================
+# video-produce - Master orchestrator for video tutorial production
+# Usage: ./bin/produce <action> [options]
+#
+# Actions:
+#   produce intro          - Generate intro video (5-10-15s)
+#   produce demo           - Record tool demo with voiceover
+#   produce full           - Full tutorial pipeline
+#   produce tts            - Generate voiceover text
+#   produce script         - Generate video script from tool docs
+# ==============================================================================
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIB_DIR="$(dirname "$SCRIPT_DIR")"
+
+# --- Dependencies check ---
+for cmd in ffmpeg ffprobe curl jq; do
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "[ERROR] '$cmd' not found. Install it first."
+        exit 1
+    fi
+done
+
+# --- Source config ---
+DEEPSEEK_MODEL="deepseek-chat-v3-0724"
+DEEPSEEK_API_KEY="${DEEPSEEK_API_KEY:-}"
+OUTPUT_DIR="$LIB_DIR/output"
+ASSETS_DIR="$LIB_DIR/assets"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+PROJECT_NAME="${PROJECT_NAME:-tutorial}"
+
+# --- Functions ---
+
+log()   { echo "[INFO] $*"; }
+warn()  { echo "[WARN] $*" >&2; }
+err()   { echo "[ERROR] $*" >&2; exit 1; }
+
+# DeepSeek API call (for text/script generation)
+deepseek_api() {
+    local prompt="$1"
+    local system="${2:-Eres un asistente útil.}"
+    local temperature="${3:-0.3}"
+
+    [ -z "$DEEPSEEK_API_KEY" ] && err "DEEPSEEK_API_KEY not set. Export it first."
+
+    curl -s "https://api.deepseek.com/chat/completions" \
+        -H "Content-Type: application/json" \
+        -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+        -d "$(cat <<EOF
+{
+    "model": "$DEEPSEEK_MODEL",
+    "messages": [
+        {"role": "system", "content": "$system"},
+        {"role": "user", "content": "$prompt"}
+    ],
+    "temperature": $temperature,
+    "max_tokens": 2000
+}
+EOF
+    )" | jq -r '.choices[0].message.content // .error.message // "ERROR: Unknown"'
+}
+
+# --- Actions ---
+
+action_script() {
+    local tool_name="${1:-Herramienta}"
+    local tool_desc="${2:-}"
+    local tool_url="${3:-}"
+
+    log "Generating video script for: $tool_name"
+    local prompt=$(cat <<SCRIPT
+Genera un guión para un video tutorial de 30 segundos sobre la herramienta "$tool_name".
+$([ -n "$tool_desc" ] && echo "Descripción: $tool_desc")
+$([ -n "$tool_url" ] && echo "URL: $tool_url")
+
+Formato del guión:
+- SCENE 1: Hook visual (5s) - qué problema resuelve
+- SCENE 2: Demostración rápida (15s) - cómo se usa en la terminal
+- SCENE 3: Resultado (5s) - qué se logra
+- SCENE 4: CTA (5s) - llamado a la acción
+
+Cada SCENE debe tener: [DURACION] [TEXTO_VOZ] [ACCION_PANTALLA] [EFECTO]
+Responde SOLO con el guión estructurado, nada más.
+SCRIPT
+)
+    deepseek_api "$prompt" "Eres un guionista experto en videos tutoriales de tecnología. Tus guiones son concisos, visuales y mantienen atención del espectador."
+}
+
+action_tts() {
+    local text="$1"
+    local output="$OUTPUT_DIR/voiceover_${TIMESTAMP}.mp3"
+
+    log "Generating TTS via DeepSeek model..."
+    log "Text length: ${#text} chars"
+    log "Output: $output"
+
+    # DeepSeek doesn't have native TTS, so we use the chat model to generate
+    # a phonetic/SSML-like text that we then feed to ffmpeg for TTS fallback
+    # For actual TTS we'll use a local approach with espeak or similar
+    if command -v espeak &>/dev/null; then
+        espeak -v es-es -s 150 -p 50 "$text" -w "$output"
+        log "TTS generated with espeak"
+    elif command -v gtts-cli &>/dev/null; then
+        gtts-cli "$text" --lang es --output "$output"
+        log "TTS generated with gTTS"
+    else
+        echo "$text" > "$OUTPUT_DIR/voiceover_${TIMESTAMP}.txt"
+        warn "No TTS engine found. Text saved to .txt. Install: pip install gTTS"
+    fi
+    echo "$output"
+}
+
+action_record() {
+    local duration="${1:-10}"
+    local output="$OUTPUT_DIR/recording_${TIMESTAMP}.mp4"
+
+    log "Recording screen for ${duration}s..."
+    log "Output: $output"
+
+    # Detect recording method
+    if command -v ffmpeg &>/dev/null; then
+        local display="${DISPLAY:-:0}"
+        local screen_size=$(xdpyinfo 2>/dev/null | grep dimensions | awk '{print $2}' || echo "1920x1080")
+
+        ffmpeg -y \
+            -f x11grab \
+            -s "$screen_size" \
+            -i "$display" \
+            -f alsa -i default \
+            -t "$duration" \
+            -c:v libx264 -preset ultrafast -crf 28 \
+            -c:a aac -b:a 64k \
+            "$output" 2>/dev/null
+        log "Recording saved"
+    else
+        err "ffmpeg with x11grab not available"
+    fi
+    echo "$output"
+}
+
+action_sfx() {
+    local video="$1"
+    local sfx_name="${2:-click}"
+    local at_time="${3:-0}"
+
+    local sfx_file="$ASSETS_DIR/sfx/${sfx_name}.mp3"
+    [ ! -f "$sfx_file" ] && sfx_file="$ASSETS_DIR/sfx/${sfx_name}.wav"
+    [ ! -f "$sfx_file" ] && err "Sound effect not found: $sfx_name (tried .mp3 .wav in $ASSETS_DIR/sfx/)"
+
+    local output="${video%.*}_sfx.mp4"
+    log "Adding SFX '$sfx_name' at $at_time..."
+
+    ffmpeg -y -i "$video" -i "$sfx_file" \
+        -filter_complex "[1:a]adelay=${at_time}s[sfx];[0:a][sfx]amix=inputs=2:duration=first[a]" \
+        -map 0:v -map "[a]" \
+        -c:v copy "$output"
+    echo "$output"
+}
+
+action_text_overlay() {
+    local video="$1"
+    local text="$2"
+    local position="${3:-center}"
+    local start_time="${4:-0}"
+    local duration="${5:-3}"
+
+    local output="${video%.*}_text.mp4"
+
+    case "$position" in
+        top)    x="(w-text_w)/2"; y="50" ;;
+        bottom) x="(w-text_w)/2"; y="h-th-50" ;;
+        center) x="(w-text_w)/2"; y="(h-text_h)/2" ;;
+        *)      x="(w-text_w)/2"; y="(h-text_h)/2" ;;
+    esac
+
+    log "Adding text overlay: '$text' at $position..."
+
+    ffmpeg -y -i "$video" \
+        -vf "drawtext=text='$text':fontcolor=white:fontsize=36:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:x=$x:y=$y:enable='between(t,$start_time,$((start_time+duration)))':shadowcolor=black:shadowx=2:shadowy=2" \
+        -c:a copy "$output"
+    echo "$output"
+}
+
+action_transition() {
+    local video1="$1"
+    local video2="$2"
+    local transition_type="${3:-fade}"
+    local output="$OUTPUT_DIR/transition_${TIMESTAMP}.mp4"
+
+    log "Adding $transition_type transition..."
+
+    case "$transition_type" in
+        fade)
+            ffmpeg -y -i "$video1" -i "$video2" \
+                -filter_complex "xfade=transition=fade:duration=0.5:offset=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$video1" | awk '{print $1-0.5}')" \
+                -c:a aac "$output"
+            ;;
+        slide)
+            ffmpeg -y -i "$video1" -i "$video2" \
+                -filter_complex "xfade=transition=slideleft:duration=0.5:offset=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$video1" | awk '{print $1-0.5}')" \
+                -c:a aac "$output"
+            ;;
+        wipe)
+            ffmpeg -y -i "$video1" -i "$video2" \
+                -filter_complex "xfade=transition=wipedown:duration=0.5:offset=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$video1" | awk '{print $1-0.5}')" \
+                -c:a aac "$output"
+            ;;
+        *)
+            ffmpeg -y -i "$video1" -i "$video2" -c copy "$output"
+            ;;
+    esac
+    echo "$output"
+}
+
+action_compose() {
+    local input_dir="${1:-$OUTPUT_DIR}"
+    local output="$OUTPUT_DIR/final_${TIMESTAMP}.mp4"
+
+    # Find all video parts sorted by name
+    local parts=()
+    while IFS= read -r f; do
+        parts+=("$f")
+    done < <(find "$input_dir" -maxdepth 1 -name "*.mp4" | sort)
+
+    [ ${#parts[@]} -eq 0 ] && err "No video parts found in $input_dir"
+
+    log "Composing ${#parts[@]} parts into final video..."
+
+    # Build concat list
+    local list_file="$OUTPUT_DIR/concat_${TIMESTAMP}.txt"
+    for f in "${parts[@]}"; do
+        echo "file '$f'" >> "$list_file"
+    done
+
+    ffmpeg -y -f concat -safe 0 -i "$list_file" -c copy "$output"
+    rm -f "$list_file"
+    log "Final video: $output"
+    echo "$output"
+}
+
+action_intro() {
+    local tool_name="${1:-Herramienta}"
+    local subtitle="${2:-}"
+    local duration="${3:-5}"
+
+    local output="$OUTPUT_DIR/intro_${TIMESTAMP}.mp4"
+
+    log "Generating intro video (${duration}s)..."
+    log "Tool: $tool_name"
+
+    # Generate background with text
+    local bg_color="#1a1a2e"
+    local accent_color="#e94560"
+    local text="${tool_name}"
+    local sub="${subtitle:-}"
+
+    # Build filter_complex for text overlays
+    local filter=""
+    if [ -n "$text" ]; then
+        filter+="drawtext=text='$text':fontcolor=white:fontsize=64:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf:x=(w-text_w)/2:y=(h-text_h)/2-40:shadowcolor=black:shadowx=3:shadowy=3,"
+    fi
+    if [ -n "$sub" ]; then
+        filter+="drawtext=text='$sub':fontcolor=#cccccc:fontsize=32:fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:x=(w-text_w)/2:y=(h-text_h)/2+40,"
+    fi
+    # Remove trailing comma
+    filter="${filter%,}"
+
+    ffmpeg -y \
+        -f lavfi -i "color=c=$bg_color:s=1920x1080:r=30" \
+        -f lavfi -i "anullsrc=channel_layout=stereo:sample_rate=44100" \
+        -t "$duration" \
+        ${filter:+-vf "$filter"} \
+        -c:v libx264 -preset ultrafast -crf 23 \
+        -c:a aac -b:a 64k \
+        -movflags +faststart \
+        "$output"
+
+    log "Intro created: $output"
+    echo "$output"
+}
+
+action_help() {
+    cat <<HELP
+Usage: ./bin/produce <action> [args]
+
+Actions:
+  intro <name> [subtitle] [duration]  Create intro video (default: 5s)
+  script <tool_name> [desc] [url]     Generate video script from tool info
+  tts <text>                           Generate voiceover audio
+  record <duration>                   Record screen (seconds)
+  sfx <video> <sfx_name> [at_sec]     Add sound effect at timestamp
+  text <video> <text> [pos] [start] [dur]  Add text overlay
+  transition <v1> <v2> [type]         Join two videos with transition (fade/slide/wipe)
+  compose [dir]                       Compose all video parts into final video
+  help                                 Show this help
+
+Transitions: fade, slide, wipe
+Positions: top, bottom, center
+HELP
+}
+
+# --- Main ---
+mkdir -p "$OUTPUT_DIR" "$ASSETS_DIR/sfx" "$ASSETS_DIR/vfx" "$ASSETS_DIR/transitions" "$ASSETS_DIR/broll"
+
+case "${1:-help}" in
+    intro)       shift; action_intro "$@" ;;
+    script)      shift; action_script "$@" ;;
+    tts)         shift; action_tts "$@" ;;
+    record)      shift; action_record "$@" ;;
+    sfx)         shift; action_sfx "$@" ;;
+    text)        shift; action_text_overlay "$@" ;;
+    transition)  shift; action_transition "$@" ;;
+    compose)     shift; action_compose "$@" ;;
+    help|*)      action_help ;;
+esac

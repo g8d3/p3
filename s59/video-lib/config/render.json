@@ -1,0 +1,23 @@
+{
+  "resolution": "1920x1080",
+  "fps": 30,
+  "codec": "libx264",
+  "preset": "medium",
+  "crf": 23,
+  "audio_codec": "aac",
+  "audio_bitrate": "128k",
+  "transitions": {
+    "default": "fade",
+    "duration": 0.5
+  },
+  "intro": {
+    "duration": 5,
+    "background": "gradient-blue",
+    "text_size": 48,
+    "text_color": "#ffffff"
+  },
+  "outro": {
+    "duration": 3,
+    "show_social": true
+  }
+}

@@ -1,0 +1,43 @@
+#!/bin/bash
+# render - Final render with all post-processing
+# Usage: ./render <input_video> [output_name] [--with-intro intro.mp4] [--with-outro outro.mp4]
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIB_DIR="$(dirname "$SCRIPT_DIR")"
+OUTPUT_DIR="$LIB_DIR/output"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+input="${1:?Input video required}"
+output_name="${2:-final}"
+output="$OUTPUT_DIR/${output_name}_${TIMESTAMP}.mp4"
+intro=""
+outro=""
+
+shift 2 || true
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --with-intro) intro="$2"; shift 2 ;;
+        --with-outro) outro="$2"; shift 2 ;;
+        *) shift ;;
+    esac
+done
+
+# Build concat list
+list_file="$OUTPUT_DIR/concat_render_${TIMESTAMP}.txt"
+[ -n "$intro" ] && echo "file '$intro'" >> "$list_file"
+echo "file '$input'" >> "$list_file"
+[ -n "$outro" ] && echo "file '$outro'" >> "$list_file"
+
+if [ -f "$list_file" ]; then
+    ffmpeg -y -f concat -safe 0 -i "$list_file" \
+        -c:v libx264 -preset medium -crf 23 \
+        -c:a aac -b:a 128k \
+        -movflags +faststart \
+        "$output"
+    rm -f "$list_file"
+else
+    cp "$input" "$output"
+fi
+
+echo "$output"

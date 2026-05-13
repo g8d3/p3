@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cortexkit/magic-context/master/assets/magic-context.schema.json",
+  "api_key": "${INWORLD_API_KEY}",
+  "model": "basic-v1",
+  "voice": {
+    "id": "narrator-en-us",
+    "language": "en-US",
+    "speed": 1.0,
+    "pitch": 0,
+    "volume": 0.8
+  },
+  "output": {
+    "format": "mp3",
+    "sample_rate": 24000,
+    "bitrate": 128
+  }
+}

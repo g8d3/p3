@@ -1,0 +1,17 @@
+{
+  "api_key": "${DEEPSEEK_API_KEY}",
+  "api_url": "https://api.deepseek.com",
+  "model": "deepseek-chat-v3-0724",
+  "cheapest_model": "deepseek-chat-v3-0724",
+  "tts_model": "deepseek-chat-v3-0724",
+  "voice": {
+    "language": "es-ES",
+    "speed": 1.0,
+    "pitch": 0
+  },
+  "output": {
+    "format": "mp3",
+    "sample_rate": 24000,
+    "bitrate": 128
+  }
+}

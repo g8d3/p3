@@ -1,0 +1,261 @@
+#!/bin/bash
+# ==============================================================================
+# video — Consola de producción de video tutorial
+#
+# Uso:
+#   video init <name>              Crear proyecto nuevo
+#   video bg <dur>                 Generar background
+#   video title "A" "B" [start]   Añadir título split (MAGIC / CONTEXT)
+#   video sub "texto" [start]     Añadir subtítulo
+#   video footer "texto" [start]  Añadir texto inferior
+#   video code <line> [lines..]   Añadir líneas de código al fondo
+#   video tts "texto"             Generar voz (Rafael español)
+#   video sfx <tipo> <at> [vol]   Añadir efecto de sonido
+#   video music                   Generar música de fondo
+#   video render                  Renderizar video final
+#   video list-sfx                Listar efectos disponibles
+#   video list-voices             Listar voces español disponibles
+#   video status                  Ver estado del proyecto
+#   video help                    Mostrar ayuda
+# ==============================================================================
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIB_DIR="$(dirname "$SCRIPT_DIR")/lib"
+ASSETS_DIR="$(dirname "$SCRIPT_DIR")/assets"
+BUILD_DIR="$(dirname "$SCRIPT_DIR")/build"
+OUTPUT_DIR="$(dirname "$SCRIPT_DIR")/output"
+
+source "$LIB_DIR/ffmpeg.sh"
+source "$LIB_DIR/project.sh"
+
+mkdir -p "$BUILD_DIR" "$OUTPUT_DIR"
+
+case "${1:-help}" in
+    init)
+        project_init "${2:-intro}" "${3:-5}"
+        ;;
+    bg)
+        dur="${2:-5}"
+        video_bg "$dur" "$BUILD_DIR/bg.mp4"
+        project_add_scene "background" 0 "$dur" "dark blend"
+        ;;
+    title)
+        a="${2:-MAGIC}"
+        b="${3:-CONTEXT}"
+        start="${4:-1.2}"
+        dur=$(python3 -c "import json; print(json.load(open('$PROJECT_FILE'))['duration'])" 2>/dev/null || echo 5)
+        video_title "$BUILD_DIR/current.mp4" "$a" "$b" "#e94560" "$start" "$dur" "$BUILD_DIR/titled.mp4"
+        mv "$BUILD_DIR/titled.mp4" "$BUILD_DIR/current.mp4"
+        project_add_scene "title" "$start" "$dur" "$a $b"
+        ;;
+    sub)
+        text="${2:?Subtitle text required}"
+        start="${3:-1.8}"
+        dur=$(python3 -c "import json; print(json.load(open('$PROJECT_FILE'))['duration'])" 2>/dev/null || echo 5)
+        video_subtitle "$BUILD_DIR/current.mp4" "$text" "$start" "$dur" "$BUILD_DIR/subbed.mp4"
+        mv "$BUILD_DIR/subbed.mp4" "$BUILD_DIR/current.mp4"
+        project_add_scene "subtitle" "$start" "$dur" "$text"
+        ;;
+    footer)
+        text="${2:?Footer text required}"
+        start="${3:-2.5}"
+        dur=$(python3 -c "import json; print(json.load(open('$PROJECT_FILE'))['duration'])" 2>/dev/null || echo 5)
+        result=$(video_footer "$BUILD_DIR/current.mp4" "$text" "#888888" "$start" "$dur" 80 720)
+        if [ -f "$result" ]; then
+            mv "$result" "$BUILD_DIR/current.mp4"
+            project_add_scene "footer" "$start" "2.5" "$text"
+        fi
+        ;;
+    code)
+        shift
+        lines=("$@")
+        dur=$(python3 -c "import json; print(json.load(open('$PROJECT_FILE'))['duration'])" 2>/dev/null || echo 5)
+        result=$(video_code_bg "$BUILD_DIR/current.mp4" "$dur" "${lines[@]}")
+        if [ -f "$result" ] && [ "$result" != "$BUILD_DIR/current.mp4" ]; then
+            mv "$result" "$BUILD_DIR/current.mp4"
+        fi
+        project_add_scene "code" 0.5 "4.0" "${lines[*]}"
+        ;;
+    tts)
+        text="${2:?TTS text required}"
+        output="${3:-$BUILD_DIR/tts.mp3}"
+        speed="${4:-1.0}"
+        temp="${5:-1.5}"
+        video_tts "$text" "$output" "$speed" "$temp"
+        # Update project
+        python3 -c "
+import json
+with open('$PROJECT_FILE') as f:
+    p = json.load(f)
+p['audio']['tts'] = '$output'
+with open('$PROJECT_FILE', 'w') as f:
+    json.dump(p, f, indent=2)
+" 2>/dev/null
+        ;;
+    sfx)
+        name="${2:?SFX name required (whoosh, click, pop)}"
+        at="${3:?Timestamp required (ms)}"
+        vol="${4:-0.5}"
+        project_add_sfx "$name" "$at" "$vol"
+        ;;
+    music)
+        ffmpeg -y \
+            -f lavfi -i "aevalsrc=exprs='sin(55*2*PI*t)*0.06+sin(82*2*PI*t)*0.03':d=5.5:c=stereo:s=48000" \
+            -f lavfi -i "anoisesrc=d=5.5:c=white:a=0.005,lowpass=f=300" \
+            -filter_complex "[0:a][1:a]amix=inputs=2:duration=first:weights=0.7 0.3,volume=0.3,afade=t=in:st=0:d=0.5,afade=t=out:st=4.8:d=0.7" \
+            -t 5.5 "$BUILD_DIR/music.wav" 2>/dev/null
+        echo "Music generated: $BUILD_DIR/music.wav"
+        project_add_scene "music" 0 "5" "ambient drone"
+        ;;
+    scene)
+        mode="${2:-dark}"
+        start="${3:-0}"
+        dur=$(python3 -c "import json; print(json.load(open('$PROJECT_FILE'))['duration'])" 2>/dev/null || echo 5)
+        project_add_segment "$mode" "$start" "$dur"
+        # Crear el background para este segmento
+        seg_dur=$(echo "$dur - $start" | bc)
+        video_bg "$seg_dur" "$mode" "$BUILD_DIR/bg_${start}.mp4"
+        echo "Scene '$mode' from ${start}s (${seg_dur}s)"
+        ;;
+
+    render)
+        # Check if we have segments
+        seg_count=$(python3 -c "import json; p=json.load(open('$PROJECT_FILE')); print(len(p.get('segments',[])))" 2>/dev/null || echo 0)
+        
+        if [ "$seg_count" -gt 1 ]; then
+            # Multi-segment: render each segment with transitions
+            echo "Rendering ${seg_count} segments with transitions..."
+            
+            # Get all segment clips
+            clips=()
+            while IFS= read -r clip; do
+                clips+=("$clip")
+            done < <(python3 -c "
+import json, os
+p = json.load(open('$PROJECT_FILE'))
+build = '$BUILD_DIR'
+for s in p.get('segments', []):
+    print(os.path.join(build, f'bg_{int(s[\"start\"])}.mp4'))
+" 2>/dev/null)
+            
+            # Concatenate with transitions
+            current="${clips[0]}"
+            for i in $(seq 1 $(( ${#clips[@]} - 1 ))); do
+                next="${clips[$i]}"
+                current=$(video_transition "$current" "$next" "fade" 0.5 "$BUILD_DIR/seg_${i}.mp4")
+            done
+            
+            # Copy final concatenated video
+            cp "$current" "$BUILD_DIR/current.mp4"
+        fi
+
+        if [ ! -f "$BUILD_DIR/current.mp4" ]; then
+            echo "No video to render. Build scenes first."
+            exit 1
+        fi
+
+        # Get duration from project
+        if [ -f "$PROJECT_FILE" ]; then
+            tts_path=$(python3 -c "
+import json
+p = json.load(open('$PROJECT_FILE'))
+print(p['audio']['tts'] or '$BUILD_DIR/tts.mp3')
+" 2>/dev/null || echo "$BUILD_DIR/tts.mp3")
+        fi
+
+        if [ ! -f "$tts_path" ]; then
+            echo "No TTS found. Generate TTS first: video tts 'texto'"
+            exit 1
+        fi
+
+        # Build audio mix from project SFX
+        sfx_args=()
+        if [ -f "$PROJECT_FILE" ]; then
+            while IFS= read -r line; do
+                eval "$line"
+            done < <(python3 -c "
+import json
+with open('$PROJECT_FILE') as f:
+    p = json.load(f)
+for s in p['audio']['sfx']:
+    print(f'sfx_file=$ASSETS_DIR/sfx/{s[\"name\"]}.wav')
+    print(f'sfx_delay={s[\"at\"]}')
+    print(f'sfx_vol={s[\"volume\"]}')
+" 2>/dev/null)
+        fi
+
+        # Mix audio
+        audio_mix=$(video_mix_audio \
+            "$tts_path" \
+            "$BUILD_DIR/music.wav" \
+            "$BUILD_DIR/audio-mixed.wav" \
+            "$dur" \
+            "${sfx_args[@]}")
+
+        # Render final
+        output="${2:-$OUTPUT_DIR/final.mp4}"
+        result=$(video_render "$BUILD_DIR/current.mp4" "$audio_mix" "$output")
+        ffprobe -v error -show_entries format=duration,size,bit_rate -of default=noprint_wrappers=1 "$result"
+        echo "RENDERED: $result"
+        ;;
+    list-sfx)
+        echo "=== Sound Effects Available ==="
+        for f in "$ASSETS_DIR/sfx"/*.wav; do
+            name=$(basename "$f" .wav)
+            dur=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$f" 2>/dev/null)
+            echo "  $name  (${dur}s)"
+        done
+        ;;
+    list-voices)
+        echo "=== Spanish Voices (Inworld AI) ==="
+        echo "  Rafael  - Profunda, compuesta (ideal narración) ✓ TESTED"
+        echo "  Sofia   - Rápida, clara, neutro latino"
+        echo "  Mateo   - Joven, clara, ritmo moderado"
+        echo "  Miguel  - Calma, storytelling"
+        echo "  Diego   - Suave, gentil"
+        echo "  Lupita  - Enérgica, vibrante"
+        echo ""
+        echo "Usage: video tts 'texto' --voice Sofia"
+        ;;
+    status)
+        project_status
+        echo ""
+        echo "Files:"
+        ls -lh "$BUILD_DIR/" 2>/dev/null | awk '{print "  "$5, $9}'
+        ;;
+    help|*)
+        cat <<HELP
+🎛️  VIDEO CONSOLE — Producción de tutoriales
+
+COMANDOS:
+  init <name> [dur]     Crear proyecto (ej: video init intro 5)
+  bg [dur]              Generar background animado
+  title "A" "B" [s]     Título split (MAGIC / CONTEXT)
+  sub "texto" [s]       Subtítulo centrado
+  footer "texto" [s]    Texto inferior
+  code <line> [...]     Líneas de código al fondo
+  tts "texto"           Generar voz (Rafael español)
+  sfx <tipo> <ms> [vol] Efecto: whoosh, click, pop
+  music                 Generar música ambiental
+  render [output]       Exportar video final
+  list-sfx              Ver efectos disponibles
+  list-voices           Ver voces español
+  status                Ver estado del proyecto
+  help                  Esta ayuda
+
+FLUJO TÍPICO:
+  video init intro 5
+  video bg
+  video tts "Magic Context. Tu agente con memoria infinita."
+  video music
+  video code "> import magic_context" "> ctx = Context()"
+  video title "MAGIC" "CONTEXT" 1.2
+  video sub "Cache-aware | Cross-session" 1.8
+  video footer "github.com/cortexkit/magic-context" 2.8
+  video sfx whoosh 1100 0.5
+  video sfx click 1500 0.5
+  video render
+HELP
+        ;;
+esac

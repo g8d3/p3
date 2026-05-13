@@ -1,0 +1,30 @@
+# Videos
+*.mp4
+*.webm
+*.mov
+*.avi
+
+# Audio
+*.wav
+*.mp3
+
+# Build artifacts
+build/
+output/
+temp/
+*.tar.gz
+
+# Node
+node_modules/
+package-lock.json
+
+# Project state
+project.json
+
+# IDE
+.vscode/
+.idea/
+package.json
+test-video/
+build/
+output/

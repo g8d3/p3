@@ -1,0 +1,22 @@
+#!/bin/bash
+# broll - Insert b-roll footage at timestamp
+# Usage: ./broll <main_video> <broll_file> <at_time> [duration]
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIB_DIR="$(dirname "$SCRIPT_DIR")"
+OUTPUT_DIR="$LIB_DIR/output"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+main_video="${1:?Main video required}"
+broll_file="${2:?B-roll file required}"
+at_time="${3:-0}"
+duration="${4:-3}"
+output="${main_video%.*}_broll.mp4"
+
+# Overlay b-roll as Picture-in-Picture at specified time
+ffmpeg -y -i "$main_video" -i "$broll_file" \
+    -filter_complex "[1:v]scale=640:360[br];[0:v][br]overlay=W-w-20:20:enable='between(t,$at_time,$((at_time+duration)))'" \
+    -c:a copy "$output"
+
+echo "$output"
