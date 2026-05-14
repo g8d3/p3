@@ -1,16 +1,3 @@
-/**
- * pi-termux-hook.mjs — Loader hook que repara el TUI de pi para Termux
- *
- * Parches:
- *   Patch 1: Romper render loop (firstChanged < prevViewportTop)
- *     - Si el cambio es en input (últimas 5 líneas): soft render desde home
- *     - Si no: skip (solo actualizar estado en memoria)
- *     - Así el input se ve al escribir y el loop no salta la pantalla
- *
- * Nota: El input box fijo (como OpenCode) requiere cambiar la arquitectura
- * de pi-tui para renderizar el input como overlay. Reportado en issue #4506.
- */
-
 const TUI_PATH = 'dist/tui.js';
 
 export function load(url, context, nextLoad) {
@@ -23,19 +10,20 @@ export function load(url, context, nextLoad) {
       ? result.source 
       : Buffer.from(result.source).toString('utf8');
 
-    const p1search = 
-      'if (firstChanged < prevViewportTop) {\n' +
+    // Patch 1: firstChanged < prevViewportTop → ya no fullRender(true)
+    // Si es input (últimas 5 líneas): clear screen + home + escribir todo
+    // Si no: solo actualizar estado en memoria (skip)
+    const OLD = 'if (firstChanged < prevViewportTop) {\n' +
       '            logRedraw(`firstChanged < viewportTop (${firstChanged} < ${prevViewportTop})`);\n' +
       '            fullRender(true);\n' +
       '            return;\n' +
       '        }';
-    
-    const p1replace = 
-      'if (firstChanged < prevViewportTop) {\n' +
+
+    const NEW = 'if (firstChanged < prevViewportTop) {\n' +
       '            if (firstChanged >= newLines.length - 5) {\n' +
       '                logRedraw(`firstChanged < viewportTop INPUT (${firstChanged} < ${prevViewportTop}) SOFT_RENDER`);\n' +
       '                let buf = "\\x1b[?2026h";\n' +
-      '                buf += "\\x1b[H";\n' +
+      '                buf += "\\x1b[2J\\x1b[H";\n' +
       '                for (let i = 0; i < newLines.length; i++) {\n' +
       '                    if (i > 0) buf += "\\r\\n";\n' +
       '                    buf += newLines[i];\n' +
@@ -57,16 +45,13 @@ export function load(url, context, nextLoad) {
       '            return;\n' +
       '        }';
 
-    if (!source.includes(p1search)) {
-      console.error('[pi-termux] ⚠ Patrón no encontrado');
-      const idx = source.indexOf('firstChanged < prevViewportTop');
-      if (idx >= 0) console.error('Contexto:', source.substring(idx, idx + 250));
+    if (!source.includes(OLD)) {
+      console.error('[pi-termux] ⚠ OLD pattern not found');
       return result;
     }
 
-    source = source.replace(p1search, p1replace);
-    console.error('[pi-termux] ✓ Render loop roto, input accesible al escribir');
-
+    source = source.replace(OLD, NEW);
+    console.error('[pi-termux] ✓ Render loop roto');
     return { ...result, source };
   });
 }
