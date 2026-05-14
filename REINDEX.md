@@ -1,21 +1,41 @@
-# Reindex Instruction
+# Reindex — Hybrid Bash + AI
 
-Scan the `/home/vuos/code/p3` directory for any `s*` folders (e.g. `s50`, `s51`, …) that are **not listed** in `FOLDER_INDEX.md`.
+## Cómo funciona
 
-For each new folder found:
+Este directorio usa un reindex híbrido:
 
-1. **Explore its contents** — read key files like `package.json`, `README.md`, `main.py`, `requirements.txt`, config files, and any source code to understand what the project does.
-2. **Write a one-line description** (max 200 chars) explaining what the project is/does.
-3. **Update `FOLDER_INDEX.md`** — insert the new row(s) into the table in numerical order. Follow the existing format exactly:
-   ```
-   | `sXX-descriptive-name` | One-line description. |
-   ```
-4. **Name the folder descriptively** — if the folder is still just `sXX` (no dash suffix), rename it to `sXX-descriptive-name` using `mv`. Keep the `sXX-` number prefix.
+1. **Bash** (`reindex.sh`) escanea, encuentra directorios nuevos, ignora vacíos, recolecta metadata
+2. **AI agent** (pi, opencode o hermes) genera descripciones de los proyectos nuevos
+3. **Bash** aplica los cambios: renombra directorios, actualiza `FOLDER_INDEX.md`
 
-## Rules
+## Uso
 
-- Preserve alphabetical/numerical sort order in the table.
-- The folder name format is always `s<number>-<kebab-case-description>`.
-- If a folder is empty, name it `sXX-scratch` and describe it as "Empty placeholder directory."
-- Write descriptions in plain English — no marketing fluff, just what it actually does.
-- Do not modify existing rows — only add new ones or rename bare `sXX` folders.
+```bash
+# Reindex normal (usa pi, el agente por defecto)
+./reindex.sh
+
+# Dry-run (solo muestra qué haría, no aplica cambios)
+./reindex.sh --dry-run
+
+# Usar un agente específico
+REINDEX_AGENT=opencode ./reindex.sh
+REINDEX_AGENT=hermes ./reindex.sh
+
+# Sin output del AI a stderr
+REINDEX_AGENT=pi ./reindex.sh 2>/dev/null
+```
+
+## Reglas
+
+- **Directorios vacíos se ignoran** — no se crean entradas "scratchpad"
+- Directorios con contenido se renombran a `sXX-nombre-descriptivo`
+- Descripciones generadas por AI (máx 200 chars, inglés claro)
+- El índice se mantiene ordenado numéricamente
+
+## Agentes soportados
+
+| Variable | Agente | Comando |
+|---|---|---|
+| `REINDEX_AGENT=pi` (default) | pi | `pi -p "@prompt"` |
+| `REINDEX_AGENT=opencode` | OpenCode | `opencode run "@prompt"` |
+| `REINDEX_AGENT=hermes` | Hermes Agent | `hermes run "@prompt"` |

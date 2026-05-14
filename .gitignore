@@ -12,6 +12,9 @@ tmp/
 # Embedded external repo (tracked by its own origin)
 s45/OpenMontage/
 
+# Rust build artifacts
+**/target/
+
 # Logs — regenerate on demand
 *.log
 *.db
