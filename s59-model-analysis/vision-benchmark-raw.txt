@@ -1,0 +1,46 @@
+Vision Model Benchmark - jue 14 may 2026 12:26:35 -05
+Image: /tmp/screen-debug/screen-20260514-122052.png (64K)
+Prompt: Describe this computer screen in detail. What windows/dialogs are visible? What text and buttons do they contain? Is there any dialog blocking or requiring user interaction? What is the overall state of the application?
+
+════════════════════════════════════════════════
+Modelo: kimi-k2.5
+Inicio: 12:26:35
+Duración: 31.125310603s
+Exit code: 0
+Respuesta: This is **OBS Studio** (Open Broadcaster Software), a streaming and recording application. Here's a detailed breakdown:  ## Main Interface Layout  **Top Menu Bar:** File, Edit, View, Docks, Profile, S...
+Longitud: 1394 chars
+
+════════════════════════════════════════════════
+Modelo: kimi-k2.6
+Inicio: 12:27:06
+Duración: 40.858807898s
+Exit code: 0
+Respuesta: This is a screenshot of **OBS Studio** (Open Broadcaster Software) in a normal, idle state — no dialogs are blocking the interface.  ## Overall Layout The application is in its standard multi-panel ...
+Longitud: 1769 chars
+
+════════════════════════════════════════════════
+Modelo: mimo-v2.5
+Inicio: 12:27:47
+Duración: 11.705323740s
+Exit code: 0
+Respuesta: This is a screenshot of **OBS Studio** (Open Broadcaster Software), a video recording and streaming application. The interface is in **Spanish**.  ## Layout Overview  ### Top Menu Bar Standard menu it...
+Longitud: 1742 chars
+
+════════════════════════════════════════════════
+Modelo: qwen3.5-plus
+Inicio: 12:27:58
+Duración: 27.936353626s
+Exit code: 0
+Respuesta: ## OBS Studio Screen Description  **Application:** OBS Studio (Open Broadcaster Software) - dark theme  ### Layout & Panels  **Top Menu Bar:** File | Edit | View | Docks | Profile | Scene Collection |...
+Longitud: 1551 chars
+
+════════════════════════════════════════════════
+Modelo: qwen3.6-plus
+Inicio: 12:28:26
+Duración: 25.180711796s
+Exit code: 0
+Respuesta: This is **OBS Studio** (Open Broadcaster Software), a streaming/recording application. Here's the detailed breakdown:  ## Layout & Panels  **Top Menu Bar:** File | Edit | View | Docks | Profile | Scen...
+Longitud: 1638 chars
+
+════════════════════════════════════════════════
+Benchmark completado: jue 14 may 2026 12:28:52 -05
