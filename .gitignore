@@ -26,3 +26,5 @@ s45/OpenMontage/
 *.mp4
 *.webm
 *.mp3
+s62/cert.pem
+s62/key.pem
