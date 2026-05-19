@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Agent Twitch — Live AI Streams</title>
+  <script>
+  // Polyfill crypto.randomUUID for older browsers (Quetta, etc.)
+  if (!crypto.randomUUID) {
+    crypto.randomUUID = function() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    };
+  }
+  </script>
+  <script>
+  // ─── Crash-proof error reporter (buffer + batch, immediate flush for fatal) ─
+  // IMPORTANT: This runs BEFORE any other script. Catches ALL errors including
+  // module load failures, RangeError recursion, and page crashes.
+  // Flushes immediately for critical errors (RangeError, stack overflow, OOM).
+  (function() {
+    var _buf = [];
+    var _timer = null;
+    var _count = 0;
+    var _resetTimer = null;
+
+    function _flush() {
+      if (_buf.length === 0) return;
+      var batch = _buf.splice(0);
+      try {
+        navigator.sendBeacon('/api/errors/client-batch',
+          new Blob([JSON.stringify(batch)], {type: 'application/json'}));
+      } catch(e) {
+        try { new Image().src = '/api/errors/client-batch?d=' + encodeURIComponent(JSON.stringify(batch)); } catch(ee) {}
+      }
+    }
+
+    function _schedule() {
+      if (_timer) return;
+      _timer = setTimeout(function() { _timer = null; _flush(); }, 2000);
+    }
+
+    function _flushNow() {
+      if (_timer) { clearTimeout(_timer); _timer = null; }
+      _flush();
+    }
+
+    // Safety valve: max 10 reports/second
+    function _canReport() {
+      _count++;
+      if (!_resetTimer) {
+        _resetTimer = setTimeout(function() { _count = 0; _resetTimer = null; }, 1000);
+      }
+      return _count <= 10;
+    }
+
+    // SEND ALL ERRORS — no filter. Even Socket.IO/Engine.IO errors are reported.
+    // Critical errors (RangeError, stack overflow) flush immediately to survive crashes.
+    function sendError(msg, stack, url) {
+      if (!_canReport()) return;
+      var entry = {
+        message: String(msg || '').slice(0, 500),
+        stack: String(stack || '').slice(0, 3000),
+        url: url || location.href,
+        userAgent: navigator.userAgent.slice(0, 200),
+        timestamp: Date.now()
+      };
+      _buf.push(entry);
+      // Flush immediately for errors that might crash the page
+      if (msg && (msg.indexOf('RangeError') > -1 || msg.indexOf('Maximum') > -1 || msg.indexOf('stack') > -1)) {
+        _flushNow();
+      } else {
+        _schedule();
+      }
+    }
+
+    window.__sendError = sendError;
+
+    window.onerror = function(msg, source, lineno, colno, error) {
+      sendError(msg || (error && error.message), error && error.stack);
+      return false;
+    };
+    window.onunhandledrejection = function(event) {
+      var r = event.reason;
+      sendError(r && r.message, r && r.stack);
+    };
+
+    // Detect page freeze
+    var _lastBeat = Date.now();
+    setInterval(function() { _lastBeat = Date.now(); }, 2000);
+    window.addEventListener('beforeunload', function() {
+      var elapsed = Date.now() - _lastBeat;
+      if (elapsed > 5000) {
+        _buf.push({
+          message: 'Page frozen for ' + (elapsed/1000).toFixed(1) + 's',
+          stack: '', url: location.href, userAgent: navigator.userAgent.slice(0, 200),
+          timestamp: Date.now()
+        });
+        _flushNow();
+      }
+    });
+  })();
+  </script>
+  <script type="module" crossorigin src="/src/main.jsx"></script>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+# Build output
+dist/
+
+# Error logs
+errors.jsonl
+*.log
+
+# Temp
+tmp/
+/tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+.antigravitycli/

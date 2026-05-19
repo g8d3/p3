@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terminal Stream</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 15px;
+    line-height: 1.5;
+    padding: 12px 16px;
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+  #output { white-space: pre-wrap; word-break: break-all; }
+  .line { padding: 0; }
+  .prompt { color: #4ec9b0; }
+  .output { color: #d4d4d4; }
+  .error { color: #f44747; }
+  .info { color: #569cd6; }
+  .success { color: #6a9955; }
+  .input-line { color: #ce9178; }
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 18px;
+    background: #d4d4d4;
+    animation: blink 1s step-end infinite;
+    vertical-align: text-bottom;
+    margin-left: 2px;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+<div id="output">
+  <div class="line info">╔══════════════════════════════╗</div>
+  <div class="line info">║  Agent Twitch Terminal v1.0  ║</div>
+  <div class="line info">╚══════════════════════════════╝</div>
+  <div class="line" style="height:4px"></div>
+</div>
+<script>
+  // Expose functions for the Playwright agent to call
+  window.addLine = function(text, className) {
+    const out = document.getElementById('output');
+    const div = document.createElement('div');
+    div.className = 'line ' + (className || 'output');
+    div.textContent = text;
+    out.appendChild(div);
+    window.scrollTo(0, document.body.scrollHeight);
+  };
+  window.clearTerm = function() {
+    document.getElementById('output').innerHTML = '';
+  };
+  window.setCursor = function(show) {
+    const existing = document.querySelector('.cursor');
+    if (existing) existing.remove();
+    if (show) {
+      const span = document.createElement('span');
+      span.className = 'cursor';
+      document.getElementById('output').appendChild(span);
+    }
+  };
+</script>
+</body>
+</html>
