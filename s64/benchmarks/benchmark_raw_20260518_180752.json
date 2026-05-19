@@ -1,0 +1,4896 @@
+{
+  "ZAI Coding Plan": [
+    {
+      "provider": "ZAI",
+      "model": "glm-4.5",
+      "tests": [
+        {
+          "success": false,
+          "latency_ms": 1311.42,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Short reply"
+        },
+        {
+          "success": false,
+          "latency_ms": 972.69,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Python code"
+        },
+        {
+          "success": false,
+          "latency_ms": 1022.27,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Simple QA"
+        },
+        {
+          "success": false,
+          "latency_ms": 1130.73,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Definition"
+        },
+        {
+          "success": false,
+          "latency_ms": 990.85,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 0,
+      "error_count": 5,
+      "latencies": [],
+      "tokens_per_sec": [],
+      "costs": [],
+      "total_tokens_list": [],
+      "vision": false,
+      "avg_latency_ms": 0,
+      "min_latency_ms": 0,
+      "max_latency_ms": 0,
+      "avg_tokens_per_second": 0,
+      "max_tokens_per_second": 0,
+      "avg_cost": 0,
+      "total_cost": 0,
+      "avg_tokens_per_call": 0,
+      "total_tokens_used": 0,
+      "success_rate": 0.0
+    },
+    {
+      "provider": "ZAI",
+      "model": "glm-4.5-air",
+      "tests": [
+        {
+          "success": false,
+          "latency_ms": 1064.59,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Short reply"
+        },
+        {
+          "success": false,
+          "latency_ms": 1020.57,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Python code"
+        },
+        {
+          "success": false,
+          "latency_ms": 1056.99,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Simple QA"
+        },
+        {
+          "success": false,
+          "latency_ms": 1115.47,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Definition"
+        },
+        {
+          "success": false,
+          "latency_ms": 1232.73,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 0,
+      "error_count": 5,
+      "latencies": [],
+      "tokens_per_sec": [],
+      "costs": [],
+      "total_tokens_list": [],
+      "vision": false,
+      "avg_latency_ms": 0,
+      "min_latency_ms": 0,
+      "max_latency_ms": 0,
+      "avg_tokens_per_second": 0,
+      "max_tokens_per_second": 0,
+      "avg_cost": 0,
+      "total_cost": 0,
+      "avg_tokens_per_call": 0,
+      "total_tokens_used": 0,
+      "success_rate": 0.0
+    },
+    {
+      "provider": "ZAI",
+      "model": "glm-4.6",
+      "tests": [
+        {
+          "success": false,
+          "latency_ms": 1031.05,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Short reply"
+        },
+        {
+          "success": false,
+          "latency_ms": 1078.72,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Python code"
+        },
+        {
+          "success": false,
+          "latency_ms": 1069.62,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Simple QA"
+        },
+        {
+          "success": false,
+          "latency_ms": 1023.85,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Definition"
+        },
+        {
+          "success": false,
+          "latency_ms": 1048.88,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 0,
+      "error_count": 5,
+      "latencies": [],
+      "tokens_per_sec": [],
+      "costs": [],
+      "total_tokens_list": [],
+      "vision": false,
+      "avg_latency_ms": 0,
+      "min_latency_ms": 0,
+      "max_latency_ms": 0,
+      "avg_tokens_per_second": 0,
+      "max_tokens_per_second": 0,
+      "avg_cost": 0,
+      "total_cost": 0,
+      "avg_tokens_per_call": 0,
+      "total_tokens_used": 0,
+      "success_rate": 0.0
+    },
+    {
+      "provider": "ZAI",
+      "model": "glm-4.7",
+      "tests": [
+        {
+          "success": false,
+          "latency_ms": 1251.37,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Short reply"
+        },
+        {
+          "success": false,
+          "latency_ms": 1190.8,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Python code"
+        },
+        {
+          "success": false,
+          "latency_ms": 1446.68,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Simple QA"
+        },
+        {
+          "success": false,
+          "latency_ms": 1066.64,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Definition"
+        },
+        {
+          "success": false,
+          "latency_ms": 1064.44,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 0,
+      "error_count": 5,
+      "latencies": [],
+      "tokens_per_sec": [],
+      "costs": [],
+      "total_tokens_list": [],
+      "vision": false,
+      "avg_latency_ms": 0,
+      "min_latency_ms": 0,
+      "max_latency_ms": 0,
+      "avg_tokens_per_second": 0,
+      "max_tokens_per_second": 0,
+      "avg_cost": 0,
+      "total_cost": 0,
+      "avg_tokens_per_call": 0,
+      "total_tokens_used": 0,
+      "success_rate": 0.0
+    },
+    {
+      "provider": "ZAI",
+      "model": "glm-5",
+      "tests": [
+        {
+          "success": false,
+          "latency_ms": 1054.86,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Short reply"
+        },
+        {
+          "success": false,
+          "latency_ms": 1103.47,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Python code"
+        },
+        {
+          "success": false,
+          "latency_ms": 1134.98,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Simple QA"
+        },
+        {
+          "success": false,
+          "latency_ms": 1128.52,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Definition"
+        },
+        {
+          "success": false,
+          "latency_ms": 1125.87,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 0,
+      "error_count": 5,
+      "latencies": [],
+      "tokens_per_sec": [],
+      "costs": [],
+      "total_tokens_list": [],
+      "vision": false,
+      "avg_latency_ms": 0,
+      "min_latency_ms": 0,
+      "max_latency_ms": 0,
+      "avg_tokens_per_second": 0,
+      "max_tokens_per_second": 0,
+      "avg_cost": 0,
+      "total_cost": 0,
+      "avg_tokens_per_call": 0,
+      "total_tokens_used": 0,
+      "success_rate": 0.0
+    },
+    {
+      "provider": "ZAI",
+      "model": "glm-5-turbo",
+      "tests": [
+        {
+          "success": false,
+          "latency_ms": 1256.45,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Short reply"
+        },
+        {
+          "success": false,
+          "latency_ms": 1096.67,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Python code"
+        },
+        {
+          "success": false,
+          "latency_ms": 1134.93,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Simple QA"
+        },
+        {
+          "success": false,
+          "latency_ms": 1525.78,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Definition"
+        },
+        {
+          "success": false,
+          "latency_ms": 1128.05,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 0,
+      "error_count": 5,
+      "latencies": [],
+      "tokens_per_sec": [],
+      "costs": [],
+      "total_tokens_list": [],
+      "vision": false,
+      "avg_latency_ms": 0,
+      "min_latency_ms": 0,
+      "max_latency_ms": 0,
+      "avg_tokens_per_second": 0,
+      "max_tokens_per_second": 0,
+      "avg_cost": 0,
+      "total_cost": 0,
+      "avg_tokens_per_call": 0,
+      "total_tokens_used": 0,
+      "success_rate": 0.0
+    },
+    {
+      "provider": "ZAI",
+      "model": "glm-5.1",
+      "tests": [
+        {
+          "success": false,
+          "latency_ms": 1124.42,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Short reply"
+        },
+        {
+          "success": false,
+          "latency_ms": 1124.7,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Python code"
+        },
+        {
+          "success": false,
+          "latency_ms": 1126.22,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Simple QA"
+        },
+        {
+          "success": false,
+          "latency_ms": 1126.37,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Definition"
+        },
+        {
+          "success": false,
+          "latency_ms": 1033.57,
+          "error": "HTTP 429: {\"error\":{\"code\":\"1113\",\"message\":\"Insufficient balance or no resource package. Please recharge.\"}}",
+          "http_code": 429,
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 0,
+      "error_count": 5,
+      "latencies": [],
+      "tokens_per_sec": [],
+      "costs": [],
+      "total_tokens_list": [],
+      "vision": false,
+      "avg_latency_ms": 0,
+      "min_latency_ms": 0,
+      "max_latency_ms": 0,
+      "avg_tokens_per_second": 0,
+      "max_tokens_per_second": 0,
+      "avg_cost": 0,
+      "total_cost": 0,
+      "avg_tokens_per_call": 0,
+      "total_tokens_used": 0,
+      "success_rate": 0.0
+    }
+  ],
+  "OpenCode GO": [
+    {
+      "provider": "OpenCode GO",
+      "model": "minimax-m2.7",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 1331.36,
+          "body": {
+            "id": "065acd482448f2e494279055eb6ffc4b",
+            "object": "chat.completion",
+            "created": 1779145288,
+            "model": "MiniMax-M2.7",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant"
+                },
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 17,
+              "completion_tokens": 10,
+              "total_tokens": 27,
+              "prompt_tokens_details": {
+                "cached_tokens": 32
+              }
+            }
+          },
+          "prompt_tokens": 17,
+          "completion_tokens": 10,
+          "total_tokens": 27,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 7.51,
+          "model_used": "MiniMax-M2.7",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 2123.42,
+          "body": {
+            "id": "065acd499a4b5bfe625e9d7a00ce88f0",
+            "object": "chat.completion",
+            "created": 1779145290,
+            "model": "MiniMax-M2.7",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "Here\u2019s a concise way to reverse a string in Python:\n\n```python\ndef reverse_string(s: str) -> str:\n    \"\"\"Return the reversed copy of the input string.\"\"\"\n    return s[::-"
+                },
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 20,
+              "completion_tokens": 100,
+              "total_tokens": 120,
+              "prompt_tokens_details": {
+                "cached_tokens": 32
+              }
+            }
+          },
+          "prompt_tokens": 20,
+          "completion_tokens": 100,
+          "total_tokens": 120,
+          "cost": 0.0,
+          "content_len": 170,
+          "finish_reason": "length",
+          "tokens_per_second": 47.09,
+          "model_used": "MiniMax-M2.7",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 768.39,
+          "body": {
+            "id": "065acd4b1eed3b983bc4c02246f3d121",
+            "object": "chat.completion",
+            "created": 1779145291,
+            "model": "MiniMax-M2.7",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant"
+                },
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 23,
+              "completion_tokens": 10,
+              "total_tokens": 33,
+              "prompt_tokens_details": {
+                "cached_tokens": 32
+              }
+            }
+          },
+          "prompt_tokens": 23,
+          "completion_tokens": 10,
+          "total_tokens": 33,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 13.01,
+          "model_used": "MiniMax-M2.7",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 1189.4,
+          "body": {
+            "id": "065acd4c3d5d3c8eb788f11f741d29a7",
+            "object": "chat.completion",
+            "created": 1779145292,
+            "model": "MiniMax-M2.7",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant"
+                },
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 19,
+              "completion_tokens": 50,
+              "total_tokens": 69,
+              "prompt_tokens_details": {
+                "cached_tokens": 32
+              }
+            }
+          },
+          "prompt_tokens": 19,
+          "completion_tokens": 50,
+          "total_tokens": 69,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 42.04,
+          "model_used": "MiniMax-M2.7",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 2711.77,
+          "body": {
+            "id": "065acd4d5ef82c10a0eb5e78b6fb724d",
+            "object": "chat.completion",
+            "created": 1779145295,
+            "model": "MiniMax-M2.7",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant"
+                },
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 0,
+              "completion_tokens": 80,
+              "total_tokens": 80,
+              "prompt_tokens_details": {
+                "cached_tokens": 36
+              }
+            }
+          },
+          "prompt_tokens": 0,
+          "completion_tokens": 80,
+          "total_tokens": 80,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 29.5,
+          "model_used": "MiniMax-M2.7",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        1331.36,
+        2123.42,
+        768.39,
+        1189.4,
+        2711.77
+      ],
+      "tokens_per_sec": [
+        7.51,
+        47.09,
+        13.01,
+        42.04,
+        29.5
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        27,
+        120,
+        33,
+        69,
+        80
+      ],
+      "vision": false,
+      "avg_latency_ms": 1624.87,
+      "min_latency_ms": 768.39,
+      "max_latency_ms": 2711.77,
+      "avg_tokens_per_second": 27.83,
+      "max_tokens_per_second": 47.09,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 65.8,
+      "total_tokens_used": 329,
+      "success_rate": 100.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "minimax-m2.5",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 1134.0,
+          "body": {
+            "id": "chatcmpl-4a3333bc10a540a091188517281a32ab",
+            "object": "chat.completion",
+            "created": 1779145298,
+            "model": "accounts/fireworks/models/minimax-m2p5",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "The user asks: \"Reply with exactly: Hello"
+                },
+                "finish_reason": "length",
+                "token_ids": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 43,
+              "total_tokens": 53,
+              "completion_tokens": 10,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "prompt_token_ids": [
+              200019,
+              28463,
+              10,
+              2985,
+              457,
+              258,
+              12473,
+              23413,
+              46,
+              5324,
+              1925,
+              355,
+              35353,
+              12973,
+              5145,
+              50,
+              46,
+              53,
+              306,
+              355,
+              6904,
+              531,
+              35353,
+              12973,
+              46,
+              200020,
+              10,
+              200019,
+              3995,
+              10,
+              46623,
+              418,
+              8066,
+              58,
+              53398,
+              2035,
+              200020,
+              10,
+              200019,
+              1361,
+              10,
+              200050,
+              10
+            ],
+            "cost": "0"
+          },
+          "prompt_tokens": 43,
+          "completion_tokens": 10,
+          "total_tokens": 53,
+          "cost": 0.0,
+          "content_len": 41,
+          "finish_reason": "length",
+          "tokens_per_second": 8.82,
+          "model_used": "accounts/fireworks/models/minimax-m2p5",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 3384.52,
+          "body": {
+            "id": "chatcmpl-1cfdc3e4225f4043aa3c7f7c6c8b0cdf",
+            "object": "chat.completion",
+            "created": 1779145300,
+            "model": "accounts/fireworks/models/minimax-m2p5",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "Here\u2019s a simple function that returns the reversed version of a given string:\n\n```python\ndef reverse_string(s: str) -> str:\n    \"\"\"Return the reversed string.\"\"\"\n    return s[::-1]\n\n# Example usage:\nprint(reverse_string(\"hello\"))  #",
+                  "reasoning_content": "The user requests: \"Write a short Python function to reverse a string\". It's a straightforward request. We can respond with a short Python function, perhaps with some explanations. That's fine. No disallowed content. Just code."
+                },
+                "finish_reason": "length",
+                "token_ids": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 46,
+              "total_tokens": 146,
+              "completion_tokens": 100,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "prompt_token_ids": [
+              200019,
+              28463,
+              10,
+              2985,
+              457,
+              258,
+              12473,
+              23413,
+              46,
+              5324,
+              1925,
+              355,
+              35353,
+              12973,
+              5145,
+              50,
+              46,
+              53,
+              306,
+              355,
+              6904,
+              531,
+              35353,
+              12973,
+              46,
+              200020,
+              10,
+              200019,
+              3995,
+              10,
+              20768,
+              258,
+              3744,
+              18296,
+              1695,
+              301,
+              16893,
+              258,
+              3611,
+              200020,
+              10,
+              200019,
+              1361,
+              10,
+              200050,
+              10
+            ],
+            "cost": "0"
+          },
+          "prompt_tokens": 46,
+          "completion_tokens": 100,
+          "total_tokens": 146,
+          "cost": 0.0,
+          "content_len": 232,
+          "finish_reason": "length",
+          "tokens_per_second": 29.55,
+          "model_used": "accounts/fireworks/models/minimax-m2p5",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 1043.86,
+          "body": {
+            "id": "chatcmpl-a2b436b2d7d840229cd9027ea56a243e",
+            "object": "chat.completion",
+            "created": 1779145303,
+            "model": "accounts/fireworks/models/minimax-m2p5",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "The user asks: \"What is 2+"
+                },
+                "finish_reason": "length",
+                "token_ids": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 49,
+              "total_tokens": 59,
+              "completion_tokens": 10,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "prompt_token_ids": [
+              200019,
+              28463,
+              10,
+              2985,
+              457,
+              258,
+              12473,
+              23413,
+              46,
+              5324,
+              1925,
+              355,
+              35353,
+              12973,
+              5145,
+              50,
+              46,
+              53,
+              306,
+              355,
+              6904,
+              531,
+              35353,
+              12973,
+              46,
+              200020,
+              10,
+              200019,
+              3995,
+              10,
+              3376,
+              355,
+              32,
+              50,
+              43,
+              50,
+              63,
+              53630,
+              418,
+              1127,
+              275,
+              2013,
+              200020,
+              10,
+              200019,
+              1361,
+              10,
+              200050,
+              10
+            ],
+            "cost": "0"
+          },
+          "prompt_tokens": 49,
+          "completion_tokens": 10,
+          "total_tokens": 59,
+          "cost": 0.0,
+          "content_len": 26,
+          "finish_reason": "length",
+          "tokens_per_second": 9.58,
+          "model_used": "accounts/fireworks/models/minimax-m2p5",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 1413.21,
+          "body": {
+            "id": "chatcmpl-adfa1ea0b70f41398fc9d271d5993a04",
+            "object": "chat.completion",
+            "created": 1779145304,
+            "model": "accounts/fireworks/models/minimax-m2p5",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "We need to answer the question: \"Explain what an API is in one sentence\". This is straightforward: define API. Should be one sentence. Probably: \"An API (Application Programming Interface) is a set of protocols, methods, and tools that"
+                },
+                "finish_reason": "length",
+                "token_ids": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 45,
+              "total_tokens": 95,
+              "completion_tokens": 50,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "prompt_token_ids": [
+              200019,
+              28463,
+              10,
+              2985,
+              457,
+              258,
+              12473,
+              23413,
+              46,
+              5324,
+              1925,
+              355,
+              35353,
+              12973,
+              5145,
+              50,
+              46,
+              53,
+              306,
+              355,
+              6904,
+              531,
+              35353,
+              12973,
+              46,
+              200020,
+              10,
+              200019,
+              3995,
+              10,
+              140186,
+              1094,
+              292,
+              10123,
+              355,
+              296,
+              841,
+              14997,
+              200020,
+              10,
+              200019,
+              1361,
+              10,
+              200050,
+              10
+            ],
+            "cost": "0"
+          },
+          "prompt_tokens": 45,
+          "completion_tokens": 50,
+          "total_tokens": 95,
+          "cost": 0.0,
+          "content_len": 235,
+          "finish_reason": "length",
+          "tokens_per_second": 35.38,
+          "model_used": "accounts/fireworks/models/minimax-m2p5",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 1617.61,
+          "body": {
+            "id": "chatcmpl-098b72d6a6b54980ada5a87fbb5a521d",
+            "object": "chat.completion",
+            "created": 1779145306,
+            "model": "accounts/fireworks/models/minimax-m2p5",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "The user is asking for a haiku about coding. A haiku is a traditional Japanese form of poetry with three lines and a 5-7-5 syllable structure.\n\nLet me write a haiku about coding with the 5-7-5 syllable pattern:\n\nLine 1 (5 syllables): \"Code flows through my hands\" - Co-de-flows-through-my-hands = 5"
+                },
+                "finish_reason": "length",
+                "token_ids": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 43,
+              "total_tokens": 123,
+              "completion_tokens": 80,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              }
+            },
+            "prompt_token_ids": [
+              200019,
+              28463,
+              10,
+              2985,
+              457,
+              258,
+              12473,
+              23413,
+              46,
+              5324,
+              1925,
+              355,
+              35353,
+              12973,
+              5145,
+              50,
+              46,
+              53,
+              306,
+              355,
+              6904,
+              531,
+              35353,
+              12973,
+              46,
+              200020,
+              10,
+              200019,
+              3995,
+              10,
+              20768,
+              258,
+              501,
+              49884,
+              894,
+              23688,
+              200020,
+              10,
+              200019,
+              1361,
+              10,
+              200050,
+              10
+            ],
+            "cost": "0"
+          },
+          "prompt_tokens": 43,
+          "completion_tokens": 80,
+          "total_tokens": 123,
+          "cost": 0.0,
+          "content_len": 298,
+          "finish_reason": "length",
+          "tokens_per_second": 49.46,
+          "model_used": "accounts/fireworks/models/minimax-m2p5",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        1134.0,
+        3384.52,
+        1043.86,
+        1413.21,
+        1617.61
+      ],
+      "tokens_per_sec": [
+        8.82,
+        29.55,
+        9.58,
+        35.38,
+        49.46
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        53,
+        146,
+        59,
+        95,
+        123
+      ],
+      "vision": false,
+      "avg_latency_ms": 1718.64,
+      "min_latency_ms": 1043.86,
+      "max_latency_ms": 3384.52,
+      "avg_tokens_per_second": 26.56,
+      "max_tokens_per_second": 49.46,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 95.2,
+      "total_tokens_used": 476,
+      "success_rate": 100.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "kimi-k2.6",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 2080.4,
+          "body": {
+            "id": "gen-1779145307-sWNyY4iSnXiVzMbdr2FX",
+            "object": "chat.completion",
+            "created": 1779145307,
+            "model": "moonshotai/kimi-k2.6-20260420",
+            "provider": "Moonshot AI",
+            "system_fingerprint": "fpv0_decccfaf",
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "The user wants me to reply with exactly \"",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "The user wants me to reply with exactly \"",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 13,
+              "completion_tokens": 10,
+              "total_tokens": 23,
+              "cost": 0,
+              "is_byok": true,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 5.235e-05,
+                "upstream_inference_prompt_cost": 1.235e-05,
+                "upstream_inference_completions_cost": 4e-05
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 11,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 13,
+          "completion_tokens": 10,
+          "total_tokens": 23,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 4.81,
+          "model_used": "moonshotai/kimi-k2.6-20260420",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 3147.45,
+          "body": {
+            "id": "gen-1779145309-reh4kVdBKnZmkfq6Ng9M",
+            "object": "chat.completion",
+            "created": 1779145309,
+            "model": "moonshotai/kimi-k2.6-20260420",
+            "provider": "Moonshot AI",
+            "system_fingerprint": "fpv0_decccfaf",
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "The user now wants a short Python function to reverse a string. This request is quite straightforward\u2014I need to consider how to implement it concisely and efficiently.  \n\nFirst, I think about the basic approach: Python\u2019s string slicing is the most convenient. Using `[::-1]` can achieve string reversal in one go, making it both concise and Pythonic. However, I should also consider whether the user might want other implementation methods.  \n\nLet me think about how to structure this response. It should",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "The user now wants a short Python function to reverse a string. This request is quite straightforward\u2014I need to consider how to implement it concisely and efficiently.  \n\nFirst, I think about the basic approach: Python\u2019s string slicing is the most convenient. Using `[::-1]` can achieve string reversal in one go, making it both concise and Pythonic. However, I should also consider whether the user might want other implementation methods.  \n\nLet me think about how to structure this response. It should",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 16,
+              "completion_tokens": 100,
+              "total_tokens": 116,
+              "cost": 0,
+              "is_byok": true,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 0.0004152,
+                "upstream_inference_prompt_cost": 1.52e-05,
+                "upstream_inference_completions_cost": 0.0004
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 131,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 16,
+          "completion_tokens": 100,
+          "total_tokens": 116,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 31.77,
+          "model_used": "moonshotai/kimi-k2.6-20260420",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 1776.11,
+          "body": {
+            "id": "gen-1779145312-ZkuUSzvwtQDlMG3Al3AQ",
+            "object": "chat.completion",
+            "created": 1779145312,
+            "model": "moonshotai/kimi-k2.6-20260420",
+            "provider": "Moonshot AI",
+            "system_fingerprint": "fpv0_decccfaf",
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "The user is asking for the result of ",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "The user is asking for the result of ",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 19,
+              "completion_tokens": 10,
+              "total_tokens": 29,
+              "cost": 0,
+              "is_byok": true,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 5.805e-05,
+                "upstream_inference_prompt_cost": 1.805e-05,
+                "upstream_inference_completions_cost": 4e-05
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 10,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 19,
+          "completion_tokens": 10,
+          "total_tokens": 29,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 5.63,
+          "model_used": "moonshotai/kimi-k2.6-20260420",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 2186.33,
+          "body": {
+            "id": "gen-1779145314-MsJBntKLli48X6O9PUCz",
+            "object": "chat.completion",
+            "created": 1779145314,
+            "model": "moonshotai/kimi-k2.6-20260420",
+            "provider": "Moonshot AI",
+            "system_fingerprint": "fpv0_73456deb",
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "The user wants a one-sentence explanation of what an API is. I need to be concise but accurate.\n\nKey concepts to include:\n- API stands for Application Programming Interface\n- It's a set of rules/protocols/tools\n- It allows different",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "The user wants a one-sentence explanation of what an API is. I need to be concise but accurate.\n\nKey concepts to include:\n- API stands for Application Programming Interface\n- It's a set of rules/protocols/tools\n- It allows different",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 15,
+              "completion_tokens": 50,
+              "total_tokens": 65,
+              "cost": 0,
+              "is_byok": true,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 0.00021425,
+                "upstream_inference_prompt_cost": 1.425e-05,
+                "upstream_inference_completions_cost": 0.0002
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 62,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 15,
+          "completion_tokens": 50,
+          "total_tokens": 65,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 22.87,
+          "model_used": "moonshotai/kimi-k2.6-20260420",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 2737.62,
+          "body": {
+            "id": "gen-1779145316-FDIM4nGe5T3hpvaAo3F9",
+            "object": "chat.completion",
+            "created": 1779145316,
+            "model": "moonshotai/kimi-k2.6-20260420",
+            "provider": "Moonshot AI",
+            "system_fingerprint": "fpv0_5989ad0a",
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "The user wants a haiku about coding. A haiku is a traditional Japanese form of poetry with:\n- 3 lines\n- 5 syllables in the first line\n- 7 syllables in the second line  \n- 5 syllables in the third line\n- Often focuses on nature or seasons, but modern haikus can be about anything\n\nI need to write a ha",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "The user wants a haiku about coding. A haiku is a traditional Japanese form of poetry with:\n- 3 lines\n- 5 syllables in the first line\n- 7 syllables in the second line  \n- 5 syllables in the third line\n- Often focuses on nature or seasons, but modern haikus can be about anything\n\nI need to write a ha",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 13,
+              "completion_tokens": 80,
+              "total_tokens": 93,
+              "cost": 0,
+              "is_byok": true,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 0.00033235,
+                "upstream_inference_prompt_cost": 1.235e-05,
+                "upstream_inference_completions_cost": 0.00032
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 81,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 13,
+          "completion_tokens": 80,
+          "total_tokens": 93,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 29.22,
+          "model_used": "moonshotai/kimi-k2.6-20260420",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        2080.4,
+        3147.45,
+        1776.11,
+        2186.33,
+        2737.62
+      ],
+      "tokens_per_sec": [
+        4.81,
+        31.77,
+        5.63,
+        22.87,
+        29.22
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        23,
+        116,
+        29,
+        65,
+        93
+      ],
+      "vision": false,
+      "avg_latency_ms": 2385.58,
+      "min_latency_ms": 1776.11,
+      "max_latency_ms": 3147.45,
+      "avg_tokens_per_second": 18.86,
+      "max_tokens_per_second": 31.77,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 65.2,
+      "total_tokens_used": 326,
+      "success_rate": 100.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "kimi-k2.5",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 1533.75,
+          "body": {
+            "id": "gen-1779145320-4capN3TIjVuemxhZMUHN",
+            "object": "chat.completion",
+            "created": 1779145320,
+            "model": "moonshotai/kimi-k2.5-0127",
+            "provider": "Moonshot AI",
+            "system_fingerprint": "fpv0_26d9c55c",
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "The user wants me to reply with exactly \"",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "The user wants me to reply with exactly \"",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 13,
+              "completion_tokens": 10,
+              "total_tokens": 23,
+              "cost": 0,
+              "is_byok": true,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 3.78e-05,
+                "upstream_inference_prompt_cost": 7.8e-06,
+                "upstream_inference_completions_cost": 3e-05
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 11,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 13,
+          "completion_tokens": 10,
+          "total_tokens": 23,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 6.52,
+          "model_used": "moonshotai/kimi-k2.5-0127",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 2844.58,
+          "body": {
+            "id": "gen-1779145321-eEDat5imx3N4KRqGGKGS",
+            "object": "chat.completion",
+            "created": 1779145321,
+            "model": "moonshotai/kimi-k2.5-0127",
+            "provider": "Moonshot AI",
+            "system_fingerprint": "fpv0_8564719c",
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "The user wants a short Python function to reverse a string. This is a common task in Python with several approaches:\n\n1. Slicing: `s[::-1]` - most Pythonic, shortest\n2. `reversed()` function with `join()`: `''.join(reversed(s))`\n3. Manual loop: building string backwards\n4. Recursion (not recommended for long strings due to stack limits)\n\nSince they asked for \"short\", the slicing method is best",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "The user wants a short Python function to reverse a string. This is a common task in Python with several approaches:\n\n1. Slicing: `s[::-1]` - most Pythonic, shortest\n2. `reversed()` function with `join()`: `''.join(reversed(s))`\n3. Manual loop: building string backwards\n4. Recursion (not recommended for long strings due to stack limits)\n\nSince they asked for \"short\", the slicing method is best",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 16,
+              "completion_tokens": 100,
+              "total_tokens": 116,
+              "cost": 0,
+              "is_byok": true,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 0.0003096,
+                "upstream_inference_prompt_cost": 9.6e-06,
+                "upstream_inference_completions_cost": 0.0003
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 105,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 16,
+          "completion_tokens": 100,
+          "total_tokens": 116,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 35.15,
+          "model_used": "moonshotai/kimi-k2.5-0127",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 1443.08,
+          "body": {
+            "id": "gen-1779145324-l80Zd4bcXKDAZSiHkbKp",
+            "object": "chat.completion",
+            "created": 1779145324,
+            "model": "moonshotai/kimi-k2.5-0127",
+            "provider": "Moonshot AI",
+            "system_fingerprint": "fpv0_26d9c55c",
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "The user is asking for the answer to ",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "The user is asking for the answer to ",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 19,
+              "completion_tokens": 10,
+              "total_tokens": 29,
+              "cost": 0,
+              "is_byok": true,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 4.14e-05,
+                "upstream_inference_prompt_cost": 1.14e-05,
+                "upstream_inference_completions_cost": 3e-05
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 10,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 19,
+          "completion_tokens": 10,
+          "total_tokens": 29,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 6.93,
+          "model_used": "moonshotai/kimi-k2.5-0127",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 2425.82,
+          "body": {
+            "id": "gen-1779145325-5Y044X5uUZPMZ2pw2xne",
+            "object": "chat.completion",
+            "created": 1779145325,
+            "model": "moonshotai/kimi-k2.5-0127",
+            "provider": "Moonshot AI",
+            "system_fingerprint": "fpv0_26d9c55c",
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "The user wants a one-sentence explanation of what an API is. I need to be concise but accurate.\n\n Key concepts to include:\n - API stands for Application Programming Interface\n - It's a set of rules/protocols/tools\n - It allows different",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "The user wants a one-sentence explanation of what an API is. I need to be concise but accurate.\n\n Key concepts to include:\n - API stands for Application Programming Interface\n - It's a set of rules/protocols/tools\n - It allows different",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 15,
+              "completion_tokens": 50,
+              "total_tokens": 65,
+              "cost": 0,
+              "is_byok": true,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 0.000159,
+                "upstream_inference_prompt_cost": 9e-06,
+                "upstream_inference_completions_cost": 0.00015
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 63,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 15,
+          "completion_tokens": 50,
+          "total_tokens": 65,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 20.61,
+          "model_used": "moonshotai/kimi-k2.5-0127",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 2845.95,
+          "body": {
+            "id": "gen-1779145328-YXYd3XAoZdiHuJSciwXb",
+            "object": "chat.completion",
+            "created": 1779145328,
+            "model": "moonshotai/kimi-k2.5-0127",
+            "provider": "Moonshot AI",
+            "system_fingerprint": "fpv0_26d9c55c",
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "The user wants a haiku about coding. A haiku is a traditional Japanese form of poetry with:\n- 3 lines\n- 5 syllables in the first line\n- 7 syllables in the second line  \n- 5 syllables in the third line\n- Total of 17 syllables\n\nI need to write something evocative about coding/programming that fits this structure.\n\n",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "The user wants a haiku about coding. A haiku is a traditional Japanese form of poetry with:\n- 3 lines\n- 5 syllables in the first line\n- 7 syllables in the second line  \n- 5 syllables in the third line\n- Total of 17 syllables\n\nI need to write something evocative about coding/programming that fits this structure.\n\n",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 13,
+              "completion_tokens": 80,
+              "total_tokens": 93,
+              "cost": 0,
+              "is_byok": true,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 0.0002478,
+                "upstream_inference_prompt_cost": 7.8e-06,
+                "upstream_inference_completions_cost": 0.00024
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 86,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 13,
+          "completion_tokens": 80,
+          "total_tokens": 93,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 28.11,
+          "model_used": "moonshotai/kimi-k2.5-0127",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        1533.75,
+        2844.58,
+        1443.08,
+        2425.82,
+        2845.95
+      ],
+      "tokens_per_sec": [
+        6.52,
+        35.15,
+        6.93,
+        20.61,
+        28.11
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        23,
+        116,
+        29,
+        65,
+        93
+      ],
+      "vision": false,
+      "avg_latency_ms": 2218.64,
+      "min_latency_ms": 1443.08,
+      "max_latency_ms": 2845.95,
+      "avg_tokens_per_second": 19.46,
+      "max_tokens_per_second": 35.15,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 65.2,
+      "total_tokens_used": 326,
+      "success_rate": 100.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "glm-5.1",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 1755.52,
+          "body": {
+            "id": "chatcmpl-RHvn7iy6L1DD7W4X5RyPwJIe",
+            "object": "chat.completion",
+            "created": 1779145332,
+            "model": "frank/GLM-5.1",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "1.  **Analyze the Request:**\n",
+                  "name": null,
+                  "tool_calls": []
+                },
+                "finish_reason": "length",
+                "logprobs": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 11,
+              "total_tokens": 21,
+              "completion_tokens": 10,
+              "estimated_cost": 0,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": null
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 11,
+          "completion_tokens": 10,
+          "total_tokens": 21,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 5.7,
+          "model_used": "frank/GLM-5.1",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 2315.98,
+          "body": {
+            "id": "chatcmpl-R5CXIIUttp2EPJ8jWnP5LRQo",
+            "object": "chat.completion",
+            "created": 1779145334,
+            "model": "frank/GLM-5.1",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "1.  **Understand the Goal**: The user wants a short Python function to reverse a string.\n2.  **Identify the Best Approach**: In Python, the most idiomatic, efficient, and shortest way to reverse a string is using slicing: `s[::-1]`.\n3.  **Alternative Approaches (Optional but good for context)**:\n    *   `reversed()` + `join()`: `\"\".join(reversed(s))`\n    *   Loop (less Python",
+                  "name": null,
+                  "tool_calls": []
+                },
+                "finish_reason": "length",
+                "logprobs": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 14,
+              "total_tokens": 114,
+              "completion_tokens": 100,
+              "estimated_cost": 0,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": null
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 14,
+          "completion_tokens": 100,
+          "total_tokens": 114,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 43.18,
+          "model_used": "frank/GLM-5.1",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 1802.35,
+          "body": {
+            "id": "chatcmpl-RvAMx6cxV7T767f9E8x07Okd",
+            "object": "chat.completion",
+            "created": 1779145336,
+            "model": "frank/GLM-5.1",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "1.  **Analyze the Request:**\n",
+                  "name": null,
+                  "tool_calls": []
+                },
+                "finish_reason": "length",
+                "logprobs": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 17,
+              "total_tokens": 27,
+              "completion_tokens": 10,
+              "estimated_cost": 0,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": null
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 17,
+          "completion_tokens": 10,
+          "total_tokens": 27,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 5.55,
+          "model_used": "frank/GLM-5.1",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 1536.19,
+          "body": {
+            "id": "chatcmpl-RbRomG51vB4sxlxR3inOJF1A",
+            "object": "chat.completion",
+            "created": 1779145338,
+            "model": "frank/GLM-5.1",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "1.  **Analyze the Request:**\n    *   **Topic:** API (Application Programming Interface)\n    *   **Constraint:** Exactly one sentence.\n    *   **Goal:** Explain what it is clearly and concisely.\n\n2.",
+                  "name": null,
+                  "tool_calls": []
+                },
+                "finish_reason": "length",
+                "logprobs": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 14,
+              "total_tokens": 64,
+              "completion_tokens": 50,
+              "estimated_cost": 0,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": null
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 14,
+          "completion_tokens": 50,
+          "total_tokens": 64,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 32.55,
+          "model_used": "frank/GLM-5.1",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 1779.69,
+          "body": {
+            "id": "chatcmpl-RL3ae8Gsl62BnMqoLihyKQDQ",
+            "object": "chat.completion",
+            "created": 1779145340,
+            "model": "frank/GLM-5.1",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "1.  **Analyze the Request:**\n    *   Topic: Coding\n    *   Format: Haiku (5-7-5 syllables)\n\n2.  **Brainstorming concepts about coding:**\n    *   Bugs, debugging\n    *   Screens, typing, keys\n    *   Logic, loops, functions\n    *   Late nights, coffee\n    *",
+                  "name": null,
+                  "tool_calls": []
+                },
+                "finish_reason": "length",
+                "logprobs": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 11,
+              "total_tokens": 91,
+              "completion_tokens": 80,
+              "estimated_cost": 0,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": null
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 11,
+          "completion_tokens": 80,
+          "total_tokens": 91,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 44.95,
+          "model_used": "frank/GLM-5.1",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        1755.52,
+        2315.98,
+        1802.35,
+        1536.19,
+        1779.69
+      ],
+      "tokens_per_sec": [
+        5.7,
+        43.18,
+        5.55,
+        32.55,
+        44.95
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        21,
+        114,
+        27,
+        64,
+        91
+      ],
+      "vision": false,
+      "avg_latency_ms": 1837.95,
+      "min_latency_ms": 1536.19,
+      "max_latency_ms": 2315.98,
+      "avg_tokens_per_second": 26.39,
+      "max_tokens_per_second": 44.95,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 63.4,
+      "total_tokens_used": 317,
+      "success_rate": 100.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "glm-5",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 1352.5,
+          "body": {
+            "id": "chatcmpl-ReEzaFAsu57HOAcvWlBjUfmE",
+            "object": "chat.completion",
+            "created": 1779145346,
+            "model": "frank/GLM-5.1",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "1.  **Analyze the Request:**\n",
+                  "name": null,
+                  "tool_calls": []
+                },
+                "finish_reason": "length",
+                "logprobs": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 11,
+              "total_tokens": 21,
+              "completion_tokens": 10,
+              "estimated_cost": 0,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": null
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 11,
+          "completion_tokens": 10,
+          "total_tokens": 21,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 7.39,
+          "model_used": "frank/GLM-5.1",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 2501.13,
+          "body": {
+            "id": "chatcmpl-RcQNr4H6ni4vWO7LoLVQ2DWc",
+            "object": "chat.completion",
+            "created": 1779145348,
+            "model": "frank/GLM-5.1",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "1.  **Understand the Goal:** The user wants a short Python function to reverse a string.\n2.  **Identify the Best Pythonic Approach:** In Python, the most idiomatic and concise way to reverse a string is using slicing: `string[::-1]`.\n3.  **Consider Alternatives (for completeness/brevity):**\n    *   Slicing (best): `s[::-1]`\n    *   `reversed()` built-in: `\"\".join(re",
+                  "name": null,
+                  "tool_calls": []
+                },
+                "finish_reason": "length",
+                "logprobs": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 14,
+              "total_tokens": 114,
+              "completion_tokens": 100,
+              "estimated_cost": 0,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": null
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 14,
+          "completion_tokens": 100,
+          "total_tokens": 114,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 39.98,
+          "model_used": "frank/GLM-5.1",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 2021.55,
+          "body": {
+            "id": "chatcmpl-RimDldqOQw3lPH9OF1Gpl4dv",
+            "object": "chat.completion",
+            "created": 1779145351,
+            "model": "frank/GLM-5.1",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "1.  **Analyze the Request:**\n",
+                  "name": null,
+                  "tool_calls": []
+                },
+                "finish_reason": "length",
+                "logprobs": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 17,
+              "total_tokens": 27,
+              "completion_tokens": 10,
+              "estimated_cost": 0,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": null
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 17,
+          "completion_tokens": 10,
+          "total_tokens": 27,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 4.95,
+          "model_used": "frank/GLM-5.1",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 1620.01,
+          "body": {
+            "id": "chatcmpl-RJU56eeykQnodeT1myUb85cf",
+            "object": "chat.completion",
+            "created": 1779145352,
+            "model": "frank/GLM-5.1",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "1.  **Analyze the Request:**\n    *   Topic: Explain what an API (Application Programming Interface) is.\n    *   Constraint: Exactly one sentence.\n\n2.  **Define API:**\n    *   What is it?",
+                  "name": null,
+                  "tool_calls": []
+                },
+                "finish_reason": "length",
+                "logprobs": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 14,
+              "total_tokens": 64,
+              "completion_tokens": 50,
+              "estimated_cost": 0,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": null
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 14,
+          "completion_tokens": 50,
+          "total_tokens": 64,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 30.86,
+          "model_used": "frank/GLM-5.1",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 1419.85,
+          "body": {
+            "id": "chatcmpl-RzXoGRk276PvyeJl7Uq1CIbg",
+            "object": "chat.completion",
+            "created": 1779145354,
+            "model": "frank/GLM-5.1",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "1.  **Analyze the Request:**\n    *   Topic: Coding\n    *   Format: Haiku (5-7-5 syllable structure)\n\n2.  **Brainstorming concepts about coding:**\n    *   Bugs, errors, debugging\n    *   Typing, keyboards, screens\n    *   Logic, loops, syntax\n    *   Problem-solving,",
+                  "name": null,
+                  "tool_calls": []
+                },
+                "finish_reason": "length",
+                "logprobs": null
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 11,
+              "total_tokens": 91,
+              "completion_tokens": 80,
+              "estimated_cost": 0,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": null
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 11,
+          "completion_tokens": 80,
+          "total_tokens": 91,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 56.34,
+          "model_used": "frank/GLM-5.1",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        1352.5,
+        2501.13,
+        2021.55,
+        1620.01,
+        1419.85
+      ],
+      "tokens_per_sec": [
+        7.39,
+        39.98,
+        4.95,
+        30.86,
+        56.34
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        21,
+        114,
+        27,
+        64,
+        91
+      ],
+      "vision": false,
+      "avg_latency_ms": 1783.01,
+      "min_latency_ms": 1352.5,
+      "max_latency_ms": 2501.13,
+      "avg_tokens_per_second": 27.9,
+      "max_tokens_per_second": 56.34,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 63.4,
+      "total_tokens_used": 317,
+      "success_rate": 100.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "deepseek-v4-pro",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 2618.25,
+          "body": {
+            "id": "89175524-18bb-4974-b0ad-b86016c808a0",
+            "object": "chat.completion",
+            "created": 1779145359,
+            "model": "deepseek-v4-pro",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "We are asked: \"Reply with exactly: Hello"
+                },
+                "logprobs": null,
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 89,
+              "completion_tokens": 10,
+              "total_tokens": 99,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 10
+              },
+              "prompt_cache_hit_tokens": 0,
+              "prompt_cache_miss_tokens": 89
+            },
+            "system_fingerprint": "fp_9954b31ca7_prod0820_fp8_kvcache_20260402",
+            "cost": "0"
+          },
+          "prompt_tokens": 89,
+          "completion_tokens": 10,
+          "total_tokens": 99,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 3.82,
+          "model_used": "deepseek-v4-pro",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 5368.93,
+          "body": {
+            "id": "22e13907-8786-4deb-bc40-845a8ad97954",
+            "object": "chat.completion",
+            "created": 1779145361,
+            "model": "deepseek-v4-pro",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "We need to write a short Python function to reverse a string. The user wants just that: a function, presumably short and concise.\n\nWe can provide a simple function:\n\ndef reverse_string(s):\n    return s[::-1]\n\nAlternatively, we can use built-in reversed: return ''.join(reversed(s))\n\nBut the slice approach is the most Pythonic and shortest. We'll provide a brief explanation.\n\nWe should ensure the function name is clear and it works for any string.\n\nWe can also mention that"
+                },
+                "logprobs": null,
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 92,
+              "completion_tokens": 100,
+              "total_tokens": 192,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 100
+              },
+              "prompt_cache_hit_tokens": 0,
+              "prompt_cache_miss_tokens": 92
+            },
+            "system_fingerprint": "fp_9954b31ca7_prod0820_fp8_kvcache_20260402",
+            "cost": "0"
+          },
+          "prompt_tokens": 92,
+          "completion_tokens": 100,
+          "total_tokens": 192,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 18.63,
+          "model_used": "deepseek-v4-pro",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 2488.38,
+          "body": {
+            "id": "23a0b16d-2727-49ee-9ae1-5f42fcab1f81",
+            "object": "chat.completion",
+            "created": 1779145367,
+            "model": "deepseek-v4-pro",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "We are asked: \"What is 2+"
+                },
+                "logprobs": null,
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 95,
+              "completion_tokens": 10,
+              "total_tokens": 105,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 10
+              },
+              "prompt_cache_hit_tokens": 0,
+              "prompt_cache_miss_tokens": 95
+            },
+            "system_fingerprint": "fp_9954b31ca7_prod0820_fp8_kvcache_20260402",
+            "cost": "0"
+          },
+          "prompt_tokens": 95,
+          "completion_tokens": 10,
+          "total_tokens": 105,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 4.02,
+          "model_used": "deepseek-v4-pro",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 3522.56,
+          "body": {
+            "id": "2f8184b1-9f4c-4bfd-820b-3a3270975c8f",
+            "object": "chat.completion",
+            "created": 1779145369,
+            "model": "deepseek-v4-pro",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "We need to explain what an API is in one sentence. The user wants a concise, clear definition. An API (Application Programming Interface) is a set of rules and protocols that allows different software applications to communicate with each other. We need to craft"
+                },
+                "logprobs": null,
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 91,
+              "completion_tokens": 50,
+              "total_tokens": 141,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 50
+              },
+              "prompt_cache_hit_tokens": 0,
+              "prompt_cache_miss_tokens": 91
+            },
+            "system_fingerprint": "fp_9954b31ca7_prod0820_fp8_kvcache_20260402",
+            "cost": "0"
+          },
+          "prompt_tokens": 91,
+          "completion_tokens": 50,
+          "total_tokens": 141,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 14.19,
+          "model_used": "deepseek-v4-pro",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 4410.7,
+          "body": {
+            "id": "1ab0bd77-9599-48e4-a407-5f458de03edb",
+            "object": "chat.completion",
+            "created": 1779145372,
+            "model": "deepseek-v4-pro",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "We need to write a haiku about coding. Haiku is a traditional Japanese poem with a 5-7-5 syllable structure. So three lines: first line 5 syllables, second 7 syllables, third 5 syllables. Topic: coding.\n\nLet's create one:\n\nLine 1 (5 syllables): \"Lines of code appear\" (5: lines-of-code-ap-pear?"
+                },
+                "logprobs": null,
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 89,
+              "completion_tokens": 80,
+              "total_tokens": 169,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 80
+              },
+              "prompt_cache_hit_tokens": 0,
+              "prompt_cache_miss_tokens": 89
+            },
+            "system_fingerprint": "fp_9954b31ca7_prod0820_fp8_kvcache_20260402",
+            "cost": "0"
+          },
+          "prompt_tokens": 89,
+          "completion_tokens": 80,
+          "total_tokens": 169,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 18.14,
+          "model_used": "deepseek-v4-pro",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        2618.25,
+        5368.93,
+        2488.38,
+        3522.56,
+        4410.7
+      ],
+      "tokens_per_sec": [
+        3.82,
+        18.63,
+        4.02,
+        14.19,
+        18.14
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        99,
+        192,
+        105,
+        141,
+        169
+      ],
+      "vision": false,
+      "avg_latency_ms": 3681.76,
+      "min_latency_ms": 2488.38,
+      "max_latency_ms": 5368.93,
+      "avg_tokens_per_second": 11.76,
+      "max_tokens_per_second": 18.63,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 141.2,
+      "total_tokens_used": 706,
+      "success_rate": 100.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "deepseek-v4-flash",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 1740.53,
+          "body": {
+            "id": "01c82cb9-41e3-49e9-97f5-7bf26e4480cf",
+            "object": "chat.completion",
+            "created": 1779145378,
+            "model": "deepseek-v4-flash",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "We are asked to reply with exactly: Hello world"
+                },
+                "logprobs": null,
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 89,
+              "completion_tokens": 10,
+              "total_tokens": 99,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 10
+              },
+              "prompt_cache_hit_tokens": 0,
+              "prompt_cache_miss_tokens": 89
+            },
+            "system_fingerprint": "fp_8b330d02d0_prod0820_fp8_kvcache_20260402",
+            "cost": "0"
+          },
+          "prompt_tokens": 89,
+          "completion_tokens": 10,
+          "total_tokens": 99,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 5.75,
+          "model_used": "deepseek-v4-flash",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 2018.5,
+          "body": {
+            "id": "17c28029-c558-4db3-9eb0-21fcc3143457",
+            "object": "chat.completion",
+            "created": 1779145380,
+            "model": "deepseek-v4-flash",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "We need to write a short Python function to reverse a string. The user wants \"a short Python function to reverse a string\". So we should define a function, perhaps named reverse_string, that takes a string and returns the reversed string. Should be concise. We can use slicing: s[::-1] is the simplest. Or we can use reversed() and join. But slicing is shortest.\n\nWe need to consider that the user might want an explanation? The instruction is just \"Write a short Python"
+                },
+                "logprobs": null,
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 92,
+              "completion_tokens": 100,
+              "total_tokens": 192,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 100
+              },
+              "prompt_cache_hit_tokens": 0,
+              "prompt_cache_miss_tokens": 92
+            },
+            "system_fingerprint": "fp_8b330d02d0_prod0820_fp8_kvcache_20260402",
+            "cost": "0"
+          },
+          "prompt_tokens": 92,
+          "completion_tokens": 100,
+          "total_tokens": 192,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 49.54,
+          "model_used": "deepseek-v4-flash",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 1459.07,
+          "body": {
+            "id": "5efe87b9-db3f-4ead-b0eb-b7ac5c1312ed",
+            "object": "chat.completion",
+            "created": 1779145382,
+            "model": "deepseek-v4-flash",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "We are asked: \"What is 2+"
+                },
+                "logprobs": null,
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 95,
+              "completion_tokens": 10,
+              "total_tokens": 105,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 10
+              },
+              "prompt_cache_hit_tokens": 0,
+              "prompt_cache_miss_tokens": 95
+            },
+            "system_fingerprint": "fp_8b330d02d0_prod0820_fp8_kvcache_20260402",
+            "cost": "0"
+          },
+          "prompt_tokens": 95,
+          "completion_tokens": 10,
+          "total_tokens": 105,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 6.85,
+          "model_used": "deepseek-v4-flash",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 1641.63,
+          "body": {
+            "id": "e470852d-e533-4495-97d2-68fb29f3eafd",
+            "object": "chat.completion",
+            "created": 1779145383,
+            "model": "deepseek-v4-flash",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "Thinking. 1.  **Analyze the Request:**\n    *   Goal: Explain what an API is.\n    *   Constraint: *One sentence*.\n\n2.  **Define the Core Concept:**\n    *   API stands"
+                },
+                "logprobs": null,
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 91,
+              "completion_tokens": 50,
+              "total_tokens": 141,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 50
+              },
+              "prompt_cache_hit_tokens": 0,
+              "prompt_cache_miss_tokens": 91
+            },
+            "system_fingerprint": "fp_8b330d02d0_prod0820_fp8_kvcache_20260402",
+            "cost": "0"
+          },
+          "prompt_tokens": 91,
+          "completion_tokens": 50,
+          "total_tokens": 141,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 30.46,
+          "model_used": "deepseek-v4-flash",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 2048.9,
+          "body": {
+            "id": "268725e7-5220-434b-b5e9-af5e2da2f770",
+            "object": "chat.completion",
+            "created": 1779145385,
+            "model": "deepseek-v4-flash",
+            "choices": [
+              {
+                "index": 0,
+                "message": {
+                  "role": "assistant",
+                  "content": "",
+                  "reasoning_content": "Thinking. 1.  **Analyze the Request:**\n    *   Task: Write a haiku.\n    *   Subject: Coding.\n    *   Format: Haiku (traditional structure: 5 syllables / 7 syllables / 5 syllables).\n    *   Target Audience/Context: General, probably appealing to programmers.\n    *   Tone: Can be reflective, witty, expressive"
+                },
+                "logprobs": null,
+                "finish_reason": "length"
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 89,
+              "completion_tokens": 80,
+              "total_tokens": 169,
+              "prompt_tokens_details": {
+                "cached_tokens": 0
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 80
+              },
+              "prompt_cache_hit_tokens": 0,
+              "prompt_cache_miss_tokens": 89
+            },
+            "system_fingerprint": "fp_8b330d02d0_prod0820_fp8_kvcache_20260402",
+            "cost": "0"
+          },
+          "prompt_tokens": 89,
+          "completion_tokens": 80,
+          "total_tokens": 169,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 39.05,
+          "model_used": "deepseek-v4-flash",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        1740.53,
+        2018.5,
+        1459.07,
+        1641.63,
+        2048.9
+      ],
+      "tokens_per_sec": [
+        5.75,
+        49.54,
+        6.85,
+        30.46,
+        39.05
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        99,
+        192,
+        105,
+        141,
+        169
+      ],
+      "vision": false,
+      "avg_latency_ms": 1781.73,
+      "min_latency_ms": 1459.07,
+      "max_latency_ms": 2048.9,
+      "avg_tokens_per_second": 26.33,
+      "max_tokens_per_second": 49.54,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 141.2,
+      "total_tokens_used": 706,
+      "success_rate": 100.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "qwen3.6-plus",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 6777.11,
+          "body": {
+            "choices": [
+              {
+                "message": {
+                  "content": "Hello world",
+                  "reasoning_content": "Here's a thinking process:\n\n1.  **Analyze User Input:**\n   - User says: \"Reply with exactly: Hello world\"\n   - The instruction is clear and specific: I must reply with exactly the phrase \"Hello world\" (without quotes, and presumably matching capitalization and spacing).\n\n2.  **Identify Constraints:**\n   - \"Reply with exactly:\" means no additional text, greetings, explanations, or formatting beyond the specified string.\n   - The target string is \"Hello world\".\n\n3.  **Formulate Response:**\n   - Simply output: Hello world\n   - Check for exact match: \"Hello world\" vs \"Hello world\" -> matches exactly.\n   - Ensure no extra characters, spaces, or newlines are added unintentionally.\n\n4.  **Final Output Generation:**\n   - Output: Hello world\n   - Self-Correction/Verification during thought: \n     - Does it need quotes? No, the instruction says \"exactly: Hello world\", implying the text itself.\n     - Capitalization: \"Hello world\" (H capitalized, w lowercase).\n     - Spacing: Single space.\n     - Matches exactly.\n\n   Proceed. \n   Output matches requirement.\u2705",
+                  "role": "assistant"
+                },
+                "finish_reason": "stop",
+                "index": 0,
+                "logprobs": null
+              }
+            ],
+            "object": "chat.completion",
+            "usage": {
+              "prompt_tokens": 16,
+              "completion_tokens": 265,
+              "total_tokens": 281,
+              "completion_tokens_details": {
+                "reasoning_tokens": 259,
+                "text_tokens": 265
+              },
+              "prompt_tokens_details": {
+                "text_tokens": 16
+              }
+            },
+            "created": 1779145394,
+            "system_fingerprint": null,
+            "model": "qwen3.6-plus",
+            "id": "chatcmpl-bdf469cf-0284-4cf1-84cd-32626fb2ba95",
+            "cost": "0"
+          },
+          "prompt_tokens": 16,
+          "completion_tokens": 265,
+          "total_tokens": 281,
+          "cost": 0.0,
+          "content_len": 11,
+          "finish_reason": "stop",
+          "tokens_per_second": 39.1,
+          "model_used": "qwen3.6-plus",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 10558.67,
+          "body": {
+            "choices": [
+              {
+                "message": {
+                  "content": "Here's the most Pythonic and concise way:\n\n```python\ndef reverse_string(s):\n    return s[::-1]\n```\n\n**How it works:** Python's slice notation `[::-1]` means \"start to end, stepping backwards by 1\", which efficiently reverses the string.\n\n**Example usage:**\n```python\nprint(reverse_string(\"hello\"))  # Output: olleh\n```",
+                  "reasoning_content": "Here's a thinking process:\n\n1.  **Understand User Request**: The user wants a short Python function to reverse a string.\n2.  **Identify Key Requirements**:\n   - Input: A string\n   - Output: The reversed string\n   - Language: Python\n   - Constraint: Short/concise\n3.  **Consider Python Idioms for String Reversal**:\n   - Slicing: `s[::-1]` (most common, Pythonic, efficient)\n   - `reversed()` + `join()`: `''.join(reversed(s))`\n   - Loop/Recursion: Less efficient, not \"short\"\n4.  **Select Best Approach**: Slicing is the shortest and most Pythonic.\n5.  **Draft Function**:\n   ```python\n   def reverse_string(s):\n       return s[::-1]\n   ```\n6.  **Verify**:\n   - Input: `\"hello\"` -> Output: `\"olleh\"` \u2713\n   - Handles empty strings: `\"\"` -> `\"\"` \u2713\n   - Handles special characters/spaces: Works \u2713\n   - Short? Yes, 2 lines.\n7.  **Add Context/Explanation (Optional but helpful)**: Briefly explain how it works (slicing with step -1) and maybe show an example.\n8.  **Final Output Generation**: Present the function clearly, optionally with a usage example. Keep it concise as requested.\n\n   ```python\n   def reverse_string(s):\n       return s[::-1]\n   ```\n   Add a short note about how it works. Ensure it's ready.\u2705",
+                  "role": "assistant"
+                },
+                "finish_reason": "stop",
+                "index": 0,
+                "logprobs": null
+              }
+            ],
+            "object": "chat.completion",
+            "usage": {
+              "prompt_tokens": 19,
+              "completion_tokens": 436,
+              "total_tokens": 455,
+              "completion_tokens_details": {
+                "reasoning_tokens": 346,
+                "text_tokens": 436
+              },
+              "prompt_tokens_details": {
+                "text_tokens": 19
+              }
+            },
+            "created": 1779145405,
+            "system_fingerprint": null,
+            "model": "qwen3.6-plus",
+            "id": "chatcmpl-5f15b8ee-d2a9-453c-b86e-a0c38063aa44",
+            "cost": "0"
+          },
+          "prompt_tokens": 19,
+          "completion_tokens": 436,
+          "total_tokens": 455,
+          "cost": 0.0,
+          "content_len": 318,
+          "finish_reason": "stop",
+          "tokens_per_second": 41.29,
+          "model_used": "qwen3.6-plus",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 4214.04,
+          "body": {
+            "choices": [
+              {
+                "message": {
+                  "content": "4",
+                  "reasoning_content": "Here's a thinking process:\n\n1.  **Analyze User Input:**\n   - Question: \"What is 2+2?\"\n   - Constraint: \"Reply with just the number\"\n\n2.  **Calculate:**\n   - 2 + 2 = 4\n\n3.  **Apply Constraint:**\n   - Must reply with *just* the number. No extra text, no explanations.\n\n4.  **Formulate Output:**\n   - \"4\"\n\n5.  **Final Check:**\n   - Does it match the constraint? Yes.\n   - Is it correct? Yes.\n\n   Output matches requirement exactly. Proceed. \n   Output: 4",
+                  "role": "assistant"
+                },
+                "finish_reason": "stop",
+                "index": 0,
+                "logprobs": null
+              }
+            ],
+            "object": "chat.completion",
+            "usage": {
+              "prompt_tokens": 22,
+              "completion_tokens": 150,
+              "total_tokens": 172,
+              "completion_tokens_details": {
+                "reasoning_tokens": 144,
+                "text_tokens": 150
+              },
+              "prompt_tokens_details": {
+                "text_tokens": 22
+              }
+            },
+            "created": 1779145409,
+            "system_fingerprint": null,
+            "model": "qwen3.6-plus",
+            "id": "chatcmpl-bdb7ef78-04b8-4837-8817-4bcef53f233b",
+            "cost": "0"
+          },
+          "prompt_tokens": 22,
+          "completion_tokens": 150,
+          "total_tokens": 172,
+          "cost": 0.0,
+          "content_len": 1,
+          "finish_reason": "stop",
+          "tokens_per_second": 35.6,
+          "model_used": "qwen3.6-plus",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 7457.37,
+          "body": {
+            "choices": [
+              {
+                "message": {
+                  "content": "An API is a standardized set of rules and protocols that enables different software applications to communicate and exchange data or functionality with each other.",
+                  "reasoning_content": "Here's a thinking process:\n\n1.  **Analyze User Input:**\n   - **Topic:** API (Application Programming Interface)\n   - **Constraint:** Explain it in exactly one sentence.\n\n2.  **Identify Key Concepts of an API:**\n   - Stands for Application Programming Interface\n   - Acts as a bridge/messenger/contract between different software systems\n   - Allows them to communicate and exchange data/functionality\n   - Standardizes how requests and responses are handled\n\n3.  **Draft - Option 1 (Mental):** An API is a set of rules and protocols that allows different software applications to communicate and exchange data with each other.\n   - Check: One sentence? Yes. Accurate? Yes. Clear? Yes.\n\n4.  **Refine - Option 2 (More precise/concise):** An API is a standardized set of rules that enables different software applications to communicate and share data or functionality with each other.\n   - Check: One sentence? Yes. Covers key aspects? Yes.\n\n5.  **Final Check against Constraint:** \"Explain what an API is in one sentence\" -> Option 2 fits perfectly.\n\n   Let's ensure it's exactly one sentence, clear, and captures the essence without unnecessary jargon.\n   \"An API is a standardized set of rules and protocols that enables different software applications to communicate and exchange data or functionality with each other.\"\n\n   This is one sentence, accurate, and concise.\n\n6.  **Output Generation:** Present the refined sentence.\u2705",
+                  "role": "assistant"
+                },
+                "finish_reason": "stop",
+                "index": 0,
+                "logprobs": null
+              }
+            ],
+            "object": "chat.completion",
+            "usage": {
+              "prompt_tokens": 19,
+              "completion_tokens": 351,
+              "total_tokens": 370,
+              "completion_tokens_details": {
+                "reasoning_tokens": 320,
+                "text_tokens": 351
+              },
+              "prompt_tokens_details": {
+                "text_tokens": 19
+              }
+            },
+            "created": 1779145417,
+            "system_fingerprint": null,
+            "model": "qwen3.6-plus",
+            "id": "chatcmpl-7816bb84-c95c-4877-80be-8f26ff859688",
+            "cost": "0"
+          },
+          "prompt_tokens": 19,
+          "completion_tokens": 351,
+          "total_tokens": 370,
+          "cost": 0.0,
+          "content_len": 163,
+          "finish_reason": "stop",
+          "tokens_per_second": 47.07,
+          "model_used": "qwen3.6-plus",
+          "test_name": "Definition"
+        },
+        {
+          "success": false,
+          "latency_ms": 60183.92,
+          "error": "The read operation timed out",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 4,
+      "error_count": 1,
+      "latencies": [
+        6777.11,
+        10558.67,
+        4214.04,
+        7457.37
+      ],
+      "tokens_per_sec": [
+        39.1,
+        41.29,
+        35.6,
+        47.07
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        281,
+        455,
+        172,
+        370
+      ],
+      "vision": false,
+      "avg_latency_ms": 7251.8,
+      "min_latency_ms": 4214.04,
+      "max_latency_ms": 10558.67,
+      "avg_tokens_per_second": 40.77,
+      "max_tokens_per_second": 47.07,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 319.5,
+      "total_tokens_used": 1278,
+      "success_rate": 80.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "qwen3.5-plus",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 6349.45,
+          "body": {
+            "choices": [
+              {
+                "message": {
+                  "content": "Hello world",
+                  "reasoning_content": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Input: \"Reply with exactly: Hello world\"\n    *   Constraint: \"exactly\"\n    *   Target Output: \"Hello world\"\n\n2.  **Evaluate Constraints:**\n    *   The user wants *only* the phrase \"Hello world\".\n    *   No additional text, no explanations, no markdown formatting (unless part of the phrase, which it isn't), no greetings, no sign-offs.\n\n3.  **Draft Output:**\n    *   Hello world\n\n4.  **Verify Against Constraints:**\n    *   Does it match \"Hello world\"? Yes.\n    *   Is there anything else? No.\n\n5.  **Final Decision:**\n    *   Output the string \"Hello world\".\n\n6.  **Final Check:**\n    *   Case sensitivity: \"Hello world\" (H capitalized, w lowercase).\n    *   Punctuation: None specified in the target phrase, though often \"Hello world\" implies no period unless specified. The prompt says \"Hello world\", so I will output exactly that.\n\n7.  **Execution:**\n    *   Print \"Hello world\".",
+                  "role": "assistant"
+                },
+                "finish_reason": "stop",
+                "index": 0,
+                "logprobs": null
+              }
+            ],
+            "object": "chat.completion",
+            "usage": {
+              "prompt_tokens": 16,
+              "completion_tokens": 259,
+              "total_tokens": 275,
+              "completion_tokens_details": {
+                "reasoning_tokens": 253,
+                "text_tokens": 259
+              },
+              "prompt_tokens_details": {
+                "text_tokens": 16
+              }
+            },
+            "created": 1779145514,
+            "system_fingerprint": null,
+            "model": "qwen3.5-plus",
+            "id": "chatcmpl-c369b839-21b6-42f5-8cf6-b21b2072011b",
+            "cost": "0"
+          },
+          "prompt_tokens": 16,
+          "completion_tokens": 259,
+          "total_tokens": 275,
+          "cost": 0.0,
+          "content_len": 11,
+          "finish_reason": "stop",
+          "tokens_per_second": 40.79,
+          "model_used": "qwen3.5-plus",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 6062.18,
+          "body": {
+            "choices": [
+              {
+                "message": {
+                  "content": "Here's a simple Python function to reverse a string using slicing, which is the most Pythonic and efficient method:\n\n```python\ndef reverse_string(s):\n    return s[::-1]\n```\n\n**Example usage:**\n```python\nprint(reverse_string(\"hello\"))  # Output: \"olleh\"\nprint(reverse_string(\"Python\")) # Output: \"nohtyP\"\n```\n\n**How it works:**  \nThe slice notation `[::-1]` creates a reversed copy of the string",
+                  "reasoning_content": "The user wants a simple Python function to reverse a string. This is a straightforward task. I'll provide a clean, simple solution with a brief explanation.\n\nThere are multiple ways to reverse a string in Python:\n1. Using slicing: `string[::-1]`\n2. Using reversed() function\n3. Using a loop\n\nThe slicing method is the most Pythonic and concise, so I'll use that as the primary solution.",
+                  "role": "assistant"
+                },
+                "finish_reason": "length",
+                "index": 0,
+                "logprobs": null
+              }
+            ],
+            "object": "chat.completion",
+            "usage": {
+              "prompt_tokens": 19,
+              "completion_tokens": 199,
+              "total_tokens": 218,
+              "completion_tokens_details": {
+                "reasoning_tokens": 90,
+                "text_tokens": 199
+              },
+              "prompt_tokens_details": {
+                "text_tokens": 19
+              }
+            },
+            "created": 1779145519,
+            "system_fingerprint": null,
+            "model": "qwen3.5-plus",
+            "id": "chatcmpl-d278df53-8756-4089-8e83-d2213a4dd286",
+            "cost": "0"
+          },
+          "prompt_tokens": 19,
+          "completion_tokens": 199,
+          "total_tokens": 218,
+          "cost": 0.0,
+          "content_len": 394,
+          "finish_reason": "length",
+          "tokens_per_second": 32.83,
+          "model_used": "qwen3.5-plus",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 4493.5,
+          "body": {
+            "choices": [
+              {
+                "message": {
+                  "content": "4",
+                  "reasoning_content": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Question: \"What is 2+2?\"\n    *   Constraint: \"Reply with just the number\"\n\n2.  **Calculate the Answer:**\n    *   2 + 2 = 4\n\n3.  **Format the Output:**\n    *   The user explicitly requested \"just the number\".\n    *   No explanations, no punctuation (unless part of the number, which it isn't here), no extra text.\n\n4.  **Final Verification:**\n    *   Does \"4\" satisfy the constraint? Yes.\n    *   Is it accurate? Yes.\n\n5.  **Construct Output:** 4",
+                  "role": "assistant"
+                },
+                "finish_reason": "stop",
+                "index": 0,
+                "logprobs": null
+              }
+            ],
+            "object": "chat.completion",
+            "usage": {
+              "prompt_tokens": 22,
+              "completion_tokens": 156,
+              "total_tokens": 178,
+              "completion_tokens_details": {
+                "reasoning_tokens": 151,
+                "text_tokens": 156
+              },
+              "prompt_tokens_details": {
+                "text_tokens": 22
+              }
+            },
+            "created": 1779145524,
+            "system_fingerprint": null,
+            "model": "qwen3.5-plus",
+            "id": "chatcmpl-f25f0896-7b7f-4656-afaf-2ef14488e9d5",
+            "cost": "0"
+          },
+          "prompt_tokens": 22,
+          "completion_tokens": 156,
+          "total_tokens": 178,
+          "cost": 0.0,
+          "content_len": 1,
+          "finish_reason": "stop",
+          "tokens_per_second": 34.72,
+          "model_used": "qwen3.5-plus",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 22120.6,
+          "body": {
+            "choices": [
+              {
+                "message": {
+                  "content": "An API is a set of rules that enables different software applications to communicate and exchange data with each other.",
+                  "reasoning_content": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Topic: API (Application Programming Interface).\n    *   Constraint: Explain in exactly one sentence.\n\n2.  **Identify Key Concepts of an API:**\n    *   It's a set of rules/protocols.\n    *   It allows different software applications to communicate.\n    *   It acts as an intermediary/messenger.\n    *   It enables functionality/data exchange without knowing internal details.\n\n3.  **Draft Initial Sentences:**\n    *   An API is a set of rules that lets different programs talk to each other.\n    *   An API allows software applications to communicate and share data with each other through a defined interface.\n    *   Think of an API as a waiter that takes your order to the kitchen and brings food back, but for software. (Too metaphorical, maybe not precise enough).\n    *   An API is a software intermediary that allows two applications to talk to each other.\n\n4.  **Refine for Clarity and Conciseness:**\n    *   *Draft 1:* An API is a set of definitions and protocols for building and integrating application software. (A bit dry).\n    *   *Draft 2:* An API allows different software systems to communicate and exchange data with each other without needing to know how they work internally. (Good, covers the \"what\" and the \"how\").\n    *   *Draft 3:* An API is a software intermediary that allows two applications to talk to each other. (Simple, but maybe too simple).\n    *   *Draft 4:* An API is a set of rules that allows different software applications to communicate and share data with each other. (Strong contender).\n\n5.  **Select the Best Option:**\n    *   Draft 4 is clear, accurate, and fits the one-sentence constraint perfectly.\n    *   Let's try to make it even tighter. \"An API is a set of rules that enables different software applications to communicate and exchange data with each other.\"\n\n6.  **Final Polish:**\n    *   \"An API is a set of rules and definitions that allows different software applications to communicate and exchange data with each other.\"\n\n7.  **Check Constraint:** Is it one sentence? Yes.\n\n8.  **Final Output Generation:** (Matches the selected draft).\n    \"An API is a set of rules and definitions that allows different software applications to communicate and exchange data with each other.\"\n\n    *Self-Correction during final output generation:* I can make it slightly more accessible.\n    \"An API is a software intermediary that allows two applications to talk to each other.\" -> This is very common (from MuleSoft).\n    But \"set of rules\" is more technically accurate.\n    Let's go with a blend: \"An API is a set of protocols that enables different software applications to communicate and share data with each other.\"\n\n    Actually, the simplest and most accurate one is:\n    \"An API is a set of rules that allows different software applications to communicate with each other.\"\n\n    Let's add \"exchange data\" for completeness.\n    \"An API is a set of rules that allows different software applications to communicate and exchange data with each other.\"\n\n    Wait, I want to make sure it's punchy.\n    \"An API is a software interface that allows different applications to communicate and share functionality without needing to know how each other works internally.\" -> A bit long.\n\n    Let's stick to the core definition.\n    \"An API is a set of definitions and protocols that enables different software applications to communicate and exchange data with each other.\"\n\n    Okay, I will choose the most balanced one.\n\n    \"An API is a set of rules that allows different software applications to communicate and exchange data with each other.\"\n\n    Wait, I can make it even simpler.\n    \"An API is a software intermediary that allows two applications to talk to each other.\"\n    This is often cited as the best one-sentence explanation.\n\n    Let's go with the \"intermediary\" angle as it's more intuitive.\n    \"An API is a software intermediary that allows two applications to talk to each other.\"\n\n    Actually, combining both \"rules\" and \"communication\" is safer.\n    \"An API is a set of rules that enables different software programs to communicate and share data with each other.\"\n\n    Let's finalize on: \"An API is a set of rules that allows different software applications to communicate and exchange data with each other.\"\n\n    Wait, I need to ensure I don't ramble.\n    \"An API is a set of protocols that enables different software applications to communicate and share data.\"\n\n    Okay, final decision:\n    \"An API is a set of rules that allows different software applications to communicate and exchange data with each other.\"\n\n    Wait, looking at popular definitions, the \"intermediary\" one is very strong.\n    \"An API is a software intermediary that allows two applications to talk to each other.\"\n\n    Let's provide the most comprehensive yet simple one.\n    \"An API is a set of rules that enables different software applications to communicate and exchange data with each other.\"\n\n    Okay, I'll go with that.cw",
+                  "role": "assistant"
+                },
+                "finish_reason": "stop",
+                "index": 0,
+                "logprobs": null
+              }
+            ],
+            "object": "chat.completion",
+            "usage": {
+              "prompt_tokens": 19,
+              "completion_tokens": 1136,
+              "total_tokens": 1155,
+              "completion_tokens_details": {
+                "reasoning_tokens": 1110,
+                "text_tokens": 1136
+              },
+              "prompt_tokens_details": {
+                "text_tokens": 19
+              }
+            },
+            "created": 1779145546,
+            "system_fingerprint": null,
+            "model": "qwen3.5-plus",
+            "id": "chatcmpl-3879fff0-6b9c-49c3-87ba-ae008694bed7",
+            "cost": "0"
+          },
+          "prompt_tokens": 19,
+          "completion_tokens": 1136,
+          "total_tokens": 1155,
+          "cost": 0.0,
+          "content_len": 119,
+          "finish_reason": "stop",
+          "tokens_per_second": 51.35,
+          "model_used": "qwen3.5-plus",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 27542.05,
+          "body": {
+            "choices": [
+              {
+                "message": {
+                  "content": "Fingers dance on keys\nLogic flows in endless streams\nWorlds bloom on the screen",
+                  "reasoning_content": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Topic: Coding.\n    *   Format: Haiku (5-7-5 syllables).\n\n2.  **Brainstorming Imagery & Themes:**\n    *   Screens, keyboards, light.\n    *   Logic, bugs, errors.\n    *   Creation, building, digital world.\n    *   Late nights, coffee, focus.\n    *   Lines of code, syntax.\n\n3.  **Drafting - Attempt 1:**\n    *   Lines of code flow fast (5)\n    *   Building worlds inside the screen (7)\n    *   Bugs appear and go (5)\n    *   *Critique:* A bit generic. \"Bugs appear and go\" is okay but maybe too simple.\n\n4.  **Drafting - Attempt 2:**\n    *   White keys click in night (5)\n    *   Logic weaves a digital dream (7)\n    *   One bug hides in lines (5)\n    *   *Critique:* \"White keys click in night\" is 5 syllables. \"Logic weaves a digital dream\" is 7 (Log-ic weaves a dig-i-tal dream). \"One bug hides in lines\" is 5. This works.\n\n5.  **Drafting - Attempt 3 (Focusing on the creative aspect):**\n    *   Soft keys tap away (5)\n    *   Building worlds from thought and light (7)\n    *   Code brings life to screen (5)\n    *   *Critique:* \"Soft keys tap a-way\" (5). \"Build-ing worlds from thought and light\" (7). \"Code brings life to screen\" (5). Simple and evocative.\n\n6.  **Selecting the Best Option:**\n    *   Attempt 3 feels slightly more poetic. Let's refine Attempt 1 for clarity and impact.\n    *   Let's try:\n        *   Lines of text take form (5)\n        *   Building worlds with logic bright (7)\n        *   Bugs hide in the dark (5)\n    *   Or:\n        *   Fingers dance on keys (5)\n        *   Logic weaves a new design (7)\n        *   Code brings thoughts to life (5)\n\n    *   Let's go with a classic \"creation\" theme.\n    *   Line 1: Fin-gers dance on keys (5)\n    *   Line 2: Log-ic weaves a new de-sign (7)\n    *   Line 3: Code brings thoughts to life (5)\n\n    *   Wait, \"design\" can be 2 syllables (de-sign). \"Logic\" is 2. \"Weaves\" is 1. \"A\" is 1. \"New\" is 1. Total: 2+1+1+1+2 = 7. Perfect.\n    *   \"Code brings thoughts to life\": Code (1) brings (1) thoughts (1) to (1) life (1). Total 5. Perfect.\n    *   \"Fingers dance on keys\": Fin-gers (2) dance (1) on (1) keys (1). Total 5. Perfect.\n\n7.  **Final Polish:**\n    Fingers dance on keys\n    Logic weaves a new design\n    Code brings thoughts to life\n\n8.  **Output Generation.** (Wait, let me double check syllable counts again).\n    *   Fin-gers (2)\n    *   dance (1)\n    *   on (1)\n    *   keys (1)\n    *   Total: 5.\n\n    *   Log-ic (2)\n    *   weaves (1)\n    *   a (1)\n    *   new (1)\n    *   de-sign (2)\n    *   Total: 7.\n\n    *   Code (1)\n    *   brings (1)\n    *   thoughts (1)\n    *   to (1)\n    *   life (1)\n    *   Total: 5.\n\n    Looks good.\n\n    Alternative (more about the struggle):\n    Screen glows in the dark (5)\n    Searching for the missing brace (7)\n    Bug found, code runs free (5)\n\n    Let's stick with the positive/creative one. It's more universally appealing.\n\n    Revised Plan:\n    Fingers dance on keys\n    Logic weaves a new design\n    Code brings thoughts to life\n\n    Actually, \"Code brings thoughts to life\" is a bit clich\u00e9. How about \"Worlds bloom on the screen\"?\n    Worlds (1) bloom (1) on (1) the (1) screen (1). 5 syllables.\n    Let's try that.\n\n    Fingers dance on keys\n    Logic weaves a new design\n    Worlds bloom on the screen\n\n    This feels stronger.\n\n    Wait, \"design\" pronunciation. Some say de-sign (2), some might stretch it. It's standard 2.\n    Let's try another 7-syllable line to be safe.\n    \"Build-ing worlds with-in the light\" (7).\n    Build (1) ing (1) worlds (1) with (1) in (1) the (1) light (1).\n    \"Lo-gic flows in end-less streams\" (7).\n    Lo (1) gic (1) flows (1) in (1) end (1) less (1) streams (1).\n\n    Let's go with:\n    Fingers dance on keys\n    Logic flows in endless streams\n    Worlds bloom on the screen\n\n    Check:\n    Fin-gers dance on keys (5)\n    Log-ic flows in end-less streams (7)\n    Worlds bloom on the screen (5)\n\n    This is solid.\n\n9.  **Final Decision:**\n    Fingers dance on keys\n    Logic flows in endless streams\n    Worlds bloom on the screen\n\n    Wait, \"endless\" is 2 syllables (end-less).\n    Log-ic (2) flows (1) in (1) end-less (2) streams (1). Total 7.\n    Yes.\n\n    One more check:\n    Fin-gers (2) dance (1) on (1) keys (1) = 5.\n    Worlds (1) bloom (1) on (1) the (1) screen (1) = 5.\n\n    Ready.cw",
+                  "role": "assistant"
+                },
+                "finish_reason": "stop",
+                "index": 0,
+                "logprobs": null
+              }
+            ],
+            "object": "chat.completion",
+            "usage": {
+              "prompt_tokens": 16,
+              "completion_tokens": 1455,
+              "total_tokens": 1471,
+              "completion_tokens_details": {
+                "reasoning_tokens": 1432,
+                "text_tokens": 1455
+              },
+              "prompt_tokens_details": {
+                "text_tokens": 16
+              }
+            },
+            "created": 1779145574,
+            "system_fingerprint": null,
+            "model": "qwen3.5-plus",
+            "id": "chatcmpl-fafedc20-d522-4c49-9f2d-a2dce0c03371",
+            "cost": "0"
+          },
+          "prompt_tokens": 16,
+          "completion_tokens": 1455,
+          "total_tokens": 1471,
+          "cost": 0.0,
+          "content_len": 79,
+          "finish_reason": "stop",
+          "tokens_per_second": 52.83,
+          "model_used": "qwen3.5-plus",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        6349.45,
+        6062.18,
+        4493.5,
+        22120.6,
+        27542.05
+      ],
+      "tokens_per_sec": [
+        40.79,
+        32.83,
+        34.72,
+        51.35,
+        52.83
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        275,
+        218,
+        178,
+        1155,
+        1471
+      ],
+      "vision": false,
+      "avg_latency_ms": 13313.56,
+      "min_latency_ms": 4493.5,
+      "max_latency_ms": 27542.05,
+      "avg_tokens_per_second": 42.5,
+      "max_tokens_per_second": 52.83,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 659.4,
+      "total_tokens_used": 3297,
+      "success_rate": 100.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "mimo-v2-pro",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 1375.06,
+          "body": {
+            "id": "502472c5ba144f1baa827e114a1a362e",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "Okay, the user asked me to reply with"
+                }
+              }
+            ],
+            "created": 1779145605,
+            "model": "mimo-v2-pro",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 10,
+              "prompt_tokens": 255,
+              "total_tokens": 265,
+              "completion_tokens_details": {
+                "reasoning_tokens": 9
+              },
+              "prompt_tokens_details": null
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 255,
+          "completion_tokens": 10,
+          "total_tokens": 265,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 7.27,
+          "model_used": "mimo-v2-pro",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 3372.31,
+          "body": {
+            "id": "3889bcaa4466425ab0016c6d26ce467b",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": "Here's a simple Python function to reverse a string using slicing:\n\n```python\ndef reverse_string(text):\n    return text[::-1]\n```\n\n**How it works:**\n- The slice notation `[::-1]` means start from the end and move backwards through the entire string\n- This creates a new string with characters",
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "We are going to write a simple Python function to reverse a string.\n There are multiple ways to do this, but one of the most straightforward is to use slicing."
+                }
+              }
+            ],
+            "created": 1779145608,
+            "model": "mimo-v2-pro",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 100,
+              "prompt_tokens": 258,
+              "total_tokens": 358,
+              "completion_tokens_details": {
+                "reasoning_tokens": 33
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 258,
+          "completion_tokens": 100,
+          "total_tokens": 358,
+          "cost": 0.0,
+          "content_len": 292,
+          "finish_reason": "length",
+          "tokens_per_second": 29.65,
+          "model_used": "mimo-v2-pro",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 2190.66,
+          "body": {
+            "id": "ed41cb1cd8b444b2b8b3a8b59fe94543",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "The user asks what 2+2 is"
+                }
+              }
+            ],
+            "created": 1779145610,
+            "model": "mimo-v2-pro",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 10,
+              "prompt_tokens": 261,
+              "total_tokens": 271,
+              "completion_tokens_details": {
+                "reasoning_tokens": 9
+              },
+              "prompt_tokens_details": null
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 261,
+          "completion_tokens": 10,
+          "total_tokens": 271,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 4.56,
+          "model_used": "mimo-v2-pro",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 2296.17,
+          "body": {
+            "id": "e74b6e63dc2243b59a6362d850628f62",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "Okay, the user asked for a one-sentence explanation of an API. Let me start by recalling the core concept.\n\nAn API is like a messenger that lets different software talk to each other. I need to keep it simple but accurate. Avoid"
+                }
+              }
+            ],
+            "created": 1779145612,
+            "model": "mimo-v2-pro",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 50,
+              "prompt_tokens": 258,
+              "total_tokens": 308,
+              "completion_tokens_details": {
+                "reasoning_tokens": 49
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 258,
+          "completion_tokens": 50,
+          "total_tokens": 308,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 21.78,
+          "model_used": "mimo-v2-pro",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 2940.75,
+          "body": {
+            "id": "876748e9f4d44460a42659f69d05e2c4",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "The user is asking me to write a haiku about coding. A haiku is a traditional Japanese poem with three lines following a 5-7-5 syllable pattern. Let me craft one about coding.\n\nLet me think about this:\n\nLine 1 (5 syllables): \"Fingers on the keys\" - Fin-gers-on-the-keys = 5 syllables \u2713\nLine"
+                }
+              }
+            ],
+            "created": 1779145615,
+            "model": "mimo-v2-pro",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 80,
+              "prompt_tokens": 255,
+              "total_tokens": 335,
+              "completion_tokens_details": {
+                "reasoning_tokens": 79
+              },
+              "prompt_tokens_details": null
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 255,
+          "completion_tokens": 80,
+          "total_tokens": 335,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 27.2,
+          "model_used": "mimo-v2-pro",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        1375.06,
+        3372.31,
+        2190.66,
+        2296.17,
+        2940.75
+      ],
+      "tokens_per_sec": [
+        7.27,
+        29.65,
+        4.56,
+        21.78,
+        27.2
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        265,
+        358,
+        271,
+        308,
+        335
+      ],
+      "vision": true,
+      "avg_latency_ms": 2434.99,
+      "min_latency_ms": 1375.06,
+      "max_latency_ms": 3372.31,
+      "avg_tokens_per_second": 18.09,
+      "max_tokens_per_second": 29.65,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 307.4,
+      "total_tokens_used": 1537,
+      "success_rate": 100.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "mimo-v2-omni",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 1582.65,
+          "body": {
+            "id": "92a272c0029a49e1a7103ca0680e7a67",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "First, the user says: \"Reply with"
+                }
+              }
+            ],
+            "created": 1779145619,
+            "model": "mimo-v2-omni",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 10,
+              "prompt_tokens": 256,
+              "total_tokens": 266,
+              "completion_tokens_details": {
+                "reasoning_tokens": 9
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 256,
+          "completion_tokens": 10,
+          "total_tokens": 266,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 6.32,
+          "model_used": "mimo-v2-omni",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 2595.84,
+          "body": {
+            "id": "b0dc9d53d79a4524a65b328bc38c41bd",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": "Here's a short Python function to reverse a string:\n\n```python\ndef reverse_string(s):\n    return s[::-1]\n\n# Example usage",
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "We are writing a short Python function to reverse a string.\n We can do this in several ways, but the simplest is using slicing.\n Alternatively, we can use a loop or the reversed function, but for brevity and clarity, slicing is often preferred.\n Let's write a function that takes a string as input and returns the reversed string."
+                }
+              }
+            ],
+            "created": 1779145622,
+            "model": "mimo-v2-omni",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 100,
+              "prompt_tokens": 259,
+              "total_tokens": 359,
+              "completion_tokens_details": {
+                "reasoning_tokens": 69
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 259,
+          "completion_tokens": 100,
+          "total_tokens": 359,
+          "cost": 0.0,
+          "content_len": 121,
+          "finish_reason": "length",
+          "tokens_per_second": 38.52,
+          "model_used": "mimo-v2-omni",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 2108.33,
+          "body": {
+            "id": "7e14af2b37ae4162b765525f522de754",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "First, the user asked: \"What is"
+                }
+              }
+            ],
+            "created": 1779145624,
+            "model": "mimo-v2-omni",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 10,
+              "prompt_tokens": 262,
+              "total_tokens": 272,
+              "completion_tokens_details": {
+                "reasoning_tokens": 9
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 262,
+          "completion_tokens": 10,
+          "total_tokens": 272,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 4.74,
+          "model_used": "mimo-v2-omni",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 1588.65,
+          "body": {
+            "id": "3dcfba943814467d8b67978bb068a949",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "Hmm, the user asked for a one-sentence explanation of an API. This is a straightforward request with clear constraints. \n\nThe key is to keep it concise while covering the core idea: API as an interface for communication between software components."
+                }
+              }
+            ],
+            "created": 1779145625,
+            "model": "mimo-v2-omni",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 50,
+              "prompt_tokens": 259,
+              "total_tokens": 309,
+              "completion_tokens_details": {
+                "reasoning_tokens": 48
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 259,
+          "completion_tokens": 50,
+          "total_tokens": 309,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 31.47,
+          "model_used": "mimo-v2-omni",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 2605.21,
+          "body": {
+            "id": "8966fef747a443138de66c3bb1705352",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "Okay, the user asked me to write a haiku about coding. Let me start by recalling the structure of a haiku\u2014three lines with a 5-7-5 syllable pattern. \n\nCoding involves logic, structure, and creativity, so I can focus on the flow of writing code and the satisfaction of it working. First line: 5 syllables. Maybe something about typing"
+                }
+              }
+            ],
+            "created": 1779145628,
+            "model": "mimo-v2-omni",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 80,
+              "prompt_tokens": 256,
+              "total_tokens": 336,
+              "completion_tokens_details": {
+                "reasoning_tokens": 79
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 256,
+          "completion_tokens": 80,
+          "total_tokens": 336,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 30.71,
+          "model_used": "mimo-v2-omni",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        1582.65,
+        2595.84,
+        2108.33,
+        1588.65,
+        2605.21
+      ],
+      "tokens_per_sec": [
+        6.32,
+        38.52,
+        4.74,
+        31.47,
+        30.71
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        266,
+        359,
+        272,
+        309,
+        336
+      ],
+      "vision": false,
+      "avg_latency_ms": 2096.14,
+      "min_latency_ms": 1582.65,
+      "max_latency_ms": 2605.21,
+      "avg_tokens_per_second": 22.35,
+      "max_tokens_per_second": 38.52,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 308.4,
+      "total_tokens_used": 1542,
+      "success_rate": 100.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "mimo-v2.5-pro",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 1303.84,
+          "body": {
+            "id": "bfe9242d63e140e1b06ffd50ce6b7e4f",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "The user wants me to reply with exactly \""
+                }
+              }
+            ],
+            "created": 1779145630,
+            "model": "mimo-v2.5-pro",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 10,
+              "prompt_tokens": 257,
+              "total_tokens": 267,
+              "completion_tokens_details": {
+                "reasoning_tokens": 9
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 257,
+          "completion_tokens": 10,
+          "total_tokens": 267,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 7.67,
+          "model_used": "mimo-v2.5-pro",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 2822.2,
+          "body": {
+            "id": "42d21f08898b491892a954c4448a6a06",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": "Here's a short Python function to reverse a string:\n\n```python\ndef reverse_string(s: str) -> str:\n    return s[::-1]\n```\n\n\n\n## How It Works\n\nThe `[::-1]` slice notation tells Python to:\n1. **Start** at the end of the string\n2. **Stop** before the beginning\n3. **Step** backward by 1 each time\n\n## Example Usage",
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "The user wants a short Python function to reverse a string."
+                }
+              }
+            ],
+            "created": 1779145633,
+            "model": "mimo-v2.5-pro",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 100,
+              "prompt_tokens": 260,
+              "total_tokens": 360,
+              "completion_tokens_details": {
+                "reasoning_tokens": 12
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 260,
+          "completion_tokens": 100,
+          "total_tokens": 360,
+          "cost": 0.0,
+          "content_len": 310,
+          "finish_reason": "length",
+          "tokens_per_second": 35.43,
+          "model_used": "mimo-v2.5-pro",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 1517.02,
+          "body": {
+            "id": "fc3e474251e14431965e1546ab07132f",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "The user is asking a simple math question:"
+                }
+              }
+            ],
+            "created": 1779145634,
+            "model": "mimo-v2.5-pro",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 10,
+              "prompt_tokens": 263,
+              "total_tokens": 273,
+              "completion_tokens_details": {
+                "reasoning_tokens": 9
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 263,
+          "completion_tokens": 10,
+          "total_tokens": 273,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 6.59,
+          "model_used": "mimo-v2.5-pro",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 1995.81,
+          "body": {
+            "id": "e2c14da4b0124c969e01cd25a0448df4",
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "content": "An API (Application Programming Interface) is a set of rules and definitions that allows different software applications to communicate and exchange data with each other.",
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "The user wants a one-sentence explanation of what an API is."
+                }
+              }
+            ],
+            "created": 1779145636,
+            "model": "mimo-v2.5-pro",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 45,
+              "prompt_tokens": 260,
+              "total_tokens": 305,
+              "completion_tokens_details": {
+                "reasoning_tokens": 14
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 260,
+          "completion_tokens": 45,
+          "total_tokens": 305,
+          "cost": 0.0,
+          "content_len": 170,
+          "finish_reason": "stop",
+          "tokens_per_second": 22.55,
+          "model_used": "mimo-v2.5-pro",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 2893.11,
+          "body": {
+            "id": "7a706c18dcc04fa3b76448884b0b09f5",
+            "choices": [
+              {
+                "finish_reason": "stop",
+                "index": 0,
+                "message": {
+                  "content": "Here's a haiku about coding:\n\n*Lines of code compile*\n*Bugs hide in the semicolons*\n*Coffee fuels the fix* \u2615",
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "The user wants a haiku about coding. A haiku is a traditional Japanese poem with a 5-7-5 syllable structure (three lines)."
+                }
+              }
+            ],
+            "created": 1779145639,
+            "model": "mimo-v2.5-pro",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 66,
+              "prompt_tokens": 257,
+              "total_tokens": 323,
+              "completion_tokens_details": {
+                "reasoning_tokens": 32
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 257,
+          "completion_tokens": 66,
+          "total_tokens": 323,
+          "cost": 0.0,
+          "content_len": 108,
+          "finish_reason": "stop",
+          "tokens_per_second": 22.81,
+          "model_used": "mimo-v2.5-pro",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        1303.84,
+        2822.2,
+        1517.02,
+        1995.81,
+        2893.11
+      ],
+      "tokens_per_sec": [
+        7.67,
+        35.43,
+        6.59,
+        22.55,
+        22.81
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        267,
+        360,
+        273,
+        305,
+        323
+      ],
+      "vision": false,
+      "avg_latency_ms": 2106.4,
+      "min_latency_ms": 1303.84,
+      "max_latency_ms": 2893.11,
+      "avg_tokens_per_second": 19.01,
+      "max_tokens_per_second": 35.43,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 305.6,
+      "total_tokens_used": 1528,
+      "success_rate": 100.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "mimo-v2.5",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 2048.6,
+          "body": {
+            "id": "a05be6f21f5a497992ebce4d79529d35",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "The user is asking me to reply with exactly"
+                }
+              }
+            ],
+            "created": 1779145642,
+            "model": "mimo-v2.5",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 10,
+              "prompt_tokens": 253,
+              "total_tokens": 263,
+              "completion_tokens_details": {
+                "reasoning_tokens": 9
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 253,
+          "completion_tokens": 10,
+          "total_tokens": 263,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 4.88,
+          "model_used": "mimo-v2.5",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 2613.69,
+          "body": {
+            "id": "84a67c5f63f24b37b8653103945fd955",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "Okay, the user wants a short Python function to reverse a string. Let me think about how to approach this. \n\nFirst, I need to make sure the function is concise and easy to understand. Python has a simple way to reverse strings using slicing, which is both efficient and readable. \n\nI can start by defining the function with a clear name, like `reverse_string`. Then use the slicing syntax `[::-1]` to reverse the string. \n\nAlso, adding a docstring would"
+                }
+              }
+            ],
+            "created": 1779145645,
+            "model": "mimo-v2.5",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 100,
+              "prompt_tokens": 256,
+              "total_tokens": 356,
+              "completion_tokens_details": {
+                "reasoning_tokens": 99
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 256,
+          "completion_tokens": 100,
+          "total_tokens": 356,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 38.26,
+          "model_used": "mimo-v2.5",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 1619.75,
+          "body": {
+            "id": "7fcb832880524c8085ef6038abddafe8",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "The user is asking me to answer a simple"
+                }
+              }
+            ],
+            "created": 1779145646,
+            "model": "mimo-v2.5",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 10,
+              "prompt_tokens": 259,
+              "total_tokens": 269,
+              "completion_tokens_details": {
+                "reasoning_tokens": 9
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 259,
+          "completion_tokens": 10,
+          "total_tokens": 269,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 6.17,
+          "model_used": "mimo-v2.5",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 2810.0,
+          "body": {
+            "id": "b17c42b9931c48d9be8cae00f6bcdcde",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": "An API (Application Programming Interface) is like a waiter in a restaurant \u2014 it takes requests from one piece of software, delivers them to another, and brings back the",
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "The user is asking me to explain what an API is in one sentence."
+                }
+              }
+            ],
+            "created": 1779145649,
+            "model": "mimo-v2.5",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 50,
+              "prompt_tokens": 256,
+              "total_tokens": 306,
+              "completion_tokens_details": {
+                "reasoning_tokens": 15
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 256,
+          "completion_tokens": 50,
+          "total_tokens": 306,
+          "cost": 0.0,
+          "content_len": 169,
+          "finish_reason": "length",
+          "tokens_per_second": 17.79,
+          "model_used": "mimo-v2.5",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 2781.05,
+          "body": {
+            "id": "28bd20534cec4ecbbb7967d905147bf0",
+            "choices": [
+              {
+                "finish_reason": "length",
+                "index": 0,
+                "message": {
+                  "content": null,
+                  "role": "assistant",
+                  "tool_calls": null,
+                  "reasoning_content": "Hmm, the user wants a haiku about coding. Haikus have a strict 5-7-5 syllable structure. I need to capture the essence of coding in a concise and poetic way.\n\nCoding often involves problem-solving and logic. Maybe I can focus on the process of debugging, which is relatable. The first line should set the scene, the second expand on the struggle"
+                }
+              }
+            ],
+            "created": 1779145652,
+            "model": "mimo-v2.5",
+            "object": "chat.completion",
+            "usage": {
+              "completion_tokens": 80,
+              "prompt_tokens": 253,
+              "total_tokens": 333,
+              "completion_tokens_details": {
+                "reasoning_tokens": 79
+              },
+              "prompt_tokens_details": {
+                "cached_tokens": 192
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 253,
+          "completion_tokens": 80,
+          "total_tokens": 333,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 28.77,
+          "model_used": "mimo-v2.5",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        2048.6,
+        2613.69,
+        1619.75,
+        2810.0,
+        2781.05
+      ],
+      "tokens_per_sec": [
+        4.88,
+        38.26,
+        6.17,
+        17.79,
+        28.77
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        263,
+        356,
+        269,
+        306,
+        333
+      ],
+      "vision": false,
+      "avg_latency_ms": 2374.62,
+      "min_latency_ms": 1619.75,
+      "max_latency_ms": 2810.0,
+      "avg_tokens_per_second": 19.17,
+      "max_tokens_per_second": 38.26,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 305.4,
+      "total_tokens_used": 1527,
+      "success_rate": 100.0
+    },
+    {
+      "provider": "OpenCode GO",
+      "model": "hy3-preview",
+      "tests": [
+        {
+          "success": true,
+          "latency_ms": 3230.51,
+          "body": {
+            "id": "gen-1779145654-Bbm4MTbSh54Ss9jYchzG",
+            "object": "chat.completion",
+            "created": 1779145654,
+            "model": "tencent/hy3-preview-20260421",
+            "provider": "SiliconFlow",
+            "system_fingerprint": null,
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "Got it, the user asked to reply exactly \"",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "Got it, the user asked to reply exactly \"",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 18,
+              "completion_tokens": 10,
+              "total_tokens": 28,
+              "cost": 3.788e-06,
+              "is_byok": false,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 3.788e-06,
+                "upstream_inference_prompt_cost": 1.188e-06,
+                "upstream_inference_completions_cost": 2.6e-06
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 10,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 18,
+          "completion_tokens": 10,
+          "total_tokens": 28,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 3.1,
+          "model_used": "tencent/hy3-preview-20260421",
+          "test_name": "Short reply"
+        },
+        {
+          "success": true,
+          "latency_ms": 3814.22,
+          "body": {
+            "id": "gen-1779145658-Z1gN766wvWe1pP2bAFBC",
+            "object": "chat.completion",
+            "created": 1779145658,
+            "model": "tencent/hy3-preview-20260421",
+            "provider": "SiliconFlow",
+            "system_fingerprint": null,
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": "Here's a short Python",
+                  "refusal": null,
+                  "reasoning": "We can reverse a string in Python in multiple ways.\n The simplest is to use slicing: `string[::-1]`\n However, since the problem says \"write a short Python function\", we can define a function that does that.\n Alternatively, we can also do it by building the reversed string or using a loop, but the slicing method is the most Pythonic and short.\n\n Let's write a function that takes a string and returns the reversed string.",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "We can reverse a string in Python in multiple ways.\n The simplest is to use slicing: `string[::-1]`\n However, since the problem says \"write a short Python function\", we can define a function that does that.\n Alternatively, we can also do it by building the reversed string or using a loop, but the slicing method is the most Pythonic and short.\n\n Let's write a function that takes a string and returns the reversed string.",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 21,
+              "completion_tokens": 100,
+              "total_tokens": 121,
+              "cost": 2.7386e-05,
+              "is_byok": false,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 2.7386e-05,
+                "upstream_inference_prompt_cost": 1.386e-06,
+                "upstream_inference_completions_cost": 2.6e-05
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 94,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 21,
+          "completion_tokens": 100,
+          "total_tokens": 121,
+          "cost": 0.0,
+          "content_len": 21,
+          "finish_reason": "length",
+          "tokens_per_second": 26.22,
+          "model_used": "tencent/hy3-preview-20260421",
+          "test_name": "Python code"
+        },
+        {
+          "success": true,
+          "latency_ms": 3040.25,
+          "body": {
+            "id": "gen-1779145661-0ClLMIMXMAMvjvZI15Rm",
+            "object": "chat.completion",
+            "created": 1779145661,
+            "model": "tencent/hy3-preview-20260421",
+            "provider": "SiliconFlow",
+            "system_fingerprint": null,
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "Got it, the user asked what 2+",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "Got it, the user asked what 2+",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 24,
+              "completion_tokens": 10,
+              "total_tokens": 34,
+              "cost": 4.184e-06,
+              "is_byok": false,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 4.184e-06,
+                "upstream_inference_prompt_cost": 1.584e-06,
+                "upstream_inference_completions_cost": 2.6e-06
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 10,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 24,
+          "completion_tokens": 10,
+          "total_tokens": 34,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 3.29,
+          "model_used": "tencent/hy3-preview-20260421",
+          "test_name": "Simple QA"
+        },
+        {
+          "success": true,
+          "latency_ms": 3271.33,
+          "body": {
+            "id": "gen-1779145664-71hM51o9dj4fwZlDF8RP",
+            "object": "chat.completion",
+            "created": 1779145664,
+            "model": "tencent/hy3-preview-20260421",
+            "provider": "SiliconFlow",
+            "system_fingerprint": null,
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "Got it, the user wants an API explained in one sentence. First, I need to make sure I cover the key points: it's an interface, allows interaction between different software components, right? Wait, keep it simple but accurate. Let's",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "Got it, the user wants an API explained in one sentence. First, I need to make sure I cover the key points: it's an interface, allows interaction between different software components, right? Wait, keep it simple but accurate. Let's",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 20,
+              "completion_tokens": 50,
+              "total_tokens": 70,
+              "cost": 1.432e-05,
+              "is_byok": false,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 1.432e-05,
+                "upstream_inference_prompt_cost": 1.32e-06,
+                "upstream_inference_completions_cost": 1.3e-05
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 50,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 20,
+          "completion_tokens": 50,
+          "total_tokens": 70,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 15.28,
+          "model_used": "tencent/hy3-preview-20260421",
+          "test_name": "Definition"
+        },
+        {
+          "success": true,
+          "latency_ms": 3910.76,
+          "body": {
+            "id": "gen-1779145668-jJ2PJUdTLSc6CtKW27w7",
+            "object": "chat.completion",
+            "created": 1779145668,
+            "model": "tencent/hy3-preview-20260421",
+            "provider": "SiliconFlow",
+            "system_fingerprint": null,
+            "choices": [
+              {
+                "index": 0,
+                "logprobs": null,
+                "finish_reason": "length",
+                "native_finish_reason": "length",
+                "message": {
+                  "role": "assistant",
+                  "content": null,
+                  "refusal": null,
+                  "reasoning": "We need to write a haiku about coding. A haiku is a three-line poem with syllable pattern 5-7-5. The theme is coding. We should think of words related to coding: code, program, debug, syntax, function, loop, bug, compile, run, etc. We need to create a haiku that captures something about coding.\n\nLet's brainstorm:\n\n",
+                  "reasoning_details": [
+                    {
+                      "type": "reasoning.text",
+                      "text": "We need to write a haiku about coding. A haiku is a three-line poem with syllable pattern 5-7-5. The theme is coding. We should think of words related to coding: code, program, debug, syntax, function, loop, bug, compile, run, etc. We need to create a haiku that captures something about coding.\n\nLet's brainstorm:\n\n",
+                      "format": "unknown",
+                      "index": 0
+                    }
+                  ]
+                }
+              }
+            ],
+            "usage": {
+              "prompt_tokens": 18,
+              "completion_tokens": 80,
+              "total_tokens": 98,
+              "cost": 2.1988e-05,
+              "is_byok": false,
+              "prompt_tokens_details": {
+                "cached_tokens": 0,
+                "cache_write_tokens": 0,
+                "audio_tokens": 0,
+                "video_tokens": 0
+              },
+              "cost_details": {
+                "upstream_inference_cost": 2.1988e-05,
+                "upstream_inference_prompt_cost": 1.188e-06,
+                "upstream_inference_completions_cost": 2.08e-05
+              },
+              "completion_tokens_details": {
+                "reasoning_tokens": 80,
+                "image_tokens": 0,
+                "audio_tokens": 0
+              }
+            },
+            "cost": "0"
+          },
+          "prompt_tokens": 18,
+          "completion_tokens": 80,
+          "total_tokens": 98,
+          "cost": 0.0,
+          "content_len": 0,
+          "finish_reason": "length",
+          "tokens_per_second": 20.46,
+          "model_used": "tencent/hy3-preview-20260421",
+          "test_name": "Haiku"
+        }
+      ],
+      "success_count": 5,
+      "error_count": 0,
+      "latencies": [
+        3230.51,
+        3814.22,
+        3040.25,
+        3271.33,
+        3910.76
+      ],
+      "tokens_per_sec": [
+        3.1,
+        26.22,
+        3.29,
+        15.28,
+        20.46
+      ],
+      "costs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "total_tokens_list": [
+        28,
+        121,
+        34,
+        70,
+        98
+      ],
+      "vision": false,
+      "avg_latency_ms": 3453.41,
+      "min_latency_ms": 3040.25,
+      "max_latency_ms": 3910.76,
+      "avg_tokens_per_second": 13.67,
+      "max_tokens_per_second": 26.22,
+      "avg_cost": 0.0,
+      "total_cost": 0.0,
+      "avg_tokens_per_call": 70.2,
+      "total_tokens_used": 351,
+      "success_rate": 100.0
+    }
+  ]
+}
