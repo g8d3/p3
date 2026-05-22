@@ -1,0 +1,1167 @@
+{
+  "stats": {
+    "OTHER_AI_AGENT": 81,
+    "CODING_AGENT": 63,
+    "UNRELATED": 35,
+    "MCP_TOOL": 29,
+    "AGENT_SANDBOX": 25,
+    "ORCHESTRATOR": 23,
+    "MEMORY_RAG": 20,
+    "SECURITY": 14,
+    "CLI_TOOL": 11,
+    "BROWSER_AUTOMATION": 9,
+    "DEVKIT_SDK": 9,
+    "DATABASE": 4
+  },
+  "total_repos": 323,
+  "coding_agents": [
+    {
+      "name": "aaif-goose/goose",
+      "stars": 44900,
+      "language": "Rust",
+      "description": "an open source, extensible AI agent that goes beyond code suggestions - install, execute, edit, and test with any LLM"
+    },
+    {
+      "name": "charmbracelet/crush",
+      "stars": 24100,
+      "language": "Go",
+      "description": "Glamourous agentic coding for all \ud83d\udc98"
+    },
+    {
+      "name": "chenhg5/cc-connect",
+      "stars": 8200,
+      "language": "Go",
+      "description": "Bridge local AI coding agents (Claude Code, Cursor, Gemini CLI, Codex) to messaging platforms (Feishu/Lark, DingTalk, Slack, Telegram, Di\u2026"
+    },
+    {
+      "name": "YaoApp/yao",
+      "stars": 7500,
+      "language": "Go",
+      "description": "\u2728 Build AI agents and web apps \u2014 with a single binary."
+    },
+    {
+      "name": "smtg-ai/claude-squad",
+      "stars": 7400,
+      "language": "Go",
+      "description": "Manage multiple AI terminal agents like Claude Code, Codex, OpenCode, and Amp."
+    },
+    {
+      "name": "ghuntley/how-to-build-a-coding-agent",
+      "stars": 5500,
+      "language": "Go",
+      "description": "A workshop that teaches you how to build your own coding agent. Similar to Roo code, Cline, Amp, Cursor, Windsurf or OpenCode."
+    },
+    {
+      "name": "1jehuang/jcode",
+      "stars": 5300,
+      "language": "Rust",
+      "description": "Coding Agent Harness"
+    },
+    {
+      "name": "smallcloudai/refact",
+      "stars": 3500,
+      "language": "Rust",
+      "description": "AI Agent that handles engineering tasks end-to-end: integrates with developers\u2019 tools, plans, executes, and iterates until it achieves a \u2026"
+    },
+    {
+      "name": "golutra/golutra",
+      "stars": 3400,
+      "language": "Rust",
+      "description": "Multi-agent AI orchestration platform for automation, workflows, and developer tools. Golutra transforms Codex, Claude Code, and OpenClaw\u2026"
+    },
+    {
+      "name": "Gentleman-Programming/engram",
+      "stars": 3400,
+      "language": "Go",
+      "description": "Persistent memory system for AI coding agents. Agent-agnostic Go binary with SQLite + FTS5, MCP server, HTTP API, CLI, and TUI."
+    },
+    {
+      "name": "asheshgoplani/agent-deck",
+      "stars": 2400,
+      "language": "Go",
+      "description": "Terminal session manager for AI coding agents. One TUI for Claude, Gemini, OpenCode, Codex, and more."
+    },
+    {
+      "name": "graykode/abtop",
+      "stars": 2000,
+      "language": "Rust",
+      "description": "Like htop, but for AI coding agents. Monitor Claude Code & Codex CLI sessions, tokens, context window, rate limits, and ports in real-time."
+    },
+    {
+      "name": "vercel-labs/opensrc",
+      "stars": 1900,
+      "language": "Rust",
+      "description": "Fetch source code for npm packages to give AI coding agents deeper context"
+    },
+    {
+      "name": "yologdev/yoyo-evolve",
+      "stars": 1700,
+      "language": "Rust",
+      "description": "A Truman Show of a self-evolving AI coding agent. It writes its own code. Growing up in public."
+    },
+    {
+      "name": "xingkongliang/skills-manager",
+      "stars": 1300,
+      "language": "Rust",
+      "description": "A lightweight desktop app to manage, sync, and organize AI agent skills across 15+ coding tools \u2014 Cursor, Claude Code, Codex, Copilot, an\u2026"
+    },
+    {
+      "name": "modu-ai/moai-adk",
+      "stars": 990,
+      "language": "Go",
+      "description": "SPEC-First Agentic Development Kit for Claude Code \u2014 24 AI agents + 52 skills with TDD/DDD quality gates, 16-language projects, 4-languag\u2026"
+    },
+    {
+      "name": "kaplanelad/shellfirm",
+      "stars": 904,
+      "language": "Rust",
+      "description": "Safety guardrails for ai coding agents and human terminal commands"
+    },
+    {
+      "name": "qufei1993/skills-hub",
+      "stars": 900,
+      "language": "Rust",
+      "description": "A cross-platform desktop app to manage Agent Skills in one place and sync them to multiple AI coding tools\u2019 global skills directories \u2014 \u201c\u2026"
+    },
+    {
+      "name": "Dicklesworthstone/pi_agent_rust",
+      "stars": 871,
+      "language": "Rust",
+      "description": "High-performance AI coding agent CLI written in Rust with zero unsafe code"
+    },
+    {
+      "name": "vkhanhqui/figma-mcp-go",
+      "stars": 815,
+      "language": "Go",
+      "description": "Figma MCP for free users \u2014 no rate limits, full read/write, text to designs, designs to code"
+    },
+    {
+      "name": "wandb/catnip",
+      "stars": 479,
+      "language": "Go",
+      "description": "Like catnip, a highly addictive agentic coding tool"
+    },
+    {
+      "name": "neiii/bridle",
+      "stars": 423,
+      "language": "Rust",
+      "description": "TUI / CLI config manager for agentic harnesses (Amp, Claude Code, Opencode, Goose, Copilot CLI, Crush, Droid)"
+    },
+    {
+      "name": "Th0rgal/sandboxed.sh",
+      "stars": 420,
+      "language": "Rust",
+      "description": "Self-hosted orchestrator for AI autonomous agents. Run Claude Code & Open Code in isolated linux workspaces. Manage your skills, configs \u2026"
+    },
+    {
+      "name": "reyamira/models",
+      "stars": 416,
+      "language": "Rust",
+      "description": "TUI and CLI for browsing AI models, benchmarks, coding agents, and statuses for AI providers."
+    },
+    {
+      "name": "jfernandez/mdserve",
+      "stars": 402,
+      "language": "Rust",
+      "description": "Markdown preview server for AI coding agents."
+    },
+    {
+      "name": "rtk-ai/icm",
+      "stars": 319,
+      "language": "Rust",
+      "description": "Permanent memory for AI agents. Single binary, zero dependencies, MCP native."
+    },
+    {
+      "name": "tontinton/maki",
+      "stars": 285,
+      "language": "Rust",
+      "description": "An efficient AI coding agent"
+    },
+    {
+      "name": "Dicklesworthstone/ntm",
+      "stars": 279,
+      "language": "Go",
+      "description": "Named Tmux Manager: spawn, tile, and coordinate multiple AI coding agents (Claude, Codex, Gemini) across tmux panes with a TUI command pa\u2026"
+    },
+    {
+      "name": "regent-vcs/re_gent",
+      "stars": 268,
+      "language": "Go",
+      "description": "Version-Control for AI coding agents."
+    },
+    {
+      "name": "aannoo/hcom",
+      "stars": 264,
+      "language": "Rust",
+      "description": "Let AI agents message, watch, and spawn each other across terminals. Claude Code, Gemini CLI, Codex, OpenCode"
+    },
+    {
+      "name": "eqtylab/cupcake",
+      "stars": 259,
+      "language": "Rust",
+      "description": "A native policy enforcement layer for AI coding agents. Built on OPA/Rego."
+    },
+    {
+      "name": "nekocode/agent-worktree",
+      "stars": 255,
+      "language": "Rust",
+      "description": "A Git worktree workflow tool for AI coding agents. Enables parallel development with isolated environments."
+    },
+    {
+      "name": "amrit110/oli",
+      "stars": 242,
+      "language": "Rust",
+      "description": "A simple, fast terminal based AI coding assistant"
+    },
+    {
+      "name": "PacificStudio/openase",
+      "stars": 233,
+      "language": "Go",
+      "description": "Ticket-Driven Automated Software Engineering. OpenASE is an all-in-one platform that turns tickets into working code \u2014 AI agents automati\u2026"
+    },
+    {
+      "name": "agent-sh/agnix",
+      "stars": 231,
+      "language": "Rust",
+      "description": "The missing linter and lsp for AI coding assistants. Validate CLAUDE.md, AGENTS.md, SKILL.md, hooks, MCP. Plugin for all major IDEs inclu\u2026"
+    },
+    {
+      "name": "jazzenchen/VibeAround",
+      "stars": 228,
+      "language": "Rust",
+      "description": "Vibe coding companion: work with your local AI agents from anywhere. Chat on your phone or through a browser terminal, with instant previ\u2026"
+    },
+    {
+      "name": "RealZST/HarnessKit",
+      "stars": 224,
+      "language": "Rust",
+      "description": "More than a skill manager \u2014 manage skills, MCP servers, plugins, hooks, CLIs, configs, memory & rules across every AI coding agent. \ud83c\udf1f Sta\u2026"
+    },
+    {
+      "name": "AkaraChen/aghub",
+      "stars": 212,
+      "language": "Rust",
+      "description": "One hub for every AI coding agent. Unified configuration management for 22+ assistants."
+    },
+    {
+      "name": "fy0/CodeKanban",
+      "stars": 207,
+      "language": "Go",
+      "description": "Manage all your terminals and ai coding agents from one unified page."
+    },
+    {
+      "name": "hiroppy/tmux-agent-sidebar",
+      "stars": 202,
+      "language": "Rust",
+      "description": "A tmux sidebar that monitors AI coding agents across all windows and sessions in real-time"
+    },
+    {
+      "name": "aduermael/herm",
+      "stars": 190,
+      "language": "Go",
+      "description": "Terminal-native AI coding agent running in containers."
+    },
+    {
+      "name": "kontext-security/kontext-cli",
+      "stars": 185,
+      "language": "Go",
+      "description": "Open-source CLI for AI coding agents. Give your coding agents access to services without exposing keys."
+    },
+    {
+      "name": "liuxiaopai-ai/ralph-desktop",
+      "stars": 181,
+      "language": "Rust",
+      "description": "Ralph Desktop - Start vague. Ralph Loop until perfect. A visual controller for AI coding agents that helps you brainstorm requirements an\u2026"
+    },
+    {
+      "name": "GreyhavenHQ/greywall",
+      "stars": 175,
+      "language": "Go",
+      "description": "Container-free, deny-by-default sandbox for AI coding agents. Kernel-enforced filesystem, network, and syscall isolation for Linux and macOS"
+    },
+    {
+      "name": "mattolson/agent-sandbox",
+      "stars": 171,
+      "language": "Go",
+      "description": "Secure local dev environment for collaboration with AI coding agents"
+    },
+    {
+      "name": "erans/lunaroute",
+      "stars": 168,
+      "language": "Rust",
+      "description": "LunaRoute is a high-performance local proxy for AI coding assistants like Claude Code, OpenAI Codex CLI, and OpenCode. Get complete visib\u2026"
+    },
+    {
+      "name": "kelos-dev/kelos",
+      "stars": 162,
+      "language": "Go",
+      "description": "Kelos - The Kubernetes-native framework for orchestrating autonomous AI coding agents."
+    },
+    {
+      "name": "Dicklesworthstone/meta_skill",
+      "stars": 162,
+      "language": "Rust",
+      "description": "Local-first skill management platform for AI coding agents: dual SQLite+Git persistence, semantic search, bandit-optimized suggestions, a\u2026"
+    },
+    {
+      "name": "severity1/claude-agent-sdk-go",
+      "stars": 147,
+      "language": "Go",
+      "description": "Unofficial Go SDK for Claude Code CLI integration. See the Claude Agent SDK documentation for more information. This project has been ren\u2026"
+    },
+    {
+      "name": "illegalstudio/lazyagent",
+      "stars": 145,
+      "language": "Go",
+      "description": "Monitor all your coding agents from one terminal - Claude Code, Cursor, OpenCode, pi and more"
+    },
+    {
+      "name": "regenrek/peky",
+      "stars": 143,
+      "language": "Go",
+      "description": "All your AI Agents like Claude Code, Codex CLI in a single TUI to keep things organized."
+    },
+    {
+      "name": "sammcj/mcp-devtools",
+      "stars": 142,
+      "language": "Go",
+      "description": "A modular MCP server that provides commonly used developer tools for AI coding agents"
+    },
+    {
+      "name": "nwiizo/ccswarm",
+      "stars": 139,
+      "language": "Rust",
+      "description": "Multi-agent orchestration system using Claude Code with Git worktree isolation and specialized AI agents for collaborative development"
+    },
+    {
+      "name": "mnemon-dev/mnemon",
+      "stars": 132,
+      "language": "Go",
+      "description": "LLM-supervised persistent memory for AI agents \u2014 graph-based recall, cross-session knowledge, single binary. Works with Claude Code, Open\u2026"
+    },
+    {
+      "name": "QingJ01/Clyde",
+      "stars": 130,
+      "language": "Rust",
+      "description": "A desktop pet that reacts to your AI coding agent sessions in real-time."
+    },
+    {
+      "name": "kevinelliott/agentpipe",
+      "stars": 124,
+      "language": "Go",
+      "description": "A CLI/TUI app that orchestrates multi-agent conversations by enabling different AI CLI tools (Claude Code, Gemini, Qwen, etc.) to communi\u2026"
+    },
+    {
+      "name": "junhoyeo/contrabass",
+      "stars": 122,
+      "language": "Go",
+      "description": "\ud83c\udfb8 A project-level orchestrator for AI coding agents \u2014 Go & Charm stack implementation of OpenAI's Symphony"
+    },
+    {
+      "name": "mathomhaus/guild",
+      "stars": 120,
+      "language": "Go",
+      "description": "Shared context, memory, and task coordination across AI coding agents. Single Go binary, local SQLite, hybrid keyword and semantic search."
+    },
+    {
+      "name": "Dicklesworthstone/coding_agent_account_manager",
+      "stars": 118,
+      "language": "Go",
+      "description": "Sub-100ms auth switching for AI coding CLIs (Claude Code, Codex, Gemini): swap subscription accounts instantly when you hit usage limits"
+    },
+    {
+      "name": "safedep/gryph",
+      "stars": 118,
+      "language": "Go",
+      "description": "Security layer for AI coding agents. Works with Claude Code, Cursor, Windsurf, Gemini CLI, OpenCode, Pi Agent and more."
+    },
+    {
+      "name": "yuanchuan/aivo",
+      "stars": 118,
+      "language": "Rust",
+      "description": "Aivo is a command-line tool that connects your coding agent to almost any model. It also includes built-in models out of the box \u2014 no API\u2026"
+    },
+    {
+      "name": "subinium/agf",
+      "stars": 117,
+      "language": "Rust",
+      "description": "AI Agent Session Finder \u2014 TUI to find, resume and manage sessions across Claude Code, Codex, Gemini, Kiro, OpenCode, Cursor, pi, Hermes"
+    },
+    {
+      "name": "madeye/mcp-cli",
+      "stars": 116,
+      "language": "Rust",
+      "description": "a prototype to save fork/exec overhead of ai code agent"
+    }
+  ],
+  "sandboxes": [
+    {
+      "name": "superradcompany/microsandbox",
+      "stars": 6000,
+      "language": "Rust",
+      "description": "\ud83e\uddf1 secure, local and programmable sandboxes for AI agents"
+    },
+    {
+      "name": "NVIDIA/OpenShell",
+      "stars": 5700,
+      "language": "Rust",
+      "description": "OpenShell is the safe, private runtime for autonomous AI agents."
+    },
+    {
+      "name": "rivet-dev/rivet",
+      "stars": 5500,
+      "language": "Rust",
+      "description": "Rivet Actors are the primitive for stateful workloads. Built for AI agents, collaborative apps, and durable execution."
+    },
+    {
+      "name": "TencentCloud/CubeSandbox",
+      "stars": 5200,
+      "language": "Rust",
+      "description": "Instant, Concurrent, Secure & Lightweight Sandbox for AI Agents."
+    },
+    {
+      "name": "docker/docker-agent",
+      "stars": 2900,
+      "language": "Go",
+      "description": "AI Agent Builder and Runtime by Docker Engineering"
+    },
+    {
+      "name": "rivet-dev/agent-os",
+      "stars": 2900,
+      "language": "Rust",
+      "description": "A portable open-source operating system for agents. ~6 ms coldstarts, 32x cheaper than sandboxes. Powered by WebAssembly and V8 isolates."
+    },
+    {
+      "name": "zerobootdev/zeroboot",
+      "stars": 2300,
+      "language": "Rust",
+      "description": "Sub-millisecond VM sandboxes for AI agents via copy-on-write forking"
+    },
+    {
+      "name": "kubernetes-sigs/agent-sandbox",
+      "stars": 2100,
+      "language": "Go",
+      "description": "agent-sandbox enables easy management of isolated, stateful, singleton workloads, ideal for use cases like AI agent runtimes."
+    },
+    {
+      "name": "memohai/Memoh",
+      "stars": 1600,
+      "language": "Go",
+      "description": "\u2728 Self hosted, always-on AI agent platform run in containers. Create multiple bots with long memory, and connect them to Telegram, Discor\u2026"
+    },
+    {
+      "name": "ThousandBirdsInc/chidori",
+      "stars": 1300,
+      "language": "Rust",
+      "description": "A reactive runtime for building durable AI agents"
+    },
+    {
+      "name": "golemcloud/golem",
+      "stars": 990,
+      "language": "Rust",
+      "description": "Golem Cloud is the agent-native platform for building AI agents and distributed applications that never lose state, never duplicate work,\u2026"
+    },
+    {
+      "name": "superhq-ai/shuru",
+      "stars": 724,
+      "language": "Rust",
+      "description": "A local-first microVM sandbox for running AI agents safely on macOS & Linux"
+    },
+    {
+      "name": "Ai00-X/ai00_server",
+      "stars": 612,
+      "language": "Rust",
+      "description": "The all-in-one RWKV runtime box with embed, RAG, AI agents, and more."
+    },
+    {
+      "name": "strongdm/leash",
+      "stars": 556,
+      "language": "Go",
+      "description": "Leash by StrongDM - take your AI agents for a walk"
+    },
+    {
+      "name": "cloudshipai/station",
+      "stars": 419,
+      "language": "Go",
+      "description": "Station is our open-source runtime that lets teams deploy agents on their own infrastructure with full control."
+    },
+    {
+      "name": "clawshell/clawshell",
+      "stars": 282,
+      "language": "Rust",
+      "description": "The Runtime Security Layer for OpenClaw/Hermes-agent, the essential safety harness for PII & sensitive credentials protection."
+    },
+    {
+      "name": "capsulerun/capsule",
+      "stars": 281,
+      "language": "Rust",
+      "description": "Secure runtime to sandbox AI agent tasks. Run untrusted code in isolated WebAssembly environments."
+    },
+    {
+      "name": "superhq-ai/superhq",
+      "stars": 237,
+      "language": "Rust",
+      "description": "Sandboxed AI agent orchestration platform"
+    },
+    {
+      "name": "robcholz/vibebox",
+      "stars": 197,
+      "language": "Rust",
+      "description": "Ultrafast CLI on Apple Silicon macOS for fast, sandboxed development and LLM agents."
+    },
+    {
+      "name": "smartcomputer-ai/agent-os",
+      "stars": 186,
+      "language": "Rust",
+      "description": "Build autonomous AI agents! \ud83c\udf1e"
+    },
+    {
+      "name": "AkihiroSuda/alcless",
+      "stars": 166,
+      "language": "Go",
+      "description": "\ud83c\udf7a Alcoholless: lightweight security sandbox for Homebrew, AI agents, etc. on macOS"
+    },
+    {
+      "name": "dtormoen/tsk-tsk",
+      "stars": 164,
+      "language": "Rust",
+      "description": "Keeping your agents out of trouble with sandboxed coding agent automation"
+    },
+    {
+      "name": "parcadei/ouros",
+      "stars": 140,
+      "language": "Rust",
+      "description": "A sandboxed Python runtime for AI agents, written in Rust."
+    },
+    {
+      "name": "agent-sandbox/agent-sandbox",
+      "stars": 117,
+      "language": "Go",
+      "description": "Agent-Sandbox is an E2B compatible easy-to-use enterprise-grade sandboxes for AI Agents. Allows Agents to securely run untrusted LLM-gene\u2026"
+    },
+    {
+      "name": "zunor/paro",
+      "stars": 102,
+      "language": "Rust",
+      "description": "An AI-native multi-model database unifying SQL, vector, full-text, graph, and sandboxed Python \u2014 for transactional, analytical, and agent \u2026"
+    }
+  ],
+  "orchestrators": [
+    {
+      "name": "databendlabs/databend",
+      "stars": 9300,
+      "language": "Rust",
+      "description": "Data Agent Ready Warehouse : One for Analytics, Search, AI, Python Sandbox. \u2014 rebuilt from scratch. Unified architecture on your S3."
+    },
+    {
+      "name": "hatchet-dev/hatchet",
+      "stars": 7100,
+      "language": "Go",
+      "description": "\ud83e\ude93 An orchestration engine for background tasks, AI agents, and durable workflows"
+    },
+    {
+      "name": "katanemo/plano",
+      "stars": 6400,
+      "language": "Rust",
+      "description": "Plano is an AI-native proxy and data plane for agentic apps \u2014 with built-in orchestration, safety, observability, and smart LLM routing s\u2026"
+    },
+    {
+      "name": "coze-dev/coze-loop",
+      "stars": 5400,
+      "language": "Go",
+      "description": "Next-generation AI Agent Optimization Platform: Cozeloop addresses challenges in AI agent development by providing full-lifecycle managem\u2026"
+    },
+    {
+      "name": "the-open-agent/openagent",
+      "stars": 4600,
+      "language": "Go",
+      "description": "\u26a1\ufe0fnext-generation personal AI assistant powered by LLM, RAG and agent loops, supporting computer-use, browser-use and coding agent, demo: h\u2026"
+    },
+    {
+      "name": "mikeyobrien/ralph-orchestrator",
+      "stars": 2800,
+      "language": "Rust",
+      "description": "An improved implementation of the Ralph Wiggum technique for autonomous AI agent orchestration"
+    },
+    {
+      "name": "Kocoro-lab/Shannon",
+      "stars": 1800,
+      "language": "Go",
+      "description": "A production-oriented multi-agent orchestration framework."
+    },
+    {
+      "name": "Armur-Ai/Pentest-Swarm-AI",
+      "stars": 1100,
+      "language": "Go",
+      "description": "Autonomous penetration testing using a swarm of AI agents. Orchestrates recon, classification, exploitation, and reporting specialists wi\u2026"
+    },
+    {
+      "name": "helixml/helix",
+      "stars": 773,
+      "language": "Go",
+      "description": "\u267e\ufe0f Private Agent Fleet with Spec Coding. Each agent gets their own GPU-accelerated desktop. Run Claude, Codex, Gemini and open models on \u2026"
+    },
+    {
+      "name": "adolfousier/opencrabs",
+      "stars": 732,
+      "language": "Rust",
+      "description": "The self-improving all channels AI agent. Self-healing. Fully autonomous. Single Rust binary."
+    },
+    {
+      "name": "klawsh/klaw.sh",
+      "stars": 624,
+      "language": "Go",
+      "description": "kubectl for AI Agents"
+    },
+    {
+      "name": "liquidos-ai/AutoAgents",
+      "stars": 623,
+      "language": "Rust",
+      "description": "A multi-agent framework written in Rust that enables you to build, deploy, and coordinate multiple intelligent agents"
+    },
+    {
+      "name": "rapidaai/voice-ai",
+      "stars": 615,
+      "language": "Go",
+      "description": "Rapida is an open-source, end-to-end voice AI orchestration platform for building real-time conversational voice agents with audio stream\u2026"
+    },
+    {
+      "name": "sympozium-ai/sympozium",
+      "stars": 477,
+      "language": "Go",
+      "description": "The Coordination Layer for Multi-Agent AI"
+    },
+    {
+      "name": "cordum-io/cordum",
+      "stars": 473,
+      "language": "Go",
+      "description": "The open agent control plane. Govern autonomous AI agents with pre-execution policy enforcement, approval gates, and audit trails. Works \u2026"
+    },
+    {
+      "name": "graniet/llm",
+      "stars": 342,
+      "language": "Rust",
+      "description": "A powerful Rust library and CLI tool to unify and orchestrate multiple LLM, Agent and voice backends (OpenAI, Claude, Gemini, Ollama, Ele\u2026"
+    },
+    {
+      "name": "mlhher/late-cli",
+      "stars": 276,
+      "language": "Go",
+      "description": "Orchestrate an entire AI dev team on 5GB VRAM. Ephemeral subagents, exact-match diffs, zero context bloat. Single static binary, zero dep\u2026"
+    },
+    {
+      "name": "embedding-shapes/one-agent-one-browser",
+      "stars": 223,
+      "language": "Rust",
+      "description": "One from scratch browser built by one human and one agent, working hand in hand"
+    },
+    {
+      "name": "DecapodLabs/decapod",
+      "stars": 205,
+      "language": "Rust",
+      "description": "Decapod is the daemonless, local-first control plane agents call on demand to converge on human intent, shape context before inference, e\u2026"
+    },
+    {
+      "name": "Talus-Network/nexus-sdk",
+      "stars": 184,
+      "language": "Rust",
+      "description": "The Nexus SDK is a set of tools to help facilitate developers building with Nexus, the Agentic Workflow Engine, to build Talus agents or \u2026"
+    },
+    {
+      "name": "kdlbs/kandev",
+      "stars": 165,
+      "language": "Go",
+      "description": "AI Kanban & Development Environment. Orchestrate multiple agents, review changes, open PRs. Multi-provider, self-hostable, no telemetry."
+    },
+    {
+      "name": "clawfleet/ClawFleet",
+      "stars": 146,
+      "language": "Go",
+      "description": "Deploy a fleet of AI agents (OpenClaw, Hermes) on your machine in 10 minutes \u2014 use your ChatGPT subscription, no cloud bills. Open-source\u2026"
+    },
+    {
+      "name": "this-rs/project-orchestrator",
+      "stars": 115,
+      "language": "Rust",
+      "description": "A Rust-based AI agent orchestrator with Neo4j knowledge graph, Meilisearch semantic search, and Tree-sitter code parsing."
+    }
+  ],
+  "browsers": [
+    {
+      "name": "vercel-labs/agent-browser",
+      "stars": 32400,
+      "language": "Rust",
+      "description": "Browser automation CLI for AI agents"
+    },
+    {
+      "name": "h4ckf0r0day/obscura",
+      "stars": 11300,
+      "language": "Rust",
+      "description": "The headless browser for AI agents and web scraping"
+    },
+    {
+      "name": "VibiumDev/vibium",
+      "stars": 2800,
+      "language": "Go",
+      "description": "Browser automation for AI agents and humans"
+    },
+    {
+      "name": "actionbook/actionbook",
+      "stars": 1500,
+      "language": "Rust",
+      "description": "Let your AI agent use your browser. Actionbook makes it actually work."
+    },
+    {
+      "name": "mediar-ai/terminator",
+      "stars": 1400,
+      "language": "Rust",
+      "description": "playwright for windows computer use"
+    },
+    {
+      "name": "lahfir/agent-desktop",
+      "stars": 593,
+      "language": "Rust",
+      "description": "Native desktop automation CLI for AI agents. Control any application through OS accessibility trees with structured JSON output and deter\u2026"
+    },
+    {
+      "name": "gojue/moling",
+      "stars": 336,
+      "language": "Go",
+      "description": "MoLing is a computer-use and browser-use based MCP server. It is a locally deployed, dependency-free office AI assistant."
+    },
+    {
+      "name": "gsd-build/gsd-browser",
+      "stars": 226,
+      "language": "Rust",
+      "description": "A fast, native browser automation CLI built from the ground up for AI agents, powered by Chrome DevTools Protocol. 63 commands covering n\u2026"
+    },
+    {
+      "name": "k4cper-g/agent-ctrl",
+      "stars": 128,
+      "language": "Rust",
+      "description": "Desktop automation CLI for AI agents. Fast native Rust CLI."
+    }
+  ],
+  "memory_rag": [
+    {
+      "name": "memvid/memvid",
+      "stars": 15400,
+      "language": "Rust",
+      "description": "Memory layer for AI Agents. Replace complex RAG pipelines with a serverless, single-file memory layer. Give your agents instant retrieval\u2026"
+    },
+    {
+      "name": "Canner/WrenAI",
+      "stars": 15100,
+      "language": "Rust",
+      "description": "The open context layer that gives AI agents grounded, governed SQL across 20+ data sources, that helps you build GenBI, dashboards, and a\u2026"
+    },
+    {
+      "name": "Tencent/WeKnora",
+      "stars": 14500,
+      "language": "Go",
+      "description": "Open-source LLM knowledge platform: turn raw documents into a queryable RAG, an autonomous reasoning agent, and a self-maintaining Wiki."
+    },
+    {
+      "name": "sigoden/aichat",
+      "stars": 10000,
+      "language": "Rust",
+      "description": "All-in-one LLM CLI tool featuring Shell Assistant, Chat-REPL, RAG, AI Tools & Agents, with access to OpenAI, Claude, Gemini, Ollama, Groq\u2026"
+    },
+    {
+      "name": "dmtrKovalenko/fff",
+      "stars": 5900,
+      "language": "Rust",
+      "description": "The fastest and the most accurate file search toolkit for AI agents, Neovim, Rust, C, and NodeJS"
+    },
+    {
+      "name": "matrixorigin/matrixone",
+      "stars": 1800,
+      "language": "Go",
+      "description": "AI-native HTAP database with Git-for-Data and built-in vector search, serving as the data and memory backbone for intelligent agents and \u2026"
+    },
+    {
+      "name": "limecloud/lime",
+      "stars": 1400,
+      "language": "Rust",
+      "description": "AI content workspace for Chinese creators: desktop writing, research, prompt library, knowledge base, and multi-model workflows."
+    },
+    {
+      "name": "alash3al/stash",
+      "stars": 674,
+      "language": "Go",
+      "description": "Stash \u2014 persistent memory layer for AI agents. Episodes, facts, and working context stored in Postgres. MCP server included. Self-hosted,\u2026"
+    },
+    {
+      "name": "Compresr-ai/Context-Gateway",
+      "stars": 599,
+      "language": "Go",
+      "description": "Context Gateway is an agentic proxy that enhances any AI agent workflow with instant history compaction and context optimization tools"
+    },
+    {
+      "name": "marmotdata/marmot",
+      "stars": 551,
+      "language": "Go",
+      "description": "The open-source context layer for your AI. Catalog your tables, topics, queues and APIs then expose real metadata to your AI agents."
+    },
+    {
+      "name": "samvallad33/vestige",
+      "stars": 526,
+      "language": "Rust",
+      "description": "Cognitive memory for AI agents \u2014 FSRS-6 spaced repetition, 29 brain modules, 3D dashboard, single 22MB Rust binary. MCP server for Claude\u2026"
+    },
+    {
+      "name": "angelnicolasc/graymatter",
+      "stars": 358,
+      "language": "Go",
+      "description": "Three lines of code to give your AI agents persistent memory. Reduce 90% token consumption while also maintaining quality."
+    },
+    {
+      "name": "zhimaAi/ChatClaw",
+      "stars": 280,
+      "language": "Go",
+      "description": "ChatClaw: Get OpenClaw-like knowledge base personal AI agent in 5 mins. Sandbox-secured, ultra-small 30MB installer for macOS & Windows (\u2026"
+    },
+    {
+      "name": "matrixorigin/Memoria",
+      "stars": 259,
+      "language": "Rust",
+      "description": "Secure memory management for AI Agents \u2022 Ensures data integrity \u2022 Reduces hallucinations \u2022 Maintains consistent long-term context"
+    },
+    {
+      "name": "varun29ankuS/shodh-memory",
+      "stars": 209,
+      "language": "Rust",
+      "description": "Cognitive memory for AI agents \u2014 learns from use, forgets what's irrelevant, strengthens what matters. Single binary, fully offline."
+    },
+    {
+      "name": "LightningRAG/LightningRAG",
+      "stars": 196,
+      "language": "Go",
+      "description": "LightningRAG is a full-stack Vue + Gin starter with a decoupled frontend and backend, plus built-in, extensible RAG (retrieval-augmented \u2026"
+    },
+    {
+      "name": "ourmem/omem",
+      "stars": 193,
+      "language": "Rust",
+      "description": "Shared Memory That Never Forgets \u2014 persistent memory for AI agents with Space-based sharing across agents and teams. Plugins for OpenCode\u2026"
+    },
+    {
+      "name": "yantrikos/yantrikdb-server",
+      "stars": 140,
+      "language": "Rust",
+      "description": "Cognitive memory database for AI agents \u2014 consolidates duplicates, detects contradictions, fades stale memories via temporal decay. Rust,\u2026"
+    },
+    {
+      "name": "devwhodevs/engraph",
+      "stars": 131,
+      "language": "Rust",
+      "description": "Local knowledge graph for AI agents. Hybrid search + MCP server for Obsidian vaults."
+    },
+    {
+      "name": "opencrust-org/opencrust",
+      "stars": 121,
+      "language": "Rust",
+      "description": "\ud83e\udd80 Personal Multi-agent AI assistant platform, written in Rust \u2014 multi-agent, self-learning skills, RAG, MCP, and agentskills.io compatible"
+    }
+  ],
+  "mcp_tools": [
+    {
+      "name": "googleapis/mcp-toolbox",
+      "stars": 15100,
+      "language": "Go",
+      "description": "MCP Toolbox for Databases is an open source MCP server for databases."
+    },
+    {
+      "name": "google/adk-go",
+      "stars": 7900,
+      "language": "Go",
+      "description": "An open-source, code-first Go toolkit for building, evaluating, and deploying sophisticated AI agents with flexibility and control."
+    },
+    {
+      "name": "53AI/53AIHub",
+      "stars": 4900,
+      "language": "Go",
+      "description": "53AI Hub is an open-source AI portal, which enables you to quickly build a operational-level AI portal to launch and operate AI agents, p\u2026"
+    },
+    {
+      "name": "nextlevelbuilder/goclaw",
+      "stars": 3100,
+      "language": "Go",
+      "description": "GoClaw - GoClaw is OpenClaw rebuilt in Go \u2014 with multi-tenant isolation, 5-layer security, and native concurrency. Deploy AI agent teams \u2026"
+    },
+    {
+      "name": "kagent-dev/kagent",
+      "stars": 2700,
+      "language": "Go",
+      "description": "Cloud Native Agentic AI | Discord: https://bit.ly/kagentdiscord"
+    },
+    {
+      "name": "agentgateway/agentgateway",
+      "stars": 2700,
+      "language": "Rust",
+      "description": "Next Generation Agentic Proxy for AI Agents and MCP servers"
+    },
+    {
+      "name": "sentrux/sentrux",
+      "stars": 2300,
+      "language": "Rust",
+      "description": "Real-time architectural sensor that helps AI agents close the feedback loop, enabling recursive self-improvement of code quality. Pure Rust."
+    },
+    {
+      "name": "yomorun/yomo",
+      "stars": 1900,
+      "language": "Rust",
+      "description": "\ud83e\udd96 Serverless AI Agent Framework with Geo-distributed Edge AI Infra."
+    },
+    {
+      "name": "trpc-group/trpc-agent-go",
+      "stars": 1200,
+      "language": "Go",
+      "description": "trpc-agent-go is a powerful Go framework for building intelligent agent systems using large language models (LLMs) and tools."
+    },
+    {
+      "name": "luckyPipewrench/pipelock",
+      "stars": 574,
+      "language": "Go",
+      "description": "Open-source AI agent firewall for MCP security: agent egress control, DLP, SSRF, and prompt injection defense."
+    },
+    {
+      "name": "second-state/echokit_server",
+      "stars": 566,
+      "language": "Rust",
+      "description": "Open Source Voice Agent Platform"
+    },
+    {
+      "name": "matlab/matlab-mcp-core-server",
+      "stars": 536,
+      "language": "Go",
+      "description": "Run MATLAB\u00ae using AI applications with the official MATLAB MCP Server from MathWorks\u00ae. This MCP server for MATLAB supports a wide range o\u2026"
+    },
+    {
+      "name": "shiwenwen/hope-agent",
+      "stars": 420,
+      "language": "Rust",
+      "description": "\ud83e\uddad\u8de8\u7aef\u4ea4\u63a5\u3001\u8d8a\u7528\u8d8a\u61c2\u4f60\u7684\u684c\u9762 AI \u52a9\u624b\u2014\u2014\u4e5f\u80fd\u670d\u52a1\u5316\u5e38\u9a7b\u3001\u8dd1\u5728\u4e91\u4e0a | Desktop AI that hands off across your devices and gets to know you better \u2014 also runs headless on a \u2026"
+    },
+    {
+      "name": "qqqqqf-q/Arkloop",
+      "stars": 303,
+      "language": "Go",
+      "description": "\u5e72\u51c0\u3001\u5f3a\u5927\u3001\u5c5e\u4e8e\u4f60\u7684 AI Agent \u5e73\u53f0 --AI agents, without the clutter."
+    },
+    {
+      "name": "liaotxcn/Weave",
+      "stars": 302,
+      "language": "Go",
+      "description": "A highly efficient, secure, and stable application development platform with excellent performance, easy scalability, and deep integratio\u2026"
+    },
+    {
+      "name": "saidutt46/domain-check",
+      "stars": 274,
+      "language": "Rust",
+      "description": "Fast, universal domain availability checker - 1,200+ TLDs, pattern generation, RDAP with WHOIS fallback. CLI + Rust library + MCP server \u2026"
+    },
+    {
+      "name": "VersusControl/ai-infrastructure-agent",
+      "stars": 210,
+      "language": "Go",
+      "description": "AI Infrastructure Agent is an intelligent system that allows you to manage AWS infrastructure using natural language commands."
+    },
+    {
+      "name": "smart-mcp-proxy/mcpproxy-go",
+      "stars": 209,
+      "language": "Go",
+      "description": "Supercharge AI Agents, Safely"
+    },
+    {
+      "name": "ckanthony/openapi-mcp",
+      "stars": 185,
+      "language": "Go",
+      "description": "Dockerized MCP Server to allow your AI agent to access any API with existing api docs"
+    },
+    {
+      "name": "m-mizutani/gollem",
+      "stars": 185,
+      "language": "Go",
+      "description": "Go framework for agentic AI app with MCP and built-in tools"
+    },
+    {
+      "name": "babelcloud/gbox",
+      "stars": 174,
+      "language": "Go",
+      "description": "Cli and MCP for gbox. Enable AI agents to operate Android/Browser/Desktop like human."
+    },
+    {
+      "name": "pgEdge/pgedge-postgres-mcp",
+      "stars": 157,
+      "language": "Go",
+      "description": "pgEdge MCP Server. A PostgreSQL MCP server with a Natural Language Agent CLI and Web UI."
+    },
+    {
+      "name": "paiml/paiml-mcp-agent-toolkit",
+      "stars": 150,
+      "language": "Rust",
+      "description": "Pragmatic AI Labs MCP Agent Toolkit - An MCP Server designed to make code with agents more deterministic"
+    },
+    {
+      "name": "AgenticGoKit/AgenticGoKit",
+      "stars": 149,
+      "language": "Go",
+      "description": "Open-source Agentic AI framework in Go for building, orchestrating, and deploying intelligent agents. LLM-agnostic, event-driven, with mu\u2026"
+    },
+    {
+      "name": "glitchedgitz/grroxy",
+      "stars": 126,
+      "language": "Go",
+      "description": "A cyber security toolkit blending manual testing with AI Agents"
+    },
+    {
+      "name": "mathematic-inc/earl",
+      "stars": 111,
+      "language": "Rust",
+      "description": "Secure CLI proxy for AI agents \u2014 HCL-defined operation templates with OS keychain secrets, MCP integration, and prompt injection protection"
+    },
+    {
+      "name": "soth-ai/mcp-reticle",
+      "stars": 110,
+      "language": "Rust",
+      "description": "Reticle intercepts, visualizes, and profiles JSON-RPC traffic between your LLM and MCP servers in real-time, with zero latency overhead. \u2026"
+    },
+    {
+      "name": "permit0-ai/permit0",
+      "stars": 107,
+      "language": "Rust",
+      "description": "Stop AI agents from doing things they shouldn't. The action authorization layer \u2014 pre-execution, deterministic, policies included. Drop i\u2026"
+    },
+    {
+      "name": "step-security/dev-machine-guard",
+      "stars": 103,
+      "language": "Go",
+      "description": "Scan your dev machine for AI agents, MCP servers, IDE extensions, and suspicious packages - in seconds."
+    }
+  ],
+  "devkit_sdk": [
+    {
+      "name": "0xPlaygrounds/rig",
+      "stars": 7200,
+      "language": "Rust",
+      "description": "\u2699\ufe0f\ud83e\udd80 Build modular and scalable LLM Applications in Rust"
+    },
+    {
+      "name": "looplj/axonhub",
+      "stars": 3700,
+      "language": "Go",
+      "description": "\u26a1\ufe0f Open-source AI Gateway \u2014 Use any SDK to call 100+ LLMs. Built-in failover, load balancing, cost control & end-to-end tracing."
+    },
+    {
+      "name": "Ingenimax/agent-sdk-go",
+      "stars": 568,
+      "language": "Go",
+      "description": "A powerful Go framework for building production-ready AI agents!"
+    },
+    {
+      "name": "eat-pray-ai/yutu",
+      "stars": 449,
+      "language": "Go",
+      "description": "The AI-powered toolkit that grows your YouTube channel on autopilot."
+    },
+    {
+      "name": "zavora-ai/adk-rust",
+      "stars": 317,
+      "language": "Rust",
+      "description": "Rust Agent Development Kit (ADK-Rust): Build AI agents in Rust with modular components for models, tools, memory, realtime voice, and mor\u2026"
+    },
+    {
+      "name": "worldliberty/agentpay-sdk",
+      "stars": 266,
+      "language": "Rust",
+      "description": "An open SDK for agentic payments. Let AI agents make payments, hold funds, and move money across chains with policy enforcement and human\u2026"
+    },
+    {
+      "name": "qntx/erc8004",
+      "stars": 164,
+      "language": "Rust",
+      "description": "Rust SDK for ERC-8004: Onchain AI agent execution registry."
+    },
+    {
+      "name": "opper-ai/opperator",
+      "stars": 162,
+      "language": "Go",
+      "description": "Opperator is a framework for building and running general AI agents locally from your terminal"
+    },
+    {
+      "name": "wiseaidotdev/autogpt",
+      "stars": 112,
+      "language": "Rust",
+      "description": "\ud83e\udd80 A Pure Rust Framework For Building AGI."
+    }
+  ],
+  "cli_tools": [
+    {
+      "name": "larksuite/cli",
+      "stars": 9600,
+      "language": "Go",
+      "description": "The official Lark/Feishu CLI tool, maintained by the larksuite team \u2014 built for humans and AI Agents. Covers core business domains includ\u2026"
+    },
+    {
+      "name": "max-sixty/worktrunk",
+      "stars": 5000,
+      "language": "Rust",
+      "description": "Worktrunk is a CLI for Git worktree management, designed for parallel AI agent workflows"
+    },
+    {
+      "name": "DingTalk-Real-AI/dingtalk-workspace-cli",
+      "stars": 1700,
+      "language": "Go",
+      "description": "DingTalk Workspace is an officially open-sourced cross-platform CLI tool from DingTalk. It unifies DingTalk\u2019s full suite of product capab\u2026"
+    },
+    {
+      "name": "Infisical/agent-vault",
+      "stars": 1000,
+      "language": "Go",
+      "description": "A HTTP credential proxy and vault for AI agents"
+    },
+    {
+      "name": "nowledge-co/con-terminal",
+      "stars": 397,
+      "language": "Rust",
+      "description": "The Native Terminal Emulator with a builtin AI Harness"
+    },
+    {
+      "name": "geekjourneyx/jina-cli",
+      "stars": 294,
+      "language": "Go",
+      "description": "A lightweight CLI tool wrapping Jina AI Reader API for AI Agents. Fetch and parse any URL into LLM-friendly formats (Markdown/Text/HTML).\u2026"
+    },
+    {
+      "name": "SleuthCo/clawshield-public",
+      "stars": 127,
+      "language": "Go",
+      "description": "Security proxy for AI agents. Scans every message for prompt injection, PII, and secrets. Defense-in-depth: Go proxy + iptables firewall \u2026"
+    },
+    {
+      "name": "eljulians/skillfile",
+      "stars": 116,
+      "language": "Rust",
+      "description": "One-stop shop for AI skills and agents. Search 110K+ community skills, install and track them declaratively, and deploy across all major AI\u2026"
+    },
+    {
+      "name": "msmps/pilotty",
+      "stars": 115,
+      "language": "Rust",
+      "description": "Daemon-managed PTY sessions for AI agents to interact with terminal applications"
+    },
+    {
+      "name": "The-17/agentsecrets",
+      "stars": 101,
+      "language": "Go",
+      "description": "Zero-knowledge secrets infrastructure built for AI agents to operate, not just consume."
+    },
+    {
+      "name": "arkylab/aspm",
+      "stars": 101,
+      "language": "Rust",
+      "description": "A Git-based package manager designed for AI-assisted development, similar to npm but supporting skills, agents, commands, hooks, and any AI\u2026"
+    }
+  ]
+}

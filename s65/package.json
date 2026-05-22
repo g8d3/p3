@@ -1,0 +1,29 @@
+{
+  "name": "p3-agent-system",
+  "version": "0.1.0",
+  "description": "Efficient multi-agent system with sandboxing, memory management, and orchestration",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "dashboard": "tsx src/dashboard/server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "chokidar": "^4.0.0",
+    "better-sqlite3": "^11.0.0",
+    "ws": "^8.16.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "tsx": "^4.7.0",
+    "@types/node": "^22.0.0",
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/ws": "^8.5.10",
+    "vitest": "^3.0.0"
+  }
+}

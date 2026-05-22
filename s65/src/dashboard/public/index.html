@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P3 Agent System · Dashboard</title>
+<style>
+:root {
+  --bg: #0d1117;
+  --card: #161b22;
+  --border: #30363d;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --orange: #d29922;
+  --red: #f85149;
+  --purple: #bc8cff;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.header h1{font-size:20px;font-weight:600}
+.header .status{font-size:13px;color:var(--muted)}
+.status .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;animation:pulse 2s infinite}
+.dot.green{background:var(--green);box-shadow:0 0 8px var(--green)}
+.dot.red{background:var(--red);box-shadow:0 0 8px var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.dashboard{max-width:1200px;margin:0 auto;padding:20px 24px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}
+.card h3{font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.card .value{font-size:28px;font-weight:700}
+.card .value.green{color:var(--green)}
+.card .value.orange{color:var(--orange)}
+.card .value.red{color:var(--red)}
+.card .value.accent{color:var(--accent)}
+.card .sub{font-size:12px;color:var(--muted);margin-top:4px}
+
+.section{margin-bottom:24px}
+.section h2{font-size:16px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.agent-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.agent-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px}
+.agent-card .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.agent-card .name{font-weight:600;font-size:14px}
+.agent-card .badge{font-size:11px;padding:2px 8px;border-radius:8px;font-weight:500}
+.badge.idle{background:rgba(139,148,158,.15);color:var(--muted)}
+.badge.running{background:rgba(88,166,255,.15);color:var(--accent)}
+.badge.completed{background:rgba(63,185,80,.15);color:var(--green)}
+.badge.error{background:rgba(248,81,73,.15);color:var(--red)}
+.badge.killed{background:rgba(210,153,34,.15);color:var(--orange)}
+.agent-card .stats{display:flex;gap:16px;font-size:12px;color:var(--muted)}
+.agent-card .stats span{display:flex;align-items:center;gap:4px}
+.agent-card .progress{height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden}
+.agent-card .progress-bar{height:100%;background:var(--accent);border-radius:2px;transition:width .5s}
+
+.event-log{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;max-height:400px;overflow-y:auto;font-family:'SF Mono','Consolas',monospace;font-size:12px;line-height:1.6}
+.event-log .entry{display:flex;gap:8px;padding:2px 0;border-bottom:1px solid rgba(48,54,61,.5)}
+.event-log .time{color:var(--muted);flex-shrink:0}
+.event-log .type{color:var(--accent);flex-shrink:0;min-width:60px}
+.event-log .msg{color:var(--text);word-break:break-all}
+.event-log .msg.error{color:var(--red)}
+
+@media(max-width:600px){
+  .header{padding:12px 16px}
+  .dashboard{padding:12px 16px}
+  .grid{grid-template-columns:1fr}
+  .agent-list{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <h1>⚙️ P3 Agent System</h1>
+    <div class="status"><span class="dot green" id="statusDot"></span><span id="statusText">Conectando...</span></div>
+  </div>
+  <div style="font-size:13px;color:var(--muted)">
+    <span id="uptime">—</span>
+  </div>
+</div>
+
+<div class="dashboard">
+  <div class="grid">
+    <div class="card">
+      <h3>🧠 Agentes Registrados</h3>
+      <div class="value accent" id="totalAgents">0</div>
+      <div class="sub" id="agentBreakdown">—</div>
+    </div>
+    <div class="card">
+      <h3>✅ Tareas Completadas</h3>
+      <div class="value green" id="completedTasks">0</div>
+      <div class="sub" id="taskBreakdown">—</div>
+    </div>
+    <div class="card">
+      <h3>⚡ Tareas Activas</h3>
+      <div class="value orange" id="activeTasks">0</div>
+      <div class="sub" id="queueStatus">—</div>
+    </div>
+    <div class="card">
+      <h3>💾 Memoria Total</h3>
+      <div class="value" id="totalMemory">0 MB</div>
+      <div class="sub" id="avgMemory">—</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>🤖 Agentes</h2>
+    <div class="agent-list" id="agentList">
+      <div style="color:var(--muted);padding:20px;text-align:center">Esperando datos...</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>📋 Event Log</h2>
+    <div class="event-log" id="eventLog">
+      <div style="color:var(--muted);padding:10px;text-align:center">Conectando WebSocket...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const wsUrl = `ws://${location.host}`;
+let ws;
+let events = [];
+const MAX_EVENTS = 200;
+
+function connect() {
+  ws = new WebSocket(wsUrl);
+  
+  ws.onopen = () => {
+    document.getElementById('statusDot').className = 'dot green';
+    document.getElementById('statusText').textContent = 'Conectado';
+    addEvent('info', 'system', 'Dashboard conectado');
+  };
+  
+  ws.onclose = () => {
+    document.getElementById('statusDot').className = 'dot red';
+    document.getElementById('statusText').textContent = 'Desconectado (reconectando...)';
+    setTimeout(connect, 2000);
+  };
+  
+  ws.onmessage = (msg) => {
+    try {
+      const data = JSON.parse(msg.data);
+      handleMessage(data);
+    } catch(e) {}
+  };
+}
+
+function handleMessage(data) {
+  if (data.type === 'connected') {
+    addEvent('info', 'system', `Conectado - ${data.summary.totalEvents} eventos en historial`);
+    return;
+  }
+  
+  if (data.type === 'event') {
+    const event = data;
+    let label = event.type;
+    let text = JSON.stringify(event.data).slice(0, 200);
+    addEvent(label, 'event', text);
+    
+    // Update metrics based on event type
+    if (event.type === 'agent_metrics') {
+      updateAgents(event.data);
+    }
+  }
+}
+
+function addEvent(type, label, message) {
+  const log = document.getElementById('eventLog');
+  const time = new Date().toLocaleTimeString();
+  const entry = document.createElement('div');
+  entry.className = 'entry';
+  entry.innerHTML = `<span class="time">${time}</span><span class="type">${label}</span><span class="msg">${escapeHtml(message)}</span>`;
+  log.insertBefore(entry, log.firstChild);
+  
+  // Trim
+  while (log.children.length > MAX_EVENTS) {
+    log.removeChild(log.lastChild);
+  }
+}
+
+function updateAgents(data) {
+  const agents = data.agents || {};
+  const list = document.getElementById('agentList');
+  const count = Object.keys(agents).length;
+  
+  document.getElementById('totalAgents').textContent = count || '—';
+  
+  if (count === 0) {
+    list.innerHTML = '<div style="color:var(--muted);padding:20px;text-align:center">No hay agentes activos</div>';
+    return;
+  }
+  
+  let html = '';
+  for (const [id, agent] of Object.entries(agents)) {
+    const status = agent.status || 'idle';
+    const pct = agent.completed > 0 ? Math.round(agent.completed / (agent.completed + agent.failed + 1) * 100) : 0;
+    html += `
+      <div class="agent-card">
+        <div class="top">
+          <div class="name">${escapeHtml(agent.name || id)}</div>
+          <span class="badge ${status}">${status}</span>
+        </div>
+        <div class="stats">
+          <span>✅ ${agent.completed || 0}</span>
+          <span>❌ ${agent.failed || 0}</span>
+          <span>📊 ${agent.tokens || 0} tokens</span>
+          <span>💾 ${agent.memory || '—'} MB</span>
+        </div>
+        <div class="progress"><div class="progress-bar" style="width:${pct}%"></div></div>
+      </div>`;
+  }
+  list.innerHTML = html;
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+connect();
+</script>
+</body>
+</html>
