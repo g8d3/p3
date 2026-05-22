@@ -1,16 +1,8 @@
 # p3 — Folder Index
 
 | Folder | Description |
+
 |--------|-------------|
-| `s1-funding-rate-scraper` | CLI tool that fetches and normalizes funding rates from multiple decentralized perpetual DEX exchanges (Hyperliquid, dYdX, GMX, etc.) |
-| `s2-bizbot-agent` | BizBot — autonomous business agent MVP that scouts business ideas from Reddit/X, generates digital products (ebooks/PDFs) via OpenAI, and auto-markets them on X using Playwright browser automation |
-| `s3-nocode-ai-platform` | No-code AI development platform with a React frontend (visual editor, database designer, workflow builder) and Express/Apollo GraphQL backend for drag-and-drop app creation powered by AI |
-| `s4-browser-automation` | Playwright-based browser automation scripts (CDP mode) including an X/Twitter home feed scraper, a Bitwarden popout automation, and a CDP codegen helper |
-| `s5-english-learning-mvp` | English Learning MVP — a platform where teachers assign AI roles for students to chat with, with AI-powered progress tracking via a React frontend and Express/SQLite backend |
-| `s6-cdp-playground` | CDP Master Playground — a React + Vite app that provides a visual IDE for connecting to Chrome DevTools Protocol (CDP) targets, executing commands, and inspecting browser pages |
-| `s7-ai-web-scraper` | AI-powered web scraper platform with a Bun/TypeScript backend, PocketBase database, Puppeteer CDP browser automation, and OpenAI integration for AI-assisted scraping with scheduling and data sink export |
-| `s8-github-topic-scraper` | Simple Playwright-based GitHub topic scraper utility that connects to a running Chrome via CDP and scrapes GitHub repository lists from topic pages into a CSV file |
-| `s9-tax-filing-agent` | Brainstorming documents exploring a multi-agent AI system for automated IRS tax form filing using specialized LLM agents (researcher, drafter, auditor, orchestrator) |
 | `s10-contract-security` | Flask web app for smart contract security that provides endpoints for retrieving security datasets, auditing Solidity code via the MythX API, and a placeholder for real-time contract monitoring |
 | `s11-contract-security-app` | Full-stack web application (Express/TypeScript backend + React frontend) for smart contract security automation including dataset aggregation, contract auditing, and real-time protection monitoring |
 | `s12-contract-exploit-dataset` | CSV dataset cataloging unified smart contract exploits (primarily reentrancy vulnerabilities) sourced from multiple analysis tools and academic studies across thousands of contract addresses |
@@ -20,6 +12,7 @@
 | `s17-terminal-ai-chat` | Terminal-based AI chat application with curses TUI, CRUD for providers/models/agents/tools, SQLite persistence, and support for OpenAI, Anthropic, Ollama, and local models |
 | `s18-autonomous-agent` | Autonomous economic agent that explores, creates value, and earns money, with a Textual TUI, AI-driven task execution, browser automation, and self-evolution capabilities |
 | `s19-ai-skills-marketplace` | Next.js marketplace (with Prisma/PostgreSQL) for AI agents and humans to publish, share, buy, and sell AI agent skills, featuring Polar.sh, x402, and ERC-8004 payment integrations |
+| `s1-funding-rate-scraper` | CLI tool that fetches and normalizes funding rates from multiple decentralized perpetual DEX exchanges (Hyperliquid, dYdX, GMX, etc.) |
 | `s20-content-orchestrator` | Novaisabuilder Agent — a Node.js autonomous content orchestration agent for social media and content creation, using Express, SQLite, OpenAI, cron scheduling, and browser automation |
 | `s21-spacebot-agent` | Nova Builds / Spacebot — an autonomous AI agent project that scrapes X.com likes/bookmarks, stores knowledge in a graph database (GraphQLite), produces content/code, and runs a Spacebot Docker service |
 | `s22-mcp-server-config` | MCP Super Assistant Proxy — a Claude MCP (Model Context Protocol) server configuration running Chrome DevTools and shell MCP servers via npx |
@@ -29,6 +22,7 @@
 | `s26-video-generator` | Autonomous video generator that uses TTS (Inworld/OpenAI/ElevenLabs) to create narrated videos with slides and uploads them to YouTube, with Privy/Capsule wallet integration |
 | `s28-bittensor-subnet-analyzer` | Bittensor subnet rotation strategy analyzer that fetches on-chain subnet data, computes weighted signals (yield, momentum, volume, price trend, age), and generates staking rebalance recommendations with SQLite history tracking |
 | `s29-bittensor-subnet-trader` | Bittensor subnet trader (refactored version) that fetches data from both the Bittensor chain and taostats.io API, computes multi-timeframe signals, ranks subnets, and generates stake/unstake orders |
+| `s2-bizbot-agent` | BizBot — autonomous business agent MVP that scouts business ideas from Reddit/X, generates digital products (ebooks/PDFs) via OpenAI, and auto-markets them on X using Playwright browser automation |
 | `s30-opencode-config` | Minimal OpenCode workspace configuration file (just sets a GLM-4.5-Air model) |
 | `s31-cdp-browser-scripts` | Browser automation shell scripts using `agent-browser` CLI over Chrome DevTools Protocol for filling web forms, taking screenshots, and providing an interactive browser REPL |
 | `s32-cdp-node-toolkit` | Node.js CDP (Chrome DevTools Protocol) toolset for automating AI service API key creation across providers (with browser/LLM fallback), Google SSO login automation, and app logout (clearing cookies/storage) |
@@ -39,6 +33,7 @@
 | `s37-skills-manager` | Simple Python CLI skills manager for OpenCode/Claude/Agents — lists, enables, and disables skill files (`SKILL.md` / `SKILL.md.disabled`) in global and project-local directories |
 | `s38-sfx-downloader` | Sound effect downloader scripts (Python + Node.js) that use Chrome DevTools Protocol (CDP) to automate downloading sound effects from Pixabay |
 | `s39-trading-bot` | Mega Alpha trading system — an institutional-grade multi-signal combination trading bot for perpetual DEXes (Hyperliquid) implementing the Fundamental Law of Active Management (IR = IC × √N) with 12+ signals, empirical Kelly sizing, and comprehensive risk management |
+| `s3-nocode-ai-platform` | No-code AI development platform with a React frontend (visual editor, database designer, workflow builder) and Express/Apollo GraphQL backend for drag-and-drop app creation powered by AI |
 | `s40-trading-backtester` | Streamlit web dashboard (Hyperliquid Trading Game) that lets users compare grid trading vs. take-profit/stop-loss (TP/SL) trading strategies using the Nautilus Trader backtesting engine |
 | `s41-dex-volume-fetcher` | Python CLI tool that fetches and caches real-time trading volume data for all assets (perpetual and spot) from the Hyperliquid DEX exchange, outputs CSVs with hourly/daily volume in USD |
 | `s42-vrp-monitor` | Live terminal dashboard that monitors the Volatility Risk Premium (VRP) across BTC, ETH, and SOL by fetching Implied Volatility from Deribit and Realized Volatility from Hyperliquid |
@@ -49,6 +44,7 @@
 | `s47-vibe-coding-livekit` | Vibe Coding — voice-controlled AI coding assistant using Deepgram STT, choice of LLM providers, code generation via OpenCode CLI, and Kokoro TTS, with a Python LiveKit agent and React/Vite web client |
 | `s48-vibe-coding-ws` | Vibe Coding (WebSocket variant) — Python WebSocket server + single-page vanilla HTML/JS frontend where users speak or type ideas, processed through Deepgram STT → z.ai GLM-4.5 LLM → Kokoro TTS |
 | `s49-ai-companies-finance` | Tracks and analyzes AI company financial data from Yahoo Finance with a Python watchlist. |
+| `s4-browser-automation` | Playwright-based browser automation scripts (CDP mode) including an X/Twitter home feed scraper, a Bitwarden popout automation, and a CDP codegen helper |
 | `s50-multi-agent-orchestrator` | Parallel multi-agent orchestration system that spawns specialized AI agents via pi CLI for collaborative software development and video production with a real-time monitoring dashboard. |
 | `s51-multi-agent-video-pipeline` | Multi-agent AI video generation pipeline with specialized agents for direction, Remotion compositing, AI video generation, TTS audio, ShortGPT shorts, and editing for short-form cinematic content. |
 | `s52-cinematic-coding-video-generator` | Premium cinematic coding interface video generator (Python/Pillow) that produces short film-style demo videos of terminal/coding sessions with synchronized audio. |
@@ -58,4 +54,13 @@
 | `s57-agent-logger` | Logs, monitors, and tracks AI agent activities with CSV-based data storage. |
 | `s58-content-pipeline` | Automated weekly content pipeline generating videos and shorts from a topic using TTS and OpenCode Go. |
 | `s59-model-analysis` | Analyzes and compares AI model outputs across TTS, video, and text generation platforms. |
+| `s5-english-learning-mvp` | English Learning MVP — a platform where teachers assign AI roles for students to chat with, with AI-powered progress tracking via a React frontend and Express/SQLite backend |
 | `s60-spacetime-frontend` | SpacetimeDB-powered web application with reactive frontend for model and row management. |
+| `s61-obs-control` | OBS (Open Broadcaster Software) lab automation, panel control, and web interface tools. |
+| `s62-pwa-server` | HTTPS web server with service worker and manifest for a Progressive Web App. |
+| `s63-agent-hub` | Multi-agent system with web surfing, desktop sharing, terminal, and fix agents using WebSockets and React. |
+| `s64-api-benchmarks` | API benchmarking suite with automated tests, reports, and lessons learned. |
+| `s6-cdp-playground` | CDP Master Playground — a React + Vite app that provides a visual IDE for connecting to Chrome DevTools Protocol (CDP) targets, executing commands, and inspecting browser pages |
+| `s7-ai-web-scraper` | AI-powered web scraper platform with a Bun/TypeScript backend, PocketBase database, Puppeteer CDP browser automation, and OpenAI integration for AI-assisted scraping with scheduling and data sink export |
+| `s8-github-topic-scraper` | Simple Playwright-based GitHub topic scraper utility that connects to a running Chrome via CDP and scrapes GitHub repository lists from topic pages into a CSV file |
+| `s9-tax-filing-agent` | Brainstorming documents exploring a multi-agent AI system for automated IRS tax form filing using specialized LLM agents (researcher, drafter, auditor, orchestrator) |
