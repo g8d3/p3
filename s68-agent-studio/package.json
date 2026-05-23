@@ -1,0 +1,17 @@
+{
+  "name": "agent-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Agent Studio — developer agents que codean, graban, stremean y reciben feedback",
+  "scripts": {
+    "dev": "node --watch stage/server.js",
+    "orchestrate": "node amp/orquestador.js",
+    "start": "node stage/server.js & sleep 2 && node amp/orquestador.js"
+  },
+  "dependencies": {
+    "sandbox-agent": "^0.4.2",
+    "ws": "^8.18.0",
+    "express": "^4.21.0"
+  }
+}
