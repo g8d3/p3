@@ -1,0 +1,57 @@
+ID del Agente	Nombre en Pantalla	Carpeta Local	Lenguaje	RAM (MB)
+crush	Crush	.crush/skills	Go	20
+mux	Mux	.mux/skills	Go	25
+goose	Goose	.goose/skills	Rust	40
+tabnine-cli	Tabnine CLI	.tabnine/skills	Rust	45
+warp	Warp	.warp/skills	Rust	75
+claude-code	Claude Code	.claude/skills	TypeScript	90
+command-code	Command Code	.command-code/skills	TypeScript	90
+gemini-cli	Gemini CLI	.gemini/skills	TypeScript	90
+kimi-cli	Kimi CLI	.kimi/skills	TypeScript	90
+kiro-cli	Kiro CLI	.kiro/skills	TypeScript	90
+mistral-vibe	Mistral Vibe	.mistral/skills	Python	100
+amp	AMP Agent	.amp/skills	TypeScript	120
+iflow-cli	iFlow CLI	.iflow/skills	TypeScript	120
+mcpjam	MCP Jam	.mcpjam/skills	TypeScript	120
+pi	Pi Agent	.pi/skills	TypeScript	120
+opencode	OpenCode	.agents/skills	TypeScript	140
+continue	Continue	.continue/skills	TypeScript	140
+cline	Cline	.cline/skills	TypeScript	140
+openclaw	OpenClaw	.openclaw/skills	TypeScript	140
+roo	Roo Code	.roo/skills	TypeScript	140
+aider-desk	Aider	.aider/skills	Python	150
+codex	Codex	.codex/skills	Python	150
+deepagents	DeepAgents	.deepagents/skills	Python	150
+hermes-agent	Hermes Agent	.hermes/skills	Python	150
+openhands	OpenHands	.openhands/skills	Python	150
+qwen-code	Qwen Code	.qwen/skills	Python	150
+adal	Adal	.adal/skills	Python	150
+augment	Augment	.augment/skills	TypeScript	150
+bob	Bob	.bob/skills	TypeScript	150
+codearts-agent	CodeArts Agent	.codearts/skills	TypeScript	150
+codebuddy	CodeBuddy	.codebuddy/skills	TypeScript	150
+codemaker	CodeMaker	.codemaker/skills	TypeScript	150
+codestudio	CodeStudio	.codestudio/skills	TypeScript	150
+cortex	Cortex	.cortex/skills	TypeScript	150
+dexto	Dexto	.dexto/skills	TypeScript	150
+droid	Droid	.droid/skills	TypeScript	150
+firebender	Firebender	.firebender/skills	TypeScript	150
+forgecode	ForgeCode	.forgecode/skills	TypeScript	150
+kilo	Kilo	.kilo/skills	TypeScript	150
+kode	Kode	.kode/skills	TypeScript	150
+neovate	Neovate	.neovate/skills	TypeScript	150
+pochi	Pochi	.pochi/skills	TypeScript	150
+qoder	Qoder	.qoder/skills	TypeScript	150
+replit	Replit Agent	.replit/skills	TypeScript	150
+rovodev	Rovodev	.rovodev/skills	TypeScript	150
+universal	Universal Agent	.agents/skills	TypeScript	150
+windsurf	Windsurf	.windsurf/skills	TypeScript	150
+zencoder	Zencoder	.zencoder/skills	TypeScript	150
+github-copilot	GitHub Copilot	.copilot/skills	TypeScript	200
+devin	Devin	.devin/skills	Python/TypeScript	300
+aider-desk	Aider	.aider/skills	TypeScript/Electron	350
+junie	Junie	.junie/skills	Kotlin	350
+trae	Trae	.trae/skills	TypeScript/Electron	350
+trae-cn	Trae CN	.trae/skills	TypeScript/Electron	350
+cursor	Cursor	.cursor/skills	TypeScript/Electron	400
+antigravity	Antigravity	.agent/skills	TypeScript/Electron	450

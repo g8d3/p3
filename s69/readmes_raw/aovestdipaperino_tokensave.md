@@ -1,0 +1,897 @@
+<p align="center">
+  <img src="src/resources/logo.png" alt="TokenSave" width="300">
+</p>
+
+<h3 align="center">Semantic Code Intelligence for AI Coding Agents</h3>
+
+<p align="center"><strong>Fewer tokens &bull; Fewer tool calls &bull; 100% local</strong></p>
+
+<p align="center">
+  <a href="https://crates.io/crates/tokensave"><img src="https://img.shields.io/crates/v/tokensave.svg" alt="crates.io"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+  <a href="https://www.rust-lang.org/"><img src="https://img.shields.io/badge/Rust-1.70+-orange.svg" alt="Rust"></a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/macOS-supported-blue.svg" alt="macOS">
+  <img src="https://img.shields.io/badge/Linux-supported-blue.svg" alt="Linux">
+  <img src="https://img.shields.io/badge/Windows-supported-blue.svg" alt="Windows">
+  <a href="https://hypercommit.com/tokensave"><img src="https://img.shields.io/badge/Hypercommit-DB2475" alt="Hypercommit"></a>
+</p>
+
+---
+
+## Why tokensave?
+
+AI coding agents waste tokens exploring codebases. Every grep, glob, and file read costs money. On complex tasks, agents spawn multiple Explore sub-agents that scan hundreds of files just to build context.
+
+**tokensave gives agents a pre-indexed semantic knowledge graph.** Instead of scanning files, the agent queries the graph and gets instant, structured answers -- the right symbols, their relationships, and source code, in one call.
+
+### How It Works
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  AI Coding Agent (Claude Code, Codex, Gemini, Cursor, ...)   │
+│                                                              │
+│  "Implement user authentication"                             │
+│        │                                                     │
+│        ▼                                                     │
+│  ┌─────────────────┐       ┌─────────────────┐               │
+│  │  Sub-agent      │ ───── │  Sub-agent      │               │
+│  └────────┬────────┘       └─────────┬───────┘               │
+└───────────┼──────────────────────────┼───────────────────────┘
+            │                          │
+            ▼                          ▼
+┌──────────────────────────────────────────────────────────────┐
+│  tokensave MCP Server                                        │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐           │
+│  │   Search    │  │   Callers   │  │   Context   │           │
+│  │   "auth"    │  │  "login()"  │  │   for task  │           │
+│  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘           │
+│         └────────────────┼────────────────┘                  │
+│                          ▼                                   │
+│              ┌───────────────────────┐                       │
+│              │   libSQL Graph DB     │                       │
+│              │   • Instant lookups   │                       │
+│              │   • FTS5 search       │                       │
+│              └───────────────────────┘                       │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Without tokensave:** Agents use `grep`, `glob`, and `Read` to scan files -- many API calls, high token usage.
+
+**With tokensave:** Agents query the graph via MCP tools -- instant results, local processing, fewer tokens.
+
+---
+
+## Key Features
+
+| | | |
+|---|---|---|
+| **Smart Context Building** | **Semantic Search** | **Impact Analysis** |
+| One tool call returns everything the agent needs -- entry points, related symbols, and code snippets. | Find code by meaning, not just text. Search for "authentication" and find `login`, `validateToken`, `AuthService`. | Know exactly what breaks before you change it. Trace callers, callees, and the full impact radius of any symbol. |
+| **48 MCP Tools** | **34 Languages** | **14 Agent Integrations** |
+| From call graph traversal to dead code detection, atomic edit primitives, code-health metrics, test mapping, and complexity analysis. | Rust, Go, Java, Python, TypeScript, C, C++, Swift, and 26 more, including Markdown header extraction. Three tiers (lite/medium/full) control binary size. | Claude Code, Codex CLI, Gemini CLI, Kiro, Cursor, OpenCode, Copilot, Cline, Roo Code, Zed, Antigravity, Kilo CLI, Kimi CLI, Mistral Vibe. |
+| **Multi-Branch Indexing (opt-in)** | **100% Local** | **Always Fresh** |
+| Optional per-branch databases. Cross-branch diff and search without switching your checkout. | No data leaves your machine. No API keys. No external services. Everything runs on a local libSQL database. | Embedded file watcher (when MCP server is running) syncs the index automatically. Multi-agent safe via per-project sync lock. |
+| **Subprocess-Isolated Extraction** | **Code-Health Analytics** | **Atomic Edit Primitives** |
+| A native crash in any tree-sitter grammar (abort, segfault, anything) kills only the worker; the pool respawns it and sync continues. Sync never dies on a malformed file. | Composite health score (0-10000), Gini inequality, file-DAG depth, design-structure matrix, risk-weighted test gaps, and session deltas. | Edit files without regex or shell-quoting hazards: unique-anchor `str_replace`, atomic multi-replace, AST-rewrite, anchored insert. Auto re-indexes after writes. |
+
+---
+
+## Quick Start
+
+### 1. Install
+
+**Homebrew (macOS):**
+
+```bash
+brew install aovestdipaperino/tap/tokensave
+```
+
+**Scoop (Windows):**
+
+```powershell
+scoop bucket add tokensave https://github.com/aovestdipaperino/scoop-bucket
+scoop install tokensave
+```
+
+**Cargo (any platform):**
+
+```bash
+cargo install tokensave                          # full (34 languages, default)
+cargo install tokensave --features medium        # medium (20 languages)
+cargo install tokensave --no-default-features    # lite (11 languages, smallest binary)
+```
+
+**Prebuilt binaries (Linux, Windows, macOS):**
+
+Download from the [latest release](https://github.com/aovestdipaperino/tokensave/releases/latest) and place the binary in your `PATH`.
+
+| Platform | Archive |
+|---|---|
+| macOS (Apple Silicon) | `tokensave-vX.Y.Z-aarch64-macos.tar.gz` |
+| Linux (x86_64) | `tokensave-vX.Y.Z-x86_64-linux.tar.gz` |
+| Linux (ARM64) | `tokensave-vX.Y.Z-aarch64-linux.tar.gz` |
+| Windows (x86_64) | `tokensave-vX.Y.Z-x86_64-windows.zip` |
+
+### 2. Configure your agent
+
+```bash
+tokensave install                         # auto-detects installed agents
+tokensave install --agent antigravity     # Google Antigravity (formerly Windsurf)
+tokensave install --agent claude          # Claude Code
+tokensave install --agent cline           # Cline
+tokensave install --agent codex           # OpenAI Codex CLI
+tokensave install --agent copilot         # GitHub Copilot
+tokensave install --agent cursor          # Cursor
+tokensave install --agent gemini          # Gemini CLI
+tokensave install --agent kilo            # Kilo CLI
+tokensave install --agent kiro            # AWS Kiro
+tokensave install --agent kimi            # Moonshot Kimi CLI
+tokensave install --agent opencode        # OpenCode
+tokensave install --agent roo-code        # Roo Code
+tokensave install --agent vibe            # Mistral Vibe
+tokensave install --agent zed             # Zed
+```
+
+Each agent gets its MCP server registered in the native config format. Claude Code additionally gets a PreToolUse hook (blocks wasteful Explore agents), a UserPromptSubmit hook, a Stop hook, prompt rules in CLAUDE.md, and auto-allowed tool permissions. Kiro gets global MCP config, read-only tokensave auto-approval, AGENTS.md steering, and a tokensave-managed default agent with delegation guardrail hooks plus post-write sync; user-managed Kiro agents are preserved.
+
+All changes are idempotent -- safe to run again after upgrading. After agent setup, you'll be offered a global git post-commit hook.
+
+### 3. Index your project
+
+```bash
+cd /path/to/your/project
+tokensave init
+```
+
+This creates a `.tokensave/` directory with the knowledge graph database. Initialization and sync are separate commands: `init` is a one-time opt-in per project, while `sync` only updates projects that were already initialized. This prevents the global git post-commit hook from silently creating databases in repos you never intended to index. After `init`, use `tokensave sync` to incrementally update -- only changed files are re-indexed.
+
+<details>
+<summary><strong>What install writes for Claude Code</strong></summary>
+
+#### MCP server
+
+```json
+{
+  "mcpServers": {
+    "tokensave": {
+      "command": "/path/to/tokensave",
+      "args": ["serve"]
+    }
+  }
+}
+```
+
+#### PreToolUse hook
+
+The hook runs `tokensave hook-pre-tool-use` -- a native Rust command (no bash or jq required). It intercepts Agent tool calls and blocks Explore agents, redirecting Claude to use tokensave MCP tools instead.
+
+#### CLAUDE.md rules
+
+Appends instructions to `~/.claude/CLAUDE.md` that tell Claude to use tokensave tools before reaching for Explore agents or raw file reads.
+
+</details>
+
+---
+
+## Crash-Resilient Sync
+
+Tree-sitter grammars are compiled C/C++ code. They occasionally hit an internal assertion or otherwise terminate the process by paths that Rust panic handling cannot intercept. As of v4.3.0, every file is parsed inside a short-lived worker subprocess: if a grammar segfaults, calls `abort()`, or hits a stack overflow, only the worker dies. The pool respawns it, the offending file is logged and skipped, and `sync` keeps going.
+
+The worker is a hidden `extract-worker` subcommand authenticated against the parent via a 256-bit per-spawn token, required as both a `TOKENSAVE_WORKER_TOKEN` env var and as the first 32 bytes received on stdin. Direct invocation by users fails. Defaults to `available_parallelism()` workers; opt out with `TOKENSAVE_DISABLE_SUBPROCESS=1`.
+
+Edit primitives (`tokensave_str_replace`, `tokensave_insert_at`, etc.) still run in-process: they target one file at a time where subprocess overhead would dominate, and an extractor crash there is immediately visible to the agent.
+
+---
+
+## Multi-Branch Indexing (Optional)
+
+tokensave can optionally maintain a separate code graph per git branch. When enabled, switching branches never gives you stale results and never re-indexes files you already parsed on another branch. Multi-branch tracking is opt-in -- without it, tokensave uses a single database for all branches.
+
+### How it works
+
+When you track a branch, tokensave copies the nearest ancestor DB and syncs only the files that differ. This means tracking a feature branch off `main` is nearly instant -- it only parses the files you've changed.
+
+### CLI commands
+
+```bash
+tokensave branch add              # track the current branch
+tokensave branch list             # see tracked branches and DB sizes
+tokensave branch remove <name>    # stop tracking a branch
+tokensave branch removeall        # remove all tracked branches except default
+tokensave branch gc               # clean up branches deleted from git
+```
+
+### Cross-branch MCP tools
+
+Three MCP tools enable cross-branch queries without switching your checkout:
+
+- **`tokensave_branch_search`** -- search symbols in another branch's graph
+- **`tokensave_branch_diff`** -- compare code graphs between two branches: symbols added, removed, and changed (signature differs). Supports file and kind filters.
+- **`tokensave_branch_list`** -- list tracked branches with DB sizes, parent branch, and sync times
+
+### Branch fallback
+
+When the MCP server can't find a database for the current branch, it serves from the nearest ancestor branch's DB and includes a warning in every tool response suggesting you run `tokensave branch add`.
+
+See [docs/BRANCHING-USER-GUIDE.md](docs/BRANCHING-USER-GUIDE.md) for the full guide.
+
+---
+
+## Cross-Session Memory
+
+Three MCP tools persist decisions and code-area context across sessions, stored in the per-project `.tokensave/tokensave.db`.
+
+| Tool | Purpose |
+|------|---------|
+| `tokensave_record_decision` | Save a design/architecture decision with optional reason, files, and tags |
+| `tokensave_record_code_area` | Mark a path the agent has worked in (touch counter + last_touched_at) |
+| `tokensave_session_recall` | FTS5 query over saved decisions; pair with the two write tools |
+
+Use these so the agent doesn't have to re-explain architecture choices session-to-session.
+
+---
+
+## Savings Ledger
+
+Every MCP call writes an append-only row to `~/.tokensave/global.db` (`savings_ledger` table). Inspect with `tokensave gain`:
+
+```bash
+tokensave gain                    # current project, last 30 days
+tokensave gain --all              # all projects
+tokensave gain --history --range 7d
+tokensave gain --json
+```
+
+Dollar estimates use the existing pricing module (Sonnet input pricing, refreshed daily via LiteLLM).
+
+---
+
+## Reproducible Benchmark
+
+`tokensave bench` runs a fixed query set through `tokensave_context` and reports retrieval savings vs a full-file baseline (mirrors the CCE methodology):
+
+```bash
+tokensave bench                                    # ships with 10 default queries
+tokensave bench --queries my-queries.toml --json
+tokensave bench --max-nodes 5
+```
+
+**Measured against this repo (`tokensave` itself) using the shipped generic query set:**
+
+| # | Query | Baseline | Context | Savings |
+|---|---|---:|---:|---:|
+| 1 | How is configuration loaded at startup? | 15,475 | 460 | 97% |
+| 2 | Where are command-line arguments parsed and dispatched? | 8,047 | 242 | 97% |
+| 3 | How is the main entry point organized? | 11,883 | 242 | 98% |
+| 4 | How are errors defined, wrapped, and propagated? | 11,883 | 270 | 98% |
+| 5 | Where is logging or diagnostic output emitted? | 14,714 | 310 | 98% |
+| 6 | How are tests organized and what test harness is used? | 348 | 195 | 44% |
+| 7 | How is data persisted to disk or to a database? | 53,894 | 414 | 99% |
+| 8 | How are async tasks or background work spawned? | 13,439 | 221 | 98% |
+| 9 | How does the build wire up dependencies and initialize state? | 20,368 | 400 | 98% |
+| 10 | How are public API surfaces exposed (HTTP endpoints, library exports, or CLI commands)? | 30,345 | 630 | 98% |
+
+**Aggregate:** 93% mean retrieval savings (180,396 → 3,384 tokens across 10 queries).
+
+The default query set targets patterns present in most application codebases (CLIs, daemons, services). Run it on your own project with `tokensave bench` to see your numbers, or write a tailored query file (`--queries my.toml`) for tighter recall.
+
+### Criterion bench against large real-world repos
+
+`benches/large_repos.rs` is a [criterion](https://bheisler.github.io/criterion.rs/book/) micro-benchmark that exercises the MCP tools end-to-end against four large open-source codebases pinned at constant refs. Each tool is driven by **at least 5 queries** with arguments (node ids, qualified names, file globs, …) sampled from the indexed graph once per repo, so timings are reproducible across runs.
+
+**Repos and pinned refs** (defined in `benches/repos.rs`):
+
+| Repo | URL | Ref |
+|---|---|---|
+| polkadot-sdk | https://github.com/paritytech/polkadot-sdk | `polkadot-stable2412` |
+| emacs | https://github.com/emacs-mirror/emacs | `emacs-30.1` |
+| scipy | https://github.com/scipy/scipy | `v1.14.1` |
+| node | https://github.com/nodejs/node | `v22.11.0` |
+
+Each repo is shallow-cloned (`git init` + `git fetch --progress --depth 1 origin <ref>` + `checkout FETCH_HEAD`) on first use and cached locally; subsequent runs reuse the checkout. Git output is streamed to the terminal so the multi-GB fetch shows real-time progress.
+
+**Tools covered (5 queries each).** Read tools — `search`, `context`, `callers`, `callees`, `node`, `by_qualified_name`, `signature`, `impact`, `body`, `files`, `complexity`, `doc_coverage`, `largest`, `hotspots`, `god_class`, `module_api`, `derives`, `dead_code`, `rank`, `coupling`, `circular`. Write tools — `str_replace`, `multi_str_replace`, `insert_at`, and (if `ast-grep` is on `PATH`) `ast_grep_rewrite`.
+
+**Force-sync on every run.** Before any benchmark fires, the harness runs the equivalent of `tokensave sync --force` on each repo (`index_all()` regardless of `.tokensave/` freshness) so timings always reflect the pinned source.
+
+**Write benches and cleanup.** Write tools mutate files. To keep the "match must be unique" precondition holding, the harness uses criterion's `iter_batched` — a small scratch file under `<repo>/.tokensave-bench-scratch/` is rewritten with known content **before every timed iteration**, then the edit tool runs against it. After all benchmarks finish, the harness runs `git stash --include-untracked && git stash drop` inside every prepared repo so the working tree returns to the pinned ref.
+
+**Criterion configuration.** The bench overrides criterion's defaults to `sample_size = 10` and `measurement_time = 30s` (vs the stock 100 / 5s), which gives each per-query timing ~30 seconds of measurement — enough that slow tools like `tokensave_context` on polkadot-sdk produce stable numbers.
+
+**Run it:**
+
+```bash
+# Required: a writable cache directory for the cloned repos + their indexes.
+# Expect several GB of disk and a long first run (shallow clone + full index of each repo).
+export TOKENSAVE_BENCH_REPOS_DIR=~/tokensave-bench-cache
+
+cargo bench --bench large_repos
+```
+
+If `TOKENSAVE_BENCH_REPOS_DIR` is unset the bench prints a notice and registers zero benchmarks (so `cargo bench --all` stays cheap on contributors' machines).
+
+**Configuration (all optional, via environment):**
+
+| Variable | Effect |
+|---|---|
+| `TOKENSAVE_BENCH_REPOS_DIR` | **Required.** Root directory where each repo is cloned to `$DIR/<repo-name>/`. |
+| `TOKENSAVE_BENCH_REPOS` | Comma-separated subset of repo names to bench, e.g. `TOKENSAVE_BENCH_REPOS=emacs,scipy`. Defaults to all four. |
+| `TOKENSAVE_BENCH_SKIP_CLONE` | If set, the bench fails fast for any repo not already at its pinned ref instead of fetching. Useful in CI / offline runs. |
+
+**Filtering benchmarks** uses the standard criterion CLI — for example, only the `search` tool on `scipy`:
+
+```bash
+cargo bench --bench large_repos -- 'scipy/tokensave_search'
+```
+
+Reports (HTML + raw samples) land under `target/criterion/`.
+
+To change the pinned refs (e.g. to a newer release or a specific SHA), edit `REPOS` in `benches/repos.rs` and delete the corresponding `$TOKENSAVE_BENCH_REPOS_DIR/<repo>/.bench-ref` marker so the next run re-fetches. If you skip the post-run cleanup (e.g. you `Ctrl-C` mid-bench), running `git stash --include-untracked && git stash drop` inside each repo dir restores it manually.
+
+### MCP test-matrix probe (scripts/mcp_probe)
+
+`scripts/mcp_probe/` is a Python harness that drives `tokensave serve` over stdio against a configurable set of real repos and exercises **every read-only MCP tool with 5 query variants per language**, producing a per-tool / per-repo status table. Same harness serves two purposes:
+
+- **Regression sweep.** New language support, new tool, or a refactor — re-run the matrix and any cell that newly errors, times out, or returns empty results stands out as a 🚩.
+- **Perf probe.** Per-call timings are logged in TSV; the same fixed corpus of repos doubles as a coarse cross-version comparison. The current `tokensave_inheritance_depth` cycle bug was found by this harness when a single tool on polkadot-sdk timed out at >60 s.
+
+**Layout** — `probe.py` is the driver (id-matched JSON-RPC so a slow tool can't poison subsequent calls), `isolated.py` re-runs a single tool with a fresh server per call (escapes server queueing), `build_matrix.py` reads the TSV and emits markdown, `tools/<lang>.py` modules contribute per-language query sets (Rust shipped; add Python/Go/… by dropping a new module), `repos.toml` lists target repos (override via `$TOKENSAVE_PROBE_REPOS`).
+
+**Quick run:**
+
+```bash
+cargo build --release --bin tokensave
+python3 scripts/mcp_probe/probe.py
+python3 scripts/mcp_probe/build_matrix.py > matrix.md
+```
+
+Output cells are `✓ 5/5` (clean), `🐛 e/N` (errors), `⏱ N/N` (timeouts), `∅ E/N` (empty), `🐢 ok/slow` (>10 s calls). Any cell carrying an error or timeout earns a 🚩 in the rightmost column. Per-call detail with the first 100 chars of each error landS in the TSV log for follow-up.
+
+Different from the criterion bench above: criterion measures per-iteration latency for a focused tool set on pinned refs and produces statistical reports under `target/criterion/`; `mcp_probe` exercises every tool with a broader query set on whatever repos you point it at, optimising for breadth of coverage rather than measurement precision.
+
+---
+
+## 48 MCP Tools
+
+The discovery and analysis tools are read-only, safe to call in parallel, and annotated with `readOnlyHint`. The edit primitives are scoped to single files and re-index in place; session baseline and memory-recording tools also mutate local `.tokensave` state and are annotated as non-read-only. The three core tools (`tokensave_context`, `tokensave_search`, `tokensave_status`) are marked `anthropic/alwaysLoad` so they bypass the client's tool-search round-trip.
+
+### Discovery
+
+| Tool | Purpose |
+|------|---------|
+| `tokensave_context` | Get relevant code context for a task -- entry points, related symbols, code snippets |
+| `tokensave_search` | Find symbols by name (functions, classes, types) |
+| `tokensave_node` | Get details + source code for a specific symbol |
+| `tokensave_files` | List indexed project files with filtering |
+| `tokensave_module_api` | Public API surface of a file or directory |
+| `tokensave_similar` | Find symbols with similar names |
+| `tokensave_status` | Index status, statistics, tokens saved |
+
+### Call Graph & Impact
+
+| Tool | Purpose |
+|------|---------|
+| `tokensave_callers` | Find what calls a function |
+| `tokensave_callees` | Find what a function calls |
+| `tokensave_impact` | See what's affected by changing a symbol |
+| `tokensave_affected` | Find test files affected by source changes |
+| `tokensave_rename_preview` | All references to a symbol (preview rename impact) |
+| `tokensave_hotspots` | Most connected symbols (highest call count) |
+
+### Code Quality
+
+| Tool | Purpose |
+|------|---------|
+| `tokensave_complexity` | Rank functions by cyclomatic complexity, nesting depth, safety metrics |
+| `tokensave_dead_code` | Find unreachable symbols (no incoming edges) |
+| `tokensave_god_class` | Find classes with too many members |
+| `tokensave_coupling` | Rank files by fan-in/fan-out |
+| `tokensave_inheritance_depth` | Find the deepest inheritance hierarchies |
+| `tokensave_circular` | Detect circular file dependencies |
+| `tokensave_recursion` | Detect recursive/mutually-recursive call cycles |
+| `tokensave_unused_imports` | Import statements never referenced |
+| `tokensave_doc_coverage` | Public symbols missing documentation |
+| `tokensave_simplify_scan` | Quality analysis of changed files (duplications, dead code, complexity) |
+
+### Code-Health Analytics
+
+Five tools surface structural quality signals from the existing graph. The composite score uses a geometric mean over independent dimensions so no single one can be gamed.
+
+| Tool | Purpose |
+|------|---------|
+| `tokensave_health` | Composite quality signal (0-10000) from acyclicity, depth, equality, redundancy, and modularity |
+| `tokensave_gini` | Gini inequality coefficient for any metric (complexity, lines, fan-in/out, members) -- finds god files and uneven distribution |
+| `tokensave_dependency_depth` | Longest file-level dependency chains (Lakos levelization) with full chain reconstruction after Tarjan SCC cycle-breaking |
+| `tokensave_dsm` | Design Structure Matrix in `stats`, `clusters`, or `matrix` form -- reveals layering violations and hidden coupling |
+| `tokensave_test_risk` | Risk-weighted test-gap analysis combining complexity, fan-in, coverage, and 90-day git churn into a single score |
+
+### Sessions
+
+Snapshot health metrics at the start of an AI coding session, then diff at the end to see what improved or regressed.
+
+| Tool | Purpose |
+|------|---------|
+| `tokensave_session_start` | Save current health metrics as a JSON baseline for later comparison |
+| `tokensave_session_end` | Recompute and diff against the baseline -- per-dimension deltas, pass/fail, automatic cleanup |
+
+### Edit Primitives
+
+Four writer tools that let agents modify files without regex or shell-quoting hazards. Each is single-file, anchored, and triggers an in-place re-index after writing so the graph never goes stale.
+
+| Tool | Purpose |
+|------|---------|
+| `tokensave_str_replace` | Replace a unique `old_str` with `new_str`; fails if 0 or >1 matches (protects against multi-edit bugs) |
+| `tokensave_multi_str_replace` | Apply N `(old, new)` replacements atomically -- all-or-nothing transaction |
+| `tokensave_insert_at` | Insert content before or after a unique anchor string or line number |
+| `tokensave_ast_grep_rewrite` | Structural code rewrite via the `ast-grep` CLI in `--rewrite` mode |
+
+### Git & Workflow
+
+| Tool | Purpose |
+|------|---------|
+| `tokensave_diff_context` | Semantic context for changed files -- modified symbols, dependencies, affected tests |
+| `tokensave_commit_context` | Semantic summary of uncommitted changes for commit message drafting |
+| `tokensave_pr_context` | Semantic diff between git refs for pull request descriptions |
+| `tokensave_changelog` | Semantic diff between two git refs |
+| `tokensave_test_map` | Source-to-test mapping at the symbol level, with uncovered symbol detection |
+
+### Type System
+
+| Tool | Purpose |
+|------|---------|
+| `tokensave_type_hierarchy` | Recursive type hierarchy tree for traits, interfaces, and classes |
+| `tokensave_rank` | Rank nodes by relationship count (most implemented interface, most extended class) |
+| `tokensave_distribution` | Node kind breakdown per file or directory |
+| `tokensave_largest` | Rank nodes by size -- largest classes, longest methods |
+
+### Porting
+
+| Tool | Purpose |
+|------|---------|
+| `tokensave_port_status` | Compare symbols between source/target directories to track porting progress |
+| `tokensave_port_order` | Topological sort of symbols for porting -- port leaves first, then dependents |
+
+### Multi-Branch
+
+| Tool | Purpose |
+|------|---------|
+| `tokensave_branch_search` | Search symbols in another branch's graph |
+| `tokensave_branch_diff` | Compare symbols between branches (added/removed/changed) |
+| `tokensave_branch_list` | List tracked branches with DB sizes and sync times |
+
+### MCP Resources
+
+Four resources are exposed via `resources/list` and `resources/read`:
+
+- `tokensave://status` -- graph statistics as JSON
+- `tokensave://files` -- indexed file tree grouped by directory
+- `tokensave://overview` -- project summary with language distribution and symbol kinds
+- `tokensave://branches` -- tracked branches with DB sizes and parent info
+
+---
+
+## Token Tracking
+
+tokensave measures the tokens it saves on every MCP tool call. Each tool response includes a `tokensave_metrics: before=N after=M` line showing how many raw-file tokens were avoided by that specific call.
+
+### Cost observability
+
+```bash
+tokensave cost                     # 7-day cost summary (default)
+tokensave cost today               # today only
+tokensave cost --by-model          # breakdown by Claude model
+tokensave cost --by-task           # breakdown by task category (coding, debugging, exploration, ...)
+tokensave cost --export json       # JSON export to stdout
+tokensave cost --export csv        # CSV export to stdout
+```
+
+Parses Claude Code session transcripts (`~/.claude/projects/**/*.jsonl`), classifies each API turn into one of 13 task categories, computes dollar cost using model pricing, and stores results in `~/.tokensave/global.db` for fast aggregate queries. Pricing is refreshed from [LiteLLM](https://github.com/BerriAI/litellm) every 24 hours and falls back to an embedded table when offline.
+
+The `tokensave status` header includes a cost row showing today's spend, 7-day total, and efficiency ratio (tokens saved / total tokens). The `tokensave monitor` TUI shows a live cost panel alongside the savings feed. At the end of each Claude Code session, the `hook_stop` handler prints a one-line receipt to the terminal.
+
+Task classification categories: Coding, Debugging, Feature Dev, Refactoring, Testing, Exploration, Planning, Delegation, Git Ops, Build/Deploy, Brainstorming, Conversation, General. Classification is deterministic (pattern matching on tool names and Bash commands), requires no LLM calls, and is adapted from [AgentSeal/codeburn](https://github.com/AgentSeal/codeburn).
+
+### Live monitor
+
+```bash
+tokensave monitor
+```
+
+A global TUI that shows MCP tool calls from all projects in real time, via a shared memory-mapped ring buffer at `~/.tokensave/monitor.mmap`. Each entry shows the project name, tool name, and token delta. A cost panel at the top shows today's spend, savings, efficiency, and top model (refreshed every 30 seconds).
+
+### Session and lifetime counters
+
+```bash
+tokensave current-counter          # show per-project session counter
+tokensave reset-counter            # reset the session counter
+tokensave status                   # shows project + global lifetime totals + cost
+```
+
+### Worldwide counter
+
+All tokensave users contribute to an anonymous aggregate counter. `tokensave status` shows both your project total and the worldwide total. The upload sends only a single number (e.g. `4823`) with no identifying information. Opt out with `tokensave disable-upload-counter`.
+
+---
+
+## Embedded File Watcher
+
+When the tokensave MCP server is running (i.e. an agent is attached), it
+watches the project directory for file changes and automatically runs
+incremental syncs. The watcher lives for the lifetime of the MCP process —
+no separate daemon, no PID files, no system-service installation required.
+
+Multiple agents on the same project coordinate via a per-project sync lock:
+only one sync runs at a time, and the others read the resulting fresh DB on
+their next query.
+
+Configure the debounce window in `~/.tokensave/config.toml`:
+
+```toml
+watcher_debounce = "2s"
+```
+
+**CLI-only workflows:** If you run `tokensave` commands without an attached
+agent, the watcher is not running. Install a git post-commit hook to keep
+your index fresh between commits:
+
+```bash
+cp scripts/post-commit .git/hooks/post-commit
+chmod +x .git/hooks/post-commit
+```
+
+### Upgrading from 5.x
+
+The standalone `tokensave daemon` command and its launchd/systemd/Windows
+Service autostart support were removed in 6.0.0. If you had a daemon
+autostart installed under 5.x, remove it manually.
+
+If you don't remember the exact service/plist name, list them first:
+
+- macOS: `launchctl list | grep tokensave`
+- Linux: `systemctl --user list-units | grep tokensave`
+- Windows: `sc.exe query state= all | findstr -i tokensave`
+
+Then remove the entry matching your install:
+
+- macOS: `launchctl unload ~/Library/LaunchAgents/com.tokensave.daemon.plist && rm ~/Library/LaunchAgents/com.tokensave.daemon.plist`
+- Linux: `systemctl --user disable --now tokensave-daemon && rm ~/.config/systemd/user/tokensave-daemon.service`
+- Windows: `sc.exe delete tokensave-daemon` (from an elevated terminal)
+
+Once your agent is attached, the embedded watcher takes over automatically.
+
+---
+
+## Self-Upgrade
+
+```bash
+tokensave upgrade                  # upgrade to latest in current channel
+tokensave channel                  # show current channel (stable/beta)
+tokensave channel beta             # switch to beta channel
+tokensave channel stable           # switch back to stable
+```
+
+`tokensave upgrade` downloads the correct platform binary from GitHub releases and replaces the running binary in place. Supports stable and beta channels independently.
+
+---
+
+## CLI Reference
+
+```bash
+tokensave init [path]              # Initialize a new project (full index)
+tokensave sync [path]              # Incremental sync (must be initialized first)
+tokensave sync --force [path]      # Force a full re-index
+tokensave sync --doctor [path]     # Sync and list added/modified/removed files
+tokensave status [path]            # Show statistics + cost summary
+tokensave status [path] --json     # Show statistics (JSON output)
+tokensave status --details         # Include node-kind breakdown
+tokensave cost [range]             # Token cost summary (default: 7d)
+tokensave cost --by-model          # Cost grouped by model
+tokensave cost --by-task           # Cost grouped by task category
+tokensave cost --export json|csv   # Export cost data
+tokensave query <search> [path]    # Search symbols
+tokensave files [--filter dir] [--pattern glob] [--json]   # List indexed files
+tokensave affected <files...> [--stdin] [--depth N]        # Find affected test files
+tokensave install [--agent NAME]   # Configure agent integration
+tokensave reinstall                # Refresh settings for all installed agents
+tokensave uninstall [--agent NAME] # Remove agent integration
+tokensave serve                    # Start MCP server
+tokensave monitor                  # Live TUI showing MCP calls across all projects
+tokensave upgrade                  # Self-update to latest version
+tokensave channel [stable|beta]    # Show or switch update channel
+tokensave doctor [--agent NAME]    # Check installation health
+tokensave branch add|list|remove|removeall|gc   # Multi-branch management
+tokensave current-counter          # Show per-project token counter
+tokensave reset-counter            # Reset per-project token counter
+tokensave disable-upload-counter   # Opt out of worldwide counter uploads
+tokensave enable-upload-counter    # Re-enable worldwide counter uploads
+```
+
+---
+
+## `tokensave doctor`
+
+Run a comprehensive health check of your tokensave installation:
+
+```bash
+tokensave doctor
+```
+
+Checks: binary location, project index, global DB, user config, agent integration (MCP server, hooks, permissions, prompt rules), and network connectivity. If any tool permissions are missing after an upgrade, it tells you to run `tokensave install`. Use `--agent` to check a specific agent only.
+
+Doctor also validates that each installed hook uses the correct tokensave subcommand and auto-repairs broken hooks.
+
+---
+
+## How It Works with Claude Code
+
+Once configured, Claude Code automatically uses tokensave instead of reading raw files when it needs to understand your codebase. Three layers reinforce each other:
+
+| Layer | What it does | Why it matters |
+|-------|-------------|----------------|
+| **MCP server** | Exposes 48 `tokensave_*` tools to Claude | Claude can query the graph directly |
+| **CLAUDE.md rules** | Tells Claude to prefer tokensave over agents/file reads | Prevents the model from falling back to expensive patterns |
+| **PreToolUse hook** | Native Rust hook blocks Explore agents | Catches cases where the model ignores the CLAUDE.md rules |
+| **UserPromptSubmit hook** | Runs at prompt submission | Lifecycle tracking for token accounting |
+| **Stop hook** | Runs when the session ends | Flushes token counters |
+
+The result: Claude gets the same code understanding with far fewer tokens. A typical Explore agent reads 20-50 files; tokensave returns the relevant symbols, relationships, and code snippets from its pre-built index.
+
+---
+
+## Network Calls & Privacy
+
+tokensave's core functionality (indexing, search, graph queries, MCP server) is **100% local** -- your code never leaves your machine.
+
+| Call | Data sent | When | Opt-out |
+|------|-----------|------|---------|
+| Worldwide counter upload | Token count (a number) + country (from IP) | sync, status, MCP sessions | `tokensave disable-upload-counter` |
+| Worldwide counter read | Nothing (GET request) | status | N/A (read-only, 1s timeout) |
+| Version check | Nothing (GET request) | status (cached 5m), sync (parallel) | N/A (1s timeout, no-op on failure) |
+| Model pricing refresh | Nothing (GET request) | `tokensave cost` (cached 24h) | N/A (5s timeout, falls back to embedded pricing) |
+
+The worldwide counter upload sends a single HTTP POST with a JSON body like `{"amount": 4823}`. No cookies, no tracking, no user ID. The Cloudflare Worker logs the country of your IP address (derived from request headers) for aggregate geographic statistics -- your actual IP address is not stored.
+
+The model pricing refresh fetches a public JSON file from GitHub (`raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json`) to keep Claude model pricing up to date for `tokensave cost`. No data is sent -- it is a plain HTTPS GET. The response is cached at `~/.tokensave/pricing.json` for 24 hours. If the fetch fails, tokensave uses its compiled-in pricing table.
+
+---
+
+## 34 Languages
+
+tokensave supports 34 programming languages organized into three tiers controlled by Cargo feature flags. Each tier includes all languages from the tier below it. As of v4.1.8, Markdown headers are also extracted (in the full tier) as `Module` nodes with hierarchical `Contains` edges, so document structure participates in graph queries alongside source code.
+
+### Lite (11 languages) -- `--no-default-features`
+
+Always compiled. The smallest binary for the most popular languages.
+
+| Language | Extensions |
+|----------|-----------|
+| Rust | `.rs` |
+| Go | `.go` |
+| Java | `.java` |
+| Scala | `.scala`, `.sc` |
+| TypeScript | `.ts`, `.tsx` |
+| JavaScript | `.js`, `.jsx` |
+| Python | `.py` |
+| C | `.c`, `.h` |
+| C++ | `.cpp`, `.hpp`, `.cc`, `.cxx`, `.hh` |
+| Kotlin | `.kt`, `.kts` |
+| C# | `.cs` |
+| Swift | `.swift` |
+
+### Medium (Lite + 9 = 20 languages) -- `--features medium`
+
+| Language | Extensions | Feature flag |
+|----------|-----------|-------------|
+| Dart | `.dart` | `lang-dart` |
+| Pascal | `.pas`, `.pp`, `.dpr` | `lang-pascal` |
+| PHP | `.php` | `lang-php` |
+| Ruby | `.rb` | `lang-ruby` |
+| Bash | `.sh`, `.bash` | `lang-bash` |
+| Protobuf | `.proto` | `lang-protobuf` |
+| PowerShell | `.ps1`, `.psm1` | `lang-powershell` |
+| Nix | `.nix` | `lang-nix` |
+| VB.NET | `.vb` | `lang-vbnet` |
+
+### Full (Medium + 14 = 34 languages) -- default
+
+| Language | Extensions | Feature flag |
+|----------|-----------|-------------|
+| Lua | `.lua` | `lang-lua` |
+| Zig | `.zig` | `lang-zig` |
+| Objective-C | `.m`, `.mm` | `lang-objc` |
+| Perl | `.pl`, `.pm` | `lang-perl` |
+| Batch/CMD | `.bat`, `.cmd` | `lang-batch` |
+| Fortran | `.f90`, `.f95`, `.f03`, `.f08`, `.f18`, `.f`, `.for` | `lang-fortran` |
+| COBOL | `.cob`, `.cbl`, `.cpy` | `lang-cobol` |
+| MS BASIC 2.0 | `.bas` | `lang-msbasic2` |
+| GW-BASIC | `.gw` | `lang-gwbasic` |
+| QBasic | `.qb` | `lang-qbasic` |
+| QuickBASIC 4.5 | `.bi`, `.bm` | `lang-qbasic` |
+| Dockerfile | `Dockerfile`, `.dockerfile` | `lang-dockerfile` |
+| GLSL | `.glsl`, `.vert`, `.frag`, `.comp` | `lang-glsl` |
+| Markdown | `.md`, `.markdown` | `lang-markdown` |
+
+Individual languages can also be cherry-picked without a full tier:
+
+```bash
+cargo install tokensave --no-default-features --features lang-nix,lang-bash
+```
+
+All extractors share the same depth: functions, classes, methods, fields, imports, call graphs, inheritance chains, docstrings, complexity metrics, decorator/annotation extraction, and cross-file dependency tracking.
+
+---
+
+## tokensave vs CodeGraph
+
+tokensave is a ground-up Rust rewrite of [CodeGraph](https://www.npmjs.com/package/@colbymchenry/codegraph) (Node.js/TypeScript). Both build semantic code graphs for AI coding agents, but they diverge significantly in scope and capabilities.
+
+| | **tokensave** | **CodeGraph** |
+|---|---|---|
+| **Runtime** | Native binary (Rust) | Node.js 18+ |
+| **Install** | `brew install`, `cargo install`, `scoop install` | `npx @colbymchenry/codegraph` |
+| **Languages** | 34 (3 tiers: lite/medium/full) | 19+ |
+| **MCP tools** | 48 | 9 |
+| **Agent integrations** | 14 (Claude, Codex, Gemini, OpenCode, Cursor, Cline, Copilot, Roo Code, Zed, Antigravity, Kilo, Kiro, Kimi, Vibe) | 1 (Claude Code) |
+| **Embedded file watcher** | Yes (in MCP process, multi-agent safe) | No (hook-based sync only) |
+| **Multi-branch indexing** | Yes, opt-in (per-branch DBs, cross-branch diff/search) | No |
+| **Complexity metrics** | AST-extracted (branches, loops, nesting depth, cyclomatic) | No |
+| **Porting tools** | Yes (`port_status`, `port_order`) | No |
+| **Graph visualizer** | Removed (v4.0.1) | Yes |
+| **Semantic search** | Agent-driven keyword expansion (zero-cost) | Local embeddings (nomic-embed-text-v1.5 via ONNX) |
+| **MCP resources** | 4 (status, files, overview, branches) | No |
+| **MCP annotations** | Yes (readOnlyHint, alwaysLoad) | No |
+| **Dead code detection** | Yes | No |
+| **Circular dependency detection** | Yes | No |
+| **Type hierarchy** | Yes | No |
+| **God class / coupling analysis** | Yes | No |
+| **Commit / PR context** | Yes | No |
+| **Test mapping** | Yes | No |
+| **Rename preview** | Yes | No |
+| **Token tracking** | Per-call metrics, live TUI monitor, session + lifetime counters | No |
+| **Code-health analytics** | Composite score, Gini, dependency depth, DSM, risk-weighted test gaps, session deltas | No |
+| **Edit primitives** | 4 atomic writers (`str_replace`, `multi_str_replace`, `insert_at`, `ast_grep_rewrite`) with auto re-indexing | No |
+| **Crash resilience** | Subprocess-isolated extraction; native grammar aborts skip the file, sync continues | No |
+| **Self-upgrade** | `tokensave upgrade` with stable/beta channels | `npm update` |
+| **DB engine** | libsql (SQLite fork, WAL, async) | better-sqlite3 / wa-sqlite (WASM) |
+| **Indexing speed** | ~1.2s for 1,782 files | ~4s for 1,782 files |
+| **Binary size** | ~25 MB (all grammars bundled) | ~80 MB (node_modules + WASM) |
+
+CodeGraph pioneered the approach and remains a solid choice if you prefer npm tooling and only need Claude Code integration. tokensave extends the concept with deeper analysis, more agents, background sync, multi-branch support, and a native binary with no runtime dependencies.
+
+For detailed comparisons against CodeGraph, Dual-Graph (GrapeRoot), code-review-graph, and OpenWolf, see [docs/COMPARABLE-TOOLS.md](docs/COMPARABLE-TOOLS.md).
+
+---
+
+## Why tokensave Over the Alternatives
+
+Several tools reduce token usage for AI coding agents. Here's why tokensave stands apart.
+
+### Single native binary, zero dependencies
+
+Every alternative requires a runtime: Python, Node.js, or both. tokensave ships as a single ~25 MB Rust binary with all 34 tree-sitter grammars bundled. Nothing else to install.
+
+### Deepest code intelligence
+
+tokensave works at the symbol level: functions, structs, fields, call edges, type hierarchies, complexity metrics. Alternatives like Dual-Graph (GrapeRoot) work at the file level -- they know which files exist but can't answer "who calls this function?" or "what breaks if I change this struct?" tokensave's 48 specialized MCP tools cover call graph traversal, impact analysis, dead code detection, test mapping, rename preview, type hierarchies, circular dependency detection, complexity ranking, code-health analytics (Gini, DSM, dependency depth, risk-weighted test gaps), atomic edit primitives, and more. The closest competitor (code-review-graph) has 22 tools; others have 5-9.
+
+### Broadest agent support
+
+14 AI coding agent integrations with per-agent native configuration formats. No other tool covers as many agents with as deep an integration. Claude Code gets hooks, prompt rules, and auto-allowed tool permissions. Kiro gets global MCP config, read-only tokensave auto-approval, AGENTS.md steering, a managed agent, and hooks for delegation guardrails plus post-write sync. Other agents get MCP server registration in their native config format.
+
+### Multi-branch indexing
+
+The only tool in this space with optional per-branch graph databases and cross-branch diff and search. When enabled, switching branches is instant -- no re-indexing required.
+
+### Per-call token tracking
+
+The only tool that reports exactly how many tokens each individual MCP tool call saved, plus a live TUI monitor across all projects and lifetime counters.
+
+### Fully open source
+
+MIT-licensed Rust, auditable end to end. Dual-Graph's core engine (`graperoot` on PyPI) is proprietary -- you can't see what it does with your code graph. OpenWolf is AGPL-3.0, which requires derivative works to be open-sourced.
+
+### Performance
+
+Full-index benchmark on a 1,782-file mixed Rust/Java/Scala codebase (57K nodes, 103K edges):
+
+| Tool | Time | Speedup |
+|---|---|---|
+| CodeGraph (TypeScript) | 31.2s | 1x |
+| **tokensave (Rust)** | **1.2s** | **26x** |
+
+---
+
+## Troubleshooting
+
+### "tokensave not initialized"
+
+The `.tokensave/` directory doesn't exist in your project.
+
+```bash
+tokensave init
+```
+
+### MCP server not connecting
+
+The AI agent doesn't see tokensave tools.
+
+1. Ensure the agent config includes the tokensave MCP server (run `tokensave doctor`)
+2. Restart the agent completely
+3. Check that `tokensave` is in your PATH: `which tokensave`
+
+### Missing symbols in search
+
+- Run `tokensave sync` to update the index
+- Check that the language is supported (see table above)
+- Verify the file isn't excluded by `.gitignore`
+
+### Indexing is slow
+
+Large projects take longer on the first full index.
+
+- Subsequent runs use incremental sync and are much faster
+- Use `tokensave sync` (not `--force`) for day-to-day updates
+- The embedded MCP watcher handles sync automatically while agents are connected
+
+### Disabling tokensave for specific projects
+
+If a project is too large and tokensave uses too much RAM, you can disable it per-project by setting `DISABLE_TOKENSAVE=true` in the MCP server environment. The server exits cleanly without initializing.
+
+**Claude Code** — add to your project's `.claude/settings.json`:
+
+```json
+{
+  "mcpServers": {
+    "tokensave": {
+      "command": "tokensave",
+      "args": ["serve"],
+      "env": {
+        "DISABLE_TOKENSAVE": "true"
+      }
+    }
+  }
+}
+```
+
+**Other agents** — set the environment variable in whatever config your agent uses to launch MCP servers.
+
+You can also set it globally via the shell (`DISABLE_TOKENSAVE=true claude`), but this disables tokensave for every project in the session.
+
+---
+
+## Origin
+
+This project is a Rust port of the original [CodeGraph](https://github.com/colbymchenry/codegraph) TypeScript implementation by [@colbymchenry](https://github.com/colbymchenry). The port maintains the same architecture and MCP tool interface while leveraging Rust for performance and native tree-sitter bindings.
+
+---
+
+## Building
+
+```bash
+cargo build --release                          # full (34 languages, default)
+cargo build --release --features medium        # medium (20 languages)
+cargo build --release --no-default-features    # lite (11 languages)
+
+cargo test                                     # run all tests (requires full)
+cargo check --no-default-features              # verify lite compiles
+cargo clippy --all
+```
+
+## Star History
+
+<a href="https://www.star-history.com/#aovestdipaperino/tokensave&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=aovestdipaperino/tokensave&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=aovestdipaperino/tokensave&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=aovestdipaperino/tokensave&type=Date" />
+ </picture>
+</a>
+
+## License
+
+MIT License -- see [LICENSE](LICENSE) for details.
+
+**[tokensave.dev](https://tokensave.dev)**

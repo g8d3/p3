@@ -1,0 +1,122 @@
+# NullBoiler
+
+NullBoiler is an orchestration engine for AI agents.
+
+It is intentionally narrow: it decides what should run, when it should run, and which worker should execute it.  
+It does not replace the task tracker and it does not replace the agent runtime.
+
+You do not need all components together.  
+Choose only the pieces required for your workflow.
+
+## Design Principle
+
+`tracker = source of truth`  
+`orchestrator = policy engine`  
+`agent = executor`
+
+### 1) Tracker: [nulltickets](https://github.com/nullclaw/nulltickets)
+
+Use nulltickets as the authoritative task system for AI agents:
+
+- Stores tasks, states, priorities, and ownership.
+- Preserves durable history of task lifecycle.
+- Acts as the canonical queue/source of truth for pending work.
+
+### 2) Orchestrator: [nullboiler](https://github.com/nullclaw/nullboiler)
+
+Use nullboiler to apply orchestration policy:
+
+- Pulls/selects work from tracker or another source.
+- Applies scheduling and routing strategies.
+- Enforces concurrency limits, retries, and backoff policies.
+- Dispatches work to one or many agents/workers.
+
+NullBoiler should not become a task tracker or artifact database.
+
+### 3) Agent Runtime: [nullclaw](https://github.com/nullclaw/nullclaw) or another compatible worker
+
+Use an agent runtime as the execution engine:
+
+- Receives a concrete task/job to run.
+- Executes tools, code, and model interactions.
+- Returns execution outputs/events back to the orchestrator/tracker flow.
+
+`nullclaw` is the reference runtime, but `nullboiler` can also orchestrate other compatible workers
+(for example OpenClaw/OpenAI-compatible, ZeroClaw, or PicoClaw via bridge).
+
+Agents should execute work, not own global orchestration policy.
+
+## Why This Separation Exists
+
+Teams often try to move tracker and artifact responsibilities into the orchestrator.  
+This project keeps boundaries strict on purpose:
+
+- Tracker owns durable truth.
+- Orchestrator owns coordination policy.
+- Agent owns execution.
+
+This keeps the architecture modular, simpler to reason about, and easier to evolve.
+
+## Supported Compositions
+
+- `nullclaw` only: single-agent direct execution.
+- `nullboiler + nullclaw`: orchestrated execution without dedicated tracker.
+- `nullboiler + other compatible agents`: orchestrated execution without `nullclaw` dependency.
+- `nulltickets + nullclaw`: tracker-driven execution loop.
+- `nulltickets + nullboiler + nullclaw`: full multi-agent orchestration with durable task source.
+
+See additional integration docs in [`docs/`](./docs).
+
+## Workflow Graph Features
+
+The orchestration graph runtime supports:
+
+- `task`, `agent`, `route`, `interrupt`, `send`, `transform`, and `subgraph` nodes
+- run replay, checkpoint forking, breakpoint interrupts, and post-start state injection
+- `send` fan-out with canonical `items_key` and configurable `output_key`
+- task/agent output shaping via `output_key` and `output_mapping`
+- template access to `state.*`, `input.*`, `item.*`, `config.*`, and `store.<namespace>.<key>`
+- `transform.store_updates` for writing durable workflow memory back to NullTickets
+
+Store-backed templates and `store_updates` require a NullTickets base URL. The
+runtime resolves it from workflow fields such as `tracker_url` or from run config
+(`config.tracker_url` / `config.tracker_api_token`), which are injected into
+state as `__config`.
+
+## Config Location
+
+- Default config path: `~/.nullboiler/config.json`
+- Override instance home with `NULLBOILER_HOME=/path/to/dir`
+- Override config file directly with `--config /path/to/config.json`
+
+When `NULLBOILER_HOME` is set, `nullboiler` reads `config.json` from that directory and
+resolves relative paths like `db`, `strategies_dir`, `tracker.workflows_dir`, and
+`tracker.workspace.root` relative to that config file.
+
+## Workflow Preflight
+
+File-based tracker/pull-mode workflows are loaded from JSON files using the
+`WorkflowDef` shape in `src/workflow_loader.zig`. Before starting the server, you
+can check those files locally:
+
+```bash
+zig build run -- validate-workflows
+zig build run -- validate-workflows workflows
+```
+
+The command defaults to `workflows` and scans direct `*.json` files in the
+directory, matching `loadWorkflows`; it does not recurse into nested directories.
+This is only for file-based tracker/pull-mode `WorkflowDef` files, not graph
+workflow definitions managed through the HTTP API.
+
+It reports:
+
+- errors for missing or unreadable directories, unreadable files, malformed JSON,
+  JSON that cannot be parsed as `WorkflowDef`, missing or empty `pipeline_id`,
+  and duplicate `pipeline_id` values
+- warnings for suspicious but currently allowed shapes, including empty `id`,
+  empty `claim_roles`, dispatch workflows without `dispatch.worker_tags`, and
+  directories with no JSON workflow files
+
+Validation errors exit with status `1`. Warnings are shown but do not fail the
+command, matching the existing runtime loader's permissive behavior.

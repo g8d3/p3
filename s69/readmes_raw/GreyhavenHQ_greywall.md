@@ -1,0 +1,304 @@
+# Greywall — Sandbox for AI Coding Agents
+
+[![GitHub stars](https://img.shields.io/github/stars/GreyhavenHQ/greywall)](https://github.com/GreyhavenHQ/greywall/stargazers)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
+[![Go](https://img.shields.io/github/go-mod/go-version/GreyhavenHQ/greywall)](go.mod)
+[![Release](https://img.shields.io/github/v/release/GreyhavenHQ/greywall)](https://github.com/GreyhavenHQ/greywall/releases)
+[![Product Hunt](https://img.shields.io/badge/Product%20Hunt-Greywall-orange?logo=producthunt)](https://www.producthunt.com/products/greywall?launch=greywall)
+
+Greywall is a container-free sandbox for AI coding agents on Linux and macOS, with two complementary modes:
+
+- **`greywall` — deny-by-default sandbox.** Restricts filesystem access, network connections, and system calls to only what you explicitly allow, so tools like Claude Code, Cursor, Codex, and other AI agents can't reach your SSH keys, secrets, or anything outside the working directory.
+- **`greywatch` — allow-by-default observability layer** (equivalent to `greywall --watch`). Skips profile loading, registers a `*/*` allow rule with greyproxy so every network request is accepted but logged on the dashboard, and runs with a permissive filesystem. Use it to see what a tool actually does before deciding what to lock down.
+
+Both modes route every network connection through [greyproxy](https://github.com/GreyhavenHQ/greyproxy) — a transparent proxy with a live allow/deny dashboard — so traffic stays visible whether you're enforcing or observing. Use `--learning` to trace what a command needs and auto-generate a least-privilege config profile.
+
+*Supports Linux and macOS. See [platform support](https://docs.greywall.io/greywall/platform-support) for details.*
+
+https://github.com/user-attachments/assets/7d62d45d-a201-4f24-9138-b460e4c157a8
+
+### Key features
+
+- **Deny-by-default filesystem** — only the working directory is accessible unless you allow more
+- **Network isolation** — all traffic blocked or routed through [greyproxy](https://github.com/GreyhavenHQ/greyproxy) with a live dashboard
+- **Command blocking** — dangerous commands like `rm -rf /` and `git push --force` are denied
+- **Built-in agent profiles** — one-command setup for Claude Code, Cursor, Codex, Aider, Goose, Gemini, OpenCode, Amp, Cline, Copilot, and more
+- **Learning mode** — traces filesystem access and auto-generates least-privilege profiles
+- **Observability mode** — `greywatch` (or `greywall --watch`) runs commands with no profile and all network allowed, so the greyproxy dashboard shows exactly what an agent does without anything being denied
+- **Five security layers on Linux** — Bubblewrap namespaces, Landlock, Seccomp BPF, eBPF monitoring, TUN-based network capture
+- **No containers required** — kernel-enforced sandboxing without Docker overhead
+
+```bash
+# Sandbox a command (network + filesystem denied by default)
+greywall -- curl https://example.com
+
+# Sandbox an AI coding agent with a built-in profile
+greywall -- claude
+
+# Observe what an agent does without blocking anything (allow-by-default)
+greywatch -- claude
+
+# Learn what filesystem access a command needs, then auto-generate a profile
+greywall --learning -- opencode
+
+# Block dangerous commands
+greywall -c "rm -rf /"  # → blocked by command deny rules
+```
+
+## Install
+
+**Homebrew (macOS):**
+
+```bash
+brew tap greyhavenhq/tap
+brew install greywall
+```
+
+This also installs [greyproxy](https://github.com/GreyhavenHQ/greyproxy) as a dependency.
+
+**Linux / Mac:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/GreyhavenHQ/greywall/main/install.sh | sh
+```
+
+Both `greywall` and the `greywatch` alias (observability mode) are installed by Homebrew, `install.sh`, and `make build`. `greywatch` is a symlink to the same binary — argv[0] dispatch enables `--watch` automatically.
+
+<details>
+<summary>Other installation methods</summary>
+
+**Go install:**
+
+```bash
+go install github.com/GreyhavenHQ/greywall/cmd/greywall@latest
+# Create the greywatch alias yourself (Go install ships a single binary):
+ln -s "$(go env GOPATH)/bin/greywall" "$(go env GOPATH)/bin/greywatch"
+```
+
+**[mise](https://mise.jdx.dev/):**
+
+```bash
+mise use -g github:GreyhavenHQ/greywall
+mise use -g github:GreyhavenHQ/greyproxy
+```
+
+**Manual tarball:** GitHub release tarballs contain only the `greywall` binary. After extracting, create the alias yourself:
+
+```bash
+ln -s greywall greywatch
+```
+
+**Build from source:**
+
+```bash
+git clone https://github.com/GreyhavenHQ/greywall
+cd greywall
+make setup && make build   # creates ./greywall and ./greywatch symlink
+```
+
+</details>
+
+**Linux dependencies:**
+
+- `bubblewrap` - container-free sandboxing (required)
+- `socat` - network bridging (required)
+- `xdg-dbus-proxy` - filtered D-Bus proxy for notify-send support (optional)
+- `libsecret-tools` - keyring credential injection for gh/glab (optional)
+
+Check dependency status with `greywall check`.
+
+## Usage
+
+### Basic commands
+
+```bash
+# Run with all network blocked (default)
+greywall -- curl https://example.com
+
+# Run with shell expansion
+greywall -c "echo hello && ls"
+
+# Route through a SOCKS5 proxy
+greywall --proxy socks5://localhost:1080 -- npm install
+
+# Expose a port for inbound connections (e.g., dev servers)
+greywall -p 3000 -c "npm run dev"
+
+# Grant an extra directory/file for this run (read+write, or read-only)
+greywall --allow-path /tmp/work -- mytool
+greywall --allow-read-path /data/refs -- mytool
+
+# Enable debug logging
+greywall -d -- curl https://example.com
+
+# Monitor sandbox violations
+greywall -m -- npm install
+
+# Show available Linux security features
+greywall --linux-features
+
+# Show version
+greywall --version
+
+# Check dependencies, security features, and greyproxy status
+greywall check
+
+# Install and start greyproxy
+greywall setup
+```
+
+### Agent profiles
+
+Greywall ships with built-in sandbox profiles for popular AI coding agents (Claude Code, Codex, Cursor, Aider, Goose, Gemini CLI, OpenCode, Amp, Cline, Copilot, Kilo, Auggie, Droid) and toolchains (Node, Python, Go, Rust, Java, Ruby, Docker).
+
+On first run, greywall shows what the profile allows and lets you apply, edit, or skip:
+
+```bash
+$ greywall -- claude
+
+[greywall] Running claude in a sandbox.
+A built-in profile is available. Without it, only the current directory is accessible.
+
+Allow read:  ~/.claude  ~/.claude.json  ~/.config/claude  ~/.local/share/claude  ~/.gitconfig  ...  + working dir
+Allow write: ~/.claude  ~/.claude.json  ~/.cache/claude  ~/.config/claude  ...  + working dir
+Deny read:   ~/.ssh/id_*  ~/.gnupg/**  .env  .env.*
+Deny write:  ~/.bashrc  ~/.zshrc  ~/.ssh  ~/.gnupg
+
+[Y] Use profile (recommended)   [e] Edit first   [s] Skip (restrictive)   [n] Don't ask again
+>
+```
+
+Combine agent and toolchain profiles with `--profile`:
+
+```bash
+# Agent + Python toolchain (allows access to ~/.cache/uv, ~/.local/pipx, etc.)
+greywall --profile claude,python -- claude
+
+# Agent + multiple toolchains
+greywall --profile opencode,node,go -- opencode
+
+# List all available and saved profiles
+greywall profiles list
+```
+
+### Learning mode
+
+Greywall can trace a command's filesystem access and generate a config profile automatically:
+
+```bash
+# Run in learning mode - traces file access via strace
+greywall --learning -- opencode
+
+# List generated profiles
+greywall profiles list
+
+# Show a profile's content
+greywall profiles show opencode
+
+# Next run auto-loads the learned profile
+greywall -- opencode
+```
+
+### Watch mode (observability)
+
+Watch mode flips the policy: no profile is loaded, every network request is accepted but logged on the greyproxy dashboard, and the local filesystem is permissive. Use it to *see* what a tool does before deciding what to restrict — the inverse of deny-by-default.
+
+```bash
+# Same thing, two entry points
+greywatch -- claude
+greywall --watch -- claude
+
+# Inspect what claude touches in the greyproxy dashboard:
+#   http://localhost:43080
+```
+
+What stays the same:
+
+- **Network traffic still goes through greyproxy.** On Linux, `--unshare-net` + tun2socks force it; on macOS, the Seatbelt profile blocks direct egress to anything except the proxy. The dashboard sees every request.
+- **Hard safety floor remains.** Mandatory denies (`~/.ssh/authorized_keys`, git hooks, etc.) still apply even with the permissive filesystem.
+- **Credential substitution stays on** by default (disable with `--no-credential-protection`).
+
+What changes vs. normal mode:
+
+- No profile is loaded — observability runs from a blank default config.
+- A single `*/*` allow rule is registered with greyproxy for the session, so nothing is denied.
+- Filesystem deny-by-default is off and the command deny list is disabled.
+
+`-m` (violation monitor) stays orthogonal — combine `--watch -m` if you want both.
+
+### Configuration
+
+Greywall reads from `~/.config/greywall/greywall.json` by default (or `~/Library/Application Support/greywall/greywall.json` on macOS).
+
+```jsonc
+{
+  // Route traffic through an external SOCKS5 proxy
+  "network": {
+    "proxyUrl": "socks5://localhost:1080",
+    "dnsAddr": "localhost:5353"
+  },
+  // Control filesystem access
+  "filesystem": {
+    "defaultDenyRead": true,
+    "allowRead": ["~/.config/myapp"],
+    "allowWrite": ["."],
+    "denyWrite": ["~/.ssh/**"],
+    "denyRead": ["~/.ssh/id_*", ".env"]
+  },
+  // Block dangerous commands
+  "command": {
+    "deny": ["git push", "npm publish"]
+  }
+}
+```
+
+Use `greywall --settings ./custom.json` to specify a different config file.
+
+By default, traffic routes through the GreyProxy SOCKS5 proxy at `localhost:43052` with DNS via `localhost:43053`.
+
+## Platform support
+
+| Feature | Linux | macOS |
+|---------|:-----:|:-----:|
+| **Sandbox engine** | bubblewrap | sandbox-exec (Seatbelt) |
+| **Filesystem deny-by-default (read/write)** | ✅ | ✅ |
+| **Syscall filtering** | ✅ (seccomp) | ✅ (Seatbelt) |
+| **Filesystem access control** | ✅ (Landlock + bubblewrap) | ✅ (Seatbelt) |
+| **Violation monitoring** | ✅ (eBPF) | ✅ (Seatbelt denial logs) |
+| **Transparent proxy (full traffic capture)** | ✅ (tun2socks + TUN) | ❌ |
+| **DNS capture** | ✅ (DNS bridge) | ❌ |
+| **Proxy via env vars (SOCKS5 / HTTP)** | ✅ | ✅ |
+| **Network isolation** | ✅ (network namespace) | N/A |
+| **Command allow/deny lists** | ✅ | ✅ |
+| **Environment sanitization** | ✅ | ✅ |
+| **Learning mode** | ✅ (strace) | ✅ (eslogger, requires sudo) |
+| **PTY support** | ✅ | ✅ |
+| **External deps** | bwrap, socat, xdg-dbus-proxy (optional) | none |
+
+See [platform support](https://docs.greywall.io/greywall/platform-support) for more details.
+
+Greywall can also be used as a [Go package](https://docs.greywall.io/greywall/library).
+
+## Documentation
+
+Full documentation is available at **https://docs.greywall.io/greywall**.
+
+- [Quickstart Guide](https://docs.greywall.io/greywall/quickstart)
+- [Why Greywall](https://docs.greywall.io/greywall/why-greywall)
+- [Configuration Reference](https://docs.greywall.io/greywall/configuration)
+- [Learning Mode](https://docs.greywall.io/greywall/learning)
+- [Security Model](https://docs.greywall.io/greywall/security-model)
+- [Architecture](https://docs.greywall.io/greywall/architecture)
+- [Platform Support](https://docs.greywall.io/greywall/platform-support)
+- [Linux Security Features](https://docs.greywall.io/greywall/linux-security-features)
+- [AI Agent Integration](https://docs.greywall.io/greywall/agents)
+- [Library Usage (Go)](https://docs.greywall.io/greywall/library)
+- [Troubleshooting](https://docs.greywall.io/greywall/troubleshooting)
+
+## Attribution
+
+Greywall is a fork of [Fence](https://github.com/Use-Tusk/fence), originally
+created by [JY Tan](https://github.com/jy-tan) at [Tusk AI, Inc](https://github.com/Use-Tusk).
+Copyright 2025 Tusk AI, Inc. Licensed under the Apache License 2.0.
+
+Inspired by Anthropic's [sandbox-runtime](https://github.com/anthropic-experimental/sandbox-runtime).

@@ -1,0 +1,586 @@
+# RsClaw
+
+> **An AI agent engine that remembers — and gets better the more you use it.**  
+> One 15MB binary · 13 channels · 15 LLM providers · Multi-backend agents · OpenCLI-ready · Built in pure Rust.
+
+[![GitHub Stars](https://img.shields.io/github/stars/rsclaw-ai/rsclaw?style=flat&logo=github)](https://github.com/rsclaw-ai/rsclaw/stargazers)
+[![Crates.io](https://img.shields.io/crates/v/rsclaw?style=flat&logo=rust)](https://crates.io/crates/rsclaw)
+[![Release](https://img.shields.io/github/v/release/rsclaw-ai/rsclaw)](https://github.com/rsclaw-ai/rsclaw/releases)
+[![Downloads](https://img.shields.io/crates/d/rsclaw?style=flat)](https://crates.io/crates/rsclaw)
+[![License](https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-blue)](#license)
+[![Rust](https://img.shields.io/badge/Rust-1.91%2B-orange?logo=rust)](https://www.rust-lang.org/)
+
+**🇺🇸 English** · [🇨🇳 中文](docs/lang/README_cn.md) · [🇯🇵 日本語](docs/lang/README_ja.md) · [🇰🇷 한국어](docs/lang/README_ko.md) · [More languages ▾](docs/lang/)
+
+<p align="center">
+  <img src="docs/images/en.gif" alt="RsClaw Preview" width="800" />
+</p>
+
+Most AI agents forget everything between sessions. Every new conversation starts from zero — your preferences, your context, your workflow, all gone.
+
+**RsClaw doesn't forget.**
+
+Built from scratch in Rust, RsClaw (Crab AI / 螃蟹 AI) persists every interaction through a three-layer memory store (redb + tantivy + hnsw_rs), learns from your usage patterns, and ships as a single 15MB binary running on ~20MB RAM. Four agent lifetime modes (Main/Named/Sub/Task), four execution backends (Native Rust/Claude Code/OpenCode/ACP), 13 messaging channels, 15 LLM providers, A2A cross-machine orchestration — all without a line of Node.js. Drop-in OpenClaw replacement.
+
+💬 [Join Community](https://rsclaw.ai/en/community) — WeChat / Feishu / QQ / Telegram
+
+---
+
+## Why RsClaw
+
+- 🧠 **Three-layer persistent memory** — redb KV + tantivy full-text + hnsw_rs vector search, built in, fully local
+- 🔌 **Four agent backends in one gateway** — mix Native Rust, Claude Code, OpenCode, and any ACP-compatible agent in a single workflow
+- 🌐 **A2A v1.0 cross-machine orchestration** — full [Google A2A protocol v1.0](https://a2a-protocol.org/) (streaming, push notifications, task persistence, cancellation, INPUT_REQUIRED interrupts)
+- 🪶 **15MB binary, ~20MB idle RAM** — runs reliably on low-spec servers and edge devices
+- 🔒 **Local-first** — memory and data stay in `~/.rsclaw/`, never leave your machine
+
+---
+
+## Install
+
+### 👉 New users
+
+```bash
+# macOS / Linux
+curl -fsSL https://app.rsclaw.ai/scripts/install.sh | bash
+
+# Windows (PowerShell)
+irm https://app.rsclaw.ai/scripts/install.ps1 | iex
+```
+
+Then initialize:
+
+```bash
+rsclaw setup      # Initialize ~/.rsclaw/
+rsclaw onboard    # Interactive wizard: provider, channels, etc.
+rsclaw start
+```
+
+**First start** downloads the BGE-small-zh embedding model (~91 MB) into
+`~/.rsclaw/models/bge-small-zh/` — needed for memory semantic search.
+The download is resumable: interrupted transfers pick up where they left
+off on the next start. To pre-place the model and skip the first-run
+download, drop `model.safetensors`, `tokenizer.json`, and `config.json`
+from [BAAI/bge-small-zh-v1.5](https://huggingface.co/BAAI/bge-small-zh-v1.5)
+into that directory before `rsclaw start`. The desktop app ships the
+model bundled — no first-run download needed.
+
+### 👉 Migrating from OpenClaw
+
+```bash
+openclaw gateway stop
+rsclaw setup      # Detects OpenClaw data, offers one-click import
+rsclaw start      # Everything just works — channels, agents, sessions
+```
+
+Your `~/.openclaw/` is never modified. See [Migrate from OpenClaw](#migrate-from-openclaw) below for details.
+
+### Other install options
+
+- **Desktop app** — `.dmg` / `.exe` / `.deb` from [Releases](https://github.com/rsclaw-ai/rsclaw/releases)
+- **Via Cargo** — `cargo install rsclaw`
+- **From source** — `git clone https://github.com/rsclaw-ai/rsclaw.git && cd rsclaw && cargo build --release`
+
+---
+
+## Channels (13 + Custom)
+
+| Channel | Protocol |
+|---------|----------|
+| **WeChat Personal** | ilink long-poll (QR scan login, voice/image/file/video) |
+| **Feishu / Lark** | WebSocket (OAuth or appId + appSecret) |
+| **WeCom** | AI Bot WebSocket |
+| **QQ Bot** | WebSocket Gateway |
+| **DingTalk** | Stream Mode WebSocket |
+| **Telegram** | HTTP long-poll (DM + group, voice/image/file/video) |
+| **Discord** | Gateway WebSocket |
+| **Slack** | Socket Mode WebSocket |
+| **WhatsApp** | Cloud API Webhook |
+| **Signal** | signal-cli JSON-RPC |
+| **LINE** | Webhook |
+| **Zalo** | Webhook |
+| **Matrix** | HTTP /sync (optional E2EE) |
+| **Custom** | Webhook POST to `/hooks/{name}` |
+
+All channels support: DM/group policy (open/pairing/allowlist), health monitoring, message retry, pairing codes (8-char, 1hr TTL), streaming modes, file upload confirmation.
+
+---
+
+## LLM Providers (15+)
+
+Qwen, DeepSeek, Kimi, Zhipu (GLM), MiniMax, Doubao (ByteDance), SiliconFlow, GateRouter, OpenRouter, Anthropic, OpenAI, Gemini, xAI (Grok), Groq, Ollama, or any OpenAI-compatible API.
+
+Features: failover with exponential backoff, model fallback chains, thinking budget, Responses API + completions + Ollama native.
+
+---
+
+## Key Features
+
+### Built-in Tools (36)
+
+File read/write/search, shell exec (with safety rules), web search/fetch/download, CDP browser automation (50+ actions), memory CRUD, document extraction/creation (PDF/DOCX/XLSX/PPTX), image/video generation, voice STT (Whisper/SenseVoice), TTS, computer_use, cron jobs (recurring + one-shot timer), multi-agent spawn/task, clarify (interactive Q&A), anycli (structured web data extraction).
+
+### Pre-parsed Commands (40+)
+
+Local commands that bypass the LLM — zero token cost, sub-millisecond:
+
+```
+/run <cmd>    Shell exec (pipes, redirects)     /search <q>   Web search
+/help         Show commands                      /status       Gateway status
+/clear        Clear session                      /compact      Compress + save memory
+/ctx <text>   Add session context                /btw <q>      Side-channel quick query
+/remember     Save to long-term memory           /recall       Search memory
+/model <name> Switch model                       /cron list    List cron jobs
+```
+
+### Browser Automation (CDP)
+
+Built-in headless Chrome — no ChromeDriver, no Playwright, no Node.js:
+- 50+ actions: open, snapshot, click, fill, scroll, screenshot, evaluate, annotate, capture_video, etc.
+- Accessibility tree snapshots with `@e1` refs for LLM interaction
+- Semantic locators: getbytext, getbyrole, getbylabel
+- One-click video download: `rsclaw browser download-video <url>`
+- Auth persistence: state save/load for login session reuse
+- Memory-adaptive instance limits, 5-min idle timeout, crash auto-restart
+- CLI: `rsclaw browser open/snapshot/click/screenshot/...` (full agent-browser parity)
+
+### AnyCLI — Structured Web Data
+
+Built-in [anycli](https://crates.io/crates/anycli) integration. Turn any website into structured CLI output with declarative YAML adapters:
+
+```bash
+rsclaw anycli run hackernews top --format table limit=10
+rsclaw anycli run bilibili hot --format markdown
+rsclaw anycli run github-trending repos language=rust
+rsclaw anycli search zhihu        # search community hub
+rsclaw anycli install zhihu       # install adapter
+```
+
+Built-in adapters: hackernews, bilibili, github-trending, arxiv, wikipedia. Community hub at [anycli.org](https://anycli.org). Agent uses `anycli` tool automatically when structured data is available — cleaner than web_fetch.
+
+### Long-term Memory
+
+Three-layer storage: redb (hot KV), tantivy (full-text search), hnsw_rs (vector similarity). Session compaction at 80% context window, `/compact` manual compression with memory save, `/clear` preserves conversation summary.
+
+### Multi-Agent Architecture
+
+Four agent types with up to 4-layer delegation:
+
+| Type | Created by | Lifetime | Persisted |
+|------|-----------|----------|-----------|
+| **Main** | System | Forever | Config (`default: true`) |
+| **Named** | User | Permanent | Config file (survives restart) |
+| **Sub** | LLM | Session | Memory only (gone on restart) |
+| **Task** | LLM | One-shot | Auto-destroyed after completion |
+
+```
+Main ──spawn──→ Named "pm" (persistent, in config)
+                 └─spawn──→ Sub "analyst" (temporary)
+                              ├─task──→ Task "search-jd" (parallel)
+                              └─task──→ Task "search-tb" (parallel)
+```
+
+Each agent can use a different execution backend:
+
+| Backend | Description |
+|---------|-------------|
+| **Native Rust** | Built-in LLM runtime (default, fastest) |
+| **Claude Code** | Claude Agent SDK via ACP protocol |
+| **OpenCode** | Open-source coding agent |
+| **ACP** | Any Agent Client Protocol compliant agent |
+
+```json5
+{
+  agents: {
+    list: [
+      { id: "main", default: true, model: { primary: "qwen-plus" } },
+      { id: "coder", model: { primary: "deepseek-chat", toolset: "code" },
+        claudecode: { command: "claude-agent-acp" } },  // uses Claude Code backend
+    ],
+    a2a: [
+      { id: "gpu-worker", url: "http://gpu-server:18888", token: "${TOKEN}" },
+    ],
+  },
+}
+```
+
+Collaboration modes: sequential (chain), parallel (fan-out), orchestrated (LLM-driven `agent_<id>` tool calls).
+
+Permission model:
+- **Toolset** per agent: `minimal` (12 tools) / `web` / `code` / `standard` (16) / `full` (all)
+- **Exec safety**: 50+ global deny patterns apply to ALL agents (cannot be bypassed)
+- **Main cannot be killed**; Named/Sub/Task can be killed by their creator
+- Agents cannot communicate upward or sideways — delegation is strictly top-down
+
+### A2A Protocol
+
+Implements [Google A2A v1.0](https://a2a-protocol.org/) for cross-network agent collaboration. Auto-discovery via `/.well-known/agent.json`, JSON-RPC 2.0 task dispatch, streaming support.
+
+### Security
+
+- **Exec safety**: 50+ deny patterns (sudo, rm -rf /, .ssh, .env, etc.), configurable deny/confirm/allow
+- **Write sandbox**: path isolation + content scanning
+- **File upload**: two-layer confirmation (size gate + token gate)
+- **Per-agent permissions**: configurable command ACL
+- **Tool loop detection**: sliding window (12-call, 8-threshold)
+
+---
+
+## A2A v1.0 Protocol
+
+RsClaw implements the full [Google A2A Protocol v1.0](https://a2a-protocol.org/latest/specification/) via JSON-RPC.
+
+### Endpoints
+
+```
+GET  /.well-known/agent.json           Agent Card (discovery)
+POST /api/v1/a2a                       JSON-RPC dispatch
+                                       — sync responses for non-streaming methods
+                                       — Accept: text/event-stream for SendStreamingMessage / SubscribeToTask
+```
+
+### Methods
+
+| Method | Purpose |
+|---|---|
+| `SendMessage` | Submit a task, block until terminal state, return the final Task |
+| `SendStreamingMessage` | Submit a task, stream `status-update` + `artifact-update` SSE events |
+| `SubscribeToTask` | Tap into an in-flight task's SSE stream by id |
+| `GetTask` / `ListTasks` | Read task snapshots (pagination supported on List) |
+| `CancelTask` | Fire the cancel token; runtime exits at the next agent-loop boundary |
+| `CreateTaskPushNotificationConfig` | Register a webhook for a task's lifecycle events |
+| `GetTaskPushNotificationConfig` / `ListTaskPushNotificationConfigs` / `DeleteTaskPushNotificationConfig` | Webhook CRUD |
+| `GetExtendedAgentCard` | Full Agent Card (extended metadata) |
+
+### Quick example
+
+```bash
+curl -sS -X POST http://127.0.0.1:18888/api/v1/a2a \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc":"2.0","id":"1","method":"SendMessage",
+    "params":{"message":{"messageId":"m1","role":"user",
+      "parts":[{"type":"text","text":"reply with ack"}]}}
+  }'
+# → { "result": { "status": { "state": "TASK_STATE_COMPLETED" },
+#                 "artifacts": [{ "parts": [{"type":"text","text":"ack"}] }], ... } }
+```
+
+### Auth
+
+The `/api/v1/a2a` endpoint bypasses gateway-level auth; A2A's own bearer / `X-API-Key` schemes (declared in the Agent Card `securitySchemes`) are the authoritative gate. Configure via env:
+
+```bash
+export RSCLAW_A2A_BEARER_TOKENS="token-1,token-2"   # Authorization: Bearer <token>
+export RSCLAW_A2A_API_KEYS="key-1,key-2"            # X-API-Key: <key>
+```
+
+When **both** env vars are empty/unset, the endpoint is open (dev mode). Set either to enable enforcement; clients must present one matching credential.
+
+### Push notifications
+
+Register a webhook per task with a shared secret. The gateway POSTs to your URL on every lifecycle event with HMAC-SHA256 signed payloads:
+
+```
+POST <your-url>
+Content-Type: application/json
+X-A2A-Signature: <base64(hmac_sha256(token, body))>
+X-A2A-Task-Id:   <taskId>
+
+{"kind":"status-update","taskId":"...","contextId":"...",
+ "status":{"state":"TASK_STATE_WORKING"},"final":false}
+```
+
+Verify in Python:
+
+```python
+import hmac, hashlib, base64
+expected = base64.b64encode(hmac.new(token.encode(), body, hashlib.sha256).digest()).decode()
+assert expected == request.headers["X-A2A-Signature"]
+```
+
+Retry policy: 3 attempts with exponential backoff (2s / 4s / 8s).
+
+### INPUT_REQUIRED suspend / resume
+
+Every agent gets a built-in `wait_input(prompt, auth?)` tool. When the LLM calls it mid-turn, the runtime:
+
+1. Publishes `TASK_STATE_INPUT_REQUIRED` (or `TASK_STATE_AUTH_REQUIRED` when `auth: true`) with the prompt as a `role: agent` message
+2. Suspends the turn awaiting a `SendMessage` with the **same `taskId`**
+3. Resumes by feeding the client's text back as the tool's result
+
+Resume protocol — client receives `TASK_STATE_INPUT_REQUIRED`, then:
+
+```bash
+curl -X POST http://127.0.0.1:18888/api/v1/a2a -H "Content-Type: application/json" -d '{
+  "jsonrpc":"2.0","id":"r1","method":"SendMessage",
+  "params":{"message":{
+    "messageId":"m-resume-1",
+    "taskId":"<the same taskId>",     // ← critical: same id routes to resume short-path
+    "role":"user",
+    "parts":[{"type":"text","text":"<your answer>"}]
+  }}
+}'
+```
+
+Streaming subscribers see the agent loop continue and produce the final artifact + `TASK_STATE_COMPLETED`.
+
+### Cancellation semantics
+
+`CancelTask` fires the task's cancel token. The runtime checks the token:
+
+- At the top of every agent-loop iteration
+- Before every tool dispatch
+
+So cancellation is honored *between* tool calls, not *inside* a running LLM stream or tool. A 30-second blocking tool runs to completion; the cancel kicks in afterwards. The `CancelTask` dispatcher additionally publishes a terminal `TASK_STATE_CANCELED` event and closes the SSE stream immediately, so clients aren't blocked on the long-running call.
+
+### Persistence
+
+Tasks (history + artifacts + push configs + status) persist to `var/data/a2a/tasks.redb` so `GetTask` / `ListTasks` and webhook registrations survive restarts.
+
+See [tests/a2a_interop_python.md](tests/a2a_interop_python.md) for an end-to-end harness against the Google Python SDK (covers all 11 methods + the `wait_input` resume flow).
+
+### Exposing A2A to the internet
+
+The gateway listens on `127.0.0.1:18888` by default, so remote A2A peers can't reach it without a tunnel. Pick the option that matches your network:
+
+#### 🌍 International users — Cloudflare Tunnel
+
+Free, no VPS, HTTPS-by-default. Best for outside-China deployments.
+
+```bash
+brew install cloudflared                            # or: see cloudflare docs
+cloudflared tunnel --url http://127.0.0.1:18888     # gives you https://<random>.trycloudflare.com
+```
+
+For a stable URL with your own domain, use a [named tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/get-started/create-remote-tunnel/) with `cloudflared tunnel route dns`.
+
+Remote peers configure rsclaw to call it:
+
+```json5
+{
+  agents: {
+    a2a: [
+      { id: "alice",
+        url: "https://your-tunnel.trycloudflare.com",
+        auth_token: "${ALICE_BEARER}" },
+    ],
+  },
+}
+```
+
+Always set `RSCLAW_A2A_BEARER_TOKENS` on the gateway before going public — without it the endpoint accepts everything (dev mode).
+
+#### 🇨🇳 中国国内 — `frp` + 国内 VPS
+
+Cloudflare's edge nodes are unreliable from inside mainland China (GFW interferes, especially for the WebSocket / SSE long connections A2A streaming uses). Deploy [frp](https://github.com/fatedier/frp) on a domestic VPS (aliyun / tencent cloud / huawei cloud, ~5-10 RMB/month):
+
+VPS side (`frps.toml`):
+
+```toml
+bindPort = 7000
+auth.token = "your-frp-secret"
+
+[[httpsVhost]]
+type = "https"
+listenPort = 443
+customDomains = ["a2a.example.cn"]
+```
+
+Local side next to rsclaw (`frpc.toml`):
+
+```toml
+serverAddr = "your-vps-ip"
+serverPort = 7000
+auth.token = "your-frp-secret"
+
+[[proxies]]
+name = "rsclaw-a2a"
+type = "https"
+localIP = "127.0.0.1"
+localPort = 18888
+customDomains = ["a2a.example.cn"]
+```
+
+Same peer config as above — point `agents.a2a[].url` at `https://a2a.example.cn`. Always set `RSCLAW_A2A_BEARER_TOKENS` since a `frp` tunnel is open by default.
+
+`nps` is a similar tool with a Web UI if `frp`'s config style isn't to taste. For zero-config one-shots, [Sakura Frp 樱花穿透](https://www.natfrp.com/) has a free tier (with bandwidth caps).
+
+#### 🏗️ Self-hosted multi-tenant — [`rsclaw-tunnel`](https://github.com/rsclaw-ai/rsclaw-tunnel)
+
+For multi-agent platform deployments (one server hosting many rsclaw clients with shared edge auth, JSON-RPC method-aware rate limits, and full data control), the companion [`rsclaw-tunnel`](https://github.com/rsclaw-ai/rsclaw-tunnel) repo is in early development. It's not a Cloudflare replacement for individuals — only worth standing up when you need protocol-aware multi-tenancy that off-the-shelf tunnels don't provide. See its [`docs/why.md`](https://github.com/rsclaw-ai/rsclaw-tunnel/blob/main/docs/why.md) for the trade-off discussion.
+
+---
+
+## Configuration
+
+```json5
+{
+  gateway: { port: 18888 },
+  models: {
+    providers: {
+      qwen: { apiKey: "${DASHSCOPE_API_KEY}" },
+      ollama: { baseUrl: "http://localhost:11434" },
+    },
+  },
+  agents: {
+    defaults: {
+      model: { primary: "qwen/qwen-turbo" },
+      timeoutSeconds: 600,
+    },
+  },
+  channels: {
+    telegram: { botToken: "${TELEGRAM_BOT_TOKEN}", dmPolicy: "pairing" },
+    feishu: { appId: "cli_xxx", appSecret: "${FEISHU_APP_SECRET}" },
+  },
+}
+```
+
+All string values support `${VAR}` env substitution. Config priority: CLI flag > `$RSCLAW_BASE_DIR/rsclaw.json5` > `~/.rsclaw/rsclaw.json5` > `./rsclaw.json5`.
+
+### Upgrading from earlier A2A betas
+
+If your `rsclaw.json5` has `agents.external: [...]`, rename it to `agents.a2a: [...]` — the field shape is identical, only the key + struct name changed when A2A v1.0 landed:
+
+```json5
+agents: {
+  // before:
+  // external: [{ id: "remote-analyst", url: "https://…", auth_token: "${TOKEN}" }],
+  // after:
+  a2a: [{ id: "remote-analyst", url: "https://…", auth_token: "${TOKEN}" }],
+}
+```
+
+No back-compat alias — the gateway rejects unknown keys (which `external` now is) on startup. The runtime structs are also renamed: `ExternalAgentConfig` → `A2aPeerConfig`.
+
+---
+
+## CLI
+
+```bash
+rsclaw setup                       # First-time setup wizard
+rsclaw start / stop / restart      # Gateway control
+rsclaw status                      # Check status
+rsclaw doctor --fix                # Health check
+rsclaw configure                   # Interactive config (7 sections)
+rsclaw update                      # Auto-update from GitHub
+rsclaw tools install chrome        # Install tools (chrome/ffmpeg/node/python/opencode)
+rsclaw tools status                # Check tool availability
+rsclaw pairing pair / list / revoke
+rsclaw channels login wechat       # QR scan login
+```
+
+---
+
+## Migrate from OpenClaw
+
+```bash
+openclaw gateway stop
+rsclaw setup          # detects OpenClaw, offers import
+rsclaw start
+```
+
+Import copies config, workspace, and sessions into `~/.rsclaw/`. OpenClaw data is never modified. All OpenClaw config fields are supported.
+
+### What you gain
+
+| | RsClaw | OpenClaw |
+|---|---|---|
+| **Binary size** | ~15MB | ~300MB+ (node_modules) |
+| **Startup** | ~26ms | 2–5s |
+| **Idle memory** | ~20MB | ~1000MB+ |
+| **Long-term memory** | Three-layer (redb + tantivy + hnsw_rs) | — |
+| **Self-learning** | Learns from your usage patterns | — |
+| **Multi-backend agents** | Native Rust / Claude Code / OpenCode / ACP | — |
+| **A2A cross-machine** | Google A2A v1.0 | — |
+| **Browser automation** | Built-in headless Chrome (CDP) | — |
+| **Exec safety** | 50+ deny patterns, deny/confirm/allow | — |
+
+### FAQ
+
+**Can I run RsClaw and OpenClaw simultaneously?**  
+Yes. RsClaw uses port 18888 by default, OpenClaw uses 18789. They have separate data directories (`~/.rsclaw/` vs `~/.openclaw/`) and can run side by side without conflict.
+
+**Will RsClaw modify my OpenClaw data?**  
+Never. Import mode is strictly read-only on `~/.openclaw/`. All RsClaw data goes to `~/.rsclaw/`.
+
+**How do I switch back to OpenClaw?**  
+`rsclaw stop && openclaw gateway start`. Your `~/.openclaw/` is untouched.
+
+**Does it work offline?**  
+Yes — with Ollama for local models, or any OpenAI-compatible local endpoint. Voice STT can also run fully local via Candle Whisper.
+
+**Can I use RsClaw in my commercial product?**  
+Yes, freely. RsClaw is dual-licensed under MIT OR Apache-2.0 — you can build proprietary products, run SaaS services, or redistribute modified versions without open-source obligations.
+
+---
+
+## Development
+
+```bash
+cargo test
+RUST_LOG=rsclaw=debug cargo run -- gateway run
+
+# Cross-compile
+./scripts/build.sh all     # all platforms
+./scripts/build.sh macos   # macOS x86_64 + ARM64
+./scripts/build.sh linux   # Linux musl static
+./scripts/build.sh windows # Windows MSVC
+```
+
+### Architecture
+
+```
+src/
+  agent/       Agent runtime, memory, tools, preparse
+  channel/     13 channels
+  config/      JSON5 loader, schema
+  gateway/     Startup, hot reload
+  provider/    LLM: Anthropic, OpenAI, Gemini, Ollama, failover
+  server/      Axum HTTP, REST API, OpenAI-compat endpoints
+  store/       redb + tantivy + hnsw_rs
+  browser/     Chrome CDP automation
+  a2a/         Google A2A v1.0
+  acp/         ACP protocol
+  ws/          WebSocket v3
+```
+
+Requirements: Rust 1.91+, macOS / Linux / Windows. Optional: ffmpeg, Chrome.
+
+---
+
+## Support the project
+
+If RsClaw saves you hours, consider:
+
+- ⭐ **Star this repo** — helps other developers discover RsClaw
+- 🐛 **Report bugs** via [GitHub Issues](https://github.com/rsclaw-ai/rsclaw/issues)
+- 💬 **Join the community** — [WeChat / Feishu / QQ / Telegram](https://rsclaw.ai/en/community)
+- 🤝 **Contribute** — see [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## License
+
+Licensed under either of
+
+- **Apache License, Version 2.0** ([LICENSE-APACHE](LICENSE-APACHE) or <http://www.apache.org/licenses/LICENSE-2.0>)
+- **MIT license** ([LICENSE-MIT](LICENSE-MIT) or <http://opensource.org/licenses/MIT>)
+
+at your option.
+
+### What this means
+
+- ✅ **Use freely** in personal, commercial, and enterprise projects
+- ✅ **Modify and redistribute** without any obligation to open-source your changes
+- ✅ **Build proprietary products** on top of RsClaw
+- ✅ **Run as a SaaS service** without any licensing requirements
+- ✅ **No copyleft** — your derivative work stays yours
+
+This is the same dual-license used by the Rust language itself, Tokio, Serde, Axum, and most of the Rust ecosystem.
+
+### Contribution
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
+
+---
+
+Built with 🦀 in Rust. Inspired by the OpenClaw community.

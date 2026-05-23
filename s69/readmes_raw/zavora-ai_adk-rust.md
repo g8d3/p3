@@ -1,0 +1,1028 @@
+# ADK-Rust
+
+[![CI](https://github.com/zavora-ai/adk-rust/actions/workflows/ci.yml/badge.svg)](https://github.com/zavora-ai/adk-rust/actions/workflows/ci.yml)
+[![crates.io](https://img.shields.io/crates/v/adk-rust.svg)](https://crates.io/crates/adk-rust)
+[![docs.rs](https://docs.rs/adk-rust/badge.svg)](https://docs.rs/adk-rust)
+[![Wiki](https://img.shields.io/badge/docs-Wiki-blue)](https://github.com/zavora-ai/adk-rust/wiki)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+![Rust](https://img.shields.io/badge/rust-1.85%2B-orange.svg)
+[![GitHub Discussions](https://img.shields.io/github/discussions/zavora-ai/adk-rust?style=flat&logo=github&color=5865F2)](https://github.com/zavora-ai/adk-rust/discussions)
+
+> **🚀 v0.8.2 Released!** Provider-aware schema normalization — MCP tools now work seamlessly across Gemini, OpenAI, Anthropic without manual schema tweaking. Plus: SchemaAdapter trait, per-provider transforms, schema caching. See [CHANGELOG](CHANGELOG.md) for full details.
+>
+> **Contributors:** Many thanks to [@mikefaille](https://github.com/mikefaille) — AdkIdentity design, realtime audio, LiveKit bridge, skill system. [@rohan-panickar](https://github.com/rohan-panickar) — OpenAI-compatible providers, xAI, multimodal content. [@dhruv-pant](https://github.com/dhruv-pant) — Gemini service account auth. [@tomtom215](https://github.com/tomtom215) — A2A Protocol v1.0.0 types crate ([a2a-protocol-types](https://crates.io/crates/a2a-protocol-types)), Foundation-verified wire types powering our A2A v1 layer. [@danielsan](https://github.com/danielsan) — Google deps issue & PR (#181, #203), RAG crash report (#205). [@CodingFlow](https://github.com/CodingFlow) — Gemini 3 thinking level, global endpoint, citationSources (#177, #178, #179). [@ctylx](https://github.com/ctylx) — skill discovery fix (#204). [@poborin](https://github.com/poborin) — project config proposal (#176). [@chillin-capybara](https://github.com/chillin-capybara) — ACP integration, adk-acp crate. [Get started →](https://github.com/zavora-ai/adk-rust/wiki/quickstart)
+>
+> **Announcements:** ADK-Rust Roadmap launched for 2026, we welcome suggestions, comments and ideas. ADK Playground launched! You can now run 70+ ADK-Rust AI Agents online for free. Compile and click. No login, no install. https://playground.adk-rust.com (https://playground.adk-rust.com) And many more discussions, feel free to discuss: [![GitHub Discussions](https://img.shields.io/github/discussions/zavora-ai/adk-rust?style=flat&logo=github&color=5865F2)](https://github.com/zavora-ai/adk-rust/discussions)
+
+---
+
+### 🎧 Rust & Beyond Podcast — Episode 1: What is ADK-Rust?
+
+**Listen to ADK-Rust explain itself.** This podcast episode was generated entirely by ADK-Rust using Gemini 3.1 Flash TTS — two AI hosts, natural voices, zero manual editing.
+
+<video controls src="https://github.com/user-attachments/assets/8b217958-e6b9-4ad6-9e82-e6d6c559efe8">
+Your browser does not support the audio element. <a href="docs/podcast/adk-rust-episode-1.wav">Download Episode 1 (WAV)</a>
+</video>
+
+*2 min 21 sec · Hosts: James (Fenrir) & Ada (Kore)*
+
+> *"This episode was created using the Gemini 3.1 Flash TTS model through adk-audio. Two speakers, natural voices, all from a Rust script."* — James, in the episode
+
+<details>
+<summary>How was this made?</summary>
+
+```bash
+export GOOGLE_API_KEY=your-key
+cargo run --manifest-path examples/gemini_audio/Cargo.toml --bin generate-podcast
+```
+
+The script lives in [`examples/gemini_audio/src/podcast.rs`](examples/gemini_audio/src/podcast.rs). It uses `GeminiTts` with multi-speaker `SpeakerConfig` to synthesize a two-host dialogue. The entire pipeline — script, synthesis, WAV encoding — runs in ~60 seconds.
+
+</details>
+
+---
+
+
+
+ADK-Rust is a production-ready Rust framework for building AI agents enabling you to create powerful and high-performance AI agent systems with a flexible, modular architecture. Model-agnostic. Type-safe. Async.
+
+```bash
+cargo install cargo-adk
+cargo adk new my-agent
+cd my-agent && cargo run
+```
+
+Or pick a template: `--template tools` | `rag` | `api` | `openai`. See [Quick Start](#quick-start) for details.
+
+## Overview
+
+ADK-Rust provides a comprehensive framework for building AI agents in Rust, featuring:
+
+- **Type-safe agent abstractions** with async execution and event streaming
+- **Multiple agent types**: LLM agents, workflow agents (sequential, parallel, loop), and custom agents
+- **Realtime voice agents**: Bidirectional audio streaming with OpenAI Realtime API and Gemini Live API
+- **Tool ecosystem**: Function tools, Google Search, MCP (Model Context Protocol) integration
+- **Provider-aware schema normalization**: MCP tools work across all providers — schemas normalized per-provider at request time
+- **RAG pipeline**: Document chunking, vector embeddings, semantic search with 6 vector store backends
+- **Security**: Role-based access control, declarative scope-based tool security, SSO/OAuth, audit logging
+- **Agentic commerce**: ACP and AP2 payment orchestration with durable transaction journals and evidence-backed recall
+- **Agentic Web Protocol (AWP)**: Make websites agent-native with discovery, capability manifests, trust levels, rate limiting, consent, and health monitoring
+- **Production features**: Session management, artifact storage, memory systems with project-scoped isolation, REST/A2A APIs
+- **Developer experience**: Interactive CLI, 120+ working examples, comprehensive documentation
+
+**Status**: Production-ready, actively maintained
+
+## Architecture
+
+![ADK-Rust Architecture](assets/architecture.png)
+
+ADK-Rust follows a clean layered architecture from application interface down to foundational services.
+
+## Key Features
+
+### Agent Types
+
+**LLM Agents**: Powered by large language models with tool use, function calling, and streaming responses.
+
+**Workflow Agents**: Deterministic orchestration patterns.
+- `SequentialAgent`: Execute agents in sequence
+- `ParallelAgent`: Execute agents concurrently, with optional `SharedState` for cross-agent coordination
+- `LoopAgent`: Iterative execution with exit conditions
+
+**Custom Agents**: Implement the `Agent` trait for specialized behavior.
+
+**Realtime Voice Agents**: Build voice-enabled AI assistants with bidirectional audio streaming.
+
+**Graph Agents**: LangGraph-style workflow orchestration with state management and checkpointing.
+
+### Multi-Provider Support
+
+ADK supports multiple LLM providers with a unified API:
+
+| Provider | Model Examples | Feature Flag |
+|----------|---------------|--------------|
+| Gemini | `gemini-2.5-flash`, `gemini-2.5-pro`, `gemini-3-flash-preview`, `gemini-3.1-flash-lite-preview`, `gemini-3.1-pro-preview` | (default) |
+| OpenAI | `gpt-5`, `gpt-5-mini`, `gpt-5-nano` | `openai` |
+| OpenAI Responses API | `gpt-4.1`, `o3`, `o4-mini` | `openai` |
+| Anthropic | `claude-opus-4-7`, `claude-sonnet-4-6`, `claude-haiku-4-5` | `anthropic` |
+| DeepSeek | `deepseek-chat`, `deepseek-reasoner` | `deepseek` |
+| Groq | `meta-llama/llama-4-scout-17b-16e-instruct`, `llama-3.3-70b-versatile` | `groq` |
+| Ollama | `qwen3.6:35b-a3b`, `qwen3.5`, `llama3.2:3b` | `ollama` |
+| Fireworks AI | `accounts/fireworks/models/llama-v3p1-8b-instruct` | `openai` (preset) |
+| Together AI | `meta-llama/Llama-3.3-70B-Instruct-Turbo` | `openai` (preset) |
+| Mistral AI | `mistral-small-latest` | `openai` (preset) |
+| Perplexity | `sonar` | `openai` (preset) |
+| Cerebras | `llama-3.3-70b` | `openai` (preset) |
+| SambaNova | `Meta-Llama-3.3-70B-Instruct` | `openai` (preset) |
+| xAI (Grok) | `grok-3-mini` | `openai` (preset) |
+| Amazon Bedrock | `anthropic.claude-sonnet-4-20250514-v1:0` | `bedrock` |
+| Azure AI Inference | (endpoint-specific) | `azure-ai` |
+| mistral.rs | **Gemma 4**, Phi-3, Llama, Qwen 3.5, Voxtral, FLUX | git dependency |
+
+All providers support streaming, function calling, and multimodal inputs (where available).
+
+### Tool System
+
+Define tools with zero boilerplate using the `#[tool]` macro:
+
+```rust
+use adk_tool::{tool, AdkError};
+use schemars::JsonSchema;
+use serde::Deserialize;
+use serde_json::{json, Value};
+
+#[derive(Deserialize, JsonSchema)]
+struct WeatherArgs {
+    /// The city to look up
+    city: String,
+}
+
+/// Get the current weather for a city.
+#[tool]
+async fn get_weather(args: WeatherArgs) -> std::result::Result<Value, AdkError> {
+    Ok(json!({ "temp": 72, "city": args.city }))
+}
+
+// Use it: agent_builder.tool(Arc::new(GetWeather))
+```
+
+The macro reads the doc comment as the description, derives the JSON schema from the args type, and generates a `Tool` impl. No manual schema writing, no boilerplate.
+
+Built-in tools:
+- `#[tool]` macro (zero-boilerplate custom tools)
+- Function tools (custom Rust functions)
+- Google Search
+- Artifact loading
+- Loop termination
+
+**MCP Integration**: Connect to Model Context Protocol servers for extended capabilities. Supports [MCP Elicitation](docs/official_docs/tools/mcp-tools.md#elicitation) — servers can request additional user input at runtime via structured forms or URLs.
+
+### Production Features
+
+- **Session Management**: In-memory and SQLite-backed sessions with state persistence, encrypted sessions with AES-256-GCM and key rotation
+- **Memory System**: Long-term memory with semantic search, vector embeddings, and project-scoped isolation
+- **Servers**: REST API with SSE streaming, A2A v1.0.0 protocol for agent-to-agent communication
+- **Guardrails**: PII redaction, content filtering, JSON schema validation
+- **Tool Authorization**: Human-in-the-loop confirmation, before-tool callbacks, RBAC, graph interrupts
+- **Payments**: ACP and AP2 commerce support through `adk-payments`
+- **Observability**: OpenTelemetry tracing, structured logging
+
+## Core Crates
+
+| Crate | Purpose | Key Features |
+|-------|---------|--------------|
+| `adk-core` | Foundational traits and types | `Agent` trait, `Content`, `Part`, error types, streaming primitives |
+| `adk-agent` | Agent implementations | `LlmAgent`, `SequentialAgent`, `ParallelAgent`, `LoopAgent`, builder patterns |
+| `adk-skill` | AgentSkills parsing and selection | Skill markdown parser, `.skills` discovery/indexing, lexical matching, prompt injection helpers |
+| `adk-model` | LLM integrations | Gemini, OpenAI, Anthropic, DeepSeek, Groq, Ollama, Bedrock, Azure AI + OpenAI-compatible presets (Fireworks, Together, Mistral, Perplexity, Cerebras, SambaNova, xAI) |
+| `adk-gemini` | Gemini client | Google Gemini API client with streaming and multimodal support |
+| `adk-anthropic` | Anthropic client | Dedicated Anthropic API client with streaming, thinking, caching, citations, vision, PDF, pricing |
+| `adk-mistralrs` | Native local inference | mistral.rs v0.8.0 — **Gemma 4**, Qwen 3.5, Voxtral, ISQ/MXFP4 quantization, LoRA adapters (git-only) |
+| `adk-tool` | Tool system and extensibility | `FunctionTool`, Google Search, MCP protocol with elicitation, schema validation |
+| `adk-session` | Session and state management | SQLite/in-memory backends, conversation history, state persistence |
+| `adk-artifact` | Artifact storage system | File-based storage, MIME type handling, image/PDF/video support |
+| `adk-memory` | Long-term memory | Vector embeddings, semantic search, project-scoped isolation, 6 backends |
+| `adk-payments` | Agentic commerce orchestration | ACP/AP2 adapters, canonical transaction kernel, durable journals, evidence-backed payment flows |
+| `awp-types` | AWP protocol types | Trust levels, requester types, discovery documents, capability manifests, payment intents, typed A2A messages — zero `adk-*` deps |
+| `adk-awp` | Agentic Web Protocol implementation | Business context loading, discovery/manifest generation, rate limiting, consent, events, health state machine, AWP routes |
+| `adk-acp` | Agent Client Protocol integration | Connect to ACP agents (Claude Code, Codex, Kiro CLI) as tools, `AcpAgentTool`, `AcpToolset`, auto-approve permissions |
+| `adk-rag` | RAG pipeline | Document chunking, embeddings, vector search, reranking, 6 backends |
+| `adk-runner` | Agent execution runtime | Context management, event streaming, session lifecycle, callbacks |
+| `adk-server` | Production API servers | REST API, A2A v1.0.0 protocol (all 11 operations), middleware, health checks |
+| `adk-cli` | Command-line interface | Interactive REPL, session management, MCP server integration |
+| `adk-realtime` | Real-time voice agents | OpenAI Realtime API, Gemini Live API, bidirectional audio, VAD |
+| `adk-graph` | Graph-based workflows | LangGraph-style orchestration, state management, checkpointing, human-in-the-loop |
+| `adk-browser` | Browser automation | 46 WebDriver tools, navigation, forms, screenshots, PDF generation |
+| `adk-eval` | Agent evaluation | Test definitions, trajectory validation, LLM-judged scoring, rubrics |
+| `adk-guardrail` | Input/output validation | PII redaction, content filtering, JSON schema validation |
+| `adk-auth` | Access control | Role-based permissions, declarative scope-based security, SSO/OAuth, audit logging |
+| `adk-sandbox` | Sandboxed code execution | Process/WASM backends, OS-level sandbox profiles (Seatbelt, bubblewrap, AppContainer) |
+| `adk-telemetry` | Observability | Structured logging, OpenTelemetry tracing, span helpers |
+
+> **Extracted to standalone repos:** [adk-ui](https://github.com/zavora-ai/adk-ui) (dynamic UI generation), [adk-studio](https://github.com/zavora-ai/adk-studio) (visual agent builder), [adk-playground](https://github.com/zavora-ai/adk-playground) (120+ examples).
+
+## Quick Start
+
+### Scaffold a project (recommended)
+
+```bash
+cargo install cargo-adk
+
+cargo adk new my-agent                    # basic Gemini agent
+cargo adk new my-agent --template tools   # agent with #[tool] custom tools
+cargo adk new my-agent --template rag     # RAG with vector search
+cargo adk new my-agent --template api     # REST server
+cargo adk new my-agent --template openai  # OpenAI-powered agent
+
+cd my-agent
+cp .env.example .env    # add your API key
+cargo run
+```
+
+### Manual installation
+
+Requires Rust 1.85 or later (Rust 2024 edition). Add to your `Cargo.toml`:
+
+```toml
+[dependencies]
+adk-rust = "0.8.2"  # Minimal (default): Gemini + agent runtime + sessions
+
+# Need server, auth, graph workflows, eval?
+# adk-rust = { version = "0.8.2", features = ["standard"] }
+
+# Need everything (realtime, browser, RAG, payments, AWP)?
+# adk-rust = { version = "0.8.2", features = ["enterprise"] }
+```
+
+**Feature tiers:**
+
+| Tier | Includes | Use case |
+|------|----------|----------|
+| `minimal` (default) | Gemini provider, agents, runner, sessions | Fast starter agents |
+| `standard` | minimal + OpenAI, Anthropic, tools, memory, telemetry, server, auth, graph, eval, guardrail, plugins, artifacts, skills | Production deployment |
+| `enterprise` | standard + realtime, browser, RAG, payments, AWP | Full-featured production |
+| `full` | enterprise + audio, code execution, sandbox | Everything |
+
+> **Upgrading from 0.7.x?** The default changed to a true minimal Gemini starter tier. Add only the feature set you use, such as `features = ["openai"]`, `features = ["standard"]`, or `features = ["standard", "cli-openai"]`.
+
+Set your API key:
+
+```bash
+# For Gemini (default)
+export GOOGLE_API_KEY="your-api-key"
+
+# For OpenAI
+export OPENAI_API_KEY="your-api-key"
+
+# For Anthropic
+export ANTHROPIC_API_KEY="your-api-key"
+
+# For DeepSeek
+export DEEPSEEK_API_KEY="your-api-key"
+
+# For Groq
+export GROQ_API_KEY="your-api-key"
+
+# For Fireworks AI
+export FIREWORKS_API_KEY="your-api-key"
+
+# For Together AI
+export TOGETHER_API_KEY="your-api-key"
+
+# For Mistral AI
+export MISTRAL_API_KEY="your-api-key"
+
+# For Perplexity
+export PERPLEXITY_API_KEY="your-api-key"
+
+# For Cerebras
+export CEREBRAS_API_KEY="your-api-key"
+
+# For SambaNova
+export SAMBANOVA_API_KEY="your-api-key"
+
+# For Azure AI Inference
+export AZURE_AI_API_KEY="your-api-key"
+
+# For Amazon Bedrock (uses AWS IAM credentials)
+# Configure via: aws configure
+
+# For Ollama (no key, just run: ollama serve)
+```
+
+### Fastest Start — `adk::run()`
+
+The simplest way to run an agent is one function call. The default minimal build uses Gemini; provider auto-detection widens when you compile additional provider features.
+
+```rust
+use adk_rust::run;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    dotenvy::dotenv().ok();
+    // Minimal default: set GOOGLE_API_KEY.
+    let response = run("You are a helpful assistant.", "What is 2 + 2?").await?;
+    println!("{response}");
+    Ok(())
+}
+```
+
+`provider_from_env()` checks only compiled providers. With `features = ["openai", "anthropic"]`, the order is `ANTHROPIC_API_KEY` → `OPENAI_API_KEY` → `GOOGLE_API_KEY`.
+
+### Basic Example (Gemini)
+
+```rust
+use adk_rust::prelude::*;
+use adk_rust::Launcher;
+
+#[tokio::main]
+async fn main() -> AnyhowResult<()> {
+    dotenvy::dotenv().ok();
+    let api_key = std::env::var("GOOGLE_API_KEY")?;
+    let model = GeminiModel::new(&api_key, "gemini-2.5-flash")?;
+
+    let agent = LlmAgentBuilder::new("assistant")
+        .description("Helpful AI assistant")
+        .instruction("You are a helpful assistant. Be concise and accurate.")
+        .model(Arc::new(model))
+        .build()?;
+
+    Launcher::new(Arc::new(agent)).run().await?;
+    Ok(())
+}
+```
+
+### OpenAI Example
+
+Enable OpenAI with `adk-rust = { version = "0.8.2", features = ["openai"] }`.
+
+```rust
+use adk_rust::prelude::*;
+use adk_rust::Launcher;
+
+#[tokio::main]
+async fn main() -> AnyhowResult<()> {
+    dotenvy::dotenv().ok();
+    let api_key = std::env::var("OPENAI_API_KEY")?;
+    let model = OpenAIClient::new(OpenAIConfig::new(api_key, "gpt-5-mini"))?;
+
+    let agent = LlmAgentBuilder::new("assistant")
+        .instruction("You are a helpful assistant.")
+        .model(Arc::new(model))
+        .build()?;
+
+    Launcher::new(Arc::new(agent)).run().await?;
+    Ok(())
+}
+```
+
+### OpenAI Responses API Example
+
+Uses the `/v1/responses` endpoint — recommended for reasoning models (o3, o4-mini) and built-in tools:
+
+```rust
+use adk_rust::prelude::*;
+use adk_rust::Launcher;
+use adk_model::openai::{OpenAIResponsesClient, OpenAIResponsesConfig};
+
+#[tokio::main]
+async fn main() -> AnyhowResult<()> {
+    dotenvy::dotenv().ok();
+    let api_key = std::env::var("OPENAI_API_KEY")?;
+    let config = OpenAIResponsesConfig::new(api_key, "gpt-4.1-mini");
+    let model = OpenAIResponsesClient::new(config)?;
+
+    let agent = LlmAgentBuilder::new("assistant")
+        .instruction("You are a helpful assistant.")
+        .model(Arc::new(model))
+        .build()?;
+
+    Launcher::new(Arc::new(agent)).run().await?;
+    Ok(())
+}
+```
+
+### Anthropic Example
+
+Enable Anthropic with `adk-rust = { version = "0.8.2", features = ["anthropic"] }`.
+
+```rust
+use adk_rust::prelude::*;
+use adk_rust::Launcher;
+
+#[tokio::main]
+async fn main() -> AnyhowResult<()> {
+    dotenvy::dotenv().ok();
+    let api_key = std::env::var("ANTHROPIC_API_KEY")?;
+    let model = AnthropicClient::new(AnthropicConfig::new(api_key, "claude-sonnet-4-6"))?;
+
+    let agent = LlmAgentBuilder::new("assistant")
+        .instruction("You are a helpful assistant.")
+        .model(Arc::new(model))
+        .build()?;
+
+    Launcher::new(Arc::new(agent)).run().await?;
+    Ok(())
+}
+```
+
+### DeepSeek Example
+
+Enable DeepSeek with `adk-rust = { version = "0.8.2", features = ["deepseek"] }`.
+
+```rust
+use adk_rust::prelude::*;
+use adk_rust::Launcher;
+
+#[tokio::main]
+async fn main() -> AnyhowResult<()> {
+    dotenvy::dotenv().ok();
+    let api_key = std::env::var("DEEPSEEK_API_KEY")?;
+
+    // Standard chat model
+    let model = DeepSeekClient::chat(api_key)?;
+
+    // Or use reasoner for chain-of-thought reasoning
+    // let model = DeepSeekClient::reasoner(api_key)?;
+
+    let agent = LlmAgentBuilder::new("assistant")
+        .instruction("You are a helpful assistant.")
+        .model(Arc::new(model))
+        .build()?;
+
+    Launcher::new(Arc::new(agent)).run().await?;
+    Ok(())
+}
+```
+
+### Groq Example (Ultra-Fast)
+
+Enable Groq with `adk-rust = { version = "0.8.2", features = ["groq"] }`.
+
+```rust
+use adk_rust::prelude::*;
+use adk_rust::Launcher;
+
+#[tokio::main]
+async fn main() -> AnyhowResult<()> {
+    dotenvy::dotenv().ok();
+    let api_key = std::env::var("GROQ_API_KEY")?;
+    let model = GroqClient::new(GroqConfig::llama70b(api_key))?;
+
+    let agent = LlmAgentBuilder::new("assistant")
+        .instruction("You are a helpful assistant.")
+        .model(Arc::new(model))
+        .build()?;
+
+    Launcher::new(Arc::new(agent)).run().await?;
+    Ok(())
+}
+```
+
+### Ollama Example (Local)
+
+Enable Ollama with `adk-rust = { version = "0.8.2", features = ["ollama"] }`.
+
+```rust
+use adk_rust::prelude::*;
+use adk_rust::Launcher;
+
+#[tokio::main]
+async fn main() -> AnyhowResult<()> {
+    dotenvy::dotenv().ok();
+    // Requires: ollama serve && ollama pull llama3.2
+    let model = OllamaModel::new(OllamaConfig::new("llama3.2"))?;
+
+    let agent = LlmAgentBuilder::new("assistant")
+        .instruction("You are a helpful assistant.")
+        .model(Arc::new(model))
+        .build()?;
+
+    Launcher::new(Arc::new(agent)).run().await?;
+    Ok(())
+}
+```
+
+### Examples
+
+Examples live in the dedicated [adk-playground](https://github.com/zavora-ai/adk-playground) repo (120+ examples covering every feature and provider). The examples documented in this repository are validated by `scripts/check-doc-examples.sh`, `scripts/check-cargo-adk-templates.sh`, and workspace example builds.
+
+## Companion Projects
+
+| Project | Description |
+|---------|-------------|
+| [adk-studio](https://github.com/zavora-ai/adk-studio) | Visual agent builder — drag-and-drop canvas, code generation, live testing |
+| [adk-ui](https://github.com/zavora-ai/adk-ui) | Dynamic UI generation — 28 components, React client, streaming updates |
+| [adk-playground](https://github.com/zavora-ai/adk-playground) | 120+ working examples for every feature and provider |
+
+## Advanced Features
+
+### Realtime Voice Agents
+
+Build voice-enabled AI assistants using the `adk-realtime` crate:
+
+```rust
+use adk_realtime::{RealtimeAgent, openai::OpenAIRealtimeModel, RealtimeModel};
+use std::sync::Arc;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let api_key = std::env::var("OPENAI_API_KEY")?;
+    let model: Arc<dyn RealtimeModel> = Arc::new(
+        OpenAIRealtimeModel::new(&api_key, "gpt-realtime")
+    );
+
+    let agent = RealtimeAgent::builder("voice_assistant")
+        .model(model)
+        .instruction("You are a helpful voice assistant.")
+        .voice("alloy")
+        .server_vad()  // Enable voice activity detection
+        .build()?;
+
+    Ok(())
+}
+```
+
+**Supported Realtime Models**:
+| Provider | Model | Transport | Feature Flag |
+|----------|-------|-----------|--------------|
+| OpenAI | `gpt-realtime` | WebSocket | `openai` |
+| OpenAI | `gpt-realtime` | WebRTC | `openai-webrtc` |
+| Google | `gemini-live-2.5-flash-native-audio` | WebSocket | `gemini` |
+| Google | Gemini via Vertex AI | WebSocket + OAuth2 | `vertex-live` |
+| LiveKit | Any (bridge to Gemini/OpenAI) | WebRTC | `livekit` |
+
+**Features**:
+- OpenAI Realtime API and Gemini Live API support
+- Vertex AI Live with Application Default Credentials (ADC)
+- LiveKit WebRTC bridge for production-grade audio routing
+- OpenAI WebRTC transport with Opus codec and data channels
+- Bidirectional audio streaming (PCM16, G711, Opus)
+- Server-side Voice Activity Detection (VAD)
+- Mid-session context mutation — swap instructions and tools without dropping the call
+- Real-time tool calling during voice conversations
+- Multi-agent handoffs for complex workflows
+- Zero-allocation LiveKit audio output path
+
+**Run validated realtime examples**:
+```bash
+# OpenAI Realtime (WebSocket)
+cargo run -p adk-realtime --example openai_session_update --features openai
+
+# Vertex AI Live (requires gcloud auth application-default login)
+cargo run -p adk-realtime --example vertex_live_voice --features vertex-live
+cargo run -p adk-realtime --example vertex_live_tools --features vertex-live
+
+# LiveKit Bridge (requires LiveKit server)
+cargo run -p adk-realtime --example livekit_bridge --features livekit,openai
+
+# OpenAI WebRTC (requires cmake)
+cargo run -p adk-realtime --example openai_webrtc --features openai-webrtc
+
+# Gemini Live context mutation
+cargo run -p adk-realtime --example gemini_context_mutation --features gemini
+```
+
+### Agentic Web Protocol (AWP)
+
+Make any website or service natively accessible to AI agents using the `awp-types` and `adk-awp` crates:
+
+```rust
+use adk_awp::{AwpState, BusinessContextLoader, awp_routes};
+
+// Load business context from TOML
+let loader = BusinessContextLoader::from_file("business.toml".as_ref())?;
+
+// Build AWP state with sensible defaults (rate limiting, consent, health, events)
+let state = AwpState::builder(loader.context_ref()).build();
+
+// Merge AWP routes into your Axum app — 7 endpoints, version negotiation included
+let app = axum::Router::new()
+    .merge(awp_routes(state))
+    .merge(your_custom_routes);
+```
+
+**AWP Endpoints**:
+- `GET /.well-known/awp.json` — Discovery document (entry point for agents)
+- `GET /awp/manifest` — JSON-LD capability manifest
+- `GET /awp/health` — Health state (Healthy/Degrading/Degraded)
+- `POST /awp/events/subscribe` — Webhook subscriptions with HMAC-SHA256 signing
+- `POST /awp/a2a` — Agent-to-agent message handling
+
+**Features**: Trust levels (Anonymous/Known/Partner/Internal), per-trust-level rate limiting, consent management (in-memory or file-backed), health state machine with event emission, version negotiation, business context hot-reload.
+
+**Run the AWP example**:
+```bash
+cd examples/awp_agent
+cp .env.example .env   # add your GOOGLE_API_KEY
+cargo run
+```
+
+See [AWP Documentation](docs/official_docs/deployment/awp.md) for the full guide.
+
+### Graph-Based Workflows
+
+Build complex, stateful workflows using the `adk-graph` crate (LangGraph-style):
+
+```rust
+use adk_graph::{prelude::*, node::AgentNode};
+use adk_agent::LlmAgentBuilder;
+use adk_model::GeminiModel;
+
+// Create LLM agents for different tasks
+let translator = Arc::new(LlmAgentBuilder::new("translator")
+    .model(Arc::new(GeminiModel::new(&api_key, "gemini-2.5-flash")?))
+    .instruction("Translate the input text to French.")
+    .build()?);
+
+let summarizer = Arc::new(LlmAgentBuilder::new("summarizer")
+    .model(model.clone())
+    .instruction("Summarize the input text in one sentence.")
+    .build()?);
+
+// Create AgentNodes with custom input/output mappers
+let translator_node = AgentNode::new(translator)
+    .with_input_mapper(|state| {
+        let text = state.get("input").and_then(|v| v.as_str()).unwrap_or("");
+        adk_core::Content::new("user").with_text(text)
+    })
+    .with_output_mapper(|events| {
+        let mut updates = HashMap::new();
+        for event in events {
+            if let Some(content) = event.content() {
+                let text: String = content.parts.iter()
+                    .filter_map(|p| p.text())
+                    .collect::<Vec<_>>()
+                    .join("");
+                updates.insert("translation".to_string(), json!(text));
+            }
+        }
+        updates
+    });
+
+// Build graph with parallel execution
+let agent = GraphAgent::builder("text_processor")
+    .description("Translates and summarizes text in parallel")
+    .channels(&["input", "translation", "summary"])
+    .node(translator_node)
+    .node(summarizer_node)  // Similar setup
+    .edge(START, "translator")
+    .edge(START, "summarizer")  // Parallel execution
+    .edge("translator", "combine")
+    .edge("summarizer", "combine")
+    .edge("combine", END)
+    .build()?;
+
+// Execute
+let mut input = State::new();
+input.insert("input".to_string(), json!("AI is transforming how we work."));
+let result = agent.invoke(input, ExecutionConfig::new("thread-1")).await?;
+```
+
+**Features**:
+- **AgentNode**: Wrap LLM agents as graph nodes with custom input/output mappers
+- **Parallel & Sequential**: Execute agents concurrently or in sequence
+- **Cyclic Graphs**: ReAct pattern with tool loops and iteration limiting
+- **Conditional Routing**: Dynamic routing via `Router::by_field` or custom functions
+- **Checkpointing**: Memory and SQLite backends for fault tolerance, durable resume from checkpoint after crash
+- **Human-in-the-Loop**: Dynamic interrupts based on state, resume from checkpoint
+- **Streaming**: Multiple modes (values, updates, messages, debug)
+
+**Run validated graph examples**:
+```bash
+cargo run --manifest-path examples/tier_examples/standard/Cargo.toml --bin 11-standard-graph
+cargo run --manifest-path examples/tier_examples/standard/Cargo.toml --bin 12-standard-sequential
+cargo run --manifest-path examples/competitive_graph_resume/Cargo.toml
+```
+
+### Browser Automation
+
+Give agents web browsing capabilities using the `adk-browser` crate:
+
+```rust
+use adk_browser::{BrowserSession, BrowserToolset, BrowserConfig};
+
+// Create browser session
+let config = BrowserConfig::new().webdriver_url("http://localhost:4444");
+let session = Arc::new(BrowserSession::new(config));
+
+// Get all 46 browser tools
+let toolset = BrowserToolset::new(session);
+let tools = toolset.all_tools();
+
+// Add to agent
+let mut builder = LlmAgentBuilder::new("web_agent")
+    .model(model)
+    .instruction("Browse the web and extract information.");
+
+for tool in tools {
+    builder = builder.tool(tool);
+}
+
+let agent = builder.build()?;
+```
+
+**46 Browser Tools**:
+- Navigation: `browser_navigate`, `browser_back`, `browser_forward`, `browser_refresh`
+- Extraction: `browser_extract_text`, `browser_extract_links`, `browser_extract_html`
+- Interaction: `browser_click`, `browser_type`, `browser_select`, `browser_submit`
+- Forms: `browser_fill_form`, `browser_get_form_fields`, `browser_clear_field`
+- Screenshots: `browser_screenshot`, `browser_screenshot_element`
+- JavaScript: `browser_evaluate`, `browser_evaluate_async`
+- Cookies, frames, windows, and more
+
+**Requirements**: WebDriver (Selenium, ChromeDriver, etc.)
+```bash
+docker run -d -p 4444:4444 selenium/standalone-chrome
+```
+
+### Agent Evaluation
+
+Test and validate agent behavior using the `adk-eval` crate:
+
+```rust
+use adk_eval::{Evaluator, EvaluationConfig, EvaluationCriteria};
+
+let config = EvaluationConfig::with_criteria(
+    EvaluationCriteria::exact_tools()
+        .with_response_similarity(0.8)
+);
+
+let evaluator = Evaluator::new(config);
+let report = evaluator
+    .evaluate_file(agent, "tests/my_agent.test.json")
+    .await?;
+
+assert!(report.all_passed());
+```
+
+**Evaluation Capabilities**:
+- Trajectory validation (tool call sequences)
+- Response similarity (Jaccard, Levenshtein, ROUGE)
+- LLM-judged semantic matching
+- Rubric-based scoring with custom criteria
+- Safety and hallucination detection
+- Detailed reporting with failure analysis
+
+### Local Inference with mistral.rs
+
+For native local inference without external dependencies, use the `adk-mistralrs` crate (v0.8.0 — **Gemma 4**, Qwen 3.5, Voxtral):
+
+```rust
+use adk_mistralrs::{MistralRsModel, MistralRsConfig, ModelSource, QuantizationLevel};
+use adk_agent::LlmAgentBuilder;
+use std::sync::Arc;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    // Run Gemma 4 locally with 4-bit quantization
+    let config = MistralRsConfig::builder()
+        .model_source(ModelSource::huggingface("google/gemma-4-4b-it"))
+        .isq(QuantizationLevel::Q4_0)
+        .paged_attention(true)
+        .build();
+
+    let model = MistralRsModel::new(config).await?;
+
+    let agent = LlmAgentBuilder::new("local-assistant")
+        .instruction("You are a helpful assistant running locally.")
+        .model(Arc::new(model))
+        .build()?;
+
+    Ok(())
+}
+```
+
+**Note**: `adk-mistralrs` is not on crates.io due to git dependencies. Add via:
+```toml
+adk-mistralrs = { git = "https://github.com/zavora-ai/adk-rust" }
+# With Metal: features = ["metal"]
+# With CUDA: features = ["cuda"]
+```
+
+**Features**: Gemma 4 multimodal, ISQ/MXFP4 quantization, PagedAttention with prefix caching, multi-GPU splitting, LoRA/X-LoRA adapters, vision/speech/diffusion models, MCP integration.
+
+## Building from Source
+
+### Dev Environment Setup
+
+```bash
+# Option A: Nix/devenv (reproducible — identical on Linux, macOS, CI)
+devenv shell
+
+# Option B: Setup script (installs sccache, cmake, etc.)
+./scripts/setup-dev.sh
+
+# Option C: Manual — just install sccache for faster builds
+brew install sccache && echo 'export RUSTC_WRAPPER=sccache' >> ~/.zshrc
+```
+
+### Using Make (Recommended)
+
+```bash
+# See all available commands
+make help
+
+# Build all crates (CPU-only, works on all systems)
+make build
+
+# Build with all features (safe - adk-mistralrs excluded)
+make build-all
+
+# Build all examples
+make examples
+
+# Run tests
+make test
+
+# Run clippy lints
+make clippy
+```
+
+### Manual Build
+
+```bash
+# Build workspace (CPU-only)
+cargo build --workspace
+
+# Build with all features (works without CUDA)
+cargo build --workspace --all-features
+
+# Build all workspace examples
+cargo check --workspace --examples
+```
+
+### Local LLM with mistral.rs
+
+`adk-mistralrs` is excluded from the workspace by default to allow `--all-features` to work without CUDA toolkit. Build it explicitly:
+
+```bash
+# CPU-only (works on all systems)
+make build-mistralrs
+# or: cargo build --manifest-path adk-mistralrs/Cargo.toml
+
+# macOS with Apple Silicon (Metal GPU)
+make build-mistralrs-metal
+# or: cargo build --manifest-path adk-mistralrs/Cargo.toml --features metal
+
+# NVIDIA GPU (requires CUDA toolkit)
+make build-mistralrs-cuda
+# or: cargo build --manifest-path adk-mistralrs/Cargo.toml --features cuda
+```
+
+### Running mistralrs Examples
+
+```bash
+# Build the mistral.rs crate explicitly
+cargo build --manifest-path adk-mistralrs/Cargo.toml
+
+# With Metal GPU acceleration (macOS)
+cargo build --manifest-path adk-mistralrs/Cargo.toml --features metal
+```
+
+## Use as Library
+
+Add to your `Cargo.toml`:
+
+```toml
+[dependencies]
+# Minimal (default) — Gemini, agents, runner, sessions
+adk-rust = "0.8.2"
+
+# Add a provider explicitly when you need it
+adk-rust = { version = "0.8.2", features = ["openai"] }
+
+# Production tier without CLI provider fan-out
+adk-rust = { version = "0.8.2", features = ["standard"] }
+
+# Full — enterprise plus audio, code execution, sandbox
+adk-rust = { version = "0.8.2", features = ["full"] }
+
+# Minimal — just agents + Gemini + runner (fastest build)
+adk-rust = { version = "0.8.2", default-features = false, features = ["minimal"] }
+
+# Or individual crates for finer control
+adk-core = "0.8.2"
+adk-agent = "0.8.2"
+adk-model = { version = "0.8.2", features = ["openai", "anthropic"] }
+adk-tool = "0.8.2"
+adk-runner = "0.8.2"
+```
+
+## Examples
+
+The workspace keeps core crate examples close to the crates that own them, and standalone adoption examples under [examples/](examples/). The public gallery remains [adk-playground](https://github.com/zavora-ai/adk-playground).
+
+Validated examples in this repo include:
+
+- `cargo run -p adk-rust --example performance_0_8_llm_agents --features openrouter` — all 12 v0.8 optimization use cases with live LLM agents.
+- `cargo run --manifest-path examples/tier_examples/standard/Cargo.toml --bin 11-standard-graph` — standard-tier graph workflow.
+- `cargo run --manifest-path examples/openai_responses/Cargo.toml` — OpenAI Responses API example.
+- `cargo run -p adk-realtime --example openai_session_update --features openai` — OpenAI Realtime session mutation.
+- `cargo run -p adk-realtime --example vertex_live_voice --features vertex-live` — Vertex AI Live voice session.
+- `cargo run --manifest-path examples/awp_agent/Cargo.toml` — Agentic Web Protocol server example.
+
+## Development
+
+### Testing
+
+```bash
+# Run all tests
+cargo test
+
+# Test specific crate
+cargo test --package adk-core
+
+# With output
+cargo test -- --nocapture
+```
+
+### Code Quality
+
+```bash
+# Linting
+cargo clippy
+
+# Formatting
+cargo fmt
+
+# Security audit
+cargo audit
+```
+
+### Building
+
+```bash
+# Development build
+cargo build
+
+# Optimized release build
+cargo build --release
+```
+
+## Documentation
+
+- **Wiki**: [GitHub Wiki](https://github.com/zavora-ai/adk-rust/wiki) - Comprehensive guides and tutorials
+- **API Reference**: [docs.rs/adk-rust](https://docs.rs/adk-rust) - Full API documentation
+- **Official payments docs**: [Payments and Commerce](docs/official_docs/security/payments.md) - ACP/AP2 support, agentic commerce journeys, and validation paths
+- **Examples**: [examples/README.md](examples/README.md) - 120+ working examples with detailed explanations
+
+## Performance
+
+Optimized for production use:
+- Zero-cost abstractions with Rust's ownership model
+- Efficient async I/O via Tokio runtime
+- Minimal allocations and copying
+- Streaming responses for lower latency
+- Connection pooling and caching support
+
+## License
+
+Apache 2.0 (same as Google's ADK)
+
+## Related Projects
+
+- [ADK](https://google.github.io/adk-docs/) - Google's Agent Development Kit
+- [MCP Protocol](https://modelcontextprotocol.io/) - Model Context Protocol for tool integration
+- [Gemini API](https://ai.google.dev/gemini-api/docs) - Google's multimodal AI model
+
+## Contributing
+
+Contributions welcome! Please open an issue or pull request on GitHub.
+
+## Roadmap
+
+**v0.8.0** (current) — performance and adoption release:
+- **Dependency diet** — true minimal starter tier, rustls-only HTTP clients, opt-in CLI provider fan-out, OTLP telemetry split, MCP gated behind features, and Gemini backtraces behind debug-only feature gates.
+- **Runtime hot paths** — empty session state deltas avoid full state merges, runner history windows are configurable, trace payloads are truncated by default, parallel tools are bounded by `RunConfig::max_tool_concurrency`, and context-cache network calls no longer hold the manager mutex.
+- **Validated onboarding** — cargo-adk templates target 0.8.0 and CI now checks generated projects, example target names, and documented Cargo commands.
+
+<details>
+<summary>v0.7.0 and earlier</summary>
+
+**v0.7.0** — OS sandbox profiles, ServerBuilder, project-scoped memory, Gemini 3.1 Flash-Lite:
+- **Project-Scoped Memory** — Optional `project_id` dimension for memory isolation across all 6 backends (InMemory, SQLite, PostgreSQL, Redis, MongoDB, Neo4j). Global entries visible everywhere, project entries isolated. `MemoryServiceAdapter::with_project_id()`, `Memory::search_in_project()`, `Memory::add_to_project()`, GDPR-compliant `delete_user` across all projects.
+- **OS Sandbox Profiles** — Platform-native sandbox enforcement (Seatbelt on macOS, bubblewrap on Linux, AppContainer on Windows).
+- **ServerBuilder API** — Custom Axum controllers alongside built-in routes with shared middleware. Graceful shutdown endpoint.
+- **MCP Server Lifecycle** — `McpServerManager` for spawning, monitoring, and auto-restarting MCP server processes.
+- **Agent Interruption** — `Runner::interrupt(session_id)` for mid-execution cancellation.
+- **Breaking** — `SearchRequest` now has `project_id` field (add `project_id: None` to struct literals). `delete_entries` on InMemory now scopes to global entries only.
+
+<details>
+<summary>v0.6.0 and earlier</summary>
+
+**v0.6.0**: A2A v1.0.0 compliance, ParallelAgent SharedState, tool authorization:
+- **A2A v1.0.0 Protocol Compliance** — 9 fixes: timestamps, capabilities, idempotency, push auth, multi-turn, validation, Content-Type, streaming first-event, context lookup. All 11 JSON-RPC operations. Wire types by [@tomtom215](https://github.com/tomtom215).
+- **ParallelAgent SharedState** — `set_shared`/`get_shared`/`wait_for_key` coordination primitives for cross-agent state sharing. Enables parallel sub-agents to work on the same artifact.
+- **Tool Authorization** — Documentation for `ToolConfirmationPolicy` (HITL), `BeforeToolCallback`, RBAC, graph interrupts with CLI and web server examples.
+- **Breaking** — `build_v1_agent_card()` signature, `TaskStore`/`PushNotificationSender` trait changes, `message_stream` return type, `CallbackContext::shared_state()` default method.
+
+<details>
+<summary>v0.5.0 and earlier</summary>
+
+**v0.5.0**: Structured errors, OpenAI Responses API, OpenRouter, production hardening. `AdkError` redesign, typed `Runner::run()`, `labs` preset, `provider_from_env()`, encrypted sessions, graph durable resume, MCP resource API, Deepgram streaming STT.
+
+**v0.4.0**: Framework focus & performance. Extracted UI/Studio/Playground to standalone repos. Tiered feature presets (`minimal`/`standard`/`full`). Consolidated 7 OpenAI-compatible providers. Vertex AI deps opt-in. `cargo-adk` scaffolding CLI. `#[tool]` proc macro. nextest CI. Multimodal vision for Bedrock/OpenAI/Anthropic.
+
+**v0.3.2**: 8 new LLM providers, RAG pipeline, scope-based security, Models Discovery API, Gemini 3 support, generation config, Vertex AI Live, realtime audio transports, response parsing hardening.
+
+**v0.3.0**: adk-gemini Vertex AI overhaul, context compaction, production hardening, ADK Studio debug mode, action nodes code generation, SSO/OAuth, plugin system.
+
+**v0.2.0**: Core framework, multi-provider LLM, tool system with MCP, sessions, artifacts, memory, REST/A2A servers, CLI, realtime voice, graph workflows, browser automation, evaluation, guardrails.
+</details>
+
+</details>
+
+</details>
+
+**Planned** (see [docs/roadmap/](docs/roadmap/)):
+
+| Priority | Feature | Target | Status |
+|----------|---------|--------|--------|
+| 🔴 P0 | [ADK-UI vNext (A2UI + Generative UI)](docs/roadmap/adk-ui.md) | Q2-Q4 2026 | Planned |
+| 🟡 P1 | [Cloud Integrations](docs/roadmap/cloud-integrations.md) | Q2-Q3 2026 | Planned |
+| 🟢 P2 | [Enterprise Features](docs/roadmap/enterprise.md) | Q4 2026 | Planned |
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=zavora-ai/adk-rust&type=date&legend=top-left)](https://www.star-history.com/#zavora-ai/adk-rust&type=date&legend=top-left)
