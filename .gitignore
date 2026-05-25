@@ -28,3 +28,11 @@ s45/OpenMontage/
 *.mp3
 s62/cert.pem
 s62/key.pem
+
+# Android / Gradle build artifacts
+s71/VoiceButtonApp/.gradle/
+s71/VoiceButtonApp/app/build/
+s71/VoiceButtonApp/gradle/wrapper/gradle-wrapper.jar
+s71/VoiceButtonApp/local.properties
+*.iml
+.idea/

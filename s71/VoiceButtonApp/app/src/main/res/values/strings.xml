@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">VoiceButtons</string>
+    <string name="start_service">Iniciar Overlay</string>
+    <string name="stop_service">Detener Overlay</string>
+    <string name="add_button">Agregar Botón</string>
+    <string name="button_label">Etiqueta</string>
+    <string name="button_action">Acción</string>
+    <string name="hint_label">Ej: Saludar</string>
+    <string name="hint_action">Ej: Hola mundo</string>
+    <string name="action_type_text">Escribir texto</string>
+    <string name="action_type_key">Presionar tecla</string>
+    <string name="action_type_voice">Voz (dictado)</string>
+    <string name="action_type_enter">Enter</string>
+    <string name="voice_hint">Habla ahora...</string>
+    <string name="no_buttons">Sin botones configurados</string>
+    <string name="settings_title">Configuración</string>
+    <string name="need_overlay_permission">Se necesita permiso de superposición</string>
+    <string name="accessibility_desc">Permite inyectar texto y teclas en cualquier app</string>
+</resources>

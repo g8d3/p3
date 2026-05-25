@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- Header + estado -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="VoiceButtons"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:textColor="#888" />
+
+        </LinearLayout>
+
+        <!-- Acciones principales: Panel, Accesibilidad, Logs -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            android:layout_marginBottom="6dp">
+
+            <Button
+                android:id="@+id/btnToggleOverlay"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1.2"
+                android:text="Panel"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:padding="0dp"
+                android:layout_marginEnd="4dp" />
+
+            <Button
+                android:id="@+id/btnOpenAccessibility"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="Accesibilidad"
+                android:textSize="11sp"
+                android:gravity="center"
+                android:padding="0dp"
+                android:layout_marginEnd="4dp" />
+
+            <Button
+                android:id="@+id/btnLogs"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="0.8"
+                android:text="Logs"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:padding="0dp" />
+
+        </LinearLayout>
+
+        <!-- Test: voz y Enter (altura redimensionable) -->
+        <LinearLayout
+            android:id="@+id/testContainer"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <EditText
+                android:id="@+id/etTest"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:hint="Prueba de voz..."
+                android:gravity="start|top"
+                android:inputType="textMultiLine"
+                android:background="@android:drawable/editbox_background"
+                android:padding="4dp"
+                android:textSize="12sp"
+                android:layout_marginEnd="4dp" />
+
+            <EditText
+                android:id="@+id/etTestEnter"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:hint="Prueba Enter..."
+                android:gravity="start|center_vertical"
+                android:inputType="text"
+                android:imeOptions="actionSend"
+                android:background="@android:drawable/editbox_background"
+                android:padding="4dp"
+                android:textSize="12sp"
+                android:singleLine="true" />
+
+        </LinearLayout>
+
+        <!-- Asa para redimensionar las cajas de texto -->
+        <View
+            android:id="@+id/dragHandle"
+            android:layout_width="match_parent"
+            android:layout_height="12dp"
+            android:background="#33000000"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="4dp" />
+
+        <!-- Botones (tu lista) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tus botones:"
+            android:textStyle="bold"
+            android:textSize="12sp"
+            android:layout_marginBottom="2dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="true" />
+
+        <!-- Acciones secundarias: +Agregar, Sugerir, Configurar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            android:layout_marginTop="4dp">
+
+            <Button
+                android:id="@+id/btnAddButton"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="+ Agregar"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:padding="0dp"
+                android:layout_marginEnd="4dp" />
+
+            <Button
+                android:id="@+id/btnReport"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="Sugerir"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:padding="0dp"
+                android:layout_marginEnd="4dp" />
+
+            <Button
+                android:id="@+id/btnConfigServer"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="Servidor"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:padding="0dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
