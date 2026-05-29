@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Framework • Dashboard</title>
+<style>
+:root{--bg:#0d1117;--surface:#161b22;--border:#30363d;--text:#c9d1d9;--text-muted:#8b949e;--green:#3fb950;--yellow:#d29922;--red:#f85149;--blue:#58a6ff;--purple:#bc8cff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;padding:16px;max-width:1280px;margin:auto;font-size:14px}
+h1{font-size:22px;margin-bottom:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+h1 small{font-size:12px;color:var(--text-muted);font-weight:400}
+.subtitle{color:var(--text-muted);font-size:13px;margin-bottom:20px}
+
+/* Status bar */
+.bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:20px}
+.bar-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px}
+.bar-item .lbl{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px}
+.bar-item .val{font-size:22px;font-weight:700;margin-top:2px}
+.bar-item .val .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.bar-item .val .dot.green{background:var(--green)}
+.bar-item .val .dot.red{background:var(--red)}
+.bar-item .val .dot.yellow{background:var(--yellow)}
+
+/* Card system */
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+@media(max-width:800px){.row{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.card-header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.card-header h2{font-size:13px;text-transform:uppercase;letter-spacing:.4px;color:var(--text-muted)}
+.card-header .badge{font-size:10px;background:rgba(255,255,255,.06);padding:2px 8px;border-radius:10px;color:var(--text-muted)}
+.card-body{padding:12px 16px}
+
+/* Agents */
+.agent-card{padding:12px;border:1px solid var(--border);border-radius:8px;margin-bottom:8px;background:rgba(255,255,255,.02)}
+.agent-card:last-child{margin-bottom:0}
+.agent-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.agent-name{font-weight:600;font-size:15px}
+.agent-status{padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600}
+.agent-status.running{background:rgba(63,185,80,.12);color:var(--green)}
+.agent-status.idle{background:rgba(88,166,255,.12);color:var(--blue)}
+.agent-status.crashed{background:rgba(248,81,73,.12);color:var(--red)}
+.agent-status.stopped{background:rgba(139,148,158,.12);color:var(--text-muted)}
+.agent-meta{display:flex;gap:16px;font-size:12px;color:var(--text-muted)}
+.agent-meta span{display:flex;align-items:center;gap:4px}
+.agent-meta .num{font-weight:600;color:var(--text)}
+
+/* Tasks */
+.task-tabs{display:flex;gap:0;margin-bottom:10px;border-bottom:1px solid var(--border);font-size:12px}
+.task-tab{padding:6px 14px;cursor:pointer;border-bottom:2px solid transparent;color:var(--text-muted);transition:.15s}
+.task-tab:hover{color:var(--text)}
+.task-tab.active{border-bottom-color:var(--blue);color:var(--blue);font-weight:600}
+.task-item{padding:10px 12px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;background:rgba(255,255,255,.02)}
+.task-item:last-child{margin-bottom:0}
+.task-row1{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.task-info{flex:1;min-width:0}
+.task-action{font-weight:600;font-size:14px}
+.task-agent{color:var(--text-muted);font-size:12px;margin-top:1px}
+.task-id{font-size:10px;color:var(--text-muted);opacity:.5;margin-top:2px;font-family:monospace}
+.task-badge{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600;white-space:nowrap}
+.task-badge.pending{background:rgba(210,153,34,.15);color:var(--yellow)}
+.task-badge.assigned{background:rgba(88,166,255,.15);color:var(--blue)}
+.task-badge.ok,.task-badge.completed{background:rgba(63,185,80,.15);color:var(--green)}
+.task-badge.error{background:rgba(248,81,73,.15);color:var(--red)}
+.task-details{font-size:11px;color:var(--text-muted);margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,.04)}
+.task-details span{margin-right:14px}
+.task-details .lbl{opacity:.6}
+.task-empty{padding:30px 0;text-align:center;color:var(--text-muted);font-size:13px}
+.task-empty code{background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px;font-size:11px}
+
+/* Logs */
+.log-area{background:#000;border-radius:6px;padding:10px;font:11px/1.6 'Cascadia Code','Fira Code','JetBrains Mono',monospace;height:260px;overflow-y:auto}
+.log-entry{padding:1px 4px;border-radius:2px;white-space:pre-wrap;word-break:break-all}
+.log-entry:hover{background:rgba(255,255,255,.03)}
+.log-entry .t{color:var(--text-muted)}
+.log-entry .l{font-weight:600;padding:0 4px;border-radius:2px;font-size:10px}
+.log-entry .l.info{color:var(--blue)}
+.log-entry .l.warn{color:var(--yellow)}
+.log-entry .l.error{color:var(--red)}
+.log-entry .l.debug{color:var(--purple)}
+.log-entry .s{color:var(--green)}
+.log-entry .m{color:var(--text)}
+.log-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.log-controls button{padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--text);font-size:11px;cursor:pointer}
+.log-controls button:hover{background:rgba(255,255,255,.08)}
+.log-controls button.active{background:var(--blue);color:#000;border-color:var(--blue);font-weight:600}
+.log-controls .spacer{flex:1}
+.log-count{font-size:11px;color:var(--text-muted);align-self:center}
+
+/* Forms */
+.form-card{padding:16px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:800px){.form-grid{grid-template-columns:1fr}}
+.form-group{margin-bottom:10px}
+.form-group label{display:block;font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:500}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:6px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{outline:none;border-color:var(--blue)}
+.form-group textarea{font-family:monospace;font-size:12px;resize:vertical;min-height:50px}
+.form-group .hint{font-size:10px;color:var(--text-muted);margin-top:3px;opacity:.6}
+.btn{padding:8px 16px;border-radius:6px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+.btn.primary{background:var(--blue);color:#000}
+.btn.primary:hover{opacity:.85}
+.btn.secondary{background:rgba(255,255,255,.08);color:var(--text)}
+.btn.secondary:hover{background:rgba(255,255,255,.12)}
+.btn.danger{background:var(--red);color:#fff}
+.btn.small{padding:4px 10px;font-size:11px}
+
+/* Toast */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:13px;z-index:999;max-width:420px;animation:fi .25s;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.toast.success{border-left:3px solid var(--green)}
+.toast.error{border-left:3px solid var(--red)}
+.toast.info{border-left:3px solid var(--blue)}
+@keyframes fi{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* Collapsible */
+.detail-toggle{font-size:11px;color:var(--blue);cursor:pointer;margin-top:4px;display:inline-block}
+.detail-toggle:hover{text-decoration:underline}
+.detail-content{display:none;margin-top:6px;padding:8px;background:rgba(0,0,0,.3);border-radius:4px;font:11px/1.5 monospace;white-space:pre-wrap;word-break:break-all;max-height:120px;overflow-y:auto}
+.detail-content.open{display:block}
+</style>
+</head>
+<body>
+
+<h1>⬡ Framework <small>multi-agent orchestrator · v0.1</small></h1>
+<div class="subtitle">Visibilidad total del sistema: agentes, tareas, logs, configuración</div>
+
+<div class="bar" id="bar">
+  <div class="bar-item">
+    <div class="lbl">Orchestrator</div>
+    <div class="val" id="orch-status"><span class="dot red"></span>Desconectado</div>
+  </div>
+  <div class="bar-item">
+    <div class="lbl">Agentes</div>
+    <div class="val" id="bar-agents">0</div>
+  </div>
+  <div class="bar-item">
+    <div class="lbl">Tareas Pendientes</div>
+    <div class="val" id="bar-pending">0</div>
+  </div>
+  <div class="bar-item">
+    <div class="lbl">Completadas / Fallidas</div>
+    <div class="val" id="bar-stats">0 / 0</div>
+  </div>
+  <div class="bar-item">
+    <div class="lbl">En proceso ahora</div>
+    <div class="val" id="bar-processing">—</div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- AGENTS -->
+  <div class="card">
+    <div class="card-header">
+      <h2>🔷 Agentes</h2>
+      <span class="badge" id="agent-badge">0</span>
+    </div>
+    <div class="card-body" id="agent-list">
+      <div class="task-empty">Conectando al Orchestrator...</div>
+    </div>
+  </div>
+
+  <!-- TASKS -->
+  <div class="card">
+    <div class="card-header">
+      <h2>📋 Tareas</h2>
+      <div style="display:flex;gap:4px">
+        <span class="badge" id="task-all-badge">0</span>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="task-tabs" id="task-tabs">
+        <span class="task-tab active" data-filter="all" onclick="switchTaskTab('all')">Todas</span>
+        <span class="task-tab" data-filter="pending" onclick="switchTaskTab('pending')">Pendientes</span>
+        <span class="task-tab" data-filter="ok" onclick="switchTaskTab('ok')">Completadas</span>
+        <span class="task-tab" data-filter="error" onclick="switchTaskTab('error')">Fallidas</span>
+      </div>
+      <div id="task-list">
+        <div class="task-empty">Sin tareas aún</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- SEND TASK -->
+  <div class="card">
+    <div class="card-header"><h2>▶ Enviar Tarea</h2></div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div>
+          <div class="form-group">
+            <label>Agente destino</label>
+            <select id="task-agent">
+              <option value="">— Seleccionar —</option>
+            </select>
+            <div class="hint">¿Qué agente debe ejecutar esta tarea?</div>
+          </div>
+          <div class="form-group">
+            <label>Acción</label>
+            <input id="task-action" value="ping" placeholder="ej: generate_script">
+            <div class="hint">Nombre de la acción que el agente entiende.</div>
+          </div>
+        </div>
+        <div>
+          <div class="form-group">
+            <label>Parámetros de la acción</label>
+            <textarea id="task-params" placeholder='{"clave": "valor"}'>{"msg": "hola"}</textarea>
+            <div class="hint">JSON con los datos que necesita la acción.</div>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn primary" onclick="sendTask()">📨 Enviar tarea</button>
+            <button class="btn secondary small" onclick="document.getElementById('task-action').value='ping';document.getElementById('task-params').value='{\"msg\":\"ping\"}'">Rellenar ping</button>
+            <button class="btn secondary small" onclick="document.getElementById('task-action').value='process';document.getElementById('task-params').value='{\"input\":\"datos\"}'">Rellenar process</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIG -->
+  <div class="card">
+    <div class="card-header"><h2>⚙ Configuración</h2></div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div>
+          <div class="form-group">
+            <label>Ruta del campo</label>
+            <input id="cfg-key" placeholder="ej: agents.echo-agent.timeout_s">
+            <div class="hint">Ruta separada por puntos. Ej: <code>agents.mi-agent.env.DEBUG</code></div>
+          </div>
+        </div>
+        <div>
+          <div class="form-group">
+            <label>Nuevo valor</label>
+            <input id="cfg-value" placeholder='"60" | "true" | 120'>
+            <div class="hint">String, número, booleano, o JSON.</div>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn primary" onclick="updateConfig()">✎ Actualizar</button>
+            <button class="btn secondary small" onclick="document.getElementById('cfg-key').value='agents.echo-agent.timeout_s';document.getElementById('cfg-value').value='120'">Ejemplo: timeout</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGS -->
+<div class="card">
+  <div class="card-header">
+    <h2>📜 Logs en Tiempo Real</h2>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="log-count" id="log-count">0 eventos</span>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="log-controls">
+      <button class="active" data-level="all" onclick="filterLog('all',this)">Todos</button>
+      <button data-level="info" onclick="filterLog('info',this)">Info</button>
+      <button data-level="warn" onclick="filterLog('warn',this)">Warn</button>
+      <button data-level="error" onclick="filterLog('error',this)">Error</button>
+      <span class="spacer"></span>
+      <button onclick="document.getElementById('log-area').innerHTML='';logCount=0;document.getElementById('log-count').textContent='0 eventos'">Limpiar</button>
+      <button id="scroll-btn" onclick="toggleScroll()">Auto-scroll ✓</button>
+    </div>
+    <div class="log-area" id="log-area">
+      <div class="log-entry"><span class="t">─</span> Esperando conexión...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const WS = `ws://${location.hostname}:9877`;
+let ws, autoScroll = true, reconn = null, logCount = 0, logLevel = 'all';
+let allLogs = [], allTasks = [], allAgents = {};
+let taskFilter = 'all';
+
+// ── Connect ───────────────────────────────────────────
+
+function connect() {
+  if (ws) ws.close();
+  ws = new WebSocket(WS);
+  ws.onopen = () => { setBar('connected'); addLog('System','info','Conectado al Orchestrator'); clearTimeout(reconn); };
+  ws.onmessage = e => { try { handle(JSON.parse(e.data)); } catch(err) {} };
+  ws.onclose = () => { setBar('disconnected'); addLog('System','warn','Reconectando en 3s...'); reconn = setTimeout(connect,3000); };
+  ws.onerror = () => {};
+}
+
+function setBar(state) {
+  document.getElementById('orch-status').innerHTML = state === 'connected'
+    ? '<span class="dot green"></span>Conectado :9877'
+    : '<span class="dot red"></span>Reconectando...';
+}
+
+// ── Handle messages ───────────────────────────────────
+
+function handle(msg) {
+  const ev = msg.event || '';
+
+  if (ev === 'connected' || ev === 'state') {
+    if (msg.agents) {
+      allAgents = {};
+      for (const a of msg.agents) allAgents[a.name] = a;
+    }
+    if (msg.tasks) allTasks = msg.tasks;
+    if (msg.logs) for (const l of msg.logs) addLog(l.source, l.level, l.message);
+    render();
+  }
+
+  if (ev === 'heartbeat') {
+    if (msg.agents) {
+      allAgents = {};
+      for (const a of msg.agents) allAgents[a.name] = a;
+    }
+    renderBar();
+    renderAgents();
+  }
+
+  if (ev === 'task_assigned') {
+    addLog('System','info',`${msg.action} → ${msg.agent} (${(msg.task_id||'').slice(0,8)})`);
+    requestState();
+  }
+
+  if (ev === 'task_completed') {
+    addLog(msg.agent, msg.status === 'ok' ? 'info' : 'error', `Tarea ${(msg.task_id||'').slice(0,8)}: ${msg.status}`);
+    requestState();
+  }
+
+  if (msg.type === 'log' && msg.payload) {
+    addLog(msg.agent, msg.payload.level, msg.payload.message);
+  }
+}
+
+function requestState() {
+  if (ws && ws.readyState === WebSocket.OPEN)
+    ws.send(JSON.stringify({command:'get_state'}));
+}
+
+// ── Render ────────────────────────────────────────────
+
+function render() { renderBar(); renderAgents(); renderTasks(); renderSelector(); }
+
+function renderBar() {
+  const names = Object.keys(allAgents);
+  let ok = 0, fail = 0, inProg = [], pending = allTasks.filter(t => t.status === 'pending' || t.status === 'assigned').length;
+  for (const n of names) {
+    ok += allAgents[n].tasks_completed || 0;
+    fail += allAgents[n].tasks_failed || 0;
+    if (allAgents[n].status === 'running') inProg.push(n);
+  }
+  document.getElementById('bar-agents').textContent = names.length;
+  document.getElementById('bar-pending').textContent = pending;
+  document.getElementById('bar-stats').textContent = `${ok} / ${fail}`;
+  document.getElementById('bar-processing').textContent = inProg.length ? inProg.join(', ') : '—';
+}
+
+function renderAgents() {
+  const el = document.getElementById('agent-list');
+  const names = Object.keys(allAgents);
+  document.getElementById('agent-badge').textContent = names.length;
+  if (!names.length) { el.innerHTML = '<div class="task-empty">Sin agentes registrados</div>'; return; }
+  el.innerHTML = names.sort().map(n => {
+    const a = allAgents[n];
+    const sc = a.status || 'unknown';
+    return `<div class="agent-card">
+      <div class="agent-top">
+        <span class="agent-name">${n}</span>
+        <span class="agent-status ${sc}">${sc}</span>
+      </div>
+      <div class="agent-meta">
+        <span>✅ <span class="num">${a.tasks_completed||0}</span></span>
+        <span>❌ <span class="num">${a.tasks_failed||0}</span></span>
+        <span>🆔 ${a.pid || '-'}</span>
+        <span>⏱ ${(a.last_seen||'').slice(11,19) || '-'}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTasks() {
+  const el = document.getElementById('task-list');
+  document.getElementById('task-all-badge').textContent = allTasks.length;
+
+  let filtered = allTasks;
+  if (taskFilter === 'pending') filtered = allTasks.filter(t => t.status === 'pending' || t.status === 'assigned');
+  else if (taskFilter === 'ok') filtered = allTasks.filter(t => t.status === 'ok' || t.status === 'completed');
+  else if (taskFilter === 'error') filtered = allTasks.filter(t => t.status === 'error');
+
+  if (!filtered.length) {
+    el.innerHTML = `<div class="task-empty">${taskFilter === 'all' ? 'Sin tareas aún' : 'No hay tareas con este filtro'}</div>`;
+    return;
+  }
+
+  el.innerHTML = filtered.sort((a,b) => (b.created_at||'').localeCompare(a.created_at||'')).map(t => {
+    const status = t.status || 'pending';
+    const id = t.id || '';
+    const action = t.action || '?';
+    const agent = t.agent || '?';
+    const dur = t.duration_ms != null ? `${t.duration_ms}ms` : '—';
+    const created = (t.created_at||'').slice(11,19) || '—';
+    const error = t.error || '';
+    let resultStr = '';
+    try { const r = JSON.parse(t.result || '{}'); resultStr = JSON.stringify(r,null,2).slice(0,200); } catch(e) {}
+    let paramsStr = '';
+    try { const p = typeof t.params === 'string' ? JSON.parse(t.params) : (t.params || {}); paramsStr = JSON.stringify(p).slice(0,100); } catch(e) {}
+
+    return `<div class="task-item">
+      <div class="task-row1">
+        <div class="task-info">
+          <div class="task-action">${action}</div>
+          <div class="task-agent">→ ${agent}</div>
+          <div class="task-id">${id}</div>
+        </div>
+        <span class="task-badge ${status}">${status}</span>
+      </div>
+      <div class="task-details">
+        <span><span class="lbl">creada</span> ${created}</span>
+        <span><span class="lbl">duración</span> ${dur}</span>
+        ${error ? `<span style="color:var(--red)"><span class="lbl">error</span> ${error.slice(0,60)}</span>` : ''}
+        <span class="detail-toggle" onclick="toggleDetail(this)">▶ ver más</span>
+        <div class="detail-content">
+          <span class="lbl">parámetros:</span> ${paramsStr || '{}'}
+          ${resultStr ? `\n<span class="lbl">resultado:</span> ${resultStr}` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleDetail(el) {
+  const content = el.nextElementSibling;
+  const isOpen = content.classList.toggle('open');
+  el.textContent = isOpen ? '▼ ocultar' : '▶ ver más';
+}
+
+function switchTaskTab(filter) {
+  taskFilter = filter;
+  document.querySelectorAll('.task-tab').forEach(t => t.classList.toggle('active', t.dataset.filter === filter));
+  renderTasks();
+}
+
+function renderSelector() {
+  const sel = document.getElementById('task-agent');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">— Seleccionar —</option>';
+  for (const n of Object.keys(allAgents).sort()) {
+    const opt = document.createElement('option');
+    opt.value = n; opt.textContent = `${n} (${allAgents[n].status})`;
+    sel.appendChild(opt);
+  }
+  sel.value = cur;
+}
+
+// ── Logs ──────────────────────────────────────────────
+
+function addLog(source, level, message) {
+  allLogs.push({source,level,message,ts:new Date()});
+  const area = document.getElementById('log-area');
+  const ts = new Date().toISOString().slice(11,19);
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.dataset.level = level;
+  entry.innerHTML = `<span class="t">${ts}</span><span class="l ${level}">${level}</span><span class="s">${source}</span><span class="m"> ${message}</span>`;
+  if (logLevel !== 'all' && level !== logLevel) entry.style.display = 'none';
+  area.appendChild(entry);
+  logCount++;
+  document.getElementById('log-count').textContent = `${logCount} eventos`;
+  if (autoScroll) area.scrollTop = area.scrollHeight;
+}
+
+function filterLog(level, btn) {
+  logLevel = level;
+  document.querySelectorAll('.log-controls button[data-level]').forEach(b => b.classList.toggle('active', b === btn));
+  document.querySelectorAll('.log-entry').forEach(e => {
+    e.style.display = (level === 'all' || e.dataset.level === level) ? '' : 'none';
+  });
+}
+
+function toggleScroll() {
+  autoScroll = !autoScroll;
+  document.getElementById('scroll-btn').textContent = `Auto-scroll ${autoScroll ? '✓' : '✗'}`;
+}
+
+// ── Actions ───────────────────────────────────────────
+
+function sendTask() {
+  const agent = document.getElementById('task-agent').value;
+  const action = document.getElementById('task-action').value.trim();
+  const raw = document.getElementById('task-params').value.trim();
+  if (!agent) return toast('Selecciona un agente', 'error');
+  if (!action) return toast('Escribe una acción', 'error');
+  let params = {};
+  if (raw) { try { params = JSON.parse(raw); } catch(e) { return toast('JSON inválido: '+e.message, 'error'); } }
+  ws.send(JSON.stringify({command:'assign_task',agent,action,params,timeout_s:60}));
+  toast(`Tarea "${action}" → ${agent}`, 'success');
+  addLog('UI','info',`Tarea enviada: ${action} → ${agent} ${JSON.stringify(params)}`);
+}
+
+function updateConfig() {
+  const key = document.getElementById('cfg-key').value.trim();
+  const raw = document.getElementById('cfg-value').value.trim();
+  if (!key) return toast('Escribe una clave', 'error');
+  let val; try { val = JSON.parse(raw); } catch(e) { val = raw; }
+  const parts = key.split('.');
+  let obj = {}, cur = obj;
+  for (let i = 0; i < parts.length - 1; i++) { cur[parts[i]] = {}; cur = cur[parts[i]]; }
+  cur[parts[parts.length-1]] = val;
+  ws.send(JSON.stringify({command:'update_config', agents: obj}));
+  toast(`Config ${key} actualizado`, 'info');
+  addLog('UI','info',`Config: ${key} = ${JSON.stringify(val)}`);
+}
+
+function toast(msg, type='info') {
+  const old = document.querySelector('.toast'); if (old) old.remove();
+  const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
+}
+
+connect();
+</script>
+</body>
+</html>
