@@ -1,0 +1,10 @@
+{
+  "id": "test-001",
+  "content": "No puedo analizar el archivo porque no está presente en la conversación. Proporciona su contenido para que pueda extraer las 3 ideas principales en español (máx. 100 palabras).",
+  "proxy": {
+    "elapsed_s": 7.679,
+    "tps_60s": 11.7,
+    "window_samples": 2
+  },
+  "status": "done"
+}

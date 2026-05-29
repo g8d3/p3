@@ -1,0 +1,10 @@
+{
+  "id": "test-002",
+  "content": "1. **Consumo = Producción**: el usuario genera contenido solo al consumir (scroll, ver, elegir), reemplazando a redes tradicionales sin convertir al usuario en producto.\n2. **Autonomía total y cero fricción**: la app obtiene tendencias, escribe guiones y renderiza videos automáticamente, sin botones ni cajas de texto.\n3. **Interfaz unificada**: feed infinito tipo TikTok con controles superpuestos, eliminando pestañas de pipeline en una sola pantalla de reproductor.",
+  "proxy": {
+    "elapsed_s": 4.434,
+    "tps_60s": 16.4,
+    "window_samples": 3
+  },
+  "status": "done"
+}
