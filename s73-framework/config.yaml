@@ -1,0 +1,33 @@
+# Configuración del Framework Multi-Agente
+# Hot-reload: el Orchestrator detecta cambios en este archivo.
+
+orchestrator:
+  host: "0.0.0.0"
+  port: 9876
+  ws_port: 9877
+  state_db: "data/state.db"
+  log_retention_days: 7
+  max_queue_size: 100
+  poll_interval_ms: 500
+  cleanup_after_hours: 24
+
+ipc:
+  inbox_dir: "inbox"
+  outbox_dir: "outbox"
+  shared_dir: "shared"
+
+agents:
+  echo-agent:
+    command: "python3.12 agent-template/agent.py"
+    env:
+      AGENT_NAME: "echo-agent"
+      AGENT_POLL_MS: "500"
+      FRAMEWORK_BASE: "."
+
+  ai-provider:
+    command: "python3.12 agents/ai-provider/provider.py"
+    env:
+      AGENT_NAME: "ai-provider"
+      AGENT_POLL_MS: "200"
+      FRAMEWORK_BASE: "."
+      AI_PROVIDER_CONFIG: "config/ai-provider.yaml"
