@@ -36,3 +36,20 @@ s71/VoiceButtonApp/gradle/wrapper/gradle-wrapper.jar
 s71/VoiceButtonApp/local.properties
 *.iml
 .idea/
+
+# s72 — AI Video Studio (generated artifacts)
+s72/ai-video-studio/output/
+s72/ai-video-studio/data/
+s72/ai-video-studio/frontend/data/
+s72/ai-video-studio/backend/ffmpeg-wasm/
+s72/error_log.txt
+s72/server-0.xkb
+
+# s72 — auto-generated test reports
+s72/test-reports/auto-*.txt
+
+# s73-framework — runtime state
+s73-framework/data/
+s73-framework/inbox/
+s73-framework/outbox/
+s73-framework/shared/
