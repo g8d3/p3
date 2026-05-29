@@ -1,0 +1,84 @@
+# AI Provider — Configuración Central
+# Todos los agentes leen este archivo para saber cómo contactar modelos de IA.
+# Ubicación: config/ai-provider.yaml
+
+default_provider: opencode-go
+
+providers:
+  opencode-go:
+    type: openai-compatible
+    api_base: "https://opencode.ai/zen/go/v1/"
+    api_key_env: "OPENCODE_GO_API_KEY"
+    default_model: "deepseek-v4-flash"
+    vision_model: "mimo-v2.5"
+    timeout_s: 120
+    max_retries: 2
+
+    models:
+      # Rápidos (< 2s)
+      minimax-m2.5:
+        latency_ms: 1221
+        tokens_per_sec: 38.2
+        vision: false
+        notes: "Más rápido de todos"
+      deepseek-v4-flash:
+        latency_ms: 1563
+        tokens_per_sec: 28.6
+        vision: false
+        notes: "Default. Balance velocidad/calidad"
+      glm-5.1:
+        latency_ms: 1545
+        tokens_per_sec: 29.1
+        vision: false
+      kimi-k2.5:
+        latency_ms: 2019
+        tokens_per_sec: 21.5
+        vision: true
+      minimax-m2.7:
+        latency_ms: 2933
+        tokens_per_sec: 25.4
+        vision: false
+
+      # Alto throughput (> 40 tok/s)
+      qwen3.6-plus:
+        latency_ms: 11822
+        tokens_per_sec: 43.3
+        vision: true
+        notes: "Alto throughput pero latencia alta"
+      qwen3.5-plus:
+        latency_ms: 11357
+        tokens_per_sec: 43.1
+        vision: true
+
+      # Visión
+      mimo-v2.5:
+        latency_ms: 2580
+        tokens_per_sec: 19.2
+        vision: true
+        notes: "Modelo de visión recomendado"
+      kimi-k2.6:
+        latency_ms: 2119
+        tokens_per_sec: 23.9
+        vision: true
+      glm-4.7:
+        latency_ms: 11401
+        tokens_per_sec: 34.3
+        vision: true
+
+      # Otros
+      deepseek-v4-pro:
+        latency_ms: 3408
+        tokens_per_sec: 12.5
+        vision: false
+        notes: "Más calidad, más lento"
+      hy3-preview:
+        latency_ms: 3347
+        tokens_per_sec: 13.7
+        vision: false
+
+  # Reservado para futuro: proveedores locales o alternativos
+  # local-ollama:
+  #   type: openai-compatible
+  #   api_base: "http://localhost:11434/v1"
+  #   default_model: "llama3.2"
+  #   timeout_s: 60
