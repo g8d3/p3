@@ -1,15 +1,19 @@
 [project]
-name = "video-templator"
+name = "nova"
 version = "0.1.0"
-description = "AI-powered video template engine for rapid video creation"
+description = "Next-gen Omniversal Virtual Architecture — self-building web framework"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
 dependencies = [
-    "edge-tts>=7.0.0",
-    "moviepy>=2.0.0",
-    "pillow>=10.0.0",
+    "pyyaml>=6.0",
+    "watchdog>=4.0.0",
 ]
 
 [project.optional-dependencies]
-scripts = ["openai>=1.0.0"]  # for LLM script generation
+ai = ["openai>=1.0.0"]
+dev = ["httpx>=0.27.0", "rich>=13.0.0"]
+all = ["nova[ai,dev]"]
+
+[tool.nova]
+spec_path = "spec/app.yaml"

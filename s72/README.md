@@ -1,84 +1,43 @@
-# video-templator
+# NOVA Framework
 
-AI-powered video template engine. Create videos fast using templates, TTS, and ffmpeg.
+**Next-gen Omniversal Virtual Architecture** — A self-building web framework that creates applications that build themselves.
 
-## Features
-
-- **Narration + subtitles** — `edge-tts` generates audio and word-level timestamps in one call (free, no GPU, no API key)
-- **Karaoke highlighting** — ASS subtitles highlight the current spoken word
-- **Smart subtitle grouping** — words grouped into readable blocks with correct timing
-- **Dual-screen / PiP** — picture-in-picture secondary gameplay
-- **Background music** — auto-mixed with narration
-- **No GPU required** — everything runs on CPU
-
-## Quick start
-
-```python
-import asyncio
-from video_templator import GamingTemplate
-
-template = GamingTemplate()
-
-asyncio.run(template.render(
-    script="Hoy vamos a explorar las ruinas más peligrosas del mapa.",
-    gameplay_primary="gameplay.mp4",
-    output="video_final.mp4",
-    voice="es-MX-DaliaNeural",           # Spanish (Mexican)
-    subtitle_format="ass",               # karaoke word highlighting
-))
-```
-
-## Pipeline
-
-```
-Script (text) ──► edge-tts ──► Audio mp3 + word timestamps
-                                       │
-                                       ▼
-                              Subtitle grouper ──► SRT or ASS
-                                       │
-                                       ▼
-                              ffmpeg compositor ──► Final video
-                                       ▲
-                              Gameplay clips + music
-```
-
-## Templates
-
-| Template | Description |
-|----------|-------------|
-| `GamingTemplate` | ReVid-style: fullscreen gameplay + optional PiP + bottom subtitles + narration |
-
-## Installation
+## Quick Start
 
 ```bash
-pip install edge-tts moviepy pillow
-# ffmpeg must be installed on your system
+pip install -e .
+python -m nova
 ```
 
-## Advanced usage
+Open http://localhost:8777 and http://localhost:8777/__dev for DevTools.
 
-```python
-from video_templator import (
-    GamingTemplate,
-    TemplateConfig,
-)
+## Structure
 
-config = TemplateConfig(
-    width=1920,
-    height=1080,
-    subtitle_font="Montserrat-Bold",
-    subtitle_font_size=48,
-    max_words_per_block=4,
-    pip_width=540,
-    bg_music_volume=0.10,
-)
-
-template = GamingTemplate(config)
-await template.render(
-    script="...",
-    gameplay_primary="main.mp4",
-    gameplay_secondary="pip.mp4",    # picture-in-picture
-    bg_music="bg_music.mp3",         # background music
-    subtitle_format="srt",           # plain subtitles (no highlighting)
-)
 ```
+nova/
+├── core/          # Runtime, config, structured logging
+├── ai/            # Agnostic AI adapter + providers
+├── ipc/           # Filesystem-based message bus
+├── meta/          # Spec parser, codegen, watcher
+├── runtime/       # HTTP server, hot-reloader
+├── devtools/      # State inspector, DevTools panel
+├── spec/          # Application specs
+├── docs/          # Framework design docs
+└── tests/         # Test suite
+
+capabilities/
+├── video-templator/   # AI video template engine
+└── ai-video-studio/   # AI-powered video feed platform
+```
+
+## Principles
+
+| Principle | Description |
+|-----------|-------------|
+| **Meta** | Framework builds itself from spec |
+| **Auto** | Apps assemble themselves at runtime |
+| **Zero-Friction** | Change → see result in <2s |
+| **Total Visibility** | Every layer is observable |
+| **Config over Code** | Behavior changes without edits |
+| **Agnostic AI** | Providers are interchangeable |
+| **Consumption = Production** | Users create by using |

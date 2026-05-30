@@ -1,0 +1,17 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+data/
+logs/
+output/
+assets/
+*.mp4
+*.mp3
+*.srt
+*.ass
+generated/
+.DS_Store
+*.egg-info/
+dist/
+build/

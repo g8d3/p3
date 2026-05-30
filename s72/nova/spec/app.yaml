@@ -1,0 +1,109 @@
+# NOVA App Spec — defines models, routes, AI, and UI for self-building apps
+
+name: "nova-demo"
+version: "0.1.0"
+description: "Auto-generated demo app powered by NOVA framework"
+
+models:
+  - name: "User"
+    fields:
+      name: { type: "string", required: true }
+      email: { type: "email", unique: true }
+      avatar: { type: "string" }
+      preferences: { type: "json", default: "{}" }
+
+  - name: "Post"
+    fields:
+      title: { type: "string", required: true }
+      body: { type: "text" }
+      views: { type: "int", default: 0 }
+      published: { type: "bool", default: false }
+    relationships:
+      - { model: "User", cardinality: "many-to-one" }
+
+  - name: "Video"
+    fields:
+      title: { type: "string", required: true }
+      url: { type: "string" }
+      duration_s: { type: "float" }
+      script: { type: "text" }
+      voice: { type: "string", default: "es-MX-DaliaNeural" }
+      status: { type: "string", default: "draft" }
+
+routes:
+  - pattern: "/api/users"
+    methods: ["GET", "POST"]
+    model: "User"
+    permissions: ["authenticated"]
+
+  - pattern: "/api/users/{id}"
+    methods: ["GET", "PUT", "DELETE"]
+    model: "User"
+    permissions: ["authenticated"]
+
+  - pattern: "/api/posts"
+    methods: ["GET", "POST"]
+    model: "Post"
+
+  - pattern: "/api/videos"
+    methods: ["GET", "POST"]
+    model: "Video"
+    ai_powered: true
+
+  - pattern: "/api/feed"
+    methods: ["GET"]
+    generator: true
+    description: "Auto-generated content feed"
+
+  - pattern: "/api/render"
+    methods: ["POST"]
+    model: "Video"
+    ai_powered: true
+
+sources:
+  - name: "github"
+    type: "rest"
+    endpoint: "https://api.github.com"
+    enabled: true
+  - name: "huggingface"
+    type: "rest"
+    endpoint: "https://huggingface.co/api"
+    enabled: true
+  - name: "pixabay"
+    type: "rest"
+    endpoint: "https://pixabay.com/api"
+    enabled: true
+
+ai:
+  providers:
+    primary: "deepseek-v4-flash"
+    fallback: "gemini-2.5-pro"
+    local: "llama3.2:1b"
+  capabilities:
+    - "generate_script"
+    - "summarize"
+    - "classify"
+    - "translate"
+
+ui:
+  layout: "feed"
+  theme: "dark"
+  components:
+    - "player"
+    - "feed"
+    - "settings"
+    - "style-panel"
+
+pipelines:
+  - name: "video_feed"
+    trigger: "continuous"
+    stages:
+      - name: "fetch_trends"
+        action: "fetch_all"
+        using: "sources"
+      - name: "generate_script"
+        action: "ai.generate"
+        using: "ai-adapter"
+      - name: "produce"
+        action: "compose"
+        using: "media-compositor"

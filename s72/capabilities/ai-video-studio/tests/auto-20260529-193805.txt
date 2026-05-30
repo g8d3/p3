@@ -1,0 +1,29 @@
+
+============================================================
+  API Endpoints
+============================================================
+  ❌ GET /api/feed/queue → ? videos
+  ❌ GET /api/feed/package → None
+  ❌ GET /api/style → voice=None, font=None
+  ✅ GET /api/sources → 1 sources: error
+  ❌ GET /api/assets → 0 videos, 0 tracks
+  ❌ POST /api/style → voice=None
+
+  → ❌ SOME FAILED (1/6)
+
+============================================================
+  Feed Cycle (pop → verify → return)
+============================================================
+  ❌ Queue has 0 videos before pop
+
+  ❌ feed CRASHED: 'package'
+
+============================================================
+  Assets accessibility
+============================================================
+
+  → ✅ ALL PASS (0/0)
+
+============================================================
+  RESULT: 1/3 passed
+============================================================
