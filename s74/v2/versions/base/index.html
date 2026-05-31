@@ -45,11 +45,11 @@ textarea{width:100%;padding:8px;background:#0d1117;border:1px solid #30363d;bord
 <p style="margin-bottom:12px">¿Rechazar cambios?<br><small style="color:#8b949e">Se descartará la versión.</small></p>
 <button class="btn btn-no" onclick="rej2(true)">Sí</button> <button class="btn" onclick="rej2(false)">No</button></div>
 <script>
-const WS=9878;let S={},RID='',ACTV='';
+let WS_TRY=0;const WS=9878;let S={},RID='',ACTV='',WS_FAIL=false;
 const ws=new WebSocket("ws://"+location.hostname+":"+WS);
 ws.onmessage=e=>{S=JSON.parse(e.data);if(S.type==="state")rn()};
 ws.onopen=()=>ws.send(JSON.stringify({type:"get_state"}));
-ws.onclose=()=>setTimeout(()=>location.reload(),2000);
+ws.onclose=()=>{if(!WS_FAIL){WS_FAIL=true;setInterval(async()=>{try{const r=await fetch('/api/state');S=await r.json();rn()}catch(e){}},3000)}};
 const esc=s=>{const d=document.createElement("div");d.textContent=s||"";return d.innerHTML};
 const hide=i=>document.getElementById(i).style.display="none";
 

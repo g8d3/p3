@@ -62,9 +62,3 @@ s72/shannon/
 s74/versions/v*/
 s74/data/
 s74/versions/live
-
-# s74/v2 — runtime
-s74/v2/data/
-s74/v2/.venv/
-s74/v2/versions/live
-s74/v2/versions/v*/
