@@ -1,296 +1,174 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MyVersionApp • Orquestador</title>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VersionApp</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#0d1117;color:#c9d1d9;font-family:system-ui,-apple-system,sans-serif;padding:16px;max-width:1280px;margin:auto;font-size:14px}
-h1{font-size:22px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-h1 small{font-size:12px;color:#8b949e;font-weight:400}
-.subtitle{color:#8b949e;font-size:13px;margin-bottom:20px}
-.bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
-.bar-item{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px 16px}
-.bar-item .lbl{font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:.4px}
-.bar-item .val{font-size:20px;font-weight:700;margin-top:2px}
+body{background:#0d1117;color:#c9d1d9;font-family:system-ui,-apple-system,sans-serif;font-size:14px;padding:0}
+.toolbar{background:#161b22;border-bottom:1px solid #30363d;padding:8px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:13px;position:sticky;top:0;z-index:100}
+.toolbar a,.toolbar button{color:#c9d1d9;text-decoration:none;padding:4px 10px;border-radius:4px;border:1px solid #30363d;background:#21262d;cursor:pointer;font-size:12px}
+.toolbar a:hover,.toolbar button:hover{background:#30363d}
+.toolbar .active{background:rgba(88,166,255,.15);border-color:#58a6ff;color:#58a6ff}
+.toolbar .logo{font-weight:700;margin-right:8px}
+.toolbar .vbadge{background:#3fb95020;color:#3fb950;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600}
+.content{max-width:1280px;margin:auto;padding:20px 16px}
+h1{font-size:24px;margin-bottom:4px}
+.subtitle{color:#8b949e;margin-bottom:16px}
+.row{display:grid;gap:14px;margin-bottom:16px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:16px}
+.card h2{font-size:13px;text-transform:uppercase;color:#8b949e;letter-spacing:.4px;margin-bottom:10px}
+.bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:16px}
+.bar-item{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:10px 12px}
+.bar-item .lbl{font-size:10px;color:#8b949e;text-transform:uppercase}
+.bar-item .val{font-size:18px;font-weight:700;margin-top:2px}
+.ver-row{display:flex;justify-content:space-between;padding:6px 10px;border:1px solid #30363d;border-radius:6px;margin-bottom:4px;cursor:pointer}
+.ver-row:hover{background:#ffffff08}
+.ver-row.active{border-color:#3fb950;background:#3fb95010}
+.ver-name{font-weight:600}
+.ver-active{color:#3fb950;font-size:10px;font-weight:600}
+.bm-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4px;padding:3px 0;font-size:12px;border-bottom:1px solid #30363d10}
+.bm-model{font-weight:600}
+textarea{width:100%;padding:8px 12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-size:14px;min-height:60px;font-family:inherit;resize:vertical}
+textarea:focus{outline:none;border-color:#58a6ff}
 .btn{padding:6px 16px;border:1px solid #30363d;border-radius:6px;cursor:pointer;font-size:13px;background:#21262d;color:#c9d1d9}
 .btn:hover{background:#30363d}
-.btn-primary{border-color:#58a6ff;color:#58a6ff}
-.btn-primary:hover{background:rgba(88,166,255,.15)}
 .btn-ok{border-color:#3fb950;color:#3fb950}
-.btn-ok:hover{background:rgba(63,185,80,.15)}
+.btn-ok:hover{background:#3fb95020}
 .btn-no{border-color:#f85149;color:#f85149}
-.btn-no:hover{background:rgba(248,81,73,.15)}
-textarea{width:100%;padding:8px 12px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-size:14px;font-family:inherit;resize:vertical;min-height:60px}
-textarea:focus{outline:none;border-color:#58a6ff}
-input[type=text],input[type=number]{padding:4px 8px;background:#0d1117;border:1px solid #30363d;border-radius:4px;color:#c9d1d9;font-size:13px}
-input:focus{outline:none;border-color:#58a6ff}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
-@media(max-width:800px){.row{grid-template-columns:1fr}}
-.card{background:#161b22;border:1px solid #30363d;border-radius:10px;overflow:hidden}
-.card-header{padding:12px 16px;border-bottom:1px solid #30363d;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-.card-header h2{font-size:13px;text-transform:uppercase;letter-spacing:.4px;color:#8b949e}
-.card-body{padding:12px 16px}
-.task{padding:10px 12px;border:1px solid #30363d;border-radius:6px;margin-bottom:6px;background:rgba(255,255,255,.02)}
-.task:last-child{margin-bottom:0}
-.task-desc{font-weight:600;font-size:14px;flex:1}
-.task-status{padding:2px 10px;border-radius:8px;font-size:11px;font-weight:600}
-.status-working{background:rgba(88,166,255,.12);color:#58a6ff}
-.status-reviewing{background:rgba(210,153,34,.12);color:#d29922}
-.status-approved{background:rgba(63,185,80,.12);color:#3fb950}
-.status-rejected{background:rgba(248,81,73,.12);color:#f85149}
-.status-failed{background:rgba(248,81,73,.12);color:#f85149}
-.task-meta{font-size:11px;color:#8b949e;margin-top:4px;display:flex;gap:12px;flex-wrap:wrap}
-.diff-box{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:10px;margin-top:8px;max-height:300px;overflow:auto;font-family:monospace;font-size:12px;line-height:1.5;white-space:pre-wrap}
-.diff-box .add{color:#3fb950}.diff-box .del{color:#f85149}.diff-box .info{color:#8b949e}
-.bm-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:4px;padding:4px 0;font-size:12px;border-bottom:1px solid #30363d10;align-items:center}
-.bm-row:last-child{border:0}
-.bm-model{font-weight:600;overflow:hidden;text-overflow:ellipsis}
-.bm-dur{color:#8b949e;text-align:right}.bm-ok{text-align:center}.bm-time{color:#8b949e;text-align:right;font-size:10px}
-.version-row{display:flex;justify-content:space-between;align-items:center;padding:6px 10px;border:1px solid #30363d;border-radius:6px;margin-bottom:4px;background:rgba(255,255,255,.02);cursor:pointer}
-.version-row.active{border-color:#3fb950;background:rgba(63,185,80,.06)}
-.version-row:hover{background:rgba(255,255,255,.06)}
-.version-name{font-weight:600;font-size:14px}
-.version-desc{font-size:12px;color:#8b949e}
-.version-active{font-size:10px;padding:2px 8px;border-radius:8px;background:#3fb95020;color:#3fb950;font-weight:600}
-.lb-row{display:flex;justify-content:space-between;padding:3px 0;font-size:13px;border-bottom:1px solid #30363d10}
-.lb-name{font-weight:600}.lb-pts{color:#d29922}
+.btn-primary{border-color:#58a6ff;color:#58a6ff}
+.btn-primary:hover{background:#58a6ff20}
 .empty{color:#8b949e;font-size:13px;font-style:italic;padding:8px 0}
-.logo{width:20px;height:20px;background:linear-gradient(135deg,#3fb950,#58a6ff);border-radius:4px;display:inline-block;flex-shrink:0}
-label{font-size:12px;color:#8b949e;display:block;margin-bottom:2px}
+.diff-box{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:10px;max-height:300px;overflow:auto;font-family:monospace;font-size:12px;white-space:pre-wrap}
+.diff-box .add{color:#3fb950}.diff-box .del{color:#f85149}.diff-box .info{color:#8b949e}
+.lb-row{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #30363d10}
+.task{padding:8px 10px;border:1px solid #30363d;border-radius:6px;margin-bottom:6px;background:#ffffff04}
+.task-desc{font-weight:600}.task-meta{font-size:11px;color:#8b949e;margin-top:2px}
+.ver-desc{font-size:11px;color:#8b949e}
+.status{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600}
+.s-working{background:#58a6ff20;color:#58a6ff}.s-reviewing{background:#d2992220;color:#d29922}
+.s-approved{background:#3fb95020;color:#3fb950}.s-rejected{background:#f8514920;color:#f85149}
 </style>
 </head>
 <body>
-
-<h1><span class="logo"></span> MyVersionApp <small>Orquestador</small></h1>
-<div class="subtitle">
-  <span id="active-label">Cargando...</span>
-  · <a href="/app/" style="color:#58a6ff;text-decoration:none" target="_blank">Abrir app →</a>
-</div>
-
-<div class="bar" id="bar">
-  <div class="bar-item"><div class="lbl">Trabajando</div><div class="val" id="c-working">0</div></div>
-  <div class="bar-item"><div class="lbl">Revisando</div><div class="val" id="c-reviewing">0</div></div>
-  <div class="bar-item"><div class="lbl">Aprobadas</div><div class="val" id="c-approved">0</div></div>
-  <div class="bar-item"><div class="lbl">Versiones</div><div class="val" id="c-versions">0</div></div>
-  <div class="bar-item"><div class="lbl">Modelos</div><div class="val" id="c-models">0</div></div>
-</div>
-
-<!-- New task -->
-<div class="card" style="margin-bottom:20px">
-  <div class="card-header"><h2>Nueva tarea</h2></div>
-  <div class="card-body">
-    <textarea id="task-input" placeholder="Ej: Cambia el título a 'Mi App'"></textarea>
-    <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-      <button class="btn btn-primary" onclick="createTask()">→ Enviar tarea</button>
-      <span id="task-status" style="font-size:12px;color:#8b949e"></span>
-    </div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="card">
-    <div class="card-header"><h2>Tareas</h2><span class="badge" id="tasks-badge">0</span></div>
-    <div class="card-body" id="tasks-list"><div class="empty">No hay tareas aún</div></div>
-  </div>
-  <div class="card">
-    <div class="card-header"><h2>Versiones</h2></div>
-    <div class="card-body" id="versions-list"><div class="empty">Cargando...</div></div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="card">
-    <div class="card-header"><h2>Benchmarks</h2></div>
-    <div class="card-body" id="benchmarks"><div class="empty">Cargando...</div></div>
-  </div>
-  <div class="card">
-    <div class="card-header"><h2>Leaderboard</h2></div>
-    <div class="card-body" id="leaderboard"><div class="empty">Sin contribuciones</div></div>
-  </div>
-</div>
-
-<div class="row">
-  <div class="card">
-    <div class="card-header"><h2>Configuración</h2></div>
-    <div class="card-body">
-      <div style="display:grid;gap:8px;grid-template-columns:1fr 1fr">
-        <div>
-          <label>Benchmarks activos</label>
-          <input type="checkbox" id="cfg-enabled" onchange="saveConfig()" style="transform:scale(1.2)">
-        </div>
-        <div>
-          <label>Intervalo (seg)</label>
-          <input type="number" id="cfg-interval" value="600" min="0" style="width:100%" onchange="saveConfig()">
-        </div>
-        <div style="grid-column:span 2">
-          <label>Modelos (separados por coma, vacío=todos)</label>
-          <input type="text" id="cfg-models" style="width:100%" onchange="saveConfig()">
-        </div>
-      </div>
-      <span id="cfg-status" style="font-size:11px;color:#8b949e;margin-top:4px;display:block"></span>
-    </div>
-  </div>
-  <div class="card">
-    <div class="card-header"><h2>¿Cómo funciona?</h2></div>
-    <div class="card-body" style="font-size:13px;line-height:1.6;color:#8b949e">
-      <ol style="padding-left:18px">
-        <li>Escribís una tarea → el agente modifica <strong>una copia</strong> de la app</li>
-        <li>Revisás el diff y aprobás o rechazás</li>
-        <li>Si aprobás → esa versión se activa, la app se actualiza</li>
-        <li>Podés volver a cualquier versión anterior desde la lista</li>
-        <li>La app vive en <a href="/app/" style="color:#58a6ff">/app/</a></li>
-      </ol>
-    </div>
-  </div>
-</div>
-
+<div class="toolbar" id="toolbar"></div>
+<div class="content" id="content"></div>
 <script>
-const ws = new WebSocket("ws://" + location.hostname + ":9879");
-ws.onmessage = e => { const d = JSON.parse(e.data); if (d.type === "state") render(d); };
-ws.onopen = () => ws.send(JSON.stringify({type: "get_state"}));
-ws.onclose = () => setTimeout(() => location.reload(), 3000);
+const WS_PORT = 9879;
+let STATE = {};
+let VIEW = location.pathname.split("/")[1] || ""; // v003, v002, etc.
 
-function render(d) {
-  document.getElementById("c-working").textContent = (d.tasks||[]).filter(t => t.status==="working").length;
-  document.getElementById("c-reviewing").textContent = (d.tasks||[]).filter(t => t.status==="reviewing").length;
-  document.getElementById("c-approved").textContent = (d.tasks||[]).filter(t => t.status==="approved").length;
-  document.getElementById("c-versions").textContent = (d.versions||[]).length;
-  document.getElementById("c-models").textContent = new Set((d.benchmarks||[]).map(b=>b.model)).size;
-  document.getElementById("tasks-badge").textContent = (d.tasks||[]).filter(t=>t.status==="reviewing").length;
-  document.getElementById("active-label").textContent = "Activo: " + (d.active_version||"?");
+function esc(s){const d=document.createElement("div");d.textContent=s||"";return d.innerHTML}
 
-  // Tasks
-  const tEl = document.getElementById("tasks-list");
-  const tasks = d.tasks || [];
-  if (!tasks.length) { tEl.innerHTML = '<div class="empty">No hay tareas. Creá una arriba.</div>'; }
-  else {
-    tEl.innerHTML = tasks.map(t => {
-      const sc = "status-" + t.status;
-      const sl = {working:"trabajando",reviewing:"en revisión",approved:"aprobada",rejected:"rechazada",failed:"error"};
-      const actions = t.status === "reviewing" ? `
-        <div style="margin-top:6px;display:flex;gap:6px">
-          <button class="btn btn-ok" onclick="fetch('/api/tasks/${t.id}/approve',{method:'POST'}).then(()=>{})">✓ Aprobar</button>
-          <button class="btn btn-no" onclick="if(confirm('¿Rechazar?'))fetch('/api/tasks/${t.id}/reject',{method:'POST'})">✗ Rechazar</button>
-          <button class="btn" onclick="showDiff('${t.id}',this)">Ver diff</button>
-        </div>
-        <div class="diff-box" id="diff-${t.id}" style="display:none">Cargando...</div>
-      ` : "";
-      return `<div class="task">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
-          <span class="task-desc">${esc(t.description)}</span>
-          <span class="task-status ${sc}">${sl[t.status]||t.status}</span>
-        </div>
-        <div class="task-meta"><span>${t.id}</span><span>${(t.created_at||"").slice(0,19)}</span>${t.version_name ? '<span>→ '+t.version_name+'</span>' : ''}</div>
-        ${actions}
-      </div>`;
-    }).join("");
+const ws = new WebSocket("ws://"+location.hostname+":"+WS_PORT);
+ws.onmessage = e => { STATE = JSON.parse(e.data); if(STATE.type==="state") render(); };
+ws.onopen = () => ws.send(JSON.stringify({type:"get_state"}));
+ws.onclose = () => setTimeout(()=>location.reload(),3000);
+
+function render() {
+  const s = STATE;
+  const version = VIEW && s.versions ? s.versions.find(v=>v.name===VIEW) : null;
+  const active = s.active_version || "v001";
+  const tasks = s.tasks || [];
+  const bm = s.benchmarks || [];
+  const vers = s.versions || [];
+  const lb = s.leaderboard || [];
+
+  // Toolbar
+  const tbar = document.getElementById("toolbar");
+  tbar.innerHTML = `<span class="logo">s74</span>` +
+    `<a href="/" class="${!version?'active':''}">Inicio</a>` +
+    vers.map(v => `<a href="/${v.name}" class="${VIEW===v.name?'active':''}">${v.name}</a>`).join("") +
+    (version ? `<span class="vbadge">activo: ${active}</span>` : "") +
+    `<button onclick="showNewTask()">+ Tarea</button>` +
+    `<button onclick="showBenchmarks()">Benchmarks</button>` +
+    `<button onclick="showLeaderboard()">Puntajes</button>`;
+
+  // Content
+  const el = document.getElementById("content");
+  if (!version) {
+    // Home: redirect to active version
+    location.href = "/" + active;
+    return;
   }
 
-  // Versions
-  const vEl = document.getElementById("versions-list");
-  const versions = d.versions || [];
-  if (!versions.length) { vEl.innerHTML = '<div class="empty">Sin versiones</div>'; }
-  else {
-    vEl.innerHTML = versions.map(v => `
-      <div class="version-row ${d.active_version === v.name ? 'active' : ''}" onclick="switchVersion('${v.name}')">
-        <div>
-          <div class="version-name">${v.name} ${d.active_version === v.name ? '<span class="version-active">activo</span>' : ''}</div>
-          <div class="version-desc">${esc(v.description || '(sin descripción)')}</div>
-        </div>
-        <div style="text-align:right;font-size:11px;color:#8b949e">
-          <div>${(v.created_at||"").slice(0,10)}</div>
-          <div><a href="/versions/${v.name}/web/index.html" target="_blank" style="color:#58a6ff;text-decoration:none" onclick="event.stopPropagation()">ver →</a></div>
-        </div>
-      </div>
-    `).join("");
-  }
+  // Show version dashboard
+  const taskItems = tasks.filter(t => !version || t.version_name === version || !t.version_name).slice(0,8).map(t => {
+    const sl = {working:"s-working",reviewing:"s-reviewing",approved:"s-approved",rejected:"s-rejected"};
+    const sl2 = {working:"trabajando",reviewing:"en revisión",approved:"aprobada",rejected:"rechazada",failed:"error"};
+    const actions = t.status==="reviewing" ? `<div style="margin-top:6px;display:flex;gap:6px"><button class="btn btn-ok" onclick="approve('${t.id}')">✓ Aprobar</button><button class="btn btn-no" onclick="reject('${t.id}')">✗ Rechazar</button><button class="btn" onclick="showDiff('${t.id}',this)">Diff</button></div><div class="diff-box" id="diff-${t.id}" style="display:none"></div>` : "";
+    return `<div class="task"><div style="display:flex;justify-content:space-between"><span class="task-desc">${esc(t.description)}</span><span class="status ${sl[t.status]||''}">${sl2[t.status]||t.status}</span></div><div class="task-meta">${t.id} ${t.created_at?t.created_at.slice(0,19):''} ${t.version_name?'→ '+t.version_name:''}</div>${actions}</div>`;
+  }).join("");
 
-  // Benchmarks
-  const bEl = document.getElementById("benchmarks");
-  const bm = d.benchmarks || [];
-  bEl.innerHTML = `<div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:4px;padding:4px 0;font-size:11px;color:#8b949e;border-bottom:1px solid #30363d">
-    <span>Modelo</span><span style="text-align:right">Latencia</span><span style="text-align:right">Tok in</span><span style="text-align:right">Tok out</span><span style="text-align:center">Estado</span>
-  </div>` + bm.slice(0,12).map(b => `
-    <div class="bm-row">
-      <span class="bm-model">${b.model}</span>
-      <span class="bm-dur">${b.duration_ms}ms</span>
-      <span style="text-align:right;color:#8b949e;font-size:11px">${b.tokens_input||0}</span>
-      <span style="text-align:right;color:#8b949e;font-size:11px">${b.tokens_output||0}</span>
-      <span class="bm-ok" style="color:${b.success ? '#3fb950' : '#f85149'}">${b.success ? '✓' : '✗'}</span>
+  el.innerHTML = `
+    <h1>${esc(version.description || (version.name+' • '+active))}</h1>
+    <div class="subtitle">
+      <a href="/${active}" style="color:#58a6ff">${active}</a> activo
+      · versión ${version.name}
+      · ${(s.versions||[]).length} versiones
+      · <button class="btn" onclick="showNewTask()">+ Nueva tarea</button>
     </div>
-  `).join("") || '<div class="empty">Cargando...</div>';
-
-  // Leaderboard
-  const lEl = document.getElementById("leaderboard");
-  const lb = d.leaderboard || [];
-  lEl.innerHTML = lb.map((r,i) => `
-    <div class="lb-row"><span>#${i+1} <span class="lb-name">${esc(r.human_id)}</span></span><span class="lb-pts">${r.total} pts</span></div>
-  `).join("") || '<div class="empty">Sin contribuciones</div>';
+    <div class="bar">
+      <div class="bar-item"><div class="lbl">Trabajando</div><div class="val">${tasks.filter(t=>t.status==="working").length}</div></div>
+      <div class="bar-item"><div class="lbl">Revisando</div><div class="val">${tasks.filter(t=>t.status==="reviewing").length}</div></div>
+      <div class="bar-item"><div class="lbl">Aprobadas</div><div class="val">${tasks.filter(t=>t.status==="approved").length}</div></div>
+      <div class="bar-item"><div class="lbl">Versiones</div><div class="val">${vers.length}</div></div>
+    </div>
+    <div class="row" style="grid-template-columns:1fr 1fr">
+      <div class="card">
+        <h2>Tareas</h2>
+        ${taskItems || '<div class="empty">Sin tareas</div>'}
+      </div>
+      <div class="card">
+        <h2>Versiones</h2>
+        ${vers.map(v => `<div class="ver-row ${active===v.name?'active':''}" onclick="switchVer('${v.name}')">
+          <div><span class="ver-name">${v.name}</span> ${active===v.name?'<span class="ver-active">activo</span>':''}<div class="ver-desc">${esc(v.description||'')}</div></div>
+          <div style="text-align:right;font-size:11px;color:#8b949e">${(v.created_at||'').slice(0,10)}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="row" style="grid-template-columns:1fr 1fr">
+      <div class="card">
+        <h2>Benchmarks</h2>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:4px;font-size:11px;color:#8b949e;padding-bottom:4px;border-bottom:1px solid #30363d;margin-bottom:4px"><span>Modelo</span><span style="text-align:right">Latencia</span><span style="text-align:right">Tok in</span><span style="text-align:right">Tok out</span></div>
+        ${bm.slice(0,10).map(b => `<div class="bm-row"><span class="bm-model">${b.model}</span><span style="text-align:right;color:#8b949e">${b.duration_ms}ms</span><span style="text-align:right;color:#8b949e">${b.tokens_input||0}</span><span style="text-align:right;color:#8b949e">${b.tokens_output||0}</span></div>`).join('')}
+      </div>
+      <div class="card">
+        <h2>Puntajes</h2>
+        ${lb.map((r,i) => `<div class="lb-row"><span>#${i+1} ${esc(r.human_id)}</span><span style="color:#d29922">${r.total} pts</span></div>`).join('') || '<div class="empty">Sin contribuciones</div>'}
+      </div>
+    </div>
+  `;
 }
 
-function esc(s) { const d = document.createElement("div"); d.textContent = s || ""; return d.innerHTML; }
-
-async function createTask() {
-  const btn = event.target;
-  const input = document.getElementById("task-input");
-  const desc = input.value.trim();
+function showNewTask() {
+  const desc = prompt("Describe la tarea para el agente:");
   if (!desc) return;
-  btn.disabled = true;
-  document.getElementById("task-status").textContent = "enviando...";
-  try {
-    const resp = await fetch("/api/tasks", {method:"POST", body:JSON.stringify({description:desc}), headers:{"Content-Type":"application/json"}});
-    const data = await resp.json();
-    if (data.ok) { input.value = ""; document.getElementById("task-status").textContent = "✓ agente trabajando en " + data.version; }
-    else { document.getElementById("task-status").textContent = "✗ " + (data.error||"error"); }
-  } catch(e) { document.getElementById("task-status").textContent = "✗ " + e.message; }
-  btn.disabled = false;
+  fetch("/api/tasks", {method:"POST", body:JSON.stringify({description:desc}), headers:{"Content-Type":"application/json"}})
+    .then(r=>r.json()).then(d=>alert("Creada: "+d.version));
 }
+
+async function approve(tid) { await fetch("/api/tasks/"+tid+"/approve", {method:"POST"}); }
+async function reject(tid) { if(confirm("¿Rechazar?")) await fetch("/api/tasks/"+tid+"/reject", {method:"POST"}); }
 
 async function showDiff(tid, btn) {
-  const box = document.getElementById("diff-" + tid);
-  if (box.style.display !== "none") { box.style.display = "none"; return; }
-  box.style.display = "block";
-  const resp = await fetch("/diff/" + tid);
-  const text = await resp.text();
-  box.innerHTML = text.split("\n").map(l => {
-    if (l.startsWith("+")) return `<span class="add">${esc(l)}</span>`;
-    if (l.startsWith("-")) return `<span class="del">${esc(l)}</span>`;
-    if (l.startsWith("@@")) return `<span class="info">${esc(l)}</span>`;
+  const box = document.getElementById("diff-"+tid);
+  if(box.style.display!="none"){box.style.display="none";return}
+  box.style.display="block";
+  const r = await fetch("/diff/"+tid);
+  const t = await r.text();
+  box.innerHTML = t.split("\n").map(l => {
+    if(l.startsWith("+")) return '<span class="add">'+esc(l)+'</span>';
+    if(l.startsWith("-")) return '<span class="del">'+esc(l)+'</span>';
+    if(l.startsWith("@@")) return '<span class="info">'+esc(l)+'</span>';
     return esc(l);
   }).join("\n") || "(sin cambios)";
 }
 
-async function switchVersion(vname) {
-  if (!confirm("¿Cambiar a " + vname + "? El servidor se reiniciará.")) return;
-  await fetch("/api/versions/activate", {method:"POST", body:JSON.stringify({version:vname}), headers:{"Content-Type":"application/json"}});
+function switchVer(vname) {
+  if(!confirm("¿Cambiar a "+vname+"?")) return;
+  fetch("/api/versions/activate", {method:"POST", body:JSON.stringify({version:vname}), headers:{"Content-Type":"application/json"}})
+    .then(() => { VIEW = vname; location.href = "/"+vname; });
 }
-
-async function loadConfig() {
-  try {
-    const resp = await fetch("/api/config");
-    const cfg = await resp.json();
-    document.getElementById("cfg-enabled").checked = cfg.benchmark_enabled === "1";
-    document.getElementById("cfg-interval").value = cfg.benchmark_interval || "600";
-    document.getElementById("cfg-models").value = cfg.benchmark_models || "";
-  } catch(e) {}
-}
-
-async function saveConfig() {
-  const data = {
-    benchmark_enabled: document.getElementById("cfg-enabled").checked ? "1" : "0",
-    benchmark_interval: document.getElementById("cfg-interval").value || "600",
-    benchmark_models: document.getElementById("cfg-models").value || "",
-  };
-  try {
-    const resp = await fetch("/api/config", {method:"POST", body:JSON.stringify(data), headers:{"Content-Type":"application/json"}});
-    const r = await resp.json();
-    document.getElementById("cfg-status").textContent = r.ok ? "✓ guardado" : "✗ error";
-  } catch(e) { document.getElementById("cfg-status").textContent = "✗ " + e.message; }
-}
-
-loadConfig();
 </script>
 </body>
 </html>
