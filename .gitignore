@@ -57,3 +57,8 @@ s72/videos_demo/
 s73-framework/tests/inbox/
 s72/ai-video-studio/video_templator
 s72/shannon/
+
+# s74 — agent-generated version snapshots
+s74/versions/v*/
+s74/data/
+s74/versions/live

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MyVersionApp • Orquestador</title>
+<title>s74 • Orquestador</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#0d1117;color:#c9d1d9;font-family:system-ui,-apple-system,sans-serif;padding:16px;max-width:1280px;margin:auto;font-size:14px}
@@ -63,7 +63,7 @@ label{font-size:12px;color:#8b949e;display:block;margin-bottom:2px}
 </head>
 <body>
 
-<h1><span class="logo"></span> MyVersionApp <small>Orquestador</small></h1>
+<h1><span class="logo"></span> s74 <small>Orquestador</small></h1>
 <div class="subtitle">
   <span id="active-label">Cargando...</span>
   · <a href="/app/" style="color:#58a6ff;text-decoration:none" target="_blank">Abrir app →</a>
@@ -97,6 +97,21 @@ label{font-size:12px;color:#8b949e;display:block;margin-bottom:2px}
   <div class="card">
     <div class="card-header"><h2>Versiones</h2></div>
     <div class="card-body" id="versions-list"><div class="empty">Cargando...</div></div>
+  </div>
+</div>
+
+<!-- Preview row -->
+<div class="row">
+  <div class="card" style="grid-column:1/-1">
+    <div class="card-header">
+      <h2>Preview — <span id="preview-version">v001</span></h2>
+      <span style="font-size:12px;color:#8b949e">
+        <a href="/app/" target="_blank" style="color:#58a6ff;text-decoration:none">Abrir en nueva pestaña →</a>
+      </span>
+    </div>
+    <div class="card-body" style="padding:0">
+      <iframe id="app-preview" src="/app/" style="width:100%;height:400px;border:none;border-radius:0 0 10px 10px;background:white"></iframe>
+    </div>
   </div>
 </div>
 
@@ -160,6 +175,7 @@ function render(d) {
   document.getElementById("c-models").textContent = new Set((d.benchmarks||[]).map(b=>b.model)).size;
   document.getElementById("tasks-badge").textContent = (d.tasks||[]).filter(t=>t.status==="reviewing").length;
   document.getElementById("active-label").textContent = "Activo: " + (d.active_version||"?");
+  document.getElementById("preview-version").textContent = d.active_version || "?";
 
   // Tasks
   const tEl = document.getElementById("tasks-list");
@@ -263,8 +279,9 @@ async function showDiff(tid, btn) {
 }
 
 async function switchVersion(vname) {
-  if (!confirm("¿Cambiar a " + vname + "? El servidor se reiniciará.")) return;
+  if (!confirm("¿Cambiar a " + vname + "?")) return;
   await fetch("/api/versions/activate", {method:"POST", body:JSON.stringify({version:vname}), headers:{"Content-Type":"application/json"}});
+  document.getElementById("app-preview").src = "/app/?" + Date.now();
 }
 
 async function loadConfig() {

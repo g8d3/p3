@@ -1,0 +1,59 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no"><title>s74</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0d1117;color:#c9d1d9;font-family:system-ui,sans-serif;font-size:14px}
+.toolbar{background:#161b22;border-bottom:1px solid #30363d;padding:8px 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:100}
+.toolbar a,.toolbar button{color:#c9d1d9;padding:4px 10px;border:1px solid #30363d;border-radius:4px;background:#21262d;cursor:pointer;font-size:12px;text-decoration:none}
+.toolbar a:hover,.toolbar button:hover{background:#30363d}
+.toolbar .on{background:#58a6ff20;border-color:#58a6ff;color:#58a6ff}
+.content{max-width:1280px;margin:auto;padding:20px 16px}
+h1{font-size:24px}.sub{color:#8b949e;font-size:13px;margin-bottom:16px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:8px;padding:14px;margin-bottom:12px}
+.card h2{font-size:12px;text-transform:uppercase;color:#8b949e;margin-bottom:8px}
+.bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-bottom:16px}
+.bar-item{background:#161b22;border:1px solid #30363d;border-radius:6px;padding:8px 10px}
+.bar-item .l{font-size:10px;color:#8b949e;text-transform:uppercase}
+.bar-item .v{font-size:18px;font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.grid2{grid-template-columns:1fr}}
+.tag{display:inline-block;padding:2px 8px;border-radius:8px;font-size:10px;background:#30363d;color:#8b949e;margin:2px}
+.task{padding:8px 10px;border:1px solid #30363d;border-radius:6px;margin-bottom:6px}
+.ver-row{display:flex;justify-content:space-between;padding:6px 10px;border:1px solid #30363d;border-radius:6px;margin-bottom:4px;cursor:pointer}
+.ver-row:hover{background:#ffffff08}.ver-row.on{border-color:#3fb950;background:#3fb95010}
+.s{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600}
+.s-w{background:#58a6ff20;color:#58a6ff}.s-r{background:#d2992220;color:#d29922}.s-a{background:#3fb95020;color:#3fb950}
+.bm-row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:4px;padding:3px 0;font-size:12px}
+.btn{padding:5px 14px;border:1px solid #30363d;border-radius:6px;cursor:pointer;background:#21262d;color:#c9d1d9;font-size:12px}
+.btn-p{border-color:#58a6ff;color:#58a6ff}.btn-ok{border-color:#3fb950;color:#3fb950}
+.empty{color:#8b949e;font-style:italic;padding:6px 0}
+.diff-box{background:#0d1117;border:1px solid #30363d;border-radius:6px;padding:8px;max-height:200px;overflow:auto;font-family:monospace;font-size:12px}
+.add{color:#3fb950}.del{color:#f85149}
+.moda{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px;z-index:200;width:90%;max-width:460px;box-shadow:0 8px 32px #000}
+textarea{width:100%;padding:8px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-size:14px;resize:vertical}
+</style></head><body>
+<div class="toolbar" id="tb"></div><div class="content" id="ct"></div>
+<div id="modal" class="moda" style="display:none"><h3>Nueva tarea</h3><textarea id="ti" style="min-height:60px"></textarea>
+<div style="margin-top:8px;display:flex;gap:8px"><button class="btn btn-p" onclick="sendTask()">Enviar</button><button class="btn" onclick="hide('modal')">Cancelar</button><span id="ts" style="font-size:12px;color:#8b949e"></span></div></div>
+<div id="rej" class="moda" style="display:none;border-color:#f85149;text-align:center">
+<p style="margin-bottom:12px">¿Rechazar?<br><small style="color:#8b949e">Se descartan los cambios.</small></p>
+<button class="btn btn-ok" onclick="rej2(true)">Sí</button> <button class="btn" onclick="rej2(false)">No</button></div>
+<script>const WS=9879;let S={},RID='';
+const ws=new WebSocket("ws://"+location.hostname+":"+WS);
+ws.onmessage=e=>{S=JSON.parse(e.data);if(S.type==="state")rn()};
+ws.onopen=()=>ws.send(JSON.stringify({type:"get_state"}));
+ws.onclose=()=>setTimeout(()=>location.reload(),2000);
+const esc=s=>{const d=document.createElement("div");d.textContent=s||"";return d.innerHTML};
+const hide=i=>document.getElementById(i).style.display="none";
+function rn(){const s=S;const vv=location.pathname.split("/")[1];const ac=s.active_version||"base";const tks=s.tasks||[];const bm=s.benchmarks||[];const vers=s.versions||[];const lb=s.leaderboard||[];
+const vt={};(s.version_tags||[]).forEach(x=>{vt[x.version_name]||=[];vt[x.version_name].push(x.name)});
+document.getElementById("tb").innerHTML=`<a href="/base">base</a>`+vers.filter(v=>v.name!="base").map(v=>`<a href="/${v.name}"${vv==v.name?' class="on"':''}>${v.name}</a>`).join("")+`<button onclick="document.getElementById('modal').style.display='block';document.getElementById('ti').focus()">+Tarea</button><span style="font-size:11px;color:#8b949e;margin-left:auto">${ac}</span>`;
+const it=tks.filter(t=>t.status!="approved"&&t.status!="rejected").slice(0,10).map(t=>{const sl={working:"s-w",reviewing:"s-r",approved:"s-a"};const sn={working:"trabajando",reviewing:"revisar",approved:"ok",failed:"error"};
+const ac=t.status=="reviewing"?`<div style="margin-top:6px"><button class="btn btn-ok" onclick="fetch('/api/tasks/${t.id}/approve',{method:'POST'})">✓</button><button class="btn" onclick="RID='${t.id}';document.getElementById('rej').style.display='block'">✗</button><button class="btn" onclick="sd('${t.id}',this)">Diff</button></div><div class="diff-box" id="d-${t.id}" style="display:none"></div>`:"";
+const tg=(vt[t.version_name]||[]).map(x=>`<span class="tag">${x}</span>`).join("");return`<div class="task"><div style="display:flex;justify-content:space-between"><b>${esc(t.description)}</b><span class="s ${sl[t.status]||''}">${sn[t.status]||t.status}</span></div><div style="font-size:11px;color:#8b949e">${t.version_name||''} ${tg}</div>${ac}</div>`}).join("");
+document.getElementById("ct").innerHTML=`<h1>${vv||'base'}</h1><div class="sub">${vv=='base'?'Raíz. Crea una tarea para generar una copia.':ac+' activo'}</div>
+<div class="bar"><div class="bar-item"><div class="l">Agentes</div><div class="v">${tks.filter(t=>t.status=='working').length}</div></div><div class="bar-item"><div class="l">Revisar</div><div class="v">${tks.filter(t=>t.status=='reviewing').length}</div></div><div class="bar-item"><div class="l">Versiones</div><div class="v">${vers.length-1}</div></div></div>
+<div class="grid2"><div class="card"><h2>Tareas</h2>${it||'<div class="empty">Sin tareas</div>'}</div><div class="card"><h2>Versiones</h2>${vers.filter(v=>v.name!="base").map(v=>{const tg=(vt[v.name]||[]).map(x=>`<span class="tag">${x}</span>`).join("");return`<div class="ver-row ${ac==v.name?'on':''}" onclick="sw('${v.name}')"><div><b>${v.name}</b>${ac==v.name?'<span style="color:#3fb950;font-size:10px"> activo</span>':''}<div style="font-size:11px;color:#8b949e">${esc(v.description||'')}</div>${tg}</div></div>`}).join("")||'<div class="empty">Crea una tarea</div>'}</div></div>
+<div class="grid2"><div class="card"><h2>Benchmarks</h2>${bm.slice(0,8).map(b=>`<div class="bm-row"><span>${b.model}</span><span>${b.duration_ms}ms</span><span>${b.tokens_input||0}/${b.tokens_output||0}</span></div>`).join("")||'<div class="empty">Sin datos</div>'}</div><div class="card"><h2>Puntajes</h2>${lb.map((r,i)=>`<div>#${i+1} ${esc(r.human_id)} <span style="color:#d29922">${r.total}</span></div>`).join("")||'<div class="empty">Sin contribuciones</div>'}</div></div>`;}
+async function sendTask(){const i=document.getElementById("ti");const d=i.value.trim();if(!d)return;i.disabled=true;document.getElementById("ts").textContent="enviando...";const r=await(await fetch("/api/tasks",{method:"POST",body:JSON.stringify({description:d})})).json();i.value="";document.getElementById("ts").textContent=r.ok?"ok: "+r.version:"error";i.disabled=false;}
+function rej2(ok){if(ok)fetch("/api/tasks/"+RID+"/reject",{method:"POST"});document.getElementById("rej").style.display="none"}
+async function sd(tid,b){const bx=document.getElementById("d-"+tid);if(bx.style.display!="none"){bx.style.display="none";return}bx.style.display="block";const t=await(await fetch("/diff/"+tid)).text();bx.innerHTML=t.split("\n").map(l=>{if(l[0]=='+')return'<span class="add">'+esc(l)+'</span>';if(l[0]=='-')return'<span class="del">'+esc(l)+'</span>';return esc(l)}).join("\n")||"(sin cambios)";}
+function sw(vn){fetch("/api/versions/activate",{method:"POST",body:JSON.stringify({version:vn})}).then(()=>location.href="/"+vn)}
+</script></body></html>
