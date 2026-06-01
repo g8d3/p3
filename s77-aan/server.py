@@ -31,7 +31,9 @@ class AANHandler(http.server.BaseHTTPRequestHandler):
         self.send_header("Content-Type", content_type)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
-        if isinstance(data, str):
+        if isinstance(data, bytes):
+            self.wfile.write(data)
+        elif isinstance(data, str):
             self.wfile.write(data.encode())
         else:
             self.wfile.write(json.dumps(data, default=str).encode())
