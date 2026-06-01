@@ -1,0 +1,48 @@
+```python
+import os
+
+def sort_files_by_date(file_paths=None, directory=None, reverse=False, by='mtime'):
+    """
+    Sort a list of file paths by their date metadata.
+
+    Args:
+        file_paths (list, optional): List of file paths to sort. If None, files from `directory` are used.
+        directory (str, optional): Path to a directory. All files in this directory (non-recursive) will be sorted.
+        reverse (bool): If True, sort newest first. Default is oldest first.
+        by (str): 'mtime' (modification time) or 'ctime' (creation time, platform-dependent). Default 'mtime'.
+
+    Returns:
+        list: Sorted file paths.
+
+    Raises:
+        ValueError: If neither file_paths nor directory is provided.
+        FileNotFoundError: If any file does not exist.
+    """
+    if file_paths is None and directory is None:
+        raise ValueError("Either 'file_paths' or 'directory' must be provided.")
+
+    if directory:
+        file_paths = [
+            os.path.join(directory, entry)
+            for entry in os.listdir(directory)
+            if os.path.isfile(os.path.join(directory, entry))
+        ]
+
+    if by == 'mtime':
+        key_func = os.path.getmtime
+    elif by == 'ctime':
+        key_func = os.path.getctime
+    else:
+        raise ValueError("'by' must be 'mtime' or 'ctime'")
+
+    # Sort in place and return. Raises FileNotFoundError if any path is missing.
+    file_paths.sort(key=key_func, reverse=reverse)
+    return file_paths
+
+# Example usage:
+if __name__ == "__main__":
+    # Sort files in current directory by modification date, oldest first
+    sorted_files = sort_files_by_date(directory='.')
+    for f in sorted_files:
+        print(f)
+```

@@ -75,7 +75,7 @@ class VersionRegistry:
     def conn(self) -> sqlite3.Connection:
         """Lazily-initialised SQLite connection with the schema applied."""
         if self._conn is None:
-            self._conn = sqlite3.connect(self._db_path)
+            self._conn = sqlite3.connect(self._db_path, check_same_thread=False)
             if self._row_factory is dict:
                 self._conn.row_factory = lambda cur, row: dict(
                     zip([col[0] for col in cur.description], row)

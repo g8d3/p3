@@ -9,11 +9,13 @@ import time
 import threading
 
 from version_registry import VersionRegistry
+from orchestrator import Orchestrator
 
 HOST = "0.0.0.0"
 PORT = 9091
 WEB_DIR = os.path.join(os.path.dirname(__file__), "web")
 db = VersionRegistry()
+orch = Orchestrator()
 
 
 class APIHandler(http.server.BaseHTTPRequestHandler):
@@ -52,24 +54,38 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-cache")
-        self.send_header("Connection", "keep-alive")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
 
-        last_count = len(db.list_versions())
+        seen = set(v["id"] for v in db.list_versions())
         try:
             while True:
                 versions = db.list_versions()
                 live = db.get_live()
-                current = len(versions)
-                if current != last_count:
-                    last_count = current
+                current = set(v["id"] for v in versions)
+                if current != seen:
+                    seen = current
                     data = json.dumps({"versions": versions, "live_id": live["id"] if live else None})
                     self.wfile.write(f"data: {data}\n\n".encode())
                     self.wfile.flush()
-                time.sleep(1)
-        except (BrokenPipeError, ConnectionResetError):
-            pass
+                time.sleep(2)
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            pass  # client disconnected
+
+    def _run_agent(self, description):
+        """Launch a builder agent via tmux to create a new version."""
+        import subprocess, tempfile
+        outfile = os.path.join(os.path.dirname(__file__), "agent-output.txt")
+        donefile = outfile + ".done"
+        # Write the task for the agent
+        task = f"Create new version implementing: {description}\nOutput your result to {outfile}"
+        with open(outfile + ".task", "w") as f:
+            f.write(task)
+
+        # Launch opencode in dedicated tmux window
+        cmd = f'cd {os.path.dirname(__file__)} && opencode run "{description}" > {outfile} 2>/dev/null; touch {donefile}'
+        subprocess.run(["tmux", "new-window", "-d", "-n", "aan-build", cmd])
+        return {"ok": True, "message": "Agent launched"}
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
@@ -100,6 +116,10 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
                 for t in db.get_version_tags(v["id"]):
                     tags.add(t["name"])
             self._send({"tags": sorted(tags)})
+        elif path == "/api/agents":
+            self._send({"agents": orch.get_status()})
+        elif path == "/api/agents/running":
+            self._send({"running": len(orch.get_running())})
         else:
             self._send({"error": "not found"}, 404)
 
@@ -131,6 +151,14 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
                 self._send({"ok": True}, 201)
             except sqlite3.IntegrityError:
                 self._send({"error": "tag exists"}, 409)
+        elif path == "/api/agents/launch":
+            task = body.get("task", "") or body.get("message", "")
+            if not task:
+                self._send({"error": "task required"}, 400)
+                return
+            v = db.create_version("agent", f"agent build: {task[:50]}")
+            agent = orch.launch_agent("builder", task, v["id"])
+            self._send({"version": v["id"], "agent": agent.agent_type, "status": agent.status})
         elif path.startswith("/api/versions/") and path.endswith("/update"):
             v_id = path.split("/")[3]
             changes = {k: body[k] for k in ("message", "status") if k in body}
