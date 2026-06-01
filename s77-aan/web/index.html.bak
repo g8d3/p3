@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Version Registry</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ── theme variables ────────────────────────────────────────── */
+:root{
+  --bg:#f5f5f5;
+  --text:#1a1a1a;
+  --panel-bg:#fff;
+  --panel-shadow:0 1px 4px rgba(0,0,0,.08);
+  --hr:#eee;
+  --heading:#666;
+  --count:#aaa;
+  --ventry-border:#e8e8e8;
+  --ventry-sel-bg:#eff6ff;
+  --vmsg:#555;
+  --vmeta:#999;
+  --tag-bg:#eef2ff;
+  --tag-color:#4338ca;
+  --b-live-bg:#d1fae5;
+  --b-live-color:#065f46;
+  --b-draft-bg:#f3f4f6;
+  --b-draft-color:#6b7280;
+  --b-review-bg:#fef3c7;
+  --b-review-color:#92400e;
+  --label:#888;
+  --fg-label:#666;
+  --input-border:#d1d5db;
+  --input-shadow:rgba(59,130,246,.15);
+  --empty:#aaa;
+  --btn-outline-hover:#eff6ff;
+  --toast-shadow:0 4px 12px rgba(0,0,0,.12);
+  --toast-err-bg:#fee2e2;
+  --toast-err-color:#991b1b;
+  --toast-ok-bg:#d1fae5;
+  --toast-ok-color:#065f46;
+  --dot-draft:#9ca3af;
+  --sub-color:#888;
+  --scrollbar-track:transparent;
+  --scrollbar-thumb:#ccc;
+}
+[data-theme="dark"]{
+  --bg:#0f0f11;
+  --text:#e5e5e5;
+  --panel-bg:#1a1a1e;
+  --panel-shadow:0 1px 4px rgba(0,0,0,.4);
+  --hr:#2a2a2e;
+  --heading:#999;
+  --count:#666;
+  --ventry-border:#2a2a2e;
+  --ventry-sel-bg:#1e293b;
+  --vmsg:#aaa;
+  --vmeta:#777;
+  --tag-bg:#1e293b;
+  --tag-color:#818cf8;
+  --b-live-bg:#064e3b;
+  --b-live-color:#6ee7b7;
+  --b-draft-bg:#1f2937;
+  --b-draft-color:#9ca3af;
+  --b-review-bg:#451a03;
+  --b-review-color:#fbbf24;
+  --label:#999;
+  --fg-label:#999;
+  --input-border:#444;
+  --input-shadow:rgba(59,130,246,.3);
+  --empty:#666;
+  --btn-outline-hover:#1e293b;
+  --toast-shadow:0 4px 12px rgba(0,0,0,.5);
+  --toast-err-bg:#7f1d1d;
+  --toast-err-color:#fca5a5;
+  --toast-ok-bg:#064e3b;
+  --toast-ok-color:#6ee7b7;
+  --dot-draft:#6b7280;
+  --sub-color:#888;
+  --scrollbar-track:transparent;
+  --scrollbar-thumb:#444;
+}
+
+*{transition:background-color .2s ease,color .2s ease,border-color .2s ease,box-shadow .2s ease}
+
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+.container{max-width:1200px;margin:0 auto;padding:16px}
+header{margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+header h1{font-size:1.4rem;font-weight:700}
+header .sub{font-size:0.8rem;color:var(--sub-color)}
+
+/* theme toggle */
+.theme-btn{background:none;border:1px solid var(--ventry-border);border-radius:8px;cursor:pointer;font-size:1rem;padding:6px 10px;color:var(--text);display:inline-flex;align-items:center;gap:5px;line-height:1}
+.theme-btn:hover{border-color:#3b82f6;background:var(--btn-outline-hover)}
+.theme-btn .label{font-size:.78rem;font-weight:500}
+
+.main{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:768px){.main{grid-template-columns:1fr}}
+.panel{background:var(--panel-bg);border-radius:10px;box-shadow:var(--panel-shadow);padding:20px}
+.panel h2{font-size:.8rem;margin-bottom:12px;color:var(--heading);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.panel h2 .count{font-weight:400;color:var(--count);font-size:.75rem}
+hr{border:none;border-top:1px solid var(--hr);margin:16px 0}
+
+/* version list */
+.vlist{max-height:60vh;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--scrollbar-thumb) var(--scrollbar-track)}
+.ventry{padding:12px;border:1px solid var(--ventry-border);border-radius:8px;margin-bottom:8px;cursor:pointer;transition:border-color .15s,background .15s}
+.ventry:hover{border-color:#3b82f6}
+.ventry.sel{border-color:#3b82f6;background:var(--ventry-sel-bg)}
+.ventry .vid{font-weight:600;font-family:ui-monospace,monospace;font-size:.9rem;display:flex;align-items:center;gap:6px}
+.ventry .vmsg{font-size:.82rem;color:var(--vmsg);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ventry .vmeta{font-size:.72rem;color:var(--vmeta);margin-top:2px}
+.tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.tag{display:inline-flex;align-items:center;gap:3px;padding:1px 7px;background:var(--tag-bg);color:var(--tag-color);border-radius:5px;font-size:.72rem;font-weight:500}
+.tag.live{background:var(--b-live-bg);color:var(--b-live-color);font-weight:600}
+.badge{display:inline-flex;align-items:center;padding:1px 7px;border-radius:5px;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.b-live{background:var(--b-live-bg);color:var(--b-live-color)}
+.b-draft{background:var(--b-draft-bg);color:var(--b-draft-color)}
+.b-review{background:var(--b-review-bg);color:var(--b-review-color)}
+
+/* detail */
+.df{margin-bottom:14px}
+.df label{font-size:.72rem;color:var(--label);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.df .val{margin-top:2px;font-size:.9rem;word-break:break-word}
+
+/* buttons */
+.btn{padding:8px 18px;border:none;border-radius:7px;cursor:pointer;font-size:.85rem;font-weight:500;transition:background .15s,opacity .15s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:#3b82f6;color:#fff}
+.btn-primary:hover{background:#2563eb}
+.btn-primary:disabled{background:#93c5fd;cursor:not-allowed}
+.btn-success{background:#10b981;color:#fff}
+.btn-success:hover{background:#059669}
+.btn-success:disabled{background:#6ee7b7;cursor:not-allowed}
+.btn-outline{background:transparent;color:#3b82f6;border:1px solid #3b82f6}
+.btn-outline:hover{background:var(--btn-outline-hover)}
+.btn-sm{padding:5px 12px;font-size:.78rem}
+
+/* forms */
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:.75rem;color:var(--fg-label);margin-bottom:3px;font-weight:500}
+.fg input,.fg textarea{width:100%;padding:8px 12px;border:1px solid var(--input-border);border-radius:7px;font-size:.85rem;font-family:inherit;transition:border-color .15s}
+.fg input:focus,.fg textarea:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px var(--input-shadow)}
+.fg textarea{resize:vertical;min-height:60px}
+.fg-row{display:flex;gap:8px;align-items:end}
+.fg-row .fg{flex:1;margin-bottom:0}
+
+/* status toast */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);padding:10px 20px;border-radius:8px;font-size:.85rem;font-weight:500;z-index:100;display:none;box-shadow:var(--toast-shadow);max-width:90vw;text-align:center}
+#toast.err{display:block;background:var(--toast-err-bg);color:var(--toast-err-color)}
+#toast.ok{display:block;background:var(--toast-ok-bg);color:var(--toast-ok-color)}
+
+/* empty state */
+.empty{color:var(--empty);font-size:.85rem;text-align:center;padding:24px 0}
+
+/* detail actions area */
+#detail-actions{margin-top:16px}
+#detail-actions .action-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+/* live indicator dot */
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.dot-live{background:#10b981}
+.dot-draft{background:var(--dot-draft)}
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>Version Registry</h1>
+      <div class="sub">Manage versions, tags, and promotions</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span id="live-badge" style="font-size:.82rem;color:var(--sub-color)"></span>
+      <button id="theme-toggle" class="theme-btn" onclick="toggleTheme()" title="Toggle dark mode"></button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- LEFT: version list + create form -->
+    <div class="panel">
+      <h2>Versions <span class="count" id="version-count"></span></h2>
+      <div class="vlist" id="version-list"><div class="empty">Loading...</div></div>
+      <hr>
+      <h2>Create Version</h2>
+      <div class="fg">
+        <label for="new-msg">Message</label>
+        <textarea id="new-msg" placeholder="What changed?"></textarea>
+      </div>
+      <div class="fg-row">
+        <div class="fg">
+          <label for="new-by">Created by</label>
+          <input type="text" id="new-by" value="web">
+        </div>
+        <button class="btn btn-primary" onclick="createVersion()">Create</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: detail + actions -->
+    <div class="panel">
+      <h2>Details</h2>
+      <div id="version-detail">
+        <div class="empty">Select a version to view details</div>
+      </div>
+      <div id="detail-actions" hidden>
+        <hr>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-success" id="btn-promote" onclick="promoteLive()">Promote to Live</button>
+          <button class="btn btn-outline btn-sm" onclick="updateMsg()">Edit message</button>
+        </div>
+        <hr>
+        <h2>Add Tag</h2>
+        <div class="fg-row">
+          <div class="fg">
+            <label for="tag-name">Tag name</label>
+            <input type="text" id="tag-name" placeholder="e.g. ui, bugfix, api">
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="addTag()">Add</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+let selectedId = null;
+let versions = [];
+
+// ── helpers ──────────────────────────────────────────────────────────
+
+function qs(s, p){return(p||document).querySelector(s)}
+function qsa(s, p){return(p||document).querySelectorAll(s)}
+
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+function toast(msg, type){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className=type;
+  clearTimeout(t._hide);
+  t._hide=setTimeout(()=>{t.style.display='none'},3500);
+}
+
+async function api(method, url, body){
+  const opts={method,headers:{'Content-Type':'application/json'}};
+  if(body)opts.body=JSON.stringify(body);
+  const res=await fetch(url,opts);
+  return res.json();
+}
+
+// ── data fetching ────────────────────────────────────────────────────
+
+async function fetchVersions(){
+  try{
+    versions=await api('GET','/api/versions');
+    render();
+  }catch(e){
+    console.error('fetch versions failed',e);
+  }
+}
+
+async function fetchLive(){
+  try{
+    const v=await api('GET','/api/versions');  // same endpoint
+    const live=v.find(x=>x.live===1);
+    qs('#live-badge').textContent=live?`Live: ${live.id}`:'No live version';
+  }catch(_){}
+}
+
+// ── render ───────────────────────────────────────────────────────────
+
+function render(){
+  renderList();
+  if(selectedId&&!versions.find(v=>v.id===selectedId))selectedId=null;
+  renderDetail();
+  qs('#version-count').textContent=`(${versions.length})`;
+}
+
+function renderList(){
+  const el=qs('#version-list');
+  if(!versions.length){
+    el.innerHTML='<div class="empty">No versions yet. Create one!</div>';
+    return;
+  }
+  el.innerHTML=versions.map(v=>{
+    const sel=v.id===selectedId?' sel':'';
+    const liveDot=v.live?'<span class="dot dot-live"></span>':'';
+    const badge=v.live?'<span class="badge b-live">LIVE</span>':'';
+    const tags=(v.tags||[]).map(t=>`<span class="tag">${esc(t.name)}</span>`).join('');
+    return `<div class="ventry${sel}" data-id="${v.id}">
+      <div class="vid">${liveDot}${esc(v.id)} ${badge}</div>
+      <div class="vmsg">${esc(v.message)}</div>
+      <div class="vmeta">${esc(v.created_by)} &middot; ${v.created_at||''}</div>
+      ${tags?`<div class="tags">${tags}</div>`:''}
+    </div>`;
+  }).join('');
+
+  // click handler via delegation
+  el.querySelectorAll('.ventry').forEach(el=>{
+    el.addEventListener('click',()=>selectVersion(el.dataset.id));
+  });
+}
+
+function renderDetail(){
+  const el=qs('#version-detail');
+  const actions=qs('#detail-actions');
+  const v=versions.find(x=>x.id===selectedId);
+
+  if(!v){
+    el.innerHTML='<div class="empty">Select a version to view details</div>';
+    actions.hidden=true;
+    return;
+  }
+
+  const liveBadge=v.live?'<span class="badge b-live">LIVE</span>':'';
+  const tags=(v.tags||[]).map(t=>`<span class="tag">${esc(t.name)}</span>`).join('')||'<span style="color:#999;font-size:.82rem">none</span>';
+
+  el.innerHTML=`
+    <div class="df"><label>ID</label><div class="val" style="font-family:monospace;font-weight:600">${esc(v.id)} ${liveBadge}</div></div>
+    <div class="df"><label>Message</label><div class="val" id="detail-msg">${esc(v.message)}</div></div>
+    <div class="df"><label>Created by</label><div class="val">${esc(v.created_by)}</div></div>
+    <div class="df"><label>Status</label><div class="val"><span class="badge b-${v.status}">${esc(v.status)}</span></div></div>
+    <div class="df"><label>Created at</label><div class="val">${v.created_at||'-'}</div></div>
+    <div class="df"><label>Tags</label><div class="tags" style="margin-top:4px">${tags}</div></div>
+  `;
+
+  qs('#btn-promote',actions).disabled=v.live===1;
+  actions.hidden=false;
+}
+
+// ── actions ──────────────────────────────────────────────────────────
+
+async function selectVersion(id){
+  selectedId=id;
+  renderList();
+  renderDetail();
+}
+
+async function createVersion(){
+  const msg=qs('#new-msg').value.trim();
+  const by=qs('#new-by').value.trim()||'web';
+  if(!msg){toast('Message is required','err');return}
+  const data=await api('POST','/api/versions',{message:msg,created_by:by});
+  if(data.error){toast(data.error,'err');return}
+  qs('#new-msg').value='';
+  toast('Version created!','ok');
+  await fetchVersions();
+  selectVersion(data.id);
+}
+
+async function promoteLive(){
+  if(!selectedId)return;
+  const data=await api('POST',`/api/versions/${selectedId}/live`);
+  if(data.error){toast(data.error,'err');return}
+  toast('Promoted to live!','ok');
+  await fetchVersions();
+  await fetchLive();
+}
+
+async function updateMsg(){
+  if(!selectedId)return;
+  const v=versions.find(x=>x.id===selectedId);
+  if(!v)return;
+  const msg=prompt('Update message:',v.message);
+  if(msg===null||msg.trim()===''||msg.trim()===v.message)return;
+  const data=await api('PUT',`/api/versions/${selectedId}`,{message:msg.trim()});
+  if(data.error){toast(data.error,'err');return}
+  toast('Message updated','ok');
+  await fetchVersions();
+}
+
+async function addTag(){
+  if(!selectedId)return;
+  const name=qs('#tag-name').value.trim();
+  if(!name){toast('Tag name required','err');return}
+  // ensure tag exists
+  await api('POST','/api/tags',{name,created_by:'web'});
+  const data=await api('POST',`/api/versions/${selectedId}/tags`,{tag_name:name});
+  if(data.error){toast(data.error,'err');return}
+  qs('#tag-name').value='';
+  toast('Tag added!','ok');
+  await fetchVersions();
+}
+
+// ── event-driven updates (SSE) ────────────────────────────────────────
+
+const evtSource = new EventSource('/api/events');
+evtSource.onmessage = (e) => {
+  const data = JSON.parse(e.data);
+  versions = data.versions || [];
+  liveId = data.live_id;
+  renderVersions();
+};
+
+// ── dark mode ──────────────────────────────────────────────────────────
+
+function getTheme(){return localStorage.getItem('theme')||'light'}
+
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme',theme);
+  localStorage.setItem('theme',theme);
+  const btn=document.getElementById('theme-toggle');
+  if(theme==='dark'){
+    btn.innerHTML='☀️ <span class="label">Light</span>';
+  }else{
+    btn.innerHTML='🌙 <span class="label">Dark</span>';
+  }
+}
+
+function toggleTheme(){
+  const next=getTheme()==='dark'?'light':'dark';
+  applyTheme(next);
+}
+
+// apply saved theme on load
+applyTheme(getTheme());
+
+// ── init ─────────────────────────────────────────────────────────────
+
+fetchVersions();
+fetchLive();
+</script>
+</body>
+</html>

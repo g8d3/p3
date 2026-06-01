@@ -1,0 +1,11 @@
+file_listing.sh:
+```bash
+#!/bin/bash
+# Lists files in the current directory with details
+ls -la "$@"
+```
+
+Make executable:
+```bash
+chmod +x file_listing.sh
+```

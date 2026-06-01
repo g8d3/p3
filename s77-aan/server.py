@@ -1,180 +1,165 @@
 #!/usr/bin/env python3
-"""AAN Server — API + web UI for version registry."""
+"""AAN Server — multi-version agent platform.
+
+Each version serves at /v{id}/... All versions are live simultaneously.
+Agents build versions in parallel. The UI shows everything happening.
+"""
 import http.server
 import json
 import os
 import sqlite3
-import urllib.parse
-import time
 import threading
+import time
+import urllib.parse
 
 from version_registry import VersionRegistry
 from orchestrator import Orchestrator
 
 HOST = "0.0.0.0"
 PORT = 9091
-WEB_DIR = os.path.join(os.path.dirname(__file__), "web")
+BASE = os.path.dirname(os.path.abspath(__file__))
+WEB_DIR = os.path.join(BASE, "web")
 db = VersionRegistry()
 orch = Orchestrator()
 
 
-class APIHandler(http.server.BaseHTTPRequestHandler):
-    def _send(self, data, status=200):
+class AANHandler(http.server.BaseHTTPRequestHandler):
+    """Routes requests by version path (/v{id}/...)."""
+
+    def _respond(self, data, status=200, content_type="application/json"):
         self.send_response(status)
-        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Type", content_type)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
-        self.wfile.write(json.dumps(data, default=str).encode())
+        if isinstance(data, str):
+            self.wfile.write(data.encode())
+        else:
+            self.wfile.write(json.dumps(data, default=str).encode())
 
-    def _send_html(self, html, status=200):
-        self.send_response(status)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.end_headers()
-        self.wfile.write(html.encode())
-
-    def _send_file(self, path):
+    def _serve_file(self, path):
         try:
             with open(path, "rb") as f:
                 data = f.read()
             ext = os.path.splitext(path)[1]
-            mime = {".html": "text/html", ".js": "text/javascript", ".css": "text/css", ".png": "image/png", ".svg": "image/svg+xml"}
-            self.send_response(200)
-            self.send_header("Content-Type", mime.get(ext, "text/plain"))
-            self.end_headers()
-            self.wfile.write(data)
+            mime = {".html": "text/html", ".js": "text/javascript",
+                    ".css": "text/css", ".png": "image/png",
+                    ".svg": "image/svg+xml", ".md": "text/markdown"}
+            self._respond(data, 200, mime.get(ext, "text/plain"))
         except FileNotFoundError:
-            self.send_error(404)
+            self._respond({"error": "not found"}, 404)
 
     def _read_body(self):
         length = int(self.headers.get("Content-Length", 0))
         return json.loads(self.rfile.read(length)) if length else {}
 
-    def _sse_loop(self):
-        """Server-Sent Events: push version updates to client."""
-        self.send_response(200)
-        self.send_header("Content-Type", "text/event-stream")
-        self.send_header("Cache-Control", "no-cache")
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.end_headers()
-
-        seen = set(v["id"] for v in db.list_versions())
-        try:
-            while True:
-                versions = db.list_versions()
-                live = db.get_live()
-                current = set(v["id"] for v in versions)
-                if current != seen:
-                    seen = current
-                    data = json.dumps({"versions": versions, "live_id": live["id"] if live else None})
-                    self.wfile.write(f"data: {data}\n\n".encode())
-                    self.wfile.flush()
-                time.sleep(2)
-        except (BrokenPipeError, ConnectionResetError, OSError):
-            pass  # client disconnected
-
-    def _run_agent(self, description):
-        """Launch a builder agent via tmux to create a new version."""
-        import subprocess, tempfile
-        outfile = os.path.join(os.path.dirname(__file__), "agent-output.txt")
-        donefile = outfile + ".done"
-        # Write the task for the agent
-        task = f"Create new version implementing: {description}\nOutput your result to {outfile}"
-        with open(outfile + ".task", "w") as f:
-            f.write(task)
-
-        # Launch opencode in dedicated tmux window
-        cmd = f'cd {os.path.dirname(__file__)} && opencode run "{description}" > {outfile} 2>/dev/null; touch {donefile}'
-        subprocess.run(["tmux", "new-window", "-d", "-n", "aan-build", cmd])
-        return {"ok": True, "message": "Agent launched"}
+    def _route_version(self, v_id, subpath):
+        """Route to a specific version's content."""
+        v = db.get_version(v_id)
+        if not v:
+            self._respond({"error": "version not found"}, 404)
+            return
+        version_dir = os.path.join(BASE, "versions", v_id)
+        serve_path = os.path.join(version_dir, subpath.lstrip("/"))
+        if os.path.isdir(version_dir) and os.path.exists(serve_path):
+            self._serve_file(serve_path)
+        else:
+            self._respond(
+                f"<html><body><h1>Version {v_id}</h1>"
+                f"<p>{v.get('message','')}</p>"
+                f"<p>Built by: {v.get('created_by','')}</p>"
+                f"<pre>{serve_path}</pre></body></html>",
+                200, "text/html")
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path.rstrip("/")
 
+        # Version routing
+        if path.startswith("/v"):
+            parts = path.split("/", 2)
+            v_id = parts[1]
+            subpath = parts[2] if len(parts) > 2 else "/"
+            self._route_version(v_id, subpath)
+            return
+
+        # Main UI
         if path == "/" or path == "":
-            self._send_file(os.path.join(WEB_DIR, "index.html"))
-        elif path.startswith("/web/"):
-            self._send_file(os.path.join(os.path.dirname(__file__), path.lstrip("/")))
-        elif path == "/api/events":
+            self._serve_file(os.path.join(WEB_DIR, "index.html"))
+            return
+
+        # Static files
+        if path.startswith("/web/"):
+            self._serve_file(os.path.join(BASE, "web", path[5:]))
+            return
+
+        # API: agents
+        if path == "/api/agents":
+            self._respond({"agents": orch.get_status()})
+            return
+
+        # API: versions
+        if path == "/api/versions":
+            self._respond({"versions": db.list_versions()})
+            return
+
+        # API: SSE events
+        if path == "/api/events":
             self._sse_loop()
-        elif path == "/api/versions":
-            versions = db.list_versions()
-            live = db.get_live()
-            self._send({"versions": versions, "live_id": live["id"] if live else None})
-        elif path.startswith("/api/versions/") and path.endswith("/tags"):
-            v_id = path.split("/")[3]
-            tags = db.get_version_tags(v_id)
-            self._send({"tags": tags})
-        elif path.startswith("/api/versions/"):
-            v_id = path.split("/")[3]
-            v = db.get_version(v_id)
-            self._send(v) if v else self._send({"error": "not found"}, 404)
-        elif path == "/api/tags":
-            # Get all unique tags across versions
-            tags = set()
-            for v in db.list_versions():
-                for t in db.get_version_tags(v["id"]):
-                    tags.add(t["name"])
-            self._send({"tags": sorted(tags)})
-        elif path == "/api/agents":
-            self._send({"agents": orch.get_status()})
-        elif path == "/api/agents/running":
-            self._send({"running": len(orch.get_running())})
-        else:
-            self._send({"error": "not found"}, 404)
+            return
+
+        self._respond({"error": "not found"}, 404)
 
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path.rstrip("/")
         body = self._read_body()
 
-        if path == "/api/versions":
-            v = db.create_version(body.get("created_by", "human"), body.get("message", ""))
-            self._send(v, 201)
-        elif path.startswith("/api/versions/") and path.endswith("/live"):
-            v_id = path.split("/")[3]
-            db.set_live(v_id)
-            self._send({"ok": True, "live": v_id})
-        elif path.startswith("/api/versions/") and path.endswith("/tags"):
-            v_id = path.split("/")[3]
-            tag = body.get("tag", "")
-            try:
-                db.create_tag(tag, "human")
-            except sqlite3.IntegrityError:
-                pass
-            db.tag_version(tag, v_id)
-            self._send({"ok": True})
-        elif path == "/api/tags":
-            tag = body.get("name", "")
-            try:
-                db.create_tag(tag, "human")
-                self._send({"ok": True}, 201)
-            except sqlite3.IntegrityError:
-                self._send({"error": "tag exists"}, 409)
-        elif path == "/api/agents/launch":
-            task = body.get("task", "") or body.get("message", "")
+        if path == "/api/agents/launch":
+            task = body.get("task", "")
             if not task:
-                self._send({"error": "task required"}, 400)
+                self._respond({"error": "task required"}, 400)
                 return
-            v = db.create_version("agent", f"agent build: {task[:50]}")
+            v = db.create_version("agent", f"agent: {task[:60]}")
             agent = orch.launch_agent("builder", task, v["id"])
-            self._send({"version": v["id"], "agent": agent.agent_type, "status": agent.status})
-        elif path.startswith("/api/versions/") and path.endswith("/update"):
-            v_id = path.split("/")[3]
-            changes = {k: body[k] for k in ("message", "status") if k in body}
-            if changes:
-                db.update_version(v_id, **changes)
-            self._send({"ok": True})
-        else:
-            self._send({"error": "not found"}, 404)
+            self._respond({"version": v["id"], "status": agent.status})
+            return
+
+        self._respond({"error": "not found"}, 404)
+
+    def _sse_loop(self):
+        """Push agent + version updates to clients."""
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+
+        seen_versions = len(db.list_versions())
+        seen_agents = len(orch.get_status())
+        try:
+            while True:
+                versions = len(db.list_versions())
+                agents = len(orch.get_status())
+                changed = versions != seen_versions or agents != seen_agents
+                if changed:
+                    seen_versions, seen_agents = versions, agents
+                    data = json.dumps({
+                        "versions": db.list_versions(),
+                        "agents": orch.get_status(),
+                    })
+                    self.wfile.write(f"data: {data}\n\n".encode())
+                    self.wfile.flush()
+                time.sleep(2)
+        except (BrokenPipeError, ConnectionResetError, OSError):
+            pass
 
     def log_message(self, fmt, *args):
         pass  # quiet
 
 
 def main():
-    server = http.server.ThreadingHTTPServer((HOST, PORT), APIHandler)
-    print(f"AAN Server running at http://{HOST}:{PORT}")
+    server = http.server.ThreadingHTTPServer((HOST, PORT), AANHandler)
+    print(f"AAN running at http://{HOST}:{PORT}")
     server.serve_forever()
 
 

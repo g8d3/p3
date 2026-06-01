@@ -1,0 +1,15 @@
+```bash
+#!/bin/bash
+# list_files.sh - Lists files in a directory (default: current)
+# Usage: ./list_files.sh [directory]
+
+directory="${1:-.}"
+
+if [ ! -d "$directory" ]; then
+    echo "Error: '$directory' is not a valid directory." >&2
+    exit 1
+fi
+
+echo "Contents of $directory:"
+ls -la "$directory"
+```
