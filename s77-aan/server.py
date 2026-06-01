@@ -6,6 +6,7 @@ import os
 import sqlite3
 import urllib.parse
 import time
+import threading
 
 from version_registry import VersionRegistry
 
@@ -144,7 +145,7 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
 
 
 def main():
-    server = http.server.HTTPServer((HOST, PORT), APIHandler)
+    server = http.server.ThreadingHTTPServer((HOST, PORT), APIHandler)
     print(f"AAN Server running at http://{HOST}:{PORT}")
     server.serve_forever()
 
