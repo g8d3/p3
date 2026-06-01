@@ -157,19 +157,19 @@ echo ""
 echo "🤖 Invocando AI agent para generar descripciones..."
 
 # ── 5. Llamar al AI agent ──
-AGENT="${REINDEX_AGENT:-pi}"
+AGENT="${REINDEX_AGENT:-opencode}"
 DESCRIPTIONS=""
 
 case "$AGENT" in
-    pi)
-        echo "   Usando: pi (modo print, timeout 120s)"
-        timeout 120 pi -p "@$TASK_FILE" > "$TASK_FILE.out" 2>/dev/null || true
-        DESCRIPTIONS=$(cat "$TASK_FILE.out" 2>/dev/null || true)
-        rm -f "$TASK_FILE.out"
-        ;;
     opencode)
         echo "   Usando: opencode (timeout 120s)"
         timeout 120 opencode run "@$TASK_FILE" --model openrouter/anthropic/claude-sonnet-4 > "$TASK_FILE.out" 2>/dev/null || true
+        DESCRIPTIONS=$(cat "$TASK_FILE.out" 2>/dev/null || true)
+        rm -f "$TASK_FILE.out"
+        ;;
+    crush)
+        echo "   Usando: crush (timeout 120s)"
+        timeout 120 crush run "@$TASK_FILE" > "$TASK_FILE.out" 2>/dev/null || true
         DESCRIPTIONS=$(cat "$TASK_FILE.out" 2>/dev/null || true)
         rm -f "$TASK_FILE.out"
         ;;
@@ -178,10 +178,16 @@ case "$AGENT" in
         timeout 120 hermes run "@$TASK_FILE" > "$TASK_FILE.out" 2>/dev/null || true
         DESCRIPTIONS=$(cat "$TASK_FILE.out" 2>/dev/null || true)
         rm -f "$TASK_FILE.out"
+        ;;  
+    pi)
+        echo "   Usando: pi (modo print, timeout 120s)"
+        timeout 120 pi -p "@$TASK_FILE" > "$TASK_FILE.out" 2>/dev/null || true
+        DESCRIPTIONS=$(cat "$TASK_FILE.out" 2>/dev/null || true)
+        rm -f "$TASK_FILE.out"
         ;;
     *)
         echo "❌ Agente desconocido: $AGENT"
-        echo "   Usa REINDEX_AGENT=pi|opencode|hermes"
+        echo "   Usa REINDEX_AGENT=opencode|crush|hermes|pi"
         exit 1
         ;;
 esac
@@ -190,7 +196,8 @@ if [ -z "$DESCRIPTIONS" ]; then
     echo ""
     echo "❌ El AI agent no produjo output."
     echo "   Posibles causas:"
-    echo "   - REINDEX_AGENT=$AGENT no está instalado o configurado"
+    echo "   - REINDEX_AGENT=$AGENT no está instalado o configurado
+   - Intenta: REINDEX_AGENT=opencode ./reindex.sh"
     echo "   - El modelo no está disponible (revisa API keys)"
     echo ""
     echo "   Prueba: REINDEX_AGENT=opencode ./reindex.sh"

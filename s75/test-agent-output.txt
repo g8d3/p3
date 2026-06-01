@@ -1,0 +1,112 @@
+Aquí está el análisis completo de la sesión de MetaGPT (3836 líneas, ~7 horas de trabajo).
+
+---
+
+## 1. Decisiones de Arquitectura
+
+|#| Decisión | Contexto | Fundamento |
+|---|---|---|---|
+|A1| **Descartar MetaGPT** | Se probó, no servía para el objetivo | MetaGPT genera código en una pasada; el usuario necesita un loop de mejora continua |
+|A2| **`uv` como toolchain Python canónico** | Día 1, minuto 3 | Resuelve: PEP 668, falta de `ensurepip`, `pip` no en PATH, resolución lenta |
+|A3| **OS basado en agentes con HITL** | Discusión sobre qué construir | El producto es el bucle humano-agente, no la herramienta base |
+|A4| **Git worktrees para aislar versiones** | `git worktree` sugerido por el usuario | Cada agente trabaja en su directorio; comparten `.git`; sin conflictos |
+|A5| **Symlink para cambio instantáneo de versión** | Reemplazó restart del server | Cambiar `versions/live -> v003` es instantáneo vs `os.execv()` que tomaba segundos |
+|A6| **Rutas por versión (`/v001/`, `/v002/`)** | Feedback del usuario | URLs compartibles que representan estado — clave para colaboración |
+|A7| **Tags many-to-many** (con relaciones entre tags) | Propuesto por el usuario | Permite taxonomía sin forzarla; el AI puede auto-etiquetar desde diffs |
+|A8| **Versión base inmutable** | Derivado de la discusión sobre tags | `base/` siempre disponible; las versiones fork de ella |
+|A9| **Hot-reload del orquestador** | Para no reiniciar manualmente | `watchdog` detecta cambios en `server.py` y hace `os.execv()` |
+|A10| **Single-port HTTP+WS** | Problema de firewall en puerto separado | WS en `:9878` no pasaba; se unificó con fallback a polling HTTP |
+|A11| **Modal inline en vez de JS dialogs** | Feedback explícito del usuario | `prompt()/alert()/confirm()` bloquean el browser; modales HTML no |
+|A12| **Separación v1/v2** | Decisión del usuario de reiniciar | v1 = prototipo con bugs; v2 = reinicio con aprendizajes documentados |
+
+---
+
+## 2. Problemas Técnicos Encontrados
+
+### Categoría: Python toolchain
+|#| Problema | Síntoma | Solución |
+|---|---|---|---|
+|P1| `pip: not found` | `pip` no en `$PATH` | Usar `uv` (estaba en `/home/vuos/.local/bin/uv`) |
+|P2| PEP 668 (Debian) | `error: externally-managed-environment` | `uv` lo ignora porque usa su propio venv |
+|P3| `ensurepip` no instalado | `python3 -m venv` falla | `uv venv` maneja venvs sin `ensurepip` |
+|P4| `faiss-cpu==1.7.4` sin wheel para Python ≥3.11 | Resolución de dependencias falla | Usar Python 3.11 con `uv`, forzar `faiss-cpu~=1.14` |
+
+### Categoría: MetaGPT
+|#| Problema | Síntoma | Solución |
+|---|---|---|---|
+|P5| `click==8.4.1` + `typer==0.9.0` incompatible | `"Secondary flag is not valid for non-boolean flag"` | Downgrade a `click==8.0.4` |
+|P6| `pkg_resources` no disponible en build | Build de paquetes falla | `uv pip install setuptools` antes de instalar |
+|P7| `pandas==1.4.1` requiere compilar `numpy` | Build falla por falta de numpy | Intentar usar versión más reciente de metagpt |
+|P8| MetaGPT solo funciona con Python <3.12 | Error de instalación en 3.12 | Usar Python 3.11 |
+
+### Categoría: API / LLM
+|#| Problema | Síntoma | Solución |
+|---|---|---|---|
+|P9| HTTP 403 en OpenCode GO API | `User-Agent: Python-urllib/3.x` bloqueado | Set `User-Agent: curl/8.0` en headers |
+|P10| LLM devuelve `content` vacío con `max_tokens=10` | Respuesta vacía | Modelo usa tokens para razonamiento; aumentar `max_tokens` |
+|P11| `reasoning_content` vs `reasoning` | Field name mismatch | Leer ambos campos en la respuesta |
+|P12| LLM devuelve 33k chars de razonamiento + JSON tiny | `json.loads()` falla | Extraer JSON del `content`, ignorar `reasoning_content` |
+|P13| LLM genera Flask en vez de código asyncio | Código incompatible con el server | Mejorar prompt con contexto del stack actual |
+
+### Categoría: Sistema / DevOps
+|#| Problema | Síntoma | Solución |
+|---|---|---|---|
+|P14| Puerto en uso al reiniciar | `Address already in use` | `fuser -k 9878/tcp` o `kill` directo |
+|P15| Server hot-reload corrompe StateDB | `sqlite3.OperationalError: database is locked` | No reinicializar DB en hot-reload |
+|P16| Archivos perdidos en `mv` | `mv v1/agent.py v1/server.py ... v1/ v1/` mal escrito | Usar `find ... -exec mv` o `mv * v1/` correctamente |
+|P17| Red inalcanzable a GitHub | `Failed to connect to github.com port 443` | Usar SSH (`git@github.com`) que sí funcionaba |
+|P18| `curl` bloqueado por seguridad | `command is not allowed for security reasons: "curl"` | Usar Python `urllib` con headers adecuados |
+|P19| Symlink de `versions/live` no se trackea bien en git | Confusión en staging | Agregar a `.gitignore` o trackearlo explícitamente |
+
+---
+
+## 3. Patrones de Trabajo del Usuario
+
+### 3.1 Estilo de interacción
+
+|Patrón| Ejemplos de la sesión |
+|---|---|
+|**Aprende haciendo** | "quiero probarlo", "creé una tarea... no veo los agentes" |
+|**Desafía suposiciones** | "asumiste que lo que está en el folder 73 funciona, no entiendo por qué asumes eso" |
+|**Pide explicaciones** | "dime qué es que estás haciendo porque veo que estás haciendo un montón de cosas pero no me has explicado" |
+|**Exige visibilidad** | "no me gusta usar esos diálogos javascript que interrumpen el flujo", "tus sugerencias de modelos de visión no cuadran" |
+|**Feedback iterativo y concreto** | "pareciera que todos los comandos que tú ejecutas inician con python -c", "sigues con lo del sleep, y no uv" |
+|**Piensa en voz alta** | "no entiendo qué fue que construiste", "estoy entre el dilema o trilema" |
+|**Cierra sesiones limpiamente** | "apaga el servidor", "confirma que el git status no tiene nada", "sube todos los cambios a github" |
+
+### 3.2 Valores y preferencias técnicas
+
+|Valor| Evidencia |
+|---|---|
+|**Event-driven sobre polling** | "creo que haces comandos con sleep hay formas de evitar esos sleep y que fuera una manera más eventada y menos long polling" |
+|**URLs como estado** | "las rutas representen un estado de la aplicación así son fácilmente compartibles" |
+|**Seguridad práctica** | API keys vía env vars, no en el directorio |
+|**Costo-efectividad** | Prefiere proveedores chinos (90% más baratos), valora el plan de $10 de OpenCode GO |
+|**Responsive / mobile-first** | "el html ya no se adapta a un móvil?" |
+|**Configuración desde UI, no env vars** | "cómo así es verdad que no se puede configurar desde la interfaz web?" |
+|**Simplicidad > taxonomías complejas** | "me gustaría que simplemente fuera una palabra, para no tener que pensar tan abstractamente" |
+
+### 3.3 Patrón de trabajo con el AI
+
+```
+1. Exploración → prueba herramienta (MetaGPT)
+2. Fricción → reporta problema concreto ("veo que estás teniendo problemas con python")
+3. Corrección → da información faltante ("tal vez está instalado uv")
+4. Discusión de visión → "lo que estoy interesado es en crear esa aplicación web multiagente"
+5. Feedback en ciclo rápido → prueba → "no entendí" → explica → "vale hazlo así"
+6. Refinamiento UX → columnas, modales, rutas, WS fallback, responsive
+7. Reorganización → "mueve todo a v1, crea v2 desde cero con aprendizajes"
+8. Cierre → "apaga, sube a github, confirma status limpio"
+```
+
+### 3.4 Señales de alerta (para el AI asistente)
+
+- Cuando el usuario dice **"no entiendo"** → parar y explicar, no seguir codeando
+- Cuando dice **"asumiste"** → asunción incorrecta, corregir
+- Cuando dice **"sigues con X"** → patrón repetido que ya pidió cambiar
+- Cuando pide **"explícame"** → quiere entender antes de aprobar
+- Cuando dice **"creo que dañaste todo"** → pérdida de confianza, reorganizar y documentar aprendizajes
+
+---
+
+**TL;DR:** El usuario es un **desarrollador-visual que aprende probando, piensa en sistemas auto-mejorables, prioriza UX concreta sobre abstracción, y exige visibilidad total.** La sesión muestra una curva típica: exploración → fricción → corrección → prototipado rápido → refinamiento UX → reorganización con aprendizajes → cierre limpio.

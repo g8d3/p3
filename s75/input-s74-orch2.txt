@@ -1,0 +1,23 @@
+=== SESIÓN: OpenCode "launch config" search</rules> ``` ===
+=== ID: fb3c0d2c-d429-4ac0-b959-7a91e10a6048$$call_00_OWxo3NZg3AMYOPlcJD2m9658 | 5 mensajes ===
+
+[2026-05-30 21:42:21] USR: Search the web for "opencode lance config" or "opencode launch config" - I need to understand if there's a specific configuration term or file called "launch config" or similar in OpenCode. Look at opencode.ai documentation for any mention of "launch" configuration.
+
+Use the web_search tool to find relevant information. Break down the question into smaller, focused searches if needed. After searching, use web_fetch to get detailed content from the most relevant results.
+
+[2026-05-30 21:42:21] AST: [razonamiento]: **Investigating OpenCode Configurations**
+
+I'm currently focused on the user's request, specifically searching for "opencode launch config" and "opencode lance config". My initial searches indicate th...
+
+[2026-05-30 21:42:26] TOL: [tool:web_search]: Found 10 search results:
+
+1. Config | OpenCode
+   URL: https://opencode.ai/docs/config/
+   Summary: Configuration files are merged together, not repla
+
+[2026-05-30 21:42:26] TOL: [tool:web_search]: Found 10 search results:
+
+1. Config - opencode.ai
+   URL: https://opencode.ai/docs/config/
+   Summary: Configuration files are merged together, not re
+

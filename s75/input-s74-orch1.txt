@@ -1,0 +1,49 @@
+=== SESIÓN: OpenCode MCP Configuration Details</rules> ===
+=== ID: d99c4845-b85a-406e-be22-757926607c93$$call_00_PkCdthP91dtyXvOOaylX6694 | 8 mensajes ===
+
+[2026-05-30 21:40:44] USR: Find information about OpenCode MCP configuration. Specifically look for where the opencode config file is located (opencode.json or similar), how MCP servers are configured in it, and the structure of the MCP section. Search for "opencode MCP configuration" or "opencode.json mcp servers".
+
+Use the web_search tool to find relevant information. Break down the question into smaller, focused searches if needed. After searching, use web_fetch to get detailed content from the most relevant results.
+
+[2026-05-30 21:40:44] AST: [razonamiento]: **Locating OpenCode Config**
+
+I'm currently focused on pinpointing the OpenCode configuration file, aiming for the exact filename like `opencode.json`. My search extends to understanding how MCP serve...
+
+[2026-05-30 21:40:48] TOL: [tool:web_search]: Found 5 search results:
+
+1. MCP servers | OpenCode
+   URL: https://opencode.ai/docs/mcp-servers/
+   Summary: MCP servers Add local and remote MCP tool
+
+[2026-05-30 21:40:48] AST: [razonamiento]: **Analyzing Promising Search Results**
+
+I'm currently focused on the initial search results, and they're looking very encouraging. Results 1 and 2, specifically, stand out as potentially valuable reso...
+
+[2026-05-30 21:40:52] TOL: [tool:web_fetch]: Fetched content from https://open-code.ai/en/docs/config:
+
+OpenCode Config (opencode.json): Models, Tools, Agents, MCP - OpenCode Docs
+
+English
+
+Docum
+
+[2026-05-30 21:40:52] AST: [razonamiento]: **Analyzing Configuration Source**
+
+I've made good progress! I can confirm the `https://open-code.ai/en/docs/config` source provides nearly all the necessary details. I've pinpointed the primary confi...
+
+[2026-05-30 21:40:57] TOL: [tool:web_fetch]: Fetched content from https://opencode.ai/docs/mcp-servers/:
+
+MCP servers \| OpenCode[Skip to content](#_top)
+
+# MCP servers
+
+Add local and remote MCP 
+
+[2026-05-30 21:40:57] AST: [razonamiento]: **Analyzing Server Structure**
+
+I've been reviewing the documentation at `https://opencode.ai/docs/mcp-servers/` and found some great insights into local and remote MCP server structures. The details ... | OpenCode configuration is managed through an `opencode.json` (or `opencode.jsonc`) file. This file can be located in several places, with a specific order of precedence for merging configurations.
+
+### OpenCode Config File Location
+
+The `opencode.json` configuration file can be
+

@@ -36,6 +36,7 @@ REINDEX_AGENT=pi ./reindex.sh 2>/dev/null
 
 | Variable | Agente | Comando |
 |---|---|---|
-| `REINDEX_AGENT=pi` (default) | pi | `pi -p "@prompt"` |
-| `REINDEX_AGENT=opencode` | OpenCode | `opencode run "@prompt"` |
+| `REINDEX_AGENT=opencode` (default) | OpenCode | `opencode run "@prompt"` |
+| `REINDEX_AGENT=crush` | Crush | `crush run "@prompt"` |
 | `REINDEX_AGENT=hermes` | Hermes Agent | `hermes run "@prompt"` |
+| `REINDEX_AGENT=pi` | pi | `pi -p "@prompt"` |
