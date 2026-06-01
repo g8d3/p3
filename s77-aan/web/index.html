@@ -298,13 +298,15 @@ async function addTag(){
   await fetchVersions();
 }
 
-// ── auto-refresh ─────────────────────────────────────────────────────
+// ── event-driven updates (SSE) ────────────────────────────────────────
 
-setInterval(async ()=>{
-  const a=document.activeElement;
-  if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.tagName==='SELECT'))return;
-  await fetchVersions();
-},5000);
+const evtSource = new EventSource('/api/events');
+evtSource.onmessage = (e) => {
+  const data = JSON.parse(e.data);
+  versions = data.versions || [];
+  liveId = data.live_id;
+  renderVersions();
+};
 
 // ── init ─────────────────────────────────────────────────────────────
 

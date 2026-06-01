@@ -5,6 +5,7 @@ import json
 import os
 import sqlite3
 import urllib.parse
+import time
 
 from version_registry import VersionRegistry
 
@@ -45,6 +46,30 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
         length = int(self.headers.get("Content-Length", 0))
         return json.loads(self.rfile.read(length)) if length else {}
 
+    def _sse_loop(self):
+        """Server-Sent Events: push version updates to client."""
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Connection", "keep-alive")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.end_headers()
+
+        last_count = len(db.list_versions())
+        try:
+            while True:
+                versions = db.list_versions()
+                live = db.get_live()
+                current = len(versions)
+                if current != last_count:
+                    last_count = current
+                    data = json.dumps({"versions": versions, "live_id": live["id"] if live else None})
+                    self.wfile.write(f"data: {data}\n\n".encode())
+                    self.wfile.flush()
+                time.sleep(1)
+        except (BrokenPipeError, ConnectionResetError):
+            pass
+
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path.rstrip("/")
@@ -53,6 +78,8 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
             self._send_file(os.path.join(WEB_DIR, "index.html"))
         elif path.startswith("/web/"):
             self._send_file(os.path.join(os.path.dirname(__file__), path.lstrip("/")))
+        elif path == "/api/events":
+            self._sse_loop()
         elif path == "/api/versions":
             versions = db.list_versions()
             live = db.get_live()
