@@ -60,15 +60,32 @@ class AANHandler(http.server.BaseHTTPRequestHandler):
             return
         version_dir = os.path.join(BASE, "versions", v_id)
         serve_path = os.path.join(version_dir, subpath.lstrip("/"))
-        if os.path.isdir(version_dir) and os.path.exists(serve_path):
+        if os.path.isfile(serve_path):
             self._serve_file(serve_path)
         else:
-            self._respond(
-                f"<html><body><h1>Version {v_id}</h1>"
-                f"<p>{v.get('message','')}</p>"
-                f"<p>Built by: {v.get('created_by','')}</p>"
-                f"<pre>{serve_path}</pre></body></html>",
-                200, "text/html")
+            # Show version info page
+            html = f"""<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{v_id} — AAN</title><style>
+body{{font-family:system-ui,sans-serif;background:#0d1117;color:#c9d1d9;padding:20px;max-width:800px;margin:0 auto}}
+h1{{color:#58a6ff}}pre{{background:#161b22;padding:16px;border-radius:8px;overflow:auto}}
+.info{{color:#8b949e;font-size:.9rem;margin:12px 0}}
+a{{color:#58a6ff}}
+</style></head><body>
+<h1>{v_id}</h1>
+<div class="info">{v.get('message','')} — by {v.get('created_by','')} — {v.get('status','')}</div>
+<p><a href="/">← Back to AAN</a></p>"""
+            # List files in version directory
+            if os.path.isdir(version_dir):
+                files = os.listdir(version_dir)
+                if files:
+                    html += "<h2>Files</h2><ul>"
+                    for f in files:
+                        fp = os.path.join(version_dir, f)
+                        label = f + ("/" if os.path.isdir(fp) else "")
+                        html += f'<li><a href="/{v_id}/{f}">{label}</a></li>'
+                    html += "</ul>"
+            html += "</body></html>"
+            self._respond(html, 200, "text/html")
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
