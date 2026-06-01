@@ -68,3 +68,19 @@ s74/v2/data/
 s74/v2/.venv/
 s74/v2/versions/live
 s74/v2/versions/v*/
+
+# s77-aan
+s77-aan/__pycache__/
+s77-aan/.venv/
+s77-aan/*.pyc
+s77-aan/aan.db
+
+# s77-aan artifacts
+s77-aan/.coverage
+s77-aan/*.db*
+s77-aan/live
+s77-aan/*.done
+s77-aan/*-output.md
+s77-aan/api.py
+s77-aan/__pycache__/
+s77-aan/.venv/
