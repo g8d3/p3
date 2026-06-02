@@ -9,6 +9,7 @@ import os
 import sys
 import time
 import urllib.parse
+import html as html_mod
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE)
@@ -85,9 +86,23 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 if not v:
                     self._send({"error": "not found"}, 404)
                     return
+                # Read agent output
+                out_path = os.path.join(BASE, "agent-outputs", f"{vid}.txt")
+                if os.path.exists(out_path):
+                    with open(out_path) as f:
+                        out_text = f.read().strip() or "(empty)"
+                else:
+                    out_text = "(no output)"
+                import html as _html
+                out_escaped = _html.escape(out_text)
                 html = f"""<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{vid}</title><body style="font-family:system-ui;background:#0d1117;color:#c9d1d9;padding:20px">
-<h1>{vid}</h1><p>{v.get('message','')}</p><p>Status: {v.get('status','')}</p><p>Agent output saved</p>
+<title>{vid}</title><style>
+body{{font-family:system-ui,sans-serif;background:#0d1117;color:#c9d1d9;padding:20px;max-width:800px;margin:0 auto}}
+h1{{color:#58a6ff}}pre{{background:#161b22;padding:16px;border-radius:8px;overflow:auto;font-size:.85rem}}
+.info{{color:#8b949e;margin:12px 0}}a{{color:#58a6ff}}</style></head><body>
+<h1>{vid}</h1>
+<div class="info">{v.get('message','')} — {v.get('created_by','')} — {v.get('status','')}</div>
+<pre>{out_escaped}</pre>
 <a href="/" style="color:#58a6ff">← Back</a></body></html>"""
                 self._send(html, 200, "text/html")
             else:

@@ -60,7 +60,7 @@ function render(versions,agents){
   }else feed.innerHTML='<div class="empty">No agents yet</div>';
   if(versions&&versions.length){
     grid.innerHTML=versions.map(v=>
-      `<div class="box" onclick="window.open('/${v.id}/','_blank')"><div class="mvid">${v.id}</div><div class="msg">${esc(v.message).slice(0,50)}</div><div class="meta">${v.created_by}</div></div>`
+      `<div class="box" onclick="window.location='/${v.id}/'"><div class="mvid">${v.id}</div><div class="msg">${esc(v.message).slice(0,50)}</div><div class="meta">${v.created_by}</div></div>`
     ).join('');
   }else grid.innerHTML='<div class="empty">No versions yet</div>';
 }
