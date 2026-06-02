@@ -24,14 +24,22 @@ def tmux_launch_agent(task, version_id):
     os.makedirs(out_dir, exist_ok=True)
     outfile = os.path.join(out_dir, f"{version_id}.txt")
 
+    # Write task to file to avoid shell escaping issues
+    task_file = os.path.join(BASE, "agent-outputs", f"{version_id}.task")
+    with open(task_file, "w") as f:
+        f.write(task)
+
     wname = f"aan-{version_id}"
+    done_signal = f"aan-{version_id}-done"
     win_cmd = (
         f'export OPENCODE_GO_API_KEY={os.environ.get("OPENCODE_GO_API_KEY","")}; '
         f'export OPENCODE_GO_BASE_URL={os.environ.get("OPENCODE_GO_BASE_URL","")}; '
         f'export OPENCODE_GO_MODEL={os.environ.get("OPENCODE_GO_MODEL","")}; '
+        f'export AGENT_SYSTEM_PROMPT={os.environ.get("AGENT_SYSTEM_PROMPT","")}; '
+        f'export AGENT_WORK_DIR={BASE}; '
         f'cd {BASE}; '
-        f'uv run python3 {agent_script} "{task}" "{version_id}" 2>&1 | tee {outfile}; '
-        f'echo; touch {outfile}.done; '
+        f'uv run python3 {agent_script} "{task_file}" "{version_id}" 2>&1 | tee {outfile}; '
+        f'echo; touch {outfile}.done; tmux wait-for -S {done_signal}; '
         f'echo "Press any key to close this window..."; read -n1'
     )
     subprocess.run(["tmux", "new-window", "-d", "-n", wname, "bash", "-c", win_cmd])
