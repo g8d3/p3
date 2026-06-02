@@ -20,6 +20,19 @@ PORT = 9091
 WEB_DIR = os.path.join(BASE, "web")
 db = VersionRegistry()
 
+# Shared config file (orchestrator reads this too)
+CONFIG_FILE = os.path.join(BASE, "aan_config.json")
+
+def get_config():
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE) as f:
+            return json.load(f)
+    return {"cli_agent": "api"}
+
+def set_config(cfg):
+    with open(CONFIG_FILE, "w") as f:
+        json.dump(cfg, f)
+
 
 class Handler(http.server.BaseHTTPRequestHandler):
     def _send(self, data, status=200, ctype="application/json"):
@@ -75,6 +88,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         "finished": work[0]["finished_at"] if work else None,
                     })
             self._send({"agents": agents})
+        elif path == "/api/config":
+            self._send(get_config())
         elif path == "/api/events":
             self._sse_loop()
         else:
@@ -120,6 +135,13 @@ h1{{color:#58a6ff}}pre{{background:#161b22;padding:16px;border-radius:8px;overfl
             # Create version as "draft" — orchestrator picks it up
             v = db.create_version("agent", task, status="draft")
             self._send({"version": v["id"], "status": "queued"}, 201)
+
+        elif path == "/api/config":
+            cfg = get_config()
+            if "cli_agent" in body:
+                cfg["cli_agent"] = body["cli_agent"]
+            set_config(cfg)
+            self._send({"ok": True, "config": cfg})
 
         elif path == "/api/versions/promote":
             vid = body.get("version", "")

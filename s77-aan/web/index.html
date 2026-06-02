@@ -36,7 +36,14 @@ textarea{width:100%;padding:10px;background:#0d1117;border:1px solid #30363d;bor
 <div class="card">
 <h2>What should agents build?</h2>
 <textarea id="task" placeholder="Describe what you want built..."></textarea>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px">
+<select id="cli-select" style="flex:1;padding:8px;background:#0d1117;border:1px solid #30363d;border-radius:6px;color:#c9d1d9;font-size:.9rem">
+<option value="api">API (direct LLM, best for code)</option>
+<option value="opencode">Opencode CL (analysis)</option>
+<option value="crush">Crush (analysis)</option>
+</select>
 <button class="btn" id="go" onclick="launch()">🚀 Launch Agent</button>
+</div>
 </div>
 <div class="card"><h2>Activity</h2><div class="feed" id="feed"><div class="empty">No agents yet</div></div></div>
 <div class="card"><h2>Versions</h2><div class="grid" id="grid"><div class="empty">No versions yet</div></div></div>
@@ -50,6 +57,11 @@ async function load(){
     const r=await fetch('/api/versions');
     const d=await r.json();
     render(d.versions||[],d.agents||[]);
+  }catch(e){}
+  try{
+    const r=await fetch('/api/config');
+    const d=await r.json();
+    if(d.cli_agent) $('cli-select').value=d.cli_agent;
   }catch(e){}
 }
 function render(versions,agents){
@@ -68,6 +80,10 @@ function render(versions,agents){
 async function launch(){
   const t=task.value.trim();if(!t||go.disabled)return;
   go.disabled=true;go.textContent='⏳';
+  const cli=$('cli-select').value;
+  // Update config
+  await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cli_agent:cli})});
+  // Launch task
   await fetch('/api/agents/launch',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({task:t})});
   task.value='';go.disabled=false;go.textContent='🚀 Launch Agent';
 }
