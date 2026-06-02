@@ -1,1 +1,1 @@
-write hello.py that prints hello world
+write hello.py with a function greet(name) that prints hello

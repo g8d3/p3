@@ -1,56 +1,37 @@
 
 ============================================================
-  🤖 AAN Agent v001
-  Model: deepseek-v4-flash
-  Task: write hello.py that prints hello world
+  🤖 AAN Worker v001
+  Mode: api  Model: deepseek-v4-flash
+  Task: write hello.py with a function greet(name) that prints hello
 ============================================================
 
 ──────────────────────────────────────────────────
-  SYSTEM PROMPT: You
+  SYSTEM PROMPT: 
 ──────────────────────────────────────────────────
 
-⏳ Calling LLM... done (2.5s, 182 chars)
+⏳ Calling API (deepseek-v4-flash)... done (8.4s, 57 chars)
 
 ──────────────────────────────────────────────────
-  LLM RESPONSE: Here's the `hello.py` file you requested:
-
-```python
-print("hello world")
+  LLM RESPONSE: ```python
+def greet(name):
+    print(f"hello {name}")
 ```
-
-To run it, simply execute:
-
-```bash
-python hello.py
-```
-
-This will output `hello world` to the console.
 ──────────────────────────────────────────────────
-  📄 Extracted 2 raw code block(s) as files
 
 ──────────────────────────────────────────────────
-  FILES EXTRACTED: 2 file(s)
+  FILES: 1 extracted
 ──────────────────────────────────────────────────
-  📄 Wrote script.py (20 bytes)
-  📄 Wrote script.sh (15 bytes)
+  📄 script.py (43 bytes)
 
 ──────────────────────────────────────────────────
-  TESTING: 2 file(s)
+  TESTING: 1 files
 ──────────────────────────────────────────────────
-  ▶️  Running versions/v001/script.py... ✅ PASSED
-  Output: hello world
-  ▶️  Running versions/v001/script.sh... ❌ FAILED (exit=2)
-  Error: python: can't open file '/home/vuos/code/p3/s77-aan/hello.py': [Errno 2] No such file or directory
+  ✅ versions/v001/script.py
 
 ──────────────────────────────────────────────────
-  SUMMARY: Agent v001
+  SUMMARY: Worker v001
 ──────────────────────────────────────────────────
-  Files written: 2
-  Tests passed: 1
-  Tests failed: 1
-  Response size: 182 chars
-  LLM time: 2.5s
-
-  ⚠️  HAS FAILURES
+  Files: 1, Passed: 1, Failed: 0
+  ✅ ALL PASSED
 ============================================================
 

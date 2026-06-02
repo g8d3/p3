@@ -37,6 +37,7 @@ def tmux_launch_agent(task, version_id):
         f'export OPENCODE_GO_MODEL={os.environ.get("OPENCODE_GO_MODEL","")}; '
         f'export AGENT_SYSTEM_PROMPT={os.environ.get("AGENT_SYSTEM_PROMPT","")}; '
         f'export AGENT_WORK_DIR={BASE}; '
+        f'export AAN_CLI={os.environ.get("AAN_CLI","opencode")}; '
         f'cd {BASE}; '
         f'uv run python3 {agent_script} "{task_file}" "{version_id}" 2>&1 | tee {outfile}; '
         f'echo; touch {outfile}.done; tmux wait-for -S {done_signal}; '
