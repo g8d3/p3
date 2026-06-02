@@ -1,34 +1,29 @@
 #!/usr/bin/env python3
-"""AAN Server — multi-version agent platform.
-
-Each version serves at /v{id}/... All versions are live simultaneously.
-Agents build versions in parallel. The UI shows everything happening.
+"""
+AAN Server — pure viewer/controller. Creates pending tasks in DB.
+Independent orchestrator launches agents. Shared DB.
 """
 import http.server
 import json
 import os
-import sqlite3
-import threading
+import sys
 import time
 import urllib.parse
 
+BASE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, BASE)
 from version_registry import VersionRegistry
-from orchestrator import Orchestrator
 
 HOST = "0.0.0.0"
 PORT = 9091
-BASE = os.path.dirname(os.path.abspath(__file__))
 WEB_DIR = os.path.join(BASE, "web")
 db = VersionRegistry()
-orch = Orchestrator()
 
 
-class AANHandler(http.server.BaseHTTPRequestHandler):
-    """Routes requests by version path (/v{id}/...)."""
-
-    def _respond(self, data, status=200, content_type="application/json"):
+class Handler(http.server.BaseHTTPRequestHandler):
+    def _send(self, data, status=200, ctype="application/json"):
         self.send_response(status)
-        self.send_header("Content-Type", content_type)
+        self.send_header("Content-Type", ctype)
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         if isinstance(data, bytes):
@@ -39,133 +34,106 @@ class AANHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(data, default=str).encode())
 
     def _serve_file(self, path):
-        try:
-            with open(path, "rb") as f:
-                data = f.read()
-            ext = os.path.splitext(path)[1]
-            mime = {".html": "text/html", ".js": "text/javascript",
-                    ".css": "text/css", ".png": "image/png",
-                    ".svg": "image/svg+xml", ".md": "text/markdown"}
-            self._respond(data, 200, mime.get(ext, "text/plain"))
-        except FileNotFoundError:
-            self._respond({"error": "not found"}, 404)
+        with open(path, "rb") as f:
+            self._send(f.read(), 200, {
+                ".html": "text/html", ".js": "text/javascript",
+                ".css": "text/css", ".png": "image/png",
+            }.get(os.path.splitext(path)[1], "text/plain"))
 
     def _read_body(self):
         length = int(self.headers.get("Content-Length", 0))
         return json.loads(self.rfile.read(length)) if length else {}
 
-    def _route_version(self, v_id, subpath):
-        """Route to a specific version's content."""
-        v = db.get_version(v_id)
-        if not v:
-            self._respond({"error": "version not found"}, 404)
-            return
-        version_dir = os.path.join(BASE, "versions", v_id)
-        serve_path = os.path.join(version_dir, subpath.lstrip("/"))
-        if os.path.isfile(serve_path):
-            self._serve_file(serve_path)
-        else:
-            # Show version info page
-            html = f"""<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{v_id} — AAN</title><style>
-body{{font-family:system-ui,sans-serif;background:#0d1117;color:#c9d1d9;padding:20px;max-width:800px;margin:0 auto}}
-h1{{color:#58a6ff}}pre{{background:#161b22;padding:16px;border-radius:8px;overflow:auto}}
-.info{{color:#8b949e;font-size:.9rem;margin:12px 0}}
-a{{color:#58a6ff}}
-</style></head><body>
-<h1>{v_id}</h1>
-<div class="info">{v.get('message','')} — by {v.get('created_by','')} — {v.get('status','')}</div>
-<p><a href="/">← Back to AAN</a></p>"""
-            # List files in version directory
-            if os.path.isdir(version_dir):
-                files = os.listdir(version_dir)
-                if files:
-                    html += "<h2>Files</h2><ul>"
-                    for f in files:
-                        fp = os.path.join(version_dir, f)
-                        label = f + ("/" if os.path.isdir(fp) else "")
-                        html += f'<li><a href="/{v_id}/{f}">{label}</a></li>'
-                    html += "</ul>"
-            html += "</body></html>"
-            self._respond(html, 200, "text/html")
-
     def do_GET(self):
-        parsed = urllib.parse.urlparse(self.path)
-        path = parsed.path.rstrip("/")
+        path = urllib.parse.urlparse(self.path).path.rstrip("/")
 
-        # Version routing
-        if path.startswith("/v"):
-            parts = path.split("/", 2)
-            v_id = parts[1]
-            subpath = parts[2] if len(parts) > 2 else "/"
-            self._route_version(v_id, subpath)
-            return
-
-        # Main UI
-        if path == "/" or path == "":
+        if path in ("", "/"):
             self._serve_file(os.path.join(WEB_DIR, "index.html"))
-            return
-
-        # Static files
-        if path.startswith("/web/"):
-            self._serve_file(os.path.join(BASE, "web", path[5:]))
-            return
-
-        # API: agents
-        if path == "/api/agents":
-            self._respond({"agents": orch.get_status()})
-            return
-
-        # API: versions
-        if path == "/api/versions":
-            self._respond({"versions": db.list_versions()})
-            return
-
-        # API: SSE events
-        if path == "/api/events":
+        elif path == "/api/versions":
+            versions = db.list_versions()
+            live = db.get_live()
+            self._send({"versions": versions, "live_id": live["id"] if live else None})
+        elif path.startswith("/api/versions/") and path.endswith("/work"):
+            vid = path.split("/")[3]
+            self._send({"work": db.get_version_work(vid)})
+        elif path.startswith("/api/versions/"):
+            vid = path.split("/")[3]
+            v = db.get_version(vid)
+            self._send(v if v else {"error": "not found"}, 200 if v else 404)
+        elif path == "/api/agents":
+            # Show all versions with agent work
+            agents = []
+            for v in db.list_versions():
+                if v["created_by"] == "agent":
+                    work = db.get_version_work(v["id"])
+                    agents.append({
+                        "version": v["id"],
+                        "status": v["status"],
+                        "task": v["message"][:80],
+                        "started": work[0]["started_at"] if work else None,
+                        "finished": work[0]["finished_at"] if work else None,
+                    })
+            self._send({"agents": agents})
+        elif path == "/api/events":
             self._sse_loop()
-            return
-
-        self._respond({"error": "not found"}, 404)
+        else:
+            # Version URL routing
+            parts = path.split("/")
+            if len(parts) >= 2 and parts[1].startswith("v"):
+                vid = parts[1]
+                v = db.get_version(vid)
+                if not v:
+                    self._send({"error": "not found"}, 404)
+                    return
+                html = f"""<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{vid}</title><body style="font-family:system-ui;background:#0d1117;color:#c9d1d9;padding:20px">
+<h1>{vid}</h1><p>{v.get('message','')}</p><p>Status: {v.get('status','')}</p><p>Agent output saved</p>
+<a href="/" style="color:#58a6ff">← Back</a></body></html>"""
+                self._send(html, 200, "text/html")
+            else:
+                self._send({"error": "not found"}, 404)
 
     def do_POST(self):
-        parsed = urllib.parse.urlparse(self.path)
-        path = parsed.path.rstrip("/")
+        path = urllib.parse.urlparse(self.path).path.rstrip("/")
         body = self._read_body()
 
         if path == "/api/agents/launch":
             task = body.get("task", "")
             if not task:
-                self._respond({"error": "task required"}, 400)
+                self._send({"error": "task required"}, 400)
                 return
-            v = db.create_version("agent", f"agent: {task[:60]}")
-            agent = orch.launch_agent("builder", task, v["id"])
-            self._respond({"version": v["id"], "status": agent.status})
-            return
+            # Create version as "draft" — orchestrator picks it up
+            v = db.create_version("agent", task, status="draft")
+            self._send({"version": v["id"], "status": "queued"}, 201)
 
-        self._respond({"error": "not found"}, 404)
+        elif path == "/api/versions/promote":
+            vid = body.get("version", "")
+            if not vid:
+                self._send({"error": "version required"}, 400)
+                return
+            db.set_live(vid)
+            self._send({"ok": True, "live": vid})
+
+        else:
+            self._send({"error": "not found"}, 404)
 
     def _sse_loop(self):
-        """Push agent + version updates to clients."""
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-cache")
         self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
 
-        seen_versions = len(db.list_versions())
-        seen_agents = len(orch.get_status())
+        seen = len(db.list_versions())
         try:
             while True:
-                versions = len(db.list_versions())
-                agents = len(orch.get_status())
-                changed = versions != seen_versions or agents != seen_agents
-                if changed:
-                    seen_versions, seen_agents = versions, agents
+                current = len(db.list_versions())
+                if current != seen:
+                    seen = current
                     data = json.dumps({
                         "versions": db.list_versions(),
-                        "agents": orch.get_status(),
-                    })
+                        "agents": [v for v in db.list_versions() if v["created_by"] == "agent"],
+                    }, default=str)
                     self.wfile.write(f"data: {data}\n\n".encode())
                     self.wfile.flush()
                 time.sleep(2)
@@ -173,12 +141,12 @@ a{{color:#58a6ff}}
             pass
 
     def log_message(self, fmt, *args):
-        pass  # quiet
+        pass
 
 
 def main():
-    server = http.server.ThreadingHTTPServer((HOST, PORT), AANHandler)
-    print(f"AAN running at http://{HOST}:{PORT}")
+    server = http.server.ThreadingHTTPServer((HOST, PORT), Handler)
+    print(f"AAN viewer at http://{HOST}:{PORT}")
     server.serve_forever()
 
 

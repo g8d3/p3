@@ -6,9 +6,9 @@ import sys
 import urllib.request
 import urllib.error
 
-API_URL = os.environ.get("OPENCODE_GO_BASE_URL", "https://opencode.ai/zen/go/v1/")
-API_KEY = os.environ.get("OPENCODE_GO_API_KEY", "")
-MODEL = os.environ.get("OPENCODE_GO_MODEL", "deepseek-v4-flash")
+API_URL = os.environ.get("OPENCODE_GO_BASE_URL") or os.environ.get("OPENCODE_GO_BASE_URL", "https://opencode.ai/zen/go/v1/")
+API_KEY = os.environ.get("OPENCODE_GO_API_KEY") or os.environ.get("OPENCODE_GO_API_KEY", "")
+MODEL = os.environ.get("OPENCODE_GO_MODEL") or os.environ.get("OPENCODE_GO_MODEL", "deepseek-v4-flash")
 TIMEOUT = int(os.environ.get("AGENT_TIMEOUT", "120"))
 
 

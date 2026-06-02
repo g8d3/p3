@@ -1,79 +1,99 @@
 #!/usr/bin/env python3
-"""AAN Orchestrator — launches agents, tracks their work, reports status."""
+"""
+AAN Orchestrator — launches independent agent processes, watches for
+pending tasks in the DB, tracks results. Runs continuously as a daemon.
+"""
 import json
 import os
 import subprocess
-import threading
+import sys
 import time
 from datetime import datetime
 
-AGENT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, BASE)
+from version_registry import VersionRegistry
 
-class Agent:
-    def __init__(self, agent_type, task, version_id):
-        self.agent_type = agent_type  # "builder", "validator", "explorer"
-        self.task = task
-        self.version_id = version_id
-        self.status = "pending"  # pending → running → done | failed
-        self.started_at = None
-        self.finished_at = None
-        self.output_file = os.path.join(AGENT_DIR, f"agent-{version_id}-{agent_type}.txt")
-        self.pid = None
-
-    def launch(self):
-        self.status = "running"
-        self.started_at = datetime.now().isoformat()
-        done_file = self.output_file + ".done"
-
-        def _run():
-            try:
-                result = subprocess.run(
-                    ["uv", "run", "python3", os.path.join(AGENT_DIR, "agent_light.py"), self.task],
-                    capture_output=True, text=True, timeout=300,
-                    cwd=AGENT_DIR
-                )
-                output = result.stdout or result.stderr or "no output"
-                with open(self.output_file, "w") as f:
-                    f.write(output)
-                self.status = "done" if result.returncode == 0 else "failed"
-            except subprocess.TimeoutExpired:
-                with open(self.output_file, "w") as f:
-                    f.write("TIMEOUT: agent exceeded 300s")
-                self.status = "failed"
-            except Exception as e:
-                with open(self.output_file, "w") as f:
-                    f.write(f"ERROR: {e}")
-                self.status = "failed"
-            self.finished_at = datetime.now().isoformat()
-            open(done_file, "w").close()
-
-        thread = threading.Thread(target=_run, daemon=True)
-        thread.start()
-        return self
+POLL_INTERVAL = 3  # check for pending tasks every 3 seconds
+MAX_AGENTS = 5     # max concurrent agents
 
 
-class Orchestrator:
-    def __init__(self):
-        self.agents = []
-        self._lock = threading.Lock()
+def launch_agent_process(task, version_id):
+    """Launch an agent_light.py process. Returns the subprocess PID."""
+    agent_script = os.path.join(BASE, "agent_light.py")
+    outfile = os.path.join(BASE, "agent-outputs", f"{version_id}.txt")
+    os.makedirs(os.path.join(BASE, "agent-outputs"), exist_ok=True)
 
-    def launch_agent(self, agent_type, task, version_id):
-        agent = Agent(agent_type, task, version_id)
-        agent.launch()
-        with self._lock:
-            self.agents.append(agent)
-        return agent
+    # Explicitly set env vars from known paths
+    env = os.environ.copy()
+    secrets_file = os.path.expanduser("~/.secrets/.env")
+    if os.path.exists(secrets_file):
+        with open(secrets_file) as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("export OPENCODE_GO_"):
+                    parts = line.replace("export ", "", 1).split("=", 1)
+                    if len(parts) == 2:
+                        key, val = parts
+                        val = val.strip("'\"")
+                        env[key] = val
 
-    def get_status(self):
-        with self._lock:
-            return [{
-                "type": a.agent_type,
-                "task": a.task[:80],
-                "version": a.version_id,
-                "status": a.status,
-                "started": a.started_at,
-                "finished": a.finished_at,
-            } for a in self.agents]
+    log = open(outfile, "w")
+    proc = subprocess.Popen(
+        ["uv", "run", "python3", agent_script, task],
+        stdout=log, stderr=subprocess.STDOUT,
+        cwd=BASE, env=env,
+    )
+    return proc, outfile  # return process object, not just PID
 
-    def get_running(self):
-        return [a for a in self.agents if a.status == "running"]
+
+def main():
+    db = VersionRegistry()
+    running = {}  # version_id -> (process, outfile, start_time)
+
+    # Recover: mark any stuck "running" agents as "failed"
+    for v in db.list_versions():
+        work = db.get_version_work(v["id"])
+        for w in work:
+            if w.get("exit_status") == "running":
+                db.update_version(v["id"], status="failed")
+                print(f"  Recovered stuck: {v['id']}")
+
+    print(f"Orchestrator started. Polling every {POLL_INTERVAL}s")
+    print(f"Max concurrent agents: {MAX_AGENTS}")
+
+    while True:
+        # Check running agents
+        for vid in list(running.keys()):
+            proc_obj, outfile, start = running[vid]
+            ret = proc_obj.poll()
+            if ret is not None:
+                status = "done" if ret == 0 else "failed"
+                db.update_version(vid, status=status)
+                db.record_work(vid, "builder", exit_status=status,
+                               finished_at=datetime.now().isoformat())
+                print(f"  {vid}: {status} (pid={proc_obj.pid}, exit={ret})")
+                del running[vid]
+
+        # Check for pending tasks (versions with status "draft")
+        if len(running) < MAX_AGENTS:
+            for v in db.list_versions():
+                if v["status"] == "draft" and v["id"] not in running:
+                    task = v.get("message", "")
+                    if task:
+                        proc, outfile = launch_agent_process(task, v["id"])
+                        db.update_version(v["id"], status="running")
+                        db.record_work(v["id"], "builder", input_spec=task, exit_status="running",
+                                       started_at=datetime.now().isoformat())
+                        running[v["id"]] = (proc, outfile, datetime.now())
+                        print(f"  {v['id']}: launched (pid={proc.pid}) '{task[:50]}...'")
+                        break
+
+        time.sleep(POLL_INTERVAL)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\nOrchestrator stopped.")
