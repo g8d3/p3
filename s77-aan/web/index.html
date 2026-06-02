@@ -42,7 +42,28 @@ textarea{width:100%;padding:10px;background:#0d1117;border:1px solid #30363d;bor
 <div class="card"><h2>Versions</h2><div class="grid" id="grid"><div class="empty">No versions yet</div></div></div>
 </div>
 <script>
-const $=(id)=>document.getElementById(id);const task=$('task');const go=$('go');
+const $=(id)=>document.getElementById(id);
+const task=$('task'),go=$('go'),feed=$('feed'),grid=$('grid');
+
+async function load(){
+  try{
+    const r=await fetch('/api/versions');
+    const d=await r.json();
+    render(d.versions||[],d.agents||[]);
+  }catch(e){}
+}
+function render(versions,agents){
+  if(agents&&agents.length){
+    feed.innerHTML=agents.map(a=>
+      `<div class="entry"><span class="vid">${a.version}</span><span class="task">${esc(a.task||a.version)}</span><span class="tag t${a.status}">${a.status}</span><span class="time">${a.started?new Date(a.started+'Z').toLocaleTimeString():''}</span></div>`
+    ).join('');
+  }else feed.innerHTML='<div class="empty">No agents yet</div>';
+  if(versions&&versions.length){
+    grid.innerHTML=versions.map(v=>
+      `<div class="box" onclick="window.open('/${v.id}/','_blank')"><div class="mvid">${v.id}</div><div class="msg">${esc(v.message).slice(0,50)}</div><div class="meta">${v.created_by}</div></div>`
+    ).join('');
+  }else grid.innerHTML='<div class="empty">No versions yet</div>';
+}
 
 async function launch(){
   const t=task.value.trim();if(!t||go.disabled)return;
@@ -51,24 +72,18 @@ async function launch(){
   task.value='';go.disabled=false;go.textContent='🚀 Launch Agent';
 }
 
+// Initial load
+load();
+
+// SSE for live updates
 const es=new EventSource('/api/events');
 es.onmessage=function(e){
   try{
     const d=JSON.parse(e.data);
-    const agents=d.agents||[],versions=d.versions||[];
-    const feed=$('feed');
-    if(agents.length){
-      feed.innerHTML=agents.map(a=>
-        `<div class="entry"><span class="vid">${a.version}</span><span class="task">${esc(a.task)}</span><span class="tag t${a.status}">${a.status}</span><span class="time">${a.started?new Date(a.started+'Z').toLocaleTimeString():''}</span></div>`
-      ).join('');
-    }
-    const grid=$('grid');
-    if(versions.length){
-      grid.innerHTML=versions.map(v=>
-        `<div class="box" onclick="window.open('/${v.id}/','_blank')"><div class="mvid">${v.id}</div><div class="msg">${esc(v.message).slice(0,50)}</div><div class="meta">${v.created_by}</div></div>`
-      ).join('');
-    }
-  }catch(e){}
+    render(d.versions||[],d.agents||[]);
+  }catch(ex){}
 };
+es.onerror=function(){/* will reconnect automatically */};
+
 function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
 </script></body></html>
