@@ -84,3 +84,4 @@ s77-aan/*-output.md
 s77-aan/api.py
 s77-aan/__pycache__/
 s77-aan/.venv/
+aan_config.json

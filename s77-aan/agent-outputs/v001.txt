@@ -1,37 +1,34 @@
 
 ============================================================
   🤖 AAN Worker v001
-  Mode: api  Model: deepseek-v4-flash
-  Task: write hello.py with a function greet(name) that prints hello
+  Mode: crush  Model: deepseek-v4-flash
+  Task: Hi
 ============================================================
 
 ──────────────────────────────────────────────────
-  SYSTEM PROMPT: 
+  CLI AGENT: crush
 ──────────────────────────────────────────────────
-
-⏳ Calling API (deepseek-v4-flash)... done (8.4s, 57 chars)
-
-──────────────────────────────────────────────────
-  LLM RESPONSE: ```python
-def greet(name):
-    print(f"hello {name}")
-```
-──────────────────────────────────────────────────
+  🔧 CLI: crush
+  done (1.4s, 153 chars)
 
 ──────────────────────────────────────────────────
-  FILES: 1 extracted
+  CLI OUTPUT: 153 chars
 ──────────────────────────────────────────────────
-  📄 script.py (43 bytes)
+          
+   ERROR  
+          
+  No providers configured - please run 'crush' to set up a provider interactively.                                    
+
+
 
 ──────────────────────────────────────────────────
-  TESTING: 1 files
+  RESULT: Text response (no files)
 ──────────────────────────────────────────────────
-  ✅ versions/v001/script.py
+          
+   ERROR  
+          
+  No providers configured - please run 'crush' to set up a provider interactively.                                    
 
-──────────────────────────────────────────────────
-  SUMMARY: Worker v001
-──────────────────────────────────────────────────
-  Files: 1, Passed: 1, Failed: 0
-  ✅ ALL PASSED
+
 ============================================================
 
