@@ -1,24 +1,17 @@
 #!/usr/bin/env python3
-"""Lightweight agent — calls Opencode Go API directly. ~10MB RAM."""
-import json
-import os
-import sys
-import urllib.request
-import urllib.error
+"""Lightweight agent — calls Opencode Go API directly. Streams to stdout."""
+import json, os, sys, urllib.request
 
-API_URL = os.environ.get("OPENCODE_GO_BASE_URL") or os.environ.get("OPENCODE_GO_BASE_URL", "https://opencode.ai/zen/go/v1/")
-API_KEY = os.environ.get("OPENCODE_GO_API_KEY") or os.environ.get("OPENCODE_GO_API_KEY", "")
-MODEL = os.environ.get("OPENCODE_GO_MODEL") or os.environ.get("OPENCODE_GO_MODEL", "deepseek-v4-flash")
-TIMEOUT = int(os.environ.get("AGENT_TIMEOUT", "120"))
+API_URL = os.environ.get("OPENCODE_GO_BASE_URL", "https://opencode.ai/zen/go/v1/")
+API_KEY = os.environ.get("OPENCODE_GO_API_KEY", "")
+MODEL = os.environ.get("OPENCODE_GO_MODEL", "deepseek-v4-flash")
 
-
-def call_llm(system_prompt, user_message):
-    """Call the Opencode Go API and return the response text."""
+def call_llm(system, message):
     payload = {
         "model": MODEL,
         "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_message},
+            {"role": "system", "content": system},
+            {"role": "user", "content": message},
         ],
         "max_tokens": 4096,
         "temperature": 0.3,
@@ -33,25 +26,27 @@ def call_llm(system_prompt, user_message):
         },
     )
     try:
-        r = urllib.request.urlopen(req, timeout=TIMEOUT)
+        r = urllib.request.urlopen(req, timeout=120)
         data = json.loads(r.read())
         return data["choices"][0]["message"]["content"]
     except urllib.error.HTTPError as e:
-        return f"ERROR: HTTP {e.code}: {e.read().decode()[:200]}"
+        return f"ERROR HTTP {e.code}: {e.read().decode()[:300]}"
     except Exception as e:
         return f"ERROR: {e}"
 
-
 def main():
     task = sys.argv[1] if len(sys.argv) > 1 else sys.stdin.read().strip()
-    system = (
-        "You are a software builder agent. Your task is to write code, "
-        "create files, and implement features. Output only the code and "
-        "file changes needed. Be concise and precise."
-    )
-    result = call_llm(system, task)
+    vid = sys.argv[2] if len(sys.argv) > 2 else "?"
+    print(f"⚡ Agent {vid}: starting")
+    print(f"📋 Task: {task}")
+    print(f"🤖 Model: {MODEL}")
+    print(f"⏳ Calling LLM...", end="", flush=True)
+    result = call_llm("You are a builder agent. Output only the code.", task)
+    print(f" done ({len(result)} chars)")
+    print()
     print(result)
-
+    print()
+    print(f"✅ Agent {vid} completed")
 
 if __name__ == "__main__":
     main()
