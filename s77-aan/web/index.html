@@ -30,6 +30,7 @@ textarea{width:100%;padding:10px;background:#0d1117;border:1px solid #30363d;bor
 .msg{color:#c9d1d9;font-size:.75rem;margin:4px 0}
 .meta{color:#8b949e;font-size:.7rem}
 .empty{color:#8b949e;font-style:italic;padding:24px;text-align:center;font-size:.9rem}
+.res{color:#8b949e;font-size:.7rem;white-space:nowrap}
 </style></head><body>
 <div class="container">
 <h1>⚡ AAN — Agent Network</h1>
@@ -56,24 +57,42 @@ async function load(){
   try{
     const r=await fetch('/api/versions');
     const d=await r.json();
-    render(d.versions||[],d.agents||[]);
+    render(d.versions||[],d.agents||[],window._ri||[]);
   }catch(e){}
   try{
     const r=await fetch('/api/config');
     const d=await r.json();
     if(d.cli_agent) $('cli-select').value=d.cli_agent;
   }catch(e){}
+  await loadResources();
 }
-function render(versions,agents){
+function render(versions,agents,resources){
+  window._lv=versions;window._la=agents;
+  // Build res map: version_id -> process
+  const rmap={};
+  if(resources) for(const p of resources){
+    for(const a of agents||[]){
+      if(p.command&&p.command.includes(a.version)){rmap[a.version]=p;break}
+    }
+    for(const v of versions||[]){
+      if(p.command&&p.command.includes(v.id)){rmap[v.id]=p;break}
+    }
+  }
   if(agents&&agents.length){
-    feed.innerHTML=agents.map(a=>
-      `<div class="entry"><span class="vid">${a.version}</span><span class="task">${esc(a.task||a.version)}</span><span class="tag t${a.status}">${a.status}</span><span class="time">${a.started?new Date(a.started+'Z').toLocaleTimeString():''}</span></div>`
-    ).join('');
+    feed.innerHTML=agents.map(a=>{
+      const r=rmap[a.version];
+      const cpu=r?r.cpu.toFixed(1):'—';
+      const mem=r?r.mem.toFixed(1):'—';
+      return `<div class="entry"><span class="vid">${a.version}</span><span class="task">${esc(a.task||a.version)}</span><span class="tag t${a.status}">${a.status}</span><span class="res">CPU ${cpu}% / RAM ${mem}%</span><span class="time">${a.started?new Date(a.started+'Z').toLocaleTimeString():''}</span></div>`
+    }).join('');
   }else feed.innerHTML='<div class="empty">No agents yet</div>';
   if(versions&&versions.length){
-    grid.innerHTML=versions.map(v=>
-      `<div class="box" onclick="window.location='/${v.id}/'"><div class="mvid">${v.id}</div><div class="msg">${esc(v.message).slice(0,50)}</div><div class="meta">${v.created_by}</div></div>`
-    ).join('');
+    grid.innerHTML=versions.map(v=>{
+      const r=rmap[v.id];
+      const cpu=r?r.cpu.toFixed(1):'—';
+      const mem=r?r.mem.toFixed(1):'—';
+      return `<div class="box" onclick="window.location='/${v.id}'"><div class="mvid">${v.id}</div><div class="msg">${esc(v.message).slice(0,50)}</div><div class="meta">${v.created_by} · CPU ${cpu}% · RAM ${mem}%</div></div>`
+    }).join('');
   }else grid.innerHTML='<div class="empty">No versions yet</div>';
 }
 
@@ -91,12 +110,23 @@ async function launch(){
 // Initial load
 load();
 
+// Resource polling
+async function loadResources(){
+  try{
+    const r=await fetch('/api/resources');
+    const d=await r.json();
+    window._ri=d.processes||[];
+    render(window._lv||[],window._la||[],window._ri);
+  }catch(e){}
+}
+setInterval(loadResources,5000);
+
 // SSE for live updates
 const es=new EventSource('/api/events');
 es.onmessage=function(e){
   try{
     const d=JSON.parse(e.data);
-    render(d.versions||[],d.agents||[]);
+    render(d.versions||[],d.agents||[],window._ri||[]);
   }catch(ex){}
 };
 es.onerror=function(){/* will reconnect automatically */};

@@ -6,6 +6,7 @@ Independent orchestrator launches agents. Shared DB.
 import http.server
 import json
 import os
+import subprocess
 import sys
 import time
 import urllib.parse
@@ -92,6 +93,25 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self._send(get_config())
         elif path == "/api/events":
             self._sse_loop()
+        elif path == "/api/resources":
+            result = subprocess.run(
+                ["ps", "aux", "--sort=-%cpu"],
+                capture_output=True, text=True
+            )
+            lines = result.stdout.strip().split('\n')
+            processes = []
+            if len(lines) >= 2:
+                for line in lines[1:]:
+                    parts = line.split(None, 10)
+                    if len(parts) >= 11:
+                        processes.append({
+                            "user": parts[0],
+                            "pid": int(parts[1]),
+                            "cpu": float(parts[2]),
+                            "mem": float(parts[3]),
+                            "command": parts[10],
+                        })
+            self._send({"processes": processes})
         else:
             # Version URL routing
             parts = path.split("/")
