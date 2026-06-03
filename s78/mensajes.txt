@@ -1,0 +1,7 @@
+Mensajes del usuario:
+
+1. "necesito que crees un video súper sencillo puede ser a un frame por segundo o incluso menos en el que cambies puede ser el color alguna forma o un número una letra y es un video que se va a stremear en el navegador, quiero que el navegador tenga video fluido infinitamente a medida que el programa que crees vaya generando ese video o sea debes hacer el programa que genera el video y debes hacer el servidor que me va a permitir ver ese video hazlo lo más sencillo y corto posible las menos dependencias posibles"
+
+2. "olvidaba página móvil"
+
+3. "por favor pon los mensajes que yo te envié en un archivo de texto y sube todo el código a github"
