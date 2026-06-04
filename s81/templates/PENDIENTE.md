@@ -1,0 +1,5 @@
+# Pendientes
+
+## Preguntas para resolver
+
+- [ ]

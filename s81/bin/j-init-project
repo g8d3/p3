@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# j-init-project — Initialize a project with .j/ infrastructure
+set -euo pipefail
+
+if [ $# -lt 2 ]; then
+  echo "Usage: j-init-project <path> <name>"
+  exit 1
+fi
+
+path="$1"
+name="$2"
+here="$(cd "$(dirname "$0")" && pwd)"
+
+_escape() { printf "%s" "$1" | sed "s/'/''/g"; }
+
+# Create .j/ structure
+mkdir -p "$path/.j/tmp" "$path/.j/log"
+
+# Initialize database
+"$here/j-db" init "$path/.j/context.db"
+
+# Register project (parameterized via sqlite_parameters)
+printf ".parameter init\nINSERT INTO sqlite_parameters VALUES('@name', '%s');\nINSERT INTO sqlite_parameters VALUES('@path', '%s');\nINSERT OR REPLACE INTO projects (name, path) VALUES (@name, @path);\n" \
+  "$(_escape "$name")" "$(_escape "$path")" | sqlite3 "$path/.j/context.db"
+
+# Copy templates
+for tpl in HANDOFF.md PENDIENTE.md README.md; do
+  src="$here/../templates/$tpl"
+  if [ -f "$src" ]; then
+    sed "s/\${project_name}/$name/g" "$src" > "$path/$tpl"
+  fi
+done
+
+# Create .jignore
+cat > "$path/.j/.jignore" <<'EOF'
+# .jignore — files and directories ignored by j tools
+tmp/
+log/
+*.db
+EOF
+
+echo "Project '$name' initialized at $path"

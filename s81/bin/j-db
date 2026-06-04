@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# j-db — SQLite helper for .j/context.db
+set -euo pipefail
+
+_escape() { printf "%s" "$1" | sed "s/'/''/g"; }
+
+cmd="${1:-help}"
+[ $# -gt 0 ] && shift || true
+
+case "$cmd" in
+  init)
+    db="$1"
+    sqlite3 "$db" <<'SQLEOF'
+CREATE TABLE IF NOT EXISTS handoffs (
+  id INTEGER PRIMARY KEY,
+  from_session TEXT,
+  to_session TEXT,
+  summary TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS context_entries (
+  id INTEGER PRIMARY KEY,
+  session_id TEXT,
+  project TEXT,
+  topic TEXT,
+  content TEXT,
+  tags TEXT,
+  created_at TEXT DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS projects (
+  id INTEGER PRIMARY KEY,
+  name TEXT UNIQUE,
+  path TEXT,
+  last_session TEXT,
+  last_active TEXT DEFAULT (datetime('now'))
+);
+SQLEOF
+    sqlite3 "$db" ".read $HOME/.j/schema.sql"
+    echo "context.db initialized: $db"
+    ;;
+
+  add-context)
+    db="$1"; topic="$2"; content="$3"; tags="${4:-}"
+    printf ".parameter init\nINSERT INTO sqlite_parameters VALUES('@topic', '%s');\nINSERT INTO sqlite_parameters VALUES('@content', '%s');\nINSERT INTO sqlite_parameters VALUES('@tags', '%s');\nINSERT INTO context_entries (topic, content, tags) VALUES (@topic, @content, @tags);\n" \
+      "$(_escape "$topic")" "$(_escape "$content")" "$(_escape "$tags")" | sqlite3 "$db"
+    echo "Context entry added."
+    ;;
+
+  get-context)
+    db="$1"; topic="${2:-}"
+    if [ -n "$topic" ]; then
+      printf ".parameter init\nINSERT INTO sqlite_parameters VALUES('@topic', '%s');\nSELECT id, topic, content, tags, created_at FROM context_entries WHERE topic LIKE '%%' || @topic || '%%' ORDER BY created_at DESC;\n" \
+        "$(_escape "$topic")" | sqlite3 -header -column "$db"
+    else
+      sqlite3 -header -column "$db" "SELECT id, topic, content, tags, created_at FROM context_entries ORDER BY created_at DESC;"
+    fi
+    ;;
+
+  add-handoff)
+    db="$1"; from="$2"; to="$3"; summary="$4"
+    printf ".parameter init\nINSERT INTO sqlite_parameters VALUES('@from', '%s');\nINSERT INTO sqlite_parameters VALUES('@to', '%s');\nINSERT INTO sqlite_parameters VALUES('@summary', '%s');\nINSERT INTO handoffs (from_session, to_session, summary) VALUES (@from, @to, @summary);\n" \
+      "$(_escape "$from")" "$(_escape "$to")" "$(_escape "$summary")" | sqlite3 "$db"
+    echo "Handoff recorded."
+    ;;
+
+  recent-projects)
+    db="$1"
+    sqlite3 -header -column "$db" "SELECT id, name, path, last_session, last_active FROM projects ORDER BY last_active DESC LIMIT 10;"
+    ;;
+
+  help|*)
+    echo "Usage: j-db <command> [args]"
+    echo ""
+    echo "Commands:"
+    echo "  init <path>                          Create context.db with tables"
+    echo "  add-context <db> <topic> <content> [tags]  Add context entry"
+    echo "  get-context <db> [topic]                   List context entries"
+    echo "  add-handoff <db> <from> <to> <summary>     Record handoff"
+    echo "  recent-projects <db>                       List recent projects"
+    ;;
+esac
