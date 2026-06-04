@@ -1,0 +1,3 @@
+[submodule "s77"]
+	path = s77
+	url = https://github.com/g8d3/reloj-video.git
