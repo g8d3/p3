@@ -202,12 +202,55 @@ working → quality:pending-review → quality:needs-revision → working
 | | `estimated_tokens` | Consumo aproximado de tokens |
 | | `tool_calls` | Número de tools invocadas |
 | | `utilization` | Tiempo productivo / tiempo total |
+| **Hardware (local)** | `cpu_usage_pct` | % de CPU usado durante la tarea |
+| | `memory_mb` | RAM del agente (MB) — ej: OpenCode ~200MB, Crush ~30MB |
+| | `context_size` | Tamaño del contexto (tokens, archivos, sesiones) |
+| | `context_window_pct` | % del context window del LLM utilizado |
+| | `process_count` | Procesos hijos/spawned |
+| **Hardware (remoto)** | `api_latency_ms` | Latencia de APIs externas |
+| | `remote_gpu_used` | GPU remota (modelo, VRAM) |
+| | `network_io_bytes` | Bytes enviados/recibidos |
+| **Runtime** | `runtime_language` | Python, Go, TypeScript, Rust... |
+| | `runtime_memory_mb` | Memoria base del runtime |
+| | `startup_time_ms` | Tiempo de inicio del agente |
 | **Calidad de asignación** | `assignment_correctness` | ¿Se asignó al agente correcto? |
 | | `bottleneck` | Dónde se perdió más tiempo |
 
 ---
 
-## 10. Files produced in s84
+## 10. TTS Options for Real-Time Narration
+
+| Opción | Tipo | Calidad | Velocidad | Costo | Instalación | Real-time? |
+|--------|------|---------|-----------|-------|-------------|------------|
+| **Edge TTS** (Microsoft) | Cloud (descarga voces) | ⭐⭐⭐⭐ Muy buena | ✅ Instantáneo (~1.5x real-time) | Gratis | `pip install edge-tts` | ✅ Sí |
+| **Kokoro** via Chutes API | Cloud (GPU) | ⭐⭐⭐⭐⭐ Excelente | ✅ Rápido (~1x real-time) | API key (tienes) | Llamada HTTP | ✅ Sí |
+| **Piper TTS** | Local (CPU) | ⭐⭐⭐ Buena | ✅ Muy rápido (~0.5x real-time en CPU) | Gratis | `pip install piper-tts` + descargar modelo | ✅ Sí |
+| **eSpeak-NG** | Local (CPU) | ⭐ Robótica | ✅ Ultrarrápido | Gratis | `apt install espeak-ng` | ✅ Sí |
+| **OpenAI TTS** | Cloud | ⭐⭐⭐⭐⭐ Excelente | ✅ Rápido | $0.015/1K chars | API key | ✅ Sí |
+| **Coqui TTS** | Local (CPU/GPU) | ⭐⭐⭐⭐⭐ Excelente | ❌ Lento en CPU | Gratis | `pip install TTS` | ❌ No sin GPU |
+| **ElevenLabs** | Cloud | ⭐⭐⭐⭐⭐ Excelente | ✅ Rápido | Plan free limitado | API key | ✅ Sí |
+| **Google Cloud TTS** | Cloud | ⭐⭐⭐⭐⭐ Excelente | ✅ Rápido | $0.016/1K chars | API key | ✅ Sí |
+| **Kokoro (local, ONNX)** | Local (CPU) | ⭐⭐⭐⭐ Muy buena | ✅ Rápido (~1x real-time en CPU 82M params) | Gratis | `pip install kokoro-onnx` | ⚠️ Depende CPU |
+
+### Recomendación para el demo
+
+```
+Edge TTS (ahora mismo)
+  ├── Ya instalado y funcionando
+  ├── Voz en-US-GuyNeural (masculina, clara)
+  ├── Velocidad: genera 6s de audio en ~2s
+  └── Ideal para narración "en vivo"
+
+Kokoro (próximo paso)
+  ├── Mejor calidad natural
+  ├── Vía Chutes API (ya tienes key)
+  ├── 50+ voces (af_heart, af_bella, am_adam...)
+  └── Pendiente: encontrar endpoint exacto
+```
+
+---
+
+## 11. Files produced in s84
 
 | File | Lines | Purpose |
 |---|---|---|

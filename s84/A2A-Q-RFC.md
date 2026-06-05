@@ -325,6 +325,8 @@ All metrics are stored in `Task.metadata` under reserved keys:
 |---|---|---|
 | `a2a-quality:efficacy` | object | Quality score, pass/fail, criteria breakdown |
 | `a2a-quality:efficiency` | object | Timing, token usage, utilization |
+| `a2a-quality:hardware` | object | CPU, RAM, context window, network I/O |
+| `a2a-quality:runtime` | object | Language, memory footprint, startup time |
 | `a2a-quality:process` | object | Assignment quality, bottlenecks |
 | `a2a-quality:trace` | array | Ordered history of quality hops |
 | `a2a-quality:criteria` | object | Task-specific quality criteria |
@@ -382,6 +384,56 @@ All metrics are stored in `Task.metadata` under reserved keys:
 - `tool_calls`: Number of tool invocations during processing.
 - `utilization`: `processing_time_ms / total_wall_time_ms`. Values near 1.0
   indicate high efficiency; values near 0.0 indicate time spent waiting.
+
+### 6.3a Hardware & Runtime Metrics
+
+```json
+{
+  "a2a-quality:hardware": {
+    "local": {
+      "cpu_usage_pct": 45.2,
+      "memory_mb": 198,
+      "context_size_tokens": 32000,
+      "context_window_pct": 0.62,
+      "process_count": 3
+    },
+    "remote": {
+      "api_latency_ms": 340,
+      "remote_gpu_used": "NVIDIA A10G (24GB)",
+      "network_io_bytes": 245000
+    }
+  },
+  "a2a-quality:runtime": {
+    "language": "typescript",
+    "runtime_memory_mb": 198,
+    "startup_time_ms": 1200,
+    "agent_type": "opencode | crush | claude-code | custom",
+    "notes": "OpenCode ~200MB RAM (TypeScript), Crush ~30MB RAM (Go)"
+  }
+}
+```
+
+**Local hardware fields**:
+- `cpu_usage_pct`: Average CPU utilization during task processing.
+- `memory_mb`: Resident memory of the agent process (RSS). Useful for comparing
+  runtime efficiency — e.g., TypeScript agents (OpenCode ~200MB) vs Go agents
+  (Crush ~30MB).
+- `context_size_tokens`: Total size of the context sent to the LLM.
+- `context_window_pct`: Percentage of the LLM's context window consumed.
+  Critical metric: high values indicate context pressure, risk of truncation.
+- `process_count`: Number of child/spawned processes.
+
+**Remote hardware fields**:
+- `api_latency_ms`: Round-trip latency to external API calls.
+- `remote_gpu_used`: GPU model and VRAM if cloud compute is used.
+- `network_io_bytes`: Total bytes sent/received over the network.
+
+**Runtime fields**:
+- `language`: The agent's implementation language (Python, Go, TS, Rust...).
+- `runtime_memory_mb`: Base memory footprint of the agent runtime.
+- `startup_time_ms`: Cold-start time for the agent.
+- `agent_type`: Categorizes the agent (opencode, crush, claude-code, custom).
+- `notes`: Free-text for comparative observations.
 
 ### 6.4 Process Metrics
 
@@ -719,6 +771,38 @@ If accepted, these sections of the A2A v1.0 spec would need modification:
           "reason": {"type": "string"}
         },
         "required": ["from", "to", "state", "ts"]
+      }
+    },
+    "a2a-quality:hardware": {
+      "type": "object",
+      "properties": {
+        "local": {
+          "type": "object",
+          "properties": {
+            "cpu_usage_pct": {"type": "number"},
+            "memory_mb": {"type": "number"},
+            "context_size_tokens": {"type": "integer"},
+            "context_window_pct": {"type": "number"},
+            "process_count": {"type": "integer"}
+          }
+        },
+        "remote": {
+          "type": "object",
+          "properties": {
+            "api_latency_ms": {"type": "number"},
+            "remote_gpu_used": {"type": "string"},
+            "network_io_bytes": {"type": "integer"}
+          }
+        }
+      }
+    },
+    "a2a-quality:runtime": {
+      "type": "object",
+      "properties": {
+        "language": {"type": "string"},
+        "runtime_memory_mb": {"type": "number"},
+        "startup_time_ms": {"type": "integer"},
+        "agent_type": {"type": "string"}
       }
     },
     "a2a-quality:criteria": {

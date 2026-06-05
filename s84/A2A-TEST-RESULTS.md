@@ -303,6 +303,17 @@ A2A-Q agrega métricas estructuradas de eficacia y eficiencia a cada task:
 | | `estimated_tokens` | Consumo aproximado de tokens |
 | | `tool_calls` | Número de tools invocadas |
 | | `utilization` | Tiempo productivo / tiempo total |
+| **Hardware (local)** | `cpu_usage_pct` | % de CPU usado durante la tarea |
+| | `memory_mb` | RAM usada por el agente (MB) |
+| | `context_size` | Tamaño del contexto (tokens, archivos, sesiones activas) |
+| | `context_window_pct` | % del context window del LLM utilizado |
+| | `process_count` | Número de procesos hijos/spawned |
+| **Hardware (remoto)** | `api_latency_ms` | Latencia de llamadas a APIs externas |
+| | `remote_gpu_used` | GPU remota utilizada (modelo, VRAM) |
+| | `network_io_bytes` | Bytes enviados/recibidos |
+| **Agente (runtime)** | `runtime_language` | Python, Go, TypeScript, Rust... |
+| | `runtime_memory_mb` | Memoria base del runtime (ej: OpenCode ~200MB, Crush ~30MB) |
+| | `startup_time_ms` | Tiempo en iniciar el agente |
 | **Calidad de asignación** | `assignment_correctness` | ¿Se asignó al agente correcto? |
 | | `bottleneck` | Dónde se perdió más tiempo |
 
