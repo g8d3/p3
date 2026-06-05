@@ -14,7 +14,8 @@ import time
 import urllib.request
 import urllib.error
 
-MONITOR_LOG = "/tmp/a2a-monitor.log"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MONITOR_LOG = os.path.join(BASE_DIR, "workdir", "monitor.log")
 PORT = 9099  # monitor web UI port
 
 log_lock = threading.Lock()

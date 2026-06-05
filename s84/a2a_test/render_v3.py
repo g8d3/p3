@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Render FINAL v3: full-screen terminal + reactive Spanish narration + monitor."""
-import json, os, re, subprocess
+import json, os, re, subprocess, sys
 from PIL import Image, ImageDraw, ImageFont
 
-CAST = "/tmp/final-v2.cast"
-TTS_DIR = "/tmp/tts-v4"
-OUT_DIR = "/tmp/final-v3"
+BASE = os.path.dirname(os.path.abspath(__file__))
+CAST = os.path.join(BASE, "workdir", "final-v2.cast")
+TTS_DIR = os.path.join(BASE, "workdir", "tts-v4")
+OUT_DIR = os.path.join(BASE, "workdir", "final-v3")
 os.makedirs(OUT_DIR, exist_ok=True)
 
 W, H = 1280, 720
