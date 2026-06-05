@@ -1,0 +1,19 @@
+#!/bin/bash
+# ciclador — process supervisor for busd, notif & co
+# Usage: ciclador
+busdir="$HOME/.j/bus"
+logfile="$busdir/ciclador.log"
+
+log() { echo "[$(date +%H:%M:%S)] $*" >> "$logfile"; }
+
+log "ciclador started"
+
+while true; do
+  sleep 15
+  for proc in busd notif; do
+    if ! pgrep -f "$HOME/.j/bin/$proc" >/dev/null 2>&1; then
+      log "$proc not running, restarting..."
+      bash "$HOME/.j/bin/$proc" &
+    fi
+  done
+done

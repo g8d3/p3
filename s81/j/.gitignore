@@ -1,0 +1,33 @@
+# runtime data
+bus/.status-*
+bus/.proxy-*
+bus/history/
+bus/tmp/
+bus/a*/
+bus/bld/
+bus/dev/
+bus/tst/
+bus/usr/
+bus/backup/
+bus/busd.pid
+
+# compiled binaries
+bin/j-proxy
+
+# generated
+bin/go.mod
+bin/go.sum
+bin/go.work
+
+# databases
+flow.db
+
+# history snapshots
+history/
+
+# symlink
+current
+
+# staging copies (stable/ has the real versions)
+staging/
+stable/

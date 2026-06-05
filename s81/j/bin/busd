@@ -1,0 +1,102 @@
+#!/bin/bash
+# busd — bus daemon for agent-to-agent messaging
+# Watches ~/.j/bus/<agent>/in/ inboxes, forwards messages via tmux.
+# Usage: busd [--help]
+
+set -uo pipefail  # no set -e — busd must survive errors
+
+busdir="${HOME}/.j/bus"
+history="${busdir}/history"
+AI_CMD="${AI_CMD:-}"
+
+# ── Detect AI command ──────────────────────────────────────────
+detect_ai() {
+  [ -n "$AI_CMD" ] && echo "$AI_CMD" && return 0
+  for cmd in crush claude op opencode; do
+    path=$(command -v "$cmd" 2>/dev/null || true)
+    [ -n "$path" ] && echo "$cmd" && return 0
+  done
+  echo ""  # not found
+}
+
+# ── watch list: all <agent>/in/ dirs (skip orchestrator/) ──────
+build_watch_list() {
+  local dirs=""
+  for d in "$busdir"/*/in; do
+    [ -d "$d" ] || continue
+    [[ "$d" == */orchestrator/* ]] && continue
+    dirs="$dirs $d"
+  done
+  echo "$dirs"
+}
+
+# ── Help ────────────────────────────────────────────────────────
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
+  echo "busd — bus daemon for agent-to-agent messaging"
+  echo ""
+  echo "Usage: busd"
+  echo ""
+  echo "Watches ~/.j/bus/<agent>/in/ for new messages and forwards"
+  echo "them to the corresponding <agent> tmux session."
+  echo ""
+  echo "Environment:"
+  echo "  AI_CMD        AI command to launch (default: auto-detect)"
+  echo ""
+  echo "Directories:"
+  echo "  ~/.j/bus/     root bus directory"
+  echo "  ├── <agent>/in/   per-agent inbox"
+  echo "  └── history/      message log"
+  echo ""
+  echo "Detected AI: $(detect_ai || echo 'none')"
+  exit 0
+fi
+
+# ── Setup directories ──────────────────────────────────────────
+mkdir -p "$history"
+logfile="$history/busd.log"
+
+ai_cmd=$(detect_ai)
+echo "[$(date +%H:%M:%S)] busd starting — AI: ${ai_cmd:-none}" >> "$logfile"
+
+# ── Main loop (polling) ─────────────────────────────────────────
+processed="$HOME/.j/bus/tmp/busd-processed"
+mkdir -p "$HOME/.j/bus/tmp"
+
+while true; do
+  for d in "$busdir"/*/in; do
+    [ -d "$d" ] || continue
+    [[ "$d" == */orchestrator/* ]] && continue
+    for filepath in "$d"/*; do
+      [ -f "$filepath" ] || continue
+      # Skip if already processed in this cycle
+      base=$(basename "$filepath")
+      [ -f "$processed/$base" ] && continue
+      touch "$processed/$base"
+
+      target=$(echo "$filepath" | awk -F/ '{print $(NF-2)}')
+      fname=$(basename "$filepath")
+      msg=$(cat "$filepath" 2>/dev/null || echo "")
+      rm -f "$filepath" 2>/dev/null
+
+      if [ -n "$msg" ]; then
+        trace_id=$(echo "$fname" | sed 's/.*--//' 2>/dev/null || echo "")
+        [ -z "$trace_id" ] || [ "$trace_id" = "$fname" ] && trace_id=""
+        if [ -n "$trace_id" ]; then
+          echo "[$(date +%s)] → ${target}: ${msg} [trace_id=${trace_id}]" >> "$history/messages.log"
+        else
+          echo "[$(date +%s)] → ${target}: ${msg}" >> "$history/messages.log"
+        fi
+        if tmux has-session -t "$target" 2>/dev/null; then
+          tmux send-keys -t "$target" Escape
+          sleep 0.3
+          tmux send-keys -t "$target" "$msg" Enter
+        else
+          echo "[$(date +%s)] ⚠ tmux session '${target}' not found" >> "$logfile"
+        fi
+      fi
+    done
+  done
+  # Clean old processed markers
+  rm -f "$processed"/*
+  sleep 2
+done

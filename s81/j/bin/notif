@@ -1,0 +1,39 @@
+#!/bin/bash
+# notif — watches task inboxes and flows, notifies workers via tmux
+# Usage: notif
+busdir="$HOME/.j/bus"
+flowdb="$HOME/.j/flow.db"
+
+notify_agent() {
+  local agent="$1" desc="$2" flow="$3"
+  mkdir -p "$busdir/$agent/in"
+  local msg="$busdir/$agent/in/flow-$(date +%s)"
+  cat > "$msg" << EOF
+FLOW: $flow
+STEP: $desc
+You have been assigned this step. Run it.
+EOF
+  # Also ping via tmux if the window exists
+  if tmux has-session -t "main:$agent" 2>/dev/null; then
+    tmux send-keys -t "main:$agent" "Nueva tarea de flow: $desc" Enter
+  fi
+  log "notified $agent → $desc"
+}
+
+log() { echo "[$(date +%H:%M:%S)] $*" >> "$busdir/notif.log"; }
+
+# Flow monitor loop (every 5s) — checks for new pending steps
+while true; do
+  sleep 5
+  sqlite3 "$flowdb" "SELECT s.id, s.assigned_to, s.description, f.name, s.status, COALESCE(s.notified_at,'') FROM flows f JOIN steps s ON s.flow_id=f.id WHERE f.status='running' AND s.step_order=f.current_step AND s.assigned_to != '';" 2>/dev/null | while IFS='|' read -r sid agent desc flow st notified_at; do
+    [ -z "$agent" ] && continue
+    if [ "$st" = "pending" ]; then
+      notify_agent "$agent" "$desc" "$flow"
+      sqlite3 "$flowdb" "UPDATE steps SET status='notified', notified_at=datetime('now') WHERE id=$sid;"
+    elif [ "$st" = "notified" ] && [ -n "$notified_at" ]; then
+      # Check if 60s have passed since last notification
+      elapsed=$(sqlite3 "$flowdb" "SELECT CAST(ROUND((julianday('now') - julianday('$notified_at')) * 86400) AS INTEGER);" 2>/dev/null)
+      [ "${elapsed:-0}" -ge 60 ] && notify_agent "$agent" "$desc" "$flow" && sqlite3 "$flowdb" "UPDATE steps SET notified_at=datetime('now') WHERE id=$sid;"
+    fi
+  done
+done

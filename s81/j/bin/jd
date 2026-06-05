@@ -1,0 +1,101 @@
+#!/bin/bash
+# jd — agente unificado
+# Modos:
+#   alerta  inotify sobre ~/.j/bus/a*/{in,tasks}
+#   ronda   polling 60s sobre ~/.j/bus/{bld,tst,dev,buf,prt}/in
+set -uo pipefail
+
+busdir="${HOME}/.j/bus"
+logfile="$busdir/history/jd.log"
+mkdir -p "$busdir/history" "$busdir/tmp"
+
+log() { echo "[$(date +%H:%M:%S)] [$1] $*" >> "$logfile"; }
+
+deliver() {
+  local target="$1" msg="$2"
+  echo "[$(date +%s)] → ${target}: $(echo "$msg" | head -c 120)" >> "$busdir/history/messages.log"
+  if tmux has-session -t "$target" 2>/dev/null; then
+    tmux send-keys -t "$target" Escape
+    sleep 0.3
+    tmux send-keys -t "$target" "$msg" Enter
+    log "$target" "entregado: $(echo "$msg" | head -c 60)"
+  else
+    log "$target" "tmux no encontrado"
+  fi
+}
+
+# ── ALERTA: inotify sobre a*/{in,tasks} ────────────────────────
+run_alerta() {
+  log alerta "iniciado (inotify)"
+  watches=()
+  for d in dev buf tst bld; do
+    dir="$busdir/$d/in"
+    [ -d "$dir" ] && watches+=("$dir")
+  done
+  if [ ${#watches[@]} -eq 0 ]; then
+    log alerta "sin directorios que vigilar"
+    exit 1
+  fi
+  log alerta "vigilando ${#watches[@]} directorios"
+  inotifywait -m -e close_write,moved_to --format '%w%f' "${watches[@]}" 2>>"$logfile" | while read -r filepath; do
+    [ -f "$filepath" ] || continue
+    msg=$(cat "$filepath" 2>/dev/null || echo "")
+    rm -f "$filepath" 2>/dev/null
+    [ -z "$msg" ] && continue
+    agent=$(echo "$filepath" | awk -F/ '{print $(NF-2)}')
+    deliver "$agent" "$msg"
+  done
+}
+
+# ── RONDA: polling 60s sobre code inboxes ────────────────────
+run_ronda() {
+  log ronda "iniciado (polling 60s)"
+  local processed="$busdir/tmp/jd-codigo-processed"
+  mkdir -p "$processed"
+  while true; do
+    # Crear flow si no hay activos
+    local active
+    active=$(sqlite3 "$HOME/.j/flow.db" "SELECT COUNT(*) FROM flows WHERE status='running';" 2>/dev/null || echo 0)
+    if [ "$active" -eq 0 ]; then
+      local ts
+      ts=$(date +%s)
+      sqlite3 "$HOME/.j/flow.db" "INSERT INTO flows (name, goal, status, created_at, updated_at) VALUES ('ronda-$ts', 'ronda de mantenimiento', 'running', datetime('now'), datetime('now'));" 2>/dev/null
+      local fid
+      fid=$(sqlite3 "$HOME/.j/flow.db" "SELECT id FROM flows WHERE name='ronda-$ts';" 2>/dev/null)
+      sqlite3 "$HOME/.j/flow.db" "INSERT INTO steps (flow_id, step_order, description, status, assigned_to) VALUES ($fid, 1, 'revisar estado del sistema y reportar', 'pending', 'dev');"
+      sqlite3 "$HOME/.j/flow.db" "UPDATE flows SET current_step=1 WHERE id=$fid;"
+      log ronda "flow ronda-$ts creado (sin flows activos)"
+    fi
+    for d in "$busdir"/bld/in "$busdir"/tst/in "$busdir"/dev/in "$busdir"/buf/in "$busdir"/prt/in; do
+      [ -d "$d" ] || continue
+      for filepath in "$d"/*; do
+        [ -f "$filepath" ] || continue
+        base=$(basename "$filepath")
+        [ -f "$processed/$base" ] && continue
+        touch "$processed/$base"
+        msg=$(cat "$filepath" 2>/dev/null || echo "")
+        rm -f "$filepath" 2>/dev/null
+        [ -z "$msg" ] && continue
+        agent=$(echo "$filepath" | awk -F/ '{print $(NF-2)}')
+        deliver "$agent" "$msg"
+      done
+    done
+    rm -f "$processed"/*
+    sleep 60
+  done
+}
+
+# ── MAIN ─────────────────────────────────────────────────────
+case "${1:-}" in
+  alerta) run_alerta ;;
+  ronda)  run_ronda ;;
+  --help|-h)
+    echo "jd — agente unificado"
+    echo "  jd alerta  inotify sobre {dev,buf,tst,bld}/in"
+    echo "  jd ronda   polling 60s + crear flows si no hay"
+    ;;
+  *)
+    echo "uso: jd {alerta|ronda}  —  jd --help para ayuda" >&2
+    exit 1
+    ;;
+esac

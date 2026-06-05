@@ -1,0 +1,85 @@
+#!/bin/bash
+# j-status — compact mobile-friendly status (one-shot, run via watch)
+echo "=== FLOW ==="
+printf "  %-6s %-25s %s\n" "step" "desc" "agent"
+sqlite3 "$HOME/.j/flow.db" "SELECT id, name, current_step, (SELECT COUNT(*) FROM steps WHERE flow_id=f.id) FROM flows f WHERE f.status='running' ORDER BY f.updated_at DESC LIMIT 1;" 2>/dev/null | while IFS="|" read -r fid name cur total; do
+  [ -z "$fid" ] && continue
+  name=$(echo "$name" | head -c 20)
+  printf "  %s (%s/%s)\n" "$name" "$cur" "$total"
+  sqlite3 "$HOME/.j/flow.db" "SELECT step_order, description, status, assigned_to, (step_order = (SELECT MAX(s2.step_order) FROM steps s2 WHERE s2.flow_id=$fid AND s2.status!='done')) AS is_last FROM steps WHERE flow_id=$fid AND status!='done' ORDER BY step_order LIMIT 4;" 2>/dev/null | while IFS="|" read -r ord desc st agent last; do
+    [ -z "$ord" ] && continue
+    prefix="├─"; [ "$last" = "1" ] && prefix="└─"
+    case "$st" in
+      done) icon="  ";;
+      notified|running) icon="⚡ ";;
+      pending)
+        if [ -n "$agent" ]; then
+          ag_sig="$HOME/.j/bus/.status-${agent}-ts"
+          ag_recent=0; [ -f "$ag_sig" ] && ts=$(cat "$ag_sig") && [ $(( $(date +%s) - ts )) -lt 3 ] && ag_recent=1
+          ag_pane=$(tmux capture-pane -t "main:$agent" -p 2>/dev/null)
+          echo "$ag_pane" | grep -v '^\s*$' | grep -qE '(Working|Processing)\.\.\.|Working!|Waiting for tool|Thinking\.' && ag_recent=1
+          if [ "$ag_recent" -eq 1 ]; then
+            icon="⚡ "
+          else
+            icon="○ "
+          fi
+        else
+          icon="○ "
+        fi
+        ;;
+      *) icon="  ";;
+    esac
+    desc=$(echo "$desc" | head -c 25)
+    printf "  %s %-1s %-25s %s%s\n" "$prefix" "$ord" "$desc" "$icon" "$agent"
+  done
+done
+count=$(sqlite3 "$HOME/.j/flow.db" "SELECT COUNT(*) FROM flows WHERE status='running';" 2>/dev/null)
+[ "$count" = "0" ] && echo "  (none)"
+echo "=== AGENTS ==="
+printf "  %-2s %-12s %-12s %5s %5s\n" "#" "nombre" "status" "cpu" "mem"
+# tmux windows
+tmux list-windows -t main -F "#{window_index} #{window_name}" 2>/dev/null | while read i n; do
+  [ "$n" = "st" ] && continue
+  r="$n"
+  cpu="?"; mem="?"; pid=$(tmux list-panes -t "main:$i" -F "#{pane_pid}" 2>/dev/null)
+  if [ -n "$pid" ]; then
+    child=$(pgrep -P "$pid" -x crush 2>/dev/null | head -1)
+    [ -n "$child" ] && pid=$child
+    ps_out=$(ps --no-headers -o %cpu,%mem -p "$pid" 2>/dev/null)
+    [ -n "$ps_out" ] && read -r cpu mem <<< "$ps_out"
+  fi
+  if ! tmux has-session -t "main:$i" 2>/dev/null; then printf "  %-2s %-12s %-12s %5s %5s\n" "$i" "$r" "dead" "$cpu%" "$mem%"; continue; fi
+  st="○ idle"
+  # 1) Proxy state file (source of truth when proxy is running)
+  pf="$HOME/.j/bus/.proxy-${r}"
+  if [ -f "$pf" ]; then
+    ps=$(cat "$pf" | tr -d ' \n')
+    case "$ps" in
+      sending|receiving) st="⚡ active" ;;
+    esac
+  else
+    # 2) Fallback: bus heartbeat + pane indicators + database
+    ag_sig="$HOME/.j/bus/.status-${r}-ts"
+    ag_recent=0; [ -f "$ag_sig" ] && ts=$(cat "$ag_sig") && [ $(( $(date +%s) - ts )) -lt 3 ] && ag_recent=1
+    ag_pane=$(tmux capture-pane -t "main:$i" -p 2>/dev/null)
+    echo "$ag_pane" | grep -v '^\s*$' | grep -qE '(Working|Processing)\.\.\.|Working!|Waiting for tool|Thinking\.' && ag_recent=1
+    db=$(sqlite3 "$HOME/.j/flow.db" "SELECT 1 FROM steps s JOIN flows f ON s.flow_id=f.id WHERE f.status='running' AND s.assigned_to='$r' AND s.status IN ('pending','running') LIMIT 1;" 2>/dev/null)
+    if [ "$ag_recent" -eq 1 ] || [ -n "$db" ]; then
+      st="⚡ active"
+    fi
+  fi
+  printf "  %-2s %-12s %-12s %5s %5s\n" "$i" "$r" "$st" "$cpu%" "$mem%"
+done
+# daemons
+idx=6
+for name in jd; do
+  pid=$(pgrep -f "$name" 2>/dev/null | head -1)
+  if [ -n "$pid" ]; then
+    ps_out=$(ps --no-headers -o %cpu,%mem -p "$pid" 2>/dev/null)
+    [ -n "$ps_out" ] && read -r cpu mem <<< "$ps_out"
+    printf "  %-2s %-12s %-12s %5s %5s\n" "$idx" "$name" "running" "$cpu%" "$mem%"
+  else
+    printf "  %-2s %-12s %-12s %5s %5s\n" "$idx" "$name" "stopped" "" ""
+  fi
+  idx=$((idx + 1))
+done
