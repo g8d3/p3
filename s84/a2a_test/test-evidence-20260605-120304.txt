@@ -1,0 +1,112 @@
+============================================
+ A2A Protocol Test — Reproducible Evidence
+ Date: 2026-06-05T17:03:04Z
+ Host: vuos-hcar5000mi
+============================================
+
+=== 1. Starting Agents ===
+  Agent on port 9001: READY
+  Agent on port 9002: READY
+
+=== TEST 1: Agent Card Discovery ===
+
+Alpha Card: {"name": "Alpha-Generalist", "description": "A2A test agent. Skills: research, summarize, analyze, delegate", "url": "http://localhost:9001", "version": "1.0.0", "capabilities": {"streaming": false, "pushNotifications": false}, "defaultInputModes": ["text/plain"], "defaultOutputModes": ["text/plain"], "skills": [{"id": "research", "name": "research", "description": "Can research", "tags": ["research"], "examples": ["I need you to research"]}, {"id": "summarize", "name": "summarize", "description": "Can summarize", "tags": ["summarize"], "examples": ["I need you to summarize"]}, {"id": "analyze", "name": "analyze", "description": "Can analyze", "tags": ["analyze"], "examples": ["I need you to analyze"]}, {"id": "delegate", "name": "delegate", "description": "Can delegate", "tags": ["delegate"], "examples": ["I need you to delegate"]}]}
+Beta Card: {"name": "Beta-Quality", "description": "A2A test agent. Skills: code-review, validate, test, quality-check", "url": "http://localhost:9002", "version": "1.0.0", "capabilities": {"streaming": false, "pushNotifications": false}, "defaultInputModes": ["text/plain"], "defaultOutputModes": ["text/plain"], "skills": [{"id": "code-review", "name": "code-review", "description": "Can code-review", "tags": ["code-review"], "examples": ["I need you to code-review"]}, {"id": "validate", "name": "validate", "description": "Can validate", "tags": ["validate"], "examples": ["I need you to validate"]}, {"id": "test", "name": "test", "description": "Can test", "tags": ["test"], "examples": ["I need you to test"]}, {"id": "quality-check", "name": "quality-check", "description": "Can quality-check", "tags": ["quality-check"], "examples": ["I need you to quality-check"]}]}
+
+=== TEST 2: Send Message + Poll ===
+
+---[req-1780678985171562843]---
+>>> POST http://localhost:9001/message:send
+>>> Body: {"message":{"role":"user","parts":[{"text":"What is the weather?"}],"messageId":"m1"}}
+<<< Response (8 ms): {"jsonrpc": "2.0", "result": {"id": "task-d6bd66c7e6f8", "contextId": "task-d6bd66c7e6f8", "status": {"state": "working", "timestamp": 1780678985.1786757}, "artifacts": [], "history": [{"role": "user", "parts": [{"text": "What is the weather?"}], "messageId": "msg-8a39cc36"}], "metadata": {"agent": "Alpha-Generalist", "received_at": 1780678985.178685}}}
+---
+Task ID: task-d6bd66c7e6f8
+
+---[req-1780678985205283366]---
+>>> GET http://localhost:9001/tasks/task-d6bd66c7e6f8
+>>> Body: 
+<<< Response (8 ms): {"jsonrpc": "2.0", "result": {"id": "task-d6bd66c7e6f8", "contextId": "task-d6bd66c7e6f8", "status": {"state": "working", "timestamp": 1780678985.1786757}, "artifacts": [], "history": [{"role": "user", "parts": [{"text": "What is the weather?"}], "messageId": "msg-8a39cc36"}], "metadata": {"agent": "Alpha-Generalist", "received_at": 1780678985.178685}}}
+---
+  Poll 1: working
+---[req-1780678985736956110]---
+>>> GET http://localhost:9001/tasks/task-d6bd66c7e6f8
+>>> Body: 
+<<< Response (7 ms): {"jsonrpc": "2.0", "result": {"id": "task-d6bd66c7e6f8", "contextId": "task-d6bd66c7e6f8", "status": {"state": "working", "timestamp": 1780678985.1786757}, "artifacts": [], "history": [{"role": "user", "parts": [{"text": "What is the weather?"}], "messageId": "msg-8a39cc36"}], "metadata": {"agent": "Alpha-Generalist", "received_at": 1780678985.178685}}}
+---
+  Poll 2: working
+---[req-1780678986267795108]---
+>>> GET http://localhost:9001/tasks/task-d6bd66c7e6f8
+>>> Body: 
+<<< Response (7 ms): {"jsonrpc": "2.0", "result": {"id": "task-d6bd66c7e6f8", "contextId": "task-d6bd66c7e6f8", "status": {"state": "working", "timestamp": 1780678985.1786757}, "artifacts": [], "history": [{"role": "user", "parts": [{"text": "What is the weather?"}], "messageId": "msg-8a39cc36"}], "metadata": {"agent": "Alpha-Generalist", "received_at": 1780678985.178685}}}
+---
+  Poll 3: working
+---[req-1780678986797693086]---
+>>> GET http://localhost:9001/tasks/task-d6bd66c7e6f8
+>>> Body: 
+<<< Response (7 ms): {"jsonrpc": "2.0", "result": {"id": "task-d6bd66c7e6f8", "contextId": "task-d6bd66c7e6f8", "status": {"state": "completed", "timestamp": 1780678986.6790512}, "artifacts": [{"parts": [{"text": "[Alpha-Generalist] I've analyzed your request.\n\n\n### Research Summary\nInput: 'What is the weather?'\n\nTask: task-d6bd66c7e6f\n\nContext: task-d6bd66c7e6f8\n\n\n### Available Actions\n- Task lifecycle: submitted \u2192 working \u2192 completed\n- Cancellation supported via POST /tasks/{id}:cancel\n- No quality gate in A2A protocol"}], "id": "art-cc4567b8", "index": 0}], "history": [{"role": "user", "parts": [{"text": "What is the weather?"}], "messageId": "msg-8a39cc36"}, {"role": "agent", "parts": [{"text": "[Alpha-Generalist] I've analyzed your request.\n\n\n### Research Summary\nInput: 'What is the weather?'\n\nTask: task-d6bd66c7e6f\n\nContext: task-d6bd66c7e6f8\n\n\n### Available Actions\n- Task lifecycle: submitted \u2192 working \u2192 completed\n- Cancellation supported via POST /tasks/{id}:cancel\n- No quality gate in A2A protocol"}], "messageId": "msg-e5f4ff69"}], "metadata": {"agent": "Alpha-Generalist", "received_at": 1780678985.178685}}}
+---
+  Poll 4: completed
+
+=== TEST 3: Cancellation ===
+
+---[req-1780678986830219712]---
+>>> POST http://localhost:9001/message:send
+>>> Body: {"message":{"role":"user","parts":[{"text":"Write a very long report about AI agents"}],"messageId":"m2"}}
+<<< Response (8 ms): {"jsonrpc": "2.0", "result": {"id": "task-c54e93c4ccfd", "contextId": "task-c54e93c4ccfd", "status": {"state": "working", "timestamp": 1780678986.8370967}, "artifacts": [], "history": [{"role": "user", "parts": [{"text": "Write a very long report about AI agents"}], "messageId": "msg-de7fb978"}], "metadata": {"agent": "Alpha-Generalist", "received_at": 1780678986.8371055}}}
+---
+Task 2 ID: task-c54e93c4ccfd
+---[req-1780678987163641608]---
+>>> POST http://localhost:9001/tasks/task-c54e93c4ccfd:cancel
+>>> Body: {}
+<<< Response (7 ms): {"jsonrpc": "2.0", "result": {"id": "task-c54e93c4ccfd", "contextId": "task-c54e93c4ccfd", "status": {"state": "canceled", "timestamp": 1780678987.1704624}, "artifacts": [], "history": [{"role": "user", "parts": [{"text": "Write a very long report about AI agents"}], "messageId": "msg-de7fb978"}], "metadata": {"agent": "Alpha-Generalist", "received_at": 1780678986.8371055}}}
+---
+Cancel state: canceled
+---[req-1780678987493866744]---
+>>> GET http://localhost:9001/tasks/task-c54e93c4ccfd
+>>> Body: 
+<<< Response (7 ms): {"jsonrpc": "2.0", "result": {"id": "task-c54e93c4ccfd", "contextId": "task-c54e93c4ccfd", "status": {"state": "canceled", "timestamp": 1780678987.1704624}, "artifacts": [], "history": [{"role": "user", "parts": [{"text": "Write a very long report about AI agents"}], "messageId": "msg-de7fb978"}], "metadata": {"agent": "Alpha-Generalist", "received_at": 1780678986.8371055}}}
+---
+Verified state after cancel: canceled
+
+=== TEST 4: Quality Gate Limitation ===
+
+---[req-1780678987527411954]---
+>>> POST http://localhost:9002/message:send
+>>> Body: {"message":{"role":"user","parts":[{"text":"Review this code: def foo(): pass"}],"messageId":"m3"}}
+<<< Response (7 ms): {"jsonrpc": "2.0", "result": {"id": "task-3cb3a403baa3", "contextId": "task-3cb3a403baa3", "status": {"state": "working", "timestamp": 1780678987.5341232}, "artifacts": [], "history": [{"role": "user", "parts": [{"text": "Review this code: def foo(): pass"}], "messageId": "msg-fb9c9d29"}], "metadata": {"agent": "Beta-Quality", "received_at": 1780678987.5341334}}}
+---
+---[req-1780678989057758297]---
+>>> GET http://localhost:9002/tasks/task-3cb3a403baa3
+>>> Body: 
+<<< Response (8 ms): {"jsonrpc": "2.0", "result": {"id": "task-3cb3a403baa3", "contextId": "task-3cb3a403baa3", "status": {"state": "completed", "timestamp": 1780678988.3349774}, "artifacts": [{"parts": [{"text": "[Beta-Quality] \u2705 Quality check PASSED.\n\n### Validation Results\n- Input format: OK\n- No problematic keywords\n- Task appears well-formed\n\n### A2A Limitation Noted\nThis check is custom logic. The A2A protocol itself\nhas no concept of quality gates or acceptance criteria."}], "id": "art-9207cc75", "index": 0}], "history": [{"role": "user", "parts": [{"text": "Review this code: def foo(): pass"}], "messageId": "msg-fb9c9d29"}, {"role": "agent", "parts": [{"text": "[Beta-Quality] \u2705 Quality check PASSED.\n\n### Validation Results\n- Input format: OK\n- No problematic keywords\n- Task appears well-formed\n\n### A2A Limitation Noted\nThis check is custom logic. The A2A protocol itself\nhas no concept of quality gates or acceptance criteria."}], "messageId": "msg-9f289371"}], "metadata": {"agent": "Beta-Quality", "received_at": 1780678987.5341334}}}
+---
+Good input → state: completed
+---[req-1780678989087822841]---
+>>> POST http://localhost:9002/message:send
+>>> Body: {"message":{"role":"user","parts":[{"text":"This code has a bug"}],"messageId":"m4"}}
+<<< Response (7 ms): {"jsonrpc": "2.0", "result": {"id": "task-a1e4113eb513", "contextId": "task-a1e4113eb513", "status": {"state": "working", "timestamp": 1780678989.0944095}, "artifacts": [], "history": [{"role": "user", "parts": [{"text": "This code has a bug"}], "messageId": "msg-e7f7cc60"}], "metadata": {"agent": "Beta-Quality", "received_at": 1780678989.0944183}}}
+---
+---[req-1780678990618300208]---
+>>> GET http://localhost:9002/tasks/task-a1e4113eb513
+>>> Body: 
+<<< Response (7 ms): {"jsonrpc": "2.0", "result": {"id": "task-a1e4113eb513", "contextId": "task-a1e4113eb513", "status": {"state": "completed", "timestamp": 1780678989.8947237}, "artifacts": [{"parts": [{"text": "[Beta-Quality] \u274c Quality check FAILED.\n\n### Issues Found\n- Problematic keywords detected: ['bug']\n- No explicit acceptance criteria\n\n### Note\nA2A protocol has no standard 'quality gate' state.\nThe task state is still 'completed' even for rejections.\nQuality information is embedded in the artifact text, not in the protocol."}], "id": "art-eec124e5", "index": 0}], "history": [{"role": "user", "parts": [{"text": "This code has a bug"}], "messageId": "msg-e7f7cc60"}, {"role": "agent", "parts": [{"text": "[Beta-Quality] \u274c Quality check FAILED.\n\n### Issues Found\n- Problematic keywords detected: ['bug']\n- No explicit acceptance criteria\n\n### Note\nA2A protocol has no standard 'quality gate' state.\nThe task state is still 'completed' even for rejections.\nQuality information is embedded in the artifact text, not in the protocol."}], "messageId": "msg-3a4f5e7c"}], "metadata": {"agent": "Beta-Quality", "received_at": 1780678989.0944183}}}
+---
+Bad input → state: completed
+BOTH states are 'completed'/'completed' — no protocol-level quality distinction!
+
+=== TEST 5: List All Tasks on Alpha ===
+---[req-1780678990651422379]---
+>>> GET http://localhost:9001/tasks
+>>> Body: 
+<<< Response (8 ms): {"jsonrpc": "2.0", "result": [{"id": "task-d6bd66c7e6f8", "contextId": "task-d6bd66c7e6f8", "status": {"state": "completed", "timestamp": 1780678986.6790512}, "artifacts": [{"parts": [{"text": "[Alpha-Generalist] I've analyzed your request.\n\n\n### Research Summary\nInput: 'What is the weather?'\n\nTask: task-d6bd66c7e6f\n\nContext: task-d6bd66c7e6f8\n\n\n### Available Actions\n- Task lifecycle: submitted \u2192 working \u2192 completed\n- Cancellation supported via POST /tasks/{id}:cancel\n- No quality gate in A2A protocol"}], "id": "art-cc4567b8", "index": 0}], "history": [{"role": "user", "parts": [{"text": "What is the weather?"}], "messageId": "msg-8a39cc36"}, {"role": "agent", "parts": [{"text": "[Alpha-Generalist] I've analyzed your request.\n\n\n### Research Summary\nInput: 'What is the weather?'\n\nTask: task-d6bd66c7e6f\n\nContext: task-d6bd66c7e6f8\n\n\n### Available Actions\n- Task lifecycle: submitted \u2192 working \u2192 completed\n- Cancellation supported via POST /tasks/{id}:cancel\n- No quality gate in A2A protocol"}], "messageId": "msg-e5f4ff69"}], "metadata": {"agent": "Alpha-Generalist", "received_at": 1780678985.178685}}, {"id": "task-c54e93c4ccfd", "contextId": "task-c54e93c4ccfd", "status": {"state": "canceled", "timestamp": 1780678987.1704624}, "artifacts": [], "history": [{"role": "user", "parts": [{"text": "Write a very long report about AI agents"}], "messageId": "msg-de7fb978"}], "metadata": {"agent": "Alpha-Generalist", "received_at": 1780678986.8371055}}]}
+---
+Tasks: {"jsonrpc": "2.0", "result": [{"id": "task-d6bd66c7e6f8", "contextId": "task-d6bd66c7e6f8", "status": {"state": "completed", "timestamp": 1780678986.6790512}, "artifacts": [{"parts": [{"text": "[Alpha-Generalist] I've analyzed your request.\n\n\n### Research Summary\nInput: 'What is the weather?'\n\nTask: task-d6bd66c7e6f\n\nContext: task-d6bd66c7e6f8\n\n\n### Available Actions\n- Task lifecycle: submitted \u2192 working \u2192 completed\n- Cancellation supported via POST /tasks/{id}:cancel\n- No quality gate in A2A protocol"}], "id": "art-cc4567b8", "index": 0}], "history": [{"role": "user", "parts": [{"text": "What is the weather?"}], "messageId": "msg-8a39cc36"}, {"role": "agent", "parts": [{"text": "[Alpha-Generalist] I've analyzed your request.\n\n\n### Research Summary\nInput: 'What is the weather?'\n\nTask: task-d6bd66c7e6f\n\nContext: task-d6bd66c7e6f8\n\n\n### Available Actions\n- Task lifecycle: submitted \u2192 working \u2192 completed\n- Cancellation supported via POST /tasks/{id}:cancel\n- No quality gate in A2A protocol"}], "messageId": "msg-e5f4ff69"}], "metadata": {"agent": "Alpha-Generalist", "received_at": 1780678985.178685}}, {"id": "task-c54e93c4ccfd", "contextId": "task-c54e93c4ccfd", "status": {"state": "canceled", "timestamp": 1780678987.1704624}, "artifacts": [], "history": [{"role": "user", "parts": [{"text": "Write a very long report about AI agents"}], "messageId": "msg-de7fb978"}], "metadata": {"agent": "Alpha-Generalist", "received_at": 1780678986.8371055}}]}
+
+=== Cleanup ===
+Agents stopped.
+
+============================================
+ REPORT GENERATED: /home/vuos/code/p3/s84/a2a_test/test-evidence-20260605-120304.txt
+ You can cat this file to see every HTTP exchange.
+ Re-run anytime with: bash run_evidence.sh
+============================================
