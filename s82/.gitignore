@@ -1,0 +1,7 @@
+.crush/
+.crush/*
+.j/
+.j/*
+certs/cache/
+certs/cache/*
+*.log
