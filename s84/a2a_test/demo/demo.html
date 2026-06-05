@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Demo A2A — Grabación Real</title>
+  <link rel="stylesheet" href="asciinema-player.css" />
+  <style>
+    body { background:#111; color:#ddd; font-family:sans-serif; margin:0; padding:20px; text-align:center }
+    h1 { color:#0af; font-size:20px; margin-bottom:5px }
+    h2 { color:#888; font-size:14px; font-weight:normal; margin-top:0 }
+    .container { max-width:900px; margin:0 auto }
+    .player-wrapper { background:#000; border-radius:8px; overflow:hidden; margin:15px 0 }
+    .narration { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:15px 0 }
+    .narration a { background:#1a3a5c; color:#0af; padding:8px 16px; border-radius:6px; text-decoration:none; font-size:13px }
+    .narration a:hover { background:#2a5a8c }
+    .meta { color:#666; font-size:12px; margin-top:10px }
+    .steps { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:6px; margin:15px 0; text-align:left }
+    .step { background:#1a1a2e; border-radius:6px; padding:8px 12px; font-size:12px; border-left:3px solid #0af }
+    .step .num { color:#0af; font-weight:bold }
+    .step .desc { color:#aaa }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🕵️ A2A Protocol Test — Demo en Vivo</h1>
+    <h2>Grabación real de terminal con asciinema</h2>
+
+    <div class="steps">
+      <div class="step"><span class="num">1.</span> <span class="desc">Descubrimiento</span></div>
+      <div class="step"><span class="num">2.</span> <span class="desc">Ejecución</span></div>
+      <div class="step"><span class="num">3.</span> <span class="desc">Cancelación (con 404 real)</span></div>
+      <div class="step"><span class="num">4.</span> <span class="desc">Problema de calidad</span></div>
+      <div class="step"><span class="num">5.</span> <span class="desc">Solución A2A-Q</span></div>
+      <div class="step"><span class="num">6.</span> <span class="desc">Final + cliffhanger</span></div>
+    </div>
+
+    <div class="player-wrapper">
+      <div id="player"></div>
+    </div>
+
+    <h2 style="margin-top:20px">🎙️ Narración en español colombiano</h2>
+    <div class="narration">
+      <a href="tts-v4/c1.mp3" target="_blank">▶ Intro (5s)</a>
+      <a href="tts-v4/c2.mp3" target="_blank">▶ Descubrimiento (9s)</a>
+      <a href="tts-v4/c3.mp3" target="_blank">▶ Ejecución (9s)</a>
+      <a href="tts-v4/c4.mp3" target="_blank">▶ Cancelación (12s)</a>
+      <a href="tts-v4/c5.mp3" target="_blank">▶ Calidad (11s)</a>
+      <a href="tts-v4/c6.mp3" target="_blank">▶ Solución (8s)</a>
+      <a href="tts-v4/c7.mp3" target="_blank">▶ Final (10s)</a>
+    </div>
+    <p style="color:#888;font-size:13px">Pon cada audio mientras ves la terminal — están sincronizados aproximadamente</p>
+
+    <div class="meta">
+      <p>🎬 Grabación real — lo que ves es lo que pasó, con errores y todo</p>
+      <p>🧪 Dos agentes A2A: Alpha-Generalist y Beta-Quality</p>
+      <p>📡 Monitor de mensajes HTTP incluido</p>
+      <p>🌐 <a href="https://github.com/g8d3/p3" style="color:#0af">github.com/g8d3/p3</a></p>
+    </div>
+  </div>
+
+  <script src="asciinema-player.min.js"></script>
+  <script>
+    AsciinemaPlayer.create('final-v2.cast', document.getElementById('player'), {
+      cols: 80,
+      rows: 20,
+      autoPlay: false,
+      loop: false,
+      theme: 'monokai',
+      fontSize: '12px'
+    });
+  </script>
+</body>
+</html>
