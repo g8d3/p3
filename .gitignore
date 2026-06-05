@@ -18,6 +18,10 @@ s45/OpenMontage/
 # Logs — regenerate on demand
 *.log
 *.db
+
+# Session data — contiene prompts, tokens, contraseñas
+.crush/
+.j/
 *.pkl
 *.sqlite
 
