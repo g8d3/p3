@@ -4,7 +4,7 @@ import json, os, re, subprocess
 from PIL import Image, ImageDraw, ImageFont
 
 CAST = "/tmp/final-v2.cast"
-TTS_DIR = "/tmp/tts-v3"
+TTS_DIR = "/tmp/tts-v4"
 OUT_DIR = "/tmp/final-v3"
 os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -45,7 +45,7 @@ def main():
     hdr, evts = parse_cast(CAST)
     cast_dur = evts[-1][0]
 
-    tts_files = [os.path.join(TTS_DIR, f"paso{i}.mp3") for i in range(1,8)]
+    tts_files = [os.path.join(TTS_DIR, f"c{i}.mp3") for i in range(1,8)]
     tts_durs = []
     for f in tts_files:
         if os.path.exists(f) and os.path.getsize(f) > 0:
