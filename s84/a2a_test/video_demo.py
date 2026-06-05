@@ -11,7 +11,7 @@ import time
 import urllib.request
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-TTS_VOICE = "en-US-GuyNeural"
+TTS_VOICE = "es-CO-GonzaloNeural"
 TTS_DIR = "/tmp/a2a-demo-tts"
 os.makedirs(TTS_DIR, exist_ok=True)
 

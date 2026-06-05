@@ -8,7 +8,7 @@ BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$BASE_DIR"
 
 VENV_PYTHON="$BASE_DIR/../.venv/bin/python3"
-TTS_VOICE="en-US-GuyNeural"  # clara, masculina
+TTS_VOICE="es-CO-GonzaloNeural"  # español Colombia, masculina
 # Alternativas: en-US-JennyNeural, en-US-AriaNeural, en-GB-RyanNeural
 
 # ── Helper: narrar con TTS ──
