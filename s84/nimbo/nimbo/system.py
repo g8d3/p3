@@ -41,8 +41,10 @@ def register_system_endpoints(app):
 
     @app.route("/api/system/resources", methods=["GET"])
     async def get_resources(req):
+        loop = asyncio.get_event_loop()
+        cpu = await loop.run_in_executor(None, lambda: psutil.cpu_percent(interval=0.5))
         return {
-            "cpu": psutil.cpu_percent(interval=0.5),
+            "cpu": cpu,
             "memory": psutil.virtual_memory()._asdict(),
             "disk": psutil.disk_usage("/")._asdict(),
             "net": psutil.net_io_counters()._asdict(),

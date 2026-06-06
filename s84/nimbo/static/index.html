@@ -142,12 +142,10 @@
       if (!logsInit) {
         logsInit = true;
         nimbo.ws.on('open', () => {
-          const c = document.getElementById('log-container');
-          if (c) { const el=document.createElement('div');el.className='log-entry';el.innerHTML=`<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-level info">info</span>WS connected`;c.appendChild(el);c.scrollTop=c.scrollHeight; }
+          nimbo.ws.send(JSON.stringify({type:'log',data:{level:'info',content:'WS connected',source:'client'}}));
         });
         nimbo.ws.on('close', () => {
-          const c = document.getElementById('log-container');
-          if (c) { const el=document.createElement('div');el.className='log-entry';el.innerHTML=`<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-level warn">warn</span>WS disconnected`;c.appendChild(el);c.scrollTop=c.scrollHeight; }
+          // Can't send via WS when closed; server doesn't know. That's OK.
         });
         nimbo.ws.on('log', msg => {
           const c = document.getElementById('log-container');
@@ -157,8 +155,17 @@
           c.appendChild(el);c.scrollTop=c.scrollHeight;
         });
       }
-      const c = document.getElementById('log-container');
-      if (c) { const el=document.createElement('div');el.className='log-entry';el.innerHTML=`<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-level info">info</span>Logs ready`;c.appendChild(el);c.scrollTop=c.scrollHeight; }
+      // Load recent logs from DB (persisted events while away)
+      fetch('/api/log/recent').then(r=>r.json()).then(h=>{
+        const c=document.getElementById('log-container');
+        if(!c)return;
+        h.forEach(l=>{
+          if(c.querySelector(`[data-i="${l.id}"]`))return;
+          const el=document.createElement('div');el.className='log-entry';el.dataset.i=l.id;
+          el.innerHTML=`<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-level ${l.level}">${l.level}</span>${l.content}`;
+          c.appendChild(el);c.scrollTop=c.scrollHeight;
+        });
+      }).catch(()=>{});
     }
 
     // ── Init ──
