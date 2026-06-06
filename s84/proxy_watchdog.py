@@ -83,9 +83,20 @@ class ProxyHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.end_headers()
             with agents_lock:
-                state = {k: {"last_s": int(time.time()-v["last_request"]),
-                            "idle": v["idle"]} for k,v in agents.items()}
-                self.wfile.write(json.dumps(state).encode())
+                now = time.time()
+                state = {}
+                for k, v in agents.items():
+                    elapsed = now - v["last_request"]
+                    state[k] = {"last_s": int(elapsed), "idle": v["idle"],
+                                "status": "idle" if v["idle"] else "activo"}
+                self.wfile.write(json.dumps({"proxy": "ok", "agents": state,
+                    "timestamp": time.strftime("%H:%M:%S")}, indent=2).encode())
+            return
+        elif self.path == "/log":
+            self.send_response(200)
+            self.end_headers()
+            with log_lock:
+                self.wfile.write(json.dumps(log_entries[:50], indent=2).encode())
             return
         self.send_error(404)
 
