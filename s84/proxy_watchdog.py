@@ -20,13 +20,17 @@ log_lock = threading.Lock()
 MAX_LOG = 100
 
 def get_agent_id(headers, body):
+    # Usar header custom X-Agent-ID si existe
+    xid = headers.get("X-Agent-ID", "")
+    if xid:
+        return xid
     ua = headers.get("User-Agent", "")
     if "opencode" in ua.lower():
-        return "ventana-1 (evol-trading)"
+        return "opencode"
     if "crush" in ua.lower():
         return "crush"
     if "python" in ua.lower():
-        return "s84"
+        return "python"
     return f"agent-{len(agents)}"
 
 def track_activity(agent_id):
@@ -69,9 +73,16 @@ def check_idle():
                     time.sleep(0.2)
                     subprocess.run(["tmux", "send-keys", "-t", win, msg, "Enter"], capture_output=True)
 
-def log_entry(msg):
+def log_entry(*args):
+    """log_entry(status, agent, model, req, resp, ms) o log_entry(msg_string)"""
     with log_lock:
-        log_entries.insert(0, {"t": time.strftime("%H:%M:%S"), "msg": msg})
+        if len(args) == 1:
+            entry = {"t": time.strftime("%H:%M:%S"), "type": "sys", "msg": args[0]}
+        else:
+            entry = {"t": time.strftime("%H:%M:%S"), "type": "http",
+                     "status": args[0], "agent": args[1], "model": args[2],
+                     "req": args[3], "resp": args[4], "ms": args[5]}
+        log_entries.insert(0, entry)
         while len(log_entries) > MAX_LOG:
             log_entries.pop()
 
@@ -152,7 +163,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
                     if content:
                         resp_snippet = content[:3] + "..." + content[-3:] if len(content) > 6 else content
             except: pass
-            log_entry(f"[200] {agent_id} | {model} | \"{snippet}\" → \"{resp_snippet}\" | {elapsed}ms")
+            log_entry("200", agent_id, model, snippet, resp_snippet, elapsed)
             self.send_response(resp.status)
             for k, v in resp.headers.items():
                 if k.lower() in ("content-type",):
@@ -193,11 +204,19 @@ def render_template(upstream, agents_dict, logs):
 
     log_rows = ""
     for entry in logs[:30]:
-        cls = "err" if "[ERR]" in entry["msg"] or "[4" in entry["msg"] else "ok" if "[200]" in entry["msg"] else "info"
-        log_rows += f'<tr class="{cls}"><td style="white-space:nowrap">{entry["t"]}</td>' \
-            f'<td>{html.escape(entry["msg"])}</td></tr>'
+        if entry.get("type") == "http":
+            cls = "ok" if entry["status"] == "200" else "err"
+            log_rows += f'<tr class="{cls}"><td>{entry["t"]}</td>' \
+                f'<td>{html.escape(entry["agent"][:20])}</td>' \
+                f'<td>{html.escape(entry["model"])}</td>' \
+                f'<td class="snip">{html.escape(entry["req"])}</td>' \
+                f'<td class="snip">{html.escape(entry["resp"])}</td>' \
+                f'<td style="text-align:right">{entry["ms"]}</td></tr>'
+        else:
+            log_rows += f'<tr class="info"><td>{entry["t"]}</td>' \
+                f'<td colspan="4">{html.escape(entry.get("msg",""))}</td><td></td></tr>'
     if not log_rows:
-        log_rows = '<tr><td colspan="2" style="color:#666">—</td></tr>'
+        log_rows = '<tr><td colspan="6" style="color:#666">—</td></tr>'
 
     return tpl.replace("{{UPSTREAM}}", html.escape(upstream)) \
               .replace("{{AGENTS_ROWS}}", agent_rows) \
@@ -208,7 +227,6 @@ class UIHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.send_header("Refresh", "3")
         self.end_headers()
         with agents_lock:
             agents_copy = dict(agents)

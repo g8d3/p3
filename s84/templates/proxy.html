@@ -5,30 +5,54 @@
 <meta name="viewport" content="width=device-width"/>
 <title>Proxy Watchdog</title>
 <style>
-body{background:#111;color:#0f0;font-family:monospace;padding:10px;font-size:14px}
+body{background:#111;color:#ddd;font-family:monospace;padding:10px;font-size:13px}
 .ok{color:#0f0}.idle{color:#ff0}.err{color:#f00}.info{color:#0af}
 table{width:100%;border-collapse:collapse}
-td{padding:4px 8px;border-bottom:1px solid #222;font-size:13px}
-th{padding:6px 8px;border-bottom:2px solid #0f0;text-align:left;color:#0af}
-.bar{height:6px;background:#333;border-radius:3px;margin:4px 0}
-.bar-fill{height:6px;background:#0f0;border-radius:3px;transition:width 1s}
+td{padding:4px 6px;border-bottom:1px solid #222;font-size:12px;vertical-align:top}
+th{padding:6px 6px;border-bottom:2px solid #0f0;text-align:left;color:#0af}
+.snip{color:#888;font-size:11px}
 .status-on{color:#0f0}.status-off{color:#ff0}
+h3{margin:20px 0 8px 0;color:#0af;font-size:15px}
+p{margin:4px 0}
 </style>
 </head>
 <body>
 <h2>🔍 Proxy Watchdog</h2>
-<p>Upstream: {{UPSTREAM}}</p>
+<p>Upstream: {{UPSTREAM}} | <span id="ts">-</span></p>
 
 <h3>🤖 Agentes</h3>
-<table>
+<table id="agents-tbl">
 <tr><th>Agente</th><th>Estado</th><th>Última request</th></tr>
 {{AGENTS_ROWS}}
 </table>
 
 <h3>📋 Actividad reciente</h3>
-<table>
-<tr><th>Hora</th><th>Evento</th></tr>
+<table id="log-tbl">
+<tr><th>Hora</th><th>Agente</th><th>Modelo</th><th>Req</th><th>Resp</th><th>ms</th></tr>
 {{LOG_ROWS}}
 </table>
+
+<script>
+async function refresh() {
+  try {
+    const h = await (await fetch('/health')).json();
+    document.getElementById('ts').textContent = h.timestamp;
+    const at = document.getElementById('agents-tbl');
+    let ahtml = '<tr><th>Agente</th><th>Estado</th><th>Última request</th></tr>';
+    if (h.agents && Object.keys(h.agents).length > 0) {
+      for (const [name, info] of Object.entries(h.agents)) {
+        const cls = info.idle ? 'status-off' : 'status-on';
+        const icon = info.idle ? '🟡' : '🟢';
+        ahtml += `<tr class="${cls}"><td>${name}</td><td>${icon} ${info.status}</td><td>${info.last_s}s</td></tr>`;
+      }
+    } else {
+      ahtml += '<tr><td colspan="3" style="color:#666">—</td></tr>';
+    }
+    at.innerHTML = ahtml;
+  } catch(e) {}
+}
+setInterval(refresh, 3000);
+refresh();
+</script>
 </body>
 </html>
