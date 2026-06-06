@@ -52,8 +52,7 @@ def track_activity(agent_id):
         agents[agent_id] = {"last_request": time.time(), "idle": False}
 
 def check_idle():
-    """Hilo watchdog: detecta idle y envía recordatorios vía tmux."""
-    last_nudge = {}
+    """Hilo watchdog: detecta agentes idle. No envía mensajes a tmux."""
     while True:
         time.sleep(5)
         with agents_lock:
@@ -66,26 +65,6 @@ def check_idle():
                 elif elapsed <= AGENT_TIMEOUT and info["idle"]:
                     info["idle"] = False
                     log_entry(f"[ACTIVE] {aid}: volvió a trabajar")
-
-        # Nudge agents that are idle
-        for aid, info in list(agents.items()):
-            if info.get("idle"):
-                last_nudged = last_nudge.get(aid, 0)
-                if now - last_nudged > 30:  # nudgar cada 30s como máximo
-                    last_nudge[aid] = now
-                    # Map agent name to tmux window
-                    if "evol-trading" in aid or "ventana-1" in aid:
-                        win = "evol-trading"
-                    elif "s84" in aid or "agent-0" in aid:
-                        win = "s84"
-                    else:
-                        continue
-                    msg = f"Sigue trabajando. Revisa shared-bridge/ para nuevos descubrimientos."
-                    log_entry(f"[NUDGE] → {win}: {msg}")
-                    import subprocess
-                    subprocess.run(["tmux", "send-keys", "-t", win, "Enter"], capture_output=True)
-                    time.sleep(0.2)
-                    subprocess.run(["tmux", "send-keys", "-t", win, msg, "Enter"], capture_output=True)
 
 def scan_agents():
     """Escanea /proc en busca de procesos opencode y los registra."""

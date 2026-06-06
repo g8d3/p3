@@ -79,7 +79,7 @@ def generate_regime(regime: str, n: int = 500, start: float = 50000) -> list:
 def generate_multi_regime(
     train_regimes: list[str],
     test_regimes: list[str],
-    n_per_regime: int = 400,
+    n_per_regime: int = 2000,
 ) -> tuple[list, list]:
     """Genera train + test combinando múltiples regímenes."""
     train = []
@@ -100,20 +100,20 @@ SEEDS = {
         "params": {
             "sma_fast":    {"lo": 3,   "hi": 15,   "type": int},
             "sma_slow":    {"lo": 15,  "hi": 100,  "type": int},
-            "stop_loss":   {"lo": 0.5, "hi": 3.0,  "type": float},
-            "take_profit": {"lo": 1.0, "hi": 6.0,  "type": float},
-            "max_vol":     {"lo": 1.0, "hi": 5.0,  "type": float},
+            "stop_loss":   {"lo": 1.5, "hi": 6.0,  "type": float},
+            "take_profit": {"lo": 2.0, "hi": 10.0, "type": float},
+            "max_vol":     {"lo": 0.5, "hi": 5.0,  "type": float},
         },
     },
     "volume_spike": {
         "entry_types": ["volume_spike"],
         "exit_types": ["stop_loss_take_profit", "time_stop"],
         "params": {
-            "vol_threshold":  {"lo": 1.1, "hi": 3.0, "type": float},
-            "stop_loss":      {"lo": 0.5, "hi": 3.0, "type": float},
-            "take_profit":    {"lo": 1.0, "hi": 6.0, "type": float},
+            "vol_threshold":  {"lo": 1.1, "hi": 2.0, "type": float},
+            "stop_loss":      {"lo": 1.5, "hi": 6.0, "type": float},
+            "take_profit":    {"lo": 2.0, "hi": 10.0, "type": float},
             "max_hold":       {"lo": 5,   "hi": 48,  "type": int},
-            "max_vol":        {"lo": 1.0, "hi": 5.0, "type": float},
+            "max_vol":        {"lo": 0.5, "hi": 5.0, "type": float},
         },
     },
     "rsi": {
@@ -123,20 +123,20 @@ SEEDS = {
             "rsi_period":    {"lo": 7,   "hi": 21,  "type": int},
             "rsi_ob":        {"lo": 60,  "hi": 80,  "type": int},
             "rsi_os":        {"lo": 20,  "hi": 40,  "type": int},
-            "stop_loss":     {"lo": 0.5, "hi": 3.0, "type": float},
-            "take_profit":   {"lo": 1.0, "hi": 6.0, "type": float},
-            "max_vol":       {"lo": 1.0, "hi": 5.0, "type": float},
+            "stop_loss":     {"lo": 1.5, "hi": 6.0,  "type": float},
+            "take_profit":   {"lo": 2.0, "hi": 10.0, "type": float},
+            "max_vol":       {"lo": 0.5, "hi": 5.0, "type": float},
         },
     },
     "price_action": {
         "entry_types": ["price_level"],
         "exit_types": ["trailing_stop", "time_stop"],
         "params": {
-            "pa_lookback":   {"lo": 8,   "hi": 20,  "type": int},
-            "stop_loss":     {"lo": 0.5, "hi": 3.0, "type": float},
-            "take_profit":   {"lo": 1.0, "hi": 6.0, "type": float},
+            "pa_lookback":   {"lo": 5,   "hi": 20,  "type": int},
+            "stop_loss":     {"lo": 1.5, "hi": 6.0, "type": float},
+            "take_profit":   {"lo": 2.0, "hi": 10.0, "type": float},
             "max_hold":      {"lo": 5,   "hi": 48,  "type": int},
-            "max_vol":       {"lo": 1.0, "hi": 5.0, "type": float},
+            "max_vol":       {"lo": 0.5, "hi": 5.0, "type": float},
         },
     },
 }
@@ -371,26 +371,17 @@ def evaluate(individual: dict, candles: list, capital: float = 10_000) -> dict:
         if dd > max_dd:
             max_dd = dd
 
-    # Score compuesto: PF_capped * WR * cobertura * dd_penalty * sharpe_boost * loss_penalty
+    # Score compuesto: PF * WR * trade_penalty * (1 - dd/100)^2 * loss_penalty
     pf_for_score = min(profit_factor, 10.0) if profit_factor != 999 else 10.0
-    coverage = min(1.0, total / 30)
-    # Penalización progresiva de drawdown
-    dd_penalty = 1.0
-    if max_dd > 15:
-        dd_penalty = max(0.05, 1.0 - (max_dd - 15) / 35)
-    if max_dd > 40:
-        dd_penalty = 0.0
-    if total < 5:
-        dd_penalty = 0.0
-    # Sharpe boost
-    sharpe_boost = min(1.5, max(0.5, 1.0 + sharpe * 0.4))
+    trade_penalty = min(1.0, total / 25) if total > 8 else 0.0
+    dd_factor = max(0.0, (1.0 - max_dd / 100) ** 2)
     # Penalizar 0 pérdidas: estadísticamente improbable, probable overfitting
     loss_penalty = 1.0
-    if losses == 0 and total >= 3:
-        loss_penalty = 0.3  # fuertemente penalizado
+    if losses == 0 and total >= 5:
+        loss_penalty = 0.2
     elif losses == 0:
-        loss_penalty = 0.0  # trades insuficientes
-    score = pf_for_score * (win_rate / 100.0) * coverage * dd_penalty * sharpe_boost * loss_penalty
+        loss_penalty = 0.0
+    score = pf_for_score * (win_rate / 100.0) * trade_penalty * dd_factor * loss_penalty
 
     return {
         "total_trades": total,

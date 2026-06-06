@@ -1,0 +1,26 @@
+{
+  "strategy": {
+    "name": "price_action-5593",
+    "semilla": "price_action",
+    "entry_type": "price_level",
+    "exit_type": "trailing_stop",
+    "params": {
+      "pa_lookback": 17,
+      "stop_loss": 2.1,
+      "take_profit": 5.3,
+      "max_hold": 19,
+      "max_vol": 4.7
+    }
+  },
+  "metrics": {
+    "total_trades": 17,
+    "win_rate": 82.4,
+    "avg_pnl": 2.89,
+    "profit_factor": 22.83,
+    "sharpe": -1.33,
+    "max_drawdown": 69.64,
+    "score": 2.13,
+    "wins": 14,
+    "losses": 3
+  }
+}

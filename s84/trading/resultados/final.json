@@ -1,0 +1,188 @@
+{
+  "config": {
+    "generations": 5,
+    "pop_per_seed": 6,
+    "mutation_rate": 0.35,
+    "cross_rate": 0.2,
+    "keep_ratio": 0.3,
+    "train_regimes": [
+      "alcista",
+      "lateral",
+      "volatil"
+    ],
+    "test_regimes": [
+      "bajista",
+      "ciclico"
+    ],
+    "final_regime": "volatil"
+  },
+  "elapsed_seconds": 10.49,
+  "history": [
+    {
+      "gen": 1,
+      "best_name": "price_action-5593",
+      "best_score": 1.9,
+      "best_pf": 22.83,
+      "best_wr": 82.4
+    },
+    {
+      "gen": 2,
+      "best_name": "price_action-5593",
+      "best_score": 1.9,
+      "best_pf": 22.83,
+      "best_wr": 82.4
+    },
+    {
+      "gen": 3,
+      "best_name": "sma_cross+price_action-mut-635",
+      "best_score": 2.27,
+      "best_pf": 17.3,
+      "best_wr": 83.3
+    },
+    {
+      "gen": 4,
+      "best_name": "price_action+sma_cross+price_action-mut-656",
+      "best_score": 4.45,
+      "best_pf": 14.53,
+      "best_wr": 85.0
+    },
+    {
+      "gen": 5,
+      "best_name": "price_action+sma_cross+price_action-mut-656",
+      "best_score": 4.45,
+      "best_pf": 14.53,
+      "best_wr": 85.0
+    }
+  ],
+  "top5": [
+    {
+      "name": "sma_cross+price_action-mut-862",
+      "semilla": "sma_cross+price_action",
+      "entry_type": "sma_cross",
+      "exit_type": "trailing_stop",
+      "params": {
+        "sma_fast": 4,
+        "sma_slow": 38,
+        "stop_loss": 2.0,
+        "take_profit": 9.8,
+        "max_vol": 2.6,
+        "max_hold": 16,
+        "pa_lookback": 20
+      },
+      "metrics": {
+        "total_trades": 11,
+        "win_rate": 72.7,
+        "avg_pnl": 2.09,
+        "profit_factor": 10.07,
+        "sharpe": 0.7,
+        "max_drawdown": 22.78,
+        "score": 3.09,
+        "wins": 8,
+        "losses": 3
+      }
+    },
+    {
+      "name": "sma_cross+price_action-mut-390",
+      "semilla": "sma_cross+price_action",
+      "entry_type": "sma_cross",
+      "exit_type": "trailing_stop",
+      "params": {
+        "sma_fast": 4,
+        "sma_slow": 50,
+        "stop_loss": 2.0,
+        "take_profit": 12.0,
+        "max_vol": 2.6,
+        "max_hold": 13,
+        "pa_lookback": 20
+      },
+      "metrics": {
+        "total_trades": 9,
+        "win_rate": 77.8,
+        "avg_pnl": 2.76,
+        "profit_factor": 16.7,
+        "sharpe": 0.8,
+        "max_drawdown": 34.55,
+        "score": 2.29,
+        "wins": 7,
+        "losses": 2
+      }
+    },
+    {
+      "name": "price_action+sma_cross+price_action-mut-902",
+      "semilla": "price_action+sma_cross+price_action",
+      "entry_type": "price_level",
+      "exit_type": "trailing_stop",
+      "params": {
+        "pa_lookback": 17,
+        "stop_loss": 1.2,
+        "take_profit": 3.6,
+        "max_hold": 13,
+        "max_vol": 4.7,
+        "sma_slow": 38
+      },
+      "metrics": {
+        "total_trades": 9,
+        "win_rate": 88.9,
+        "avg_pnl": 2.69,
+        "profit_factor": 22.21,
+        "sharpe": -4.45,
+        "max_drawdown": 47.27,
+        "score": 2.11,
+        "wins": 8,
+        "losses": 1
+      }
+    },
+    {
+      "name": "sma_cross+price_action-mut-800",
+      "semilla": "sma_cross+price_action",
+      "entry_type": "sma_cross",
+      "exit_type": "trailing_stop",
+      "params": {
+        "sma_fast": 5,
+        "sma_slow": 42,
+        "stop_loss": 2.0,
+        "take_profit": 7.3,
+        "max_vol": 2.6,
+        "max_hold": 18,
+        "pa_lookback": 17
+      },
+      "metrics": {
+        "total_trades": 10,
+        "win_rate": 70.0,
+        "avg_pnl": 1.78,
+        "profit_factor": 5.49,
+        "sharpe": 0.38,
+        "max_drawdown": 14.41,
+        "score": 1.65,
+        "wins": 7,
+        "losses": 3
+      }
+    },
+    {
+      "name": "sma_cross+price_action-mut-546",
+      "semilla": "sma_cross+price_action",
+      "entry_type": "sma_cross",
+      "exit_type": "trailing_stop",
+      "params": {
+        "sma_fast": 5,
+        "sma_slow": 46,
+        "stop_loss": 2.0,
+        "take_profit": 9.8,
+        "max_vol": 2.7,
+        "max_hold": 11,
+        "pa_lookback": 20
+      },
+      "metrics": {
+        "total_trades": 7,
+        "win_rate": 71.4,
+        "avg_pnl": 3.3,
+        "profit_factor": 15.62,
+        "sharpe": 0.78,
+        "max_drawdown": 34.55,
+        "score": 1.64,
+        "wins": 5,
+        "losses": 2
+      }
+    }
+  ]
+}

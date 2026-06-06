@@ -50,33 +50,29 @@ def generate_market(regime, n=500, start=50000):
 
 SEEDS = {
     "sma_cross": {
-        "entry_type": "sma_cross",
         "entry_types": ["sma_cross"],
         "exit_types": ["stop_loss_take_profit", "trailing_stop"],
-        "params": {"sma_fast": (5,20), "sma_slow": (30,200),
-                   "stop_loss_pct": (0.5,5), "take_profit_pct": (1,10)}
+        "params": {"sma_fast": (3,10), "sma_slow": (10,40),
+                   "stop_loss_pct": (0.5,3), "take_profit_pct": (1,6)}
     },
     "volume_spike": {
-        "entry_type": "volume_spike",
         "entry_types": ["volume_spike"],
         "exit_types": ["stop_loss_take_profit", "time_stop"],
-        "params": {"volume_threshold": (1.2,5), "stop_loss_pct": (0.5,5),
-                   "take_profit_pct": (1,10), "max_hold_candles": (5,48)}
+        "params": {"volume_threshold": (1.1,3), "stop_loss_pct": (0.5,3),
+                   "take_profit_pct": (1,5), "max_hold_candles": (3,24)}
     },
     "rsi": {
-        "entry_type": "rsi",
         "entry_types": ["rsi"],
         "exit_types": ["stop_loss_take_profit", "trailing_stop"],
-        "params": {"rsi_period": (7,21), "rsi_overbought": (65,85),
-                   "rsi_oversold": (15,35), "stop_loss_pct": (0.5,5),
-                   "take_profit_pct": (1,10)}
+        "params": {"rsi_period": (5,14), "rsi_overbought": (60,80),
+                   "rsi_oversold": (20,40), "stop_loss_pct": (0.5,3),
+                   "take_profit_pct": (1,5)}
     },
     "price_action": {
-        "entry_type": "price_level",
         "entry_types": ["price_level"],
         "exit_types": ["trailing_stop", "time_stop"],
-        "params": {"stop_loss_pct": (1,5), "take_profit_pct": (2,10),
-                   "max_hold_candles": (5,48)}
+        "params": {"stop_loss_pct": (0.5,3), "take_profit_pct": (1,5),
+                   "max_hold_candles": (3,24)}
     }
 }
 
@@ -111,6 +107,7 @@ def evaluate(strategy, candles, capital=10000):
         # MAs for sma_cross
         sf = p.get("sma_fast", 10)
         ss = p.get("sma_slow", 50)
+        fast = slow = pf = ps = 0
         if ss and i >= ss:
             fast = sum(candles[j]["c"] for j in range(i-sf, i)) / sf
             slow = sum(candles[j]["c"] for j in range(i-ss, i)) / ss
