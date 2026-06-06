@@ -139,7 +139,20 @@ class ProxyHandler(BaseHTTPRequestHandler):
             resp = urllib.request.urlopen(req, timeout=60)
             data = resp.read()
             elapsed = int((time.time() - t0) * 1000)
-            log_entry(f"[200] {agent_id} | {model} | {msgs} msgs | \"{snippet}\" | {elapsed}ms")
+            # Extraer snippet de la respuesta
+            resp_snippet = ""
+            try:
+                resp_json = json.loads(data)
+                choices = resp_json.get("choices", [])
+                if choices:
+                    msg = choices[0].get("message", {})
+                    content = msg.get("content") or msg.get("reasoning_content") or ""
+                    if isinstance(content, list):
+                        content = " ".join(str(c) for c in content)
+                    if content:
+                        resp_snippet = content[:3] + "..." + content[-3:] if len(content) > 6 else content
+            except: pass
+            log_entry(f"[200] {agent_id} | {model} | \"{snippet}\" → \"{resp_snippet}\" | {elapsed}ms")
             self.send_response(resp.status)
             for k, v in resp.headers.items():
                 if k.lower() in ("content-type",):
@@ -189,13 +202,15 @@ class UIHandler(BaseHTTPRequestHandler):
                 html_parts.append(f'<tr class="{cls}"><td>{aid}</td><td>{status}</td><td>{elapsed:.0f}s</td></tr>')
             html_parts.append('</table>')
 
-        # Activity log
-        html_parts.append('<h3>📋 Actividad reciente</h3><div style="font-size:12px">')
+        # Activity log as table
+        html_parts.append('<h3>📋 Actividad reciente</h3>')
+        html_parts.append('<table><tr><th>Hora</th><th>Evento</th></tr>')
         with log_lock:
             for entry in log_entries[:30]:
                 cls = "err" if "[ERR]" in entry["msg"] or "[4" in entry["msg"] else "ok" if "[200]" in entry["msg"] else "info"
-                html_parts.append(f'<div class="{cls}">[{entry["t"]}] {html.escape(entry["msg"])}</div>')
-        html_parts.append('</div></body></html>')
+                html_parts.append(f'<tr class="{cls}"><td style="white-space:nowrap">{entry["t"]}</td>'
+                    f'<td>{html.escape(entry["msg"])}</td></tr>')
+        html_parts.append('</table></body></html>')
 
         self.wfile.write(''.join(html_parts).encode())
 
