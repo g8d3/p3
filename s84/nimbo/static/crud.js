@@ -94,6 +94,10 @@
     const noEdit = cfg.noEdit || false;
     let items = [];
     let timer = null;
+    let tbody = null;
+    let headerEl = null;
+    let emptyEl = null;
+    let firstRender = true;
 
     async function load() {
       try {
@@ -116,62 +120,78 @@
     }
 
     function render() {
-      container.innerHTML = '';
-      const header = document.createElement('div');
-      header.className = 'flex items-center justify-between mb';
+      const displayFields = fields.filter(f => f.name !== idField);
+
+      if (firstRender) {
+        container.innerHTML = '';
+        headerEl = document.createElement('div');
+        headerEl.className = 'flex items-center justify-between mb';
+        container.appendChild(headerEl);
+
+        if (customActions.length > 0 || !noEdit || !cfg.delete) {
+          const wrap = document.createElement('div');
+          wrap.className = 'table-wrap';
+          const table = document.createElement('table');
+          const thead = document.createElement('thead');
+          const tr = document.createElement('tr');
+          displayFields.forEach(f => {
+            const th = document.createElement('th');
+            th.textContent = f.label || f.name;
+            tr.appendChild(th);
+          });
+          const thActions = document.createElement('th');
+          thActions.textContent = '';
+          tr.appendChild(thActions);
+          thead.appendChild(tr);
+          table.appendChild(thead);
+          tbody = document.createElement('tbody');
+          tbody.id = resource + '-tbody';
+          table.appendChild(tbody);
+          wrap.appendChild(table);
+          container.appendChild(wrap);
+        }
+        emptyEl = document.createElement('p');
+        emptyEl.className = 'text-muted text-center';
+        container.appendChild(emptyEl);
+        firstRender = false;
+      }
+
+      headerEl.innerHTML = '';
       const h3 = document.createElement('h3');
       h3.textContent = resource;
-      header.appendChild(h3);
+      headerEl.appendChild(h3);
       if (!noCreate) {
         const addBtn = document.createElement('button');
         addBtn.className = 'btn btn-primary btn-sm';
         addBtn.textContent = '+ New';
         addBtn.onclick = () => showForm({});
-        header.appendChild(addBtn);
+        headerEl.appendChild(addBtn);
       }
-      container.appendChild(header);
 
       if (items.length === 0) {
-        const empty = document.createElement('p');
-        empty.className = 'text-muted text-center';
-        empty.textContent = 'No items.';
-        container.appendChild(empty);
+        emptyEl.style.display = '';
+        emptyEl.textContent = 'No items.';
+        if (tbody) tbody.innerHTML = '';
         return;
       }
+      emptyEl.style.display = 'none';
 
-      const wrap = document.createElement('div');
-      wrap.className = 'table-wrap';
-      const table = document.createElement('table');
-      const thead = document.createElement('thead');
-      const tr = document.createElement('tr');
-      const displayFields = fields.filter(f => f.name !== idField);
-      displayFields.forEach(f => {
-        const th = document.createElement('th');
-        th.textContent = f.label || f.name;
-        tr.appendChild(th);
-      });
-      if (customActions.length > 0 || !noEdit || !cfg.delete) {
-        const thActions = document.createElement('th');
-        thActions.textContent = '';
-        tr.appendChild(thActions);
-      }
-      thead.appendChild(tr);
-      table.appendChild(thead);
-
-      const tbody = document.createElement('tbody');
-      items.forEach(item => {
-        const row = document.createElement('tr');
-        displayFields.forEach(f => {
-          const td = document.createElement('td');
-          let val = item[f.name];
-          if (f.type === 'bool') {
-            td.innerHTML = val ? '<span class="badge badge-green">✓</span>' : '<span class="badge">✗</span>';
-          } else {
-            td.textContent = val !== null && val !== undefined ? String(val).slice(0, 100) : '';
-          }
-          row.appendChild(td);
-        });
-        if (customActions.length > 0 || !noEdit || !cfg.delete) {
+      if (tbody) {
+        tbody.innerHTML = '';
+        items.forEach(item => {
+          const row = document.createElement('tr');
+          displayFields.forEach(f => {
+            const td = document.createElement('td');
+            let val = item[f.name];
+            if (f.type === 'bool') {
+              td.innerHTML = val ? '<span class="badge badge-green">✓</span>' : '<span class="badge">✗</span>';
+            } else if (f.type === 'float') {
+              td.textContent = val !== null && val !== undefined ? Number(val).toFixed(1) : '';
+            } else {
+              td.textContent = val !== null && val !== undefined ? String(val).slice(0, 100) : '';
+            }
+            row.appendChild(td);
+          });
           const tdActions = document.createElement('td');
           tdActions.className = 'btn-group';
           customActions.forEach(a => {
@@ -194,12 +214,9 @@
             tdActions.appendChild(delBtn);
           }
           row.appendChild(tdActions);
-        }
-        tbody.appendChild(row);
-      });
-      table.appendChild(tbody);
-      wrap.appendChild(table);
-      container.appendChild(wrap);
+          tbody.appendChild(row);
+        });
+      }
     }
 
     function showForm(data) {

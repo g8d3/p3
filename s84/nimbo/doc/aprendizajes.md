@@ -80,7 +80,40 @@ Usar patrones como:
 - `element.replaceChild()` para filas de tablas
 - O un mecanismo de binding simple en el framework
 
-### 8. Hot-reload y ciclo de desarrollo
+### 8. Modelos conceptuales: ejecutables
+
+**Problema**: Process (sistema), Command (DB), Agent (futuro) son cosas distintas
+pero comparten naturaleza: son "ejecutables" que corren o pueden correr.
+
+| Modelo | Origen | Persistencia | Estado |
+|---|---|---|---|
+| Process | Sistema (psutil) | Ninguna (vivo) | running/idle/zombie |
+| Command | Base de datos | SQLite | siempre disponible |
+| Agent | Base de datos | SQLite | puede estar running o no |
+
+**Patrón aprendido**: muchos modelos futuros van a mezclar datos vivos del sistema
+con datos persistentes de DB. La interfaz debe ser la misma (CRUD table) aunque
+el backend sea diferente.
+
+**Implementación actual**:
+- Models con DB → CRUD estándar (`/api/{name}`)
+- Models virtuales (Process) → API custom (`/api/system/processes`)
+- Ambos se renderizan con la misma `crud.mount()`
+- Las diferencias se configuran con `nimbo.crud.config()` (API custom, acciones, auto-refresh)
+
+### 9. Una sola interfaz de tabla
+
+La tabla CRUD es la interfaz universal. Dashboard, procesos, comandos, logs
+son todos casos particulares de la misma tabla base. La navegación se reduce a:
+
+```
+[ modelos ] [ logs ]
+```
+
+Donde cada modelo puede tener acciones personalizadas (kill, run, etc.) y
+auto-refresh si sus datos son dinámicos.
+
+### 10. Hot-reload y ciclo de desarrollo
 
 El hot-reload (proceso padre que observa archivos y reinicia al hijo) junto
 con el auto-refresh del navegador (WebSocket livereload) permiten un ciclo

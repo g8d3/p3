@@ -29,7 +29,12 @@ def register_system_endpoints(app):
         procs = []
         for p in psutil.process_iter(proc_attrs):
             try:
-                procs.append(p.info)
+                info = p.info
+                if info.get("cpu_percent") is not None:
+                    info["cpu_percent"] = round(info["cpu_percent"], 1)
+                if info.get("memory_percent") is not None:
+                    info["memory_percent"] = round(info["memory_percent"], 1)
+                procs.append(info)
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
         return sorted(procs, key=lambda x: x.get("cpu_percent", 0), reverse=True)[:50]

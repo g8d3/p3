@@ -6,11 +6,6 @@
 <title>nimbo</title>
 <link rel="stylesheet" href="/mobile.css">
 <style>
-  .stat-bar { display: flex; gap: var(--gap); padding: 8px 0; font-size: 0.8rem; color: #8b949e; flex-wrap: wrap; }
-  .stat-bar span { display: flex; align-items: center; gap: 4px; }
-  .stat-bar .val { color: var(--accent); font-weight: 600; }
-  .mini-bar { width: 40px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; display: inline-block; vertical-align: middle; }
-  .mini-bar .fill { height: 100%; background: var(--accent); border-radius: 2px; }
   .log-entry { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.8rem; font-family: monospace; }
   .log-time { color: #8b949e; margin-right: 8px; }
   .log-level { display: inline-block; padding: 0 4px; border-radius: 3px; font-size: 0.7rem; margin-right: 6px; font-weight: 600; }
@@ -25,9 +20,7 @@
       <h1 id="app-title">nimbo</h1>
       <span id="ws-status" style="width:8px;height:8px;border-radius:50%;background:#f85149;display:inline-block"></span>
     </header>
-    <nav class="app-nav" id="app-nav">
-      <div id="sys-stats" class="stat-bar"></div>
-    </nav>
+    <nav class="app-nav" id="app-nav"></nav>
     <main class="app-content" id="app-content"></main>
   </div>
 
@@ -68,7 +61,9 @@
     });
 
     // ── Model-based routing ──
+    let cleanup = null;
     function switchModel(name) {
+      if (cleanup) { cleanup(); cleanup = null; }
       document.querySelectorAll('.app-nav a').forEach(a => a.classList.remove('active'));
       const link = document.querySelector(`.app-nav a[data-model="${name}"]`);
       if (link) link.classList.add('active');
@@ -82,16 +77,14 @@
       el.innerHTML = '<div class="card"><p class="text-muted">Loading...</p></div>';
       fetch(`/api/${name}/schema`).then(r => r.json()).then(schema => {
         el.innerHTML = '';
-        nimbo.crud.mount(el, name, schema.fields);
+        cleanup = nimbo.crud.mount(el, name, schema.fields);
       });
     }
 
     // ── Build nav from models ──
     function buildNav() {
       const nav = document.getElementById('app-nav');
-      const stats = document.getElementById('sys-stats');
       nav.innerHTML = '';
-      nav.appendChild(stats);
       models.forEach(m => {
         const a = document.createElement('a');
         a.href = '#' + m;
