@@ -20,7 +20,6 @@ log_lock = threading.Lock()
 MAX_LOG = 100
 
 def get_agent_id(headers, body):
-    # Usar header custom X-Agent-ID si existe
     xid = headers.get("X-Agent-ID", "")
     if xid:
         return xid
@@ -32,6 +31,21 @@ def get_agent_id(headers, body):
     if "python" in ua.lower():
         return "python"
     return f"agent-{len(agents)}"
+
+def register_agent(aid, pid, host):
+    with agents_lock:
+        agents[aid] = {"last_request": time.time(), "idle": False,
+                       "pid": pid, "host": host,
+                       "cpu": 0, "mem_mb": 0,
+                       "started": time.time()}
+    log_entry(f"[REG] {aid} pid={pid} host={host}")
+
+def heartbeat_agent(aid, pid, cpu, mem):
+    with agents_lock:
+        if aid in agents:
+            agents[aid]["last_request"] = time.time()
+            agents[aid]["cpu"] = cpu
+            agents[aid]["mem_mb"] = mem
 
 def track_activity(agent_id):
     with agents_lock:
@@ -115,6 +129,23 @@ class ProxyHandler(BaseHTTPRequestHandler):
         t0 = time.time()
         length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(length) if length > 0 else b"{}"
+        path = self.path
+
+        # Agent registration/heartbeat (no forward)
+        if path == "/agent/register":
+            data = json.loads(body)
+            register_agent(data.get("agent","?"), data.get("pid",0), data.get("host",""))
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b'{"ok":true}')
+            return
+        if path == "/agent/heartbeat":
+            data = json.loads(body)
+            heartbeat_agent(data.get("agent","?"), data.get("pid",0), data.get("cpu",0), data.get("mem_mb",0))
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b'{"ok":true}')
+            return
 
         agent_id = get_agent_id(self.headers, body)
         track_activity(agent_id)
@@ -196,11 +227,19 @@ def render_template(upstream, agents_dict, logs):
         elapsed = now - info["last_request"]
         status = "🟢 activo" if not info["idle"] else "🟡 idle"
         cls = "ok" if not info["idle"] else "idle"
+        pid = info.get("pid", "-")
+        cpu = info.get("cpu", "-")
+        mem = info.get("mem_mb", "-")
+        cpu_s = f"{cpu}%" if isinstance(cpu, (int,float)) else "-"
+        mem_s = f"{mem}MB" if isinstance(mem, (int,float)) else "-"
         agent_rows += f'<tr class="{cls}"><td>{html.escape(aid)}</td>' \
             f'<td class="status-{"on" if not info["idle"] else "off"}">{status}</td>' \
+            f'<td style="color:#888;font-size:11px">{pid}</td>' \
+            f'<td style="color:#888">{cpu_s}</td>' \
+            f'<td style="color:#888">{mem_s}</td>' \
             f'<td>{elapsed:.0f}s</td></tr>'
     if not agent_rows:
-        agent_rows = '<tr><td colspan="3" style="color:#666">—</td></tr>'
+        agent_rows = '<tr><td colspan="6" style="color:#666">—</td></tr>'
 
     log_rows = ""
     for entry in logs[:30]:
@@ -253,8 +292,18 @@ def main():
     threading.Thread(target=proxy.serve_forever, daemon=True).start()
     threading.Thread(target=ui.serve_forever, daemon=True).start()
 
+    # Hot reload: reiniciar si cambia el fuente
+    self_path = os.path.abspath(__file__)
+    last_mtime = os.path.getmtime(self_path)
     try:
-        while True: time.sleep(60)
+        while True:
+            time.sleep(3)
+            mtime = os.path.getmtime(self_path)
+            if mtime > last_mtime:
+                print("\n🔄 Fuente cambiado, reiniciando...")
+                proxy.shutdown()
+                ui.shutdown()
+                os.execv(sys.executable, [sys.executable, self_path])
     except KeyboardInterrupt:
         print("\nProxy detenido")
         proxy.shutdown()
