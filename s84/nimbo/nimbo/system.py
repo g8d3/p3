@@ -6,7 +6,22 @@ import psutil
 from .server import Response
 
 
+PROCESS_FIELDS = [{"name": "pid", "type": "int"},
+                   {"name": "name", "type": "string"},
+                   {"name": "cpu_percent", "type": "float", "label": "CPU%"},
+                   {"name": "memory_percent", "type": "float", "label": "MEM%"},
+                   {"name": "status", "type": "string"}]
+
+
 def register_system_endpoints(app):
+    app._model_schema["process"] = PROCESS_FIELDS
+    app._model_db["process"] = None
+    app._register_models_route()
+
+    @app.route("/api/process/schema", methods=["GET"])
+    async def proc_schema(req):
+        return {"name": "process", "fields": PROCESS_FIELDS}
+
     proc_attrs = ["pid", "name", "cpu_percent", "memory_percent", "status", "create_time"]
 
     @app.route("/api/system/processes", methods=["GET"])
