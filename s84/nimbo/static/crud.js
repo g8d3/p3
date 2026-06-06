@@ -260,7 +260,7 @@
     if (cfg.refresh) {
       timer = setInterval(() => {
         load();
-        if (window.addLog) addLog('debug', `${resource} refreshed`);
+        if (window.logEvent) logEvent('debug', `${resource} refreshed`);
       }, cfg.refresh);
     }
     return () => { if (timer) clearInterval(timer); };

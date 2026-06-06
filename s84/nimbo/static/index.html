@@ -138,28 +138,39 @@
       c.appendChild(el);
       c.scrollTop = c.scrollHeight;
     }
+    let logsTimer = null;
     function renderLogs() {
       const el = document.getElementById('app-content');
-      const exists = !!document.getElementById('log-container');
-      if (!exists) {
-        el.innerHTML = `
-          <div class="card">
-            <div class="flex items-center justify-between mb">
-              <h3>Live Logs</h3>
-              <button class="btn btn-sm" onclick="document.getElementById('log-container').innerHTML=''">Clear</button>
-            </div>
-            <div id="log-container" style="background:var(--bg);padding:12px;border-radius:var(--radius);max-height:70vh;overflow-y:auto;font-family:monospace;font-size:0.8rem"></div>
-          </div>`;
-      }
-      // Always load recent history (container was recreated)
-      fetch('/api/log/recent').then(r => r.json()).then(h => h.slice(-50).forEach(l => addLog(l.level, l.content))).catch(()=>{});
+      el.innerHTML = `
+        <div class="card">
+          <div class="flex items-center justify-between mb">
+            <h3>Live Logs</h3>
+            <button class="btn btn-sm" onclick="document.getElementById('log-container').innerHTML=''">Clear</button>
+          </div>
+          <div id="log-container" style="background:var(--bg);padding:12px;border-radius:var(--radius);max-height:70vh;overflow-y:auto;font-family:monospace;font-size:0.8rem"></div>
+        </div>`;
+      const c = document.getElementById('log-container');
+      addLog = (level, text) => {
+        if (!c) return;
+        const el = document.createElement('div');
+        el.className = 'log-entry';
+        el.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-level ${level}">${level}</span>${text}`;
+        c.appendChild(el);
+        c.scrollTop = c.scrollHeight;
+      };
       if (!logsInit) {
         logsInit = true;
-        nimbo.ws.on('open', () => addLog('info', 'WS connected'));
-        nimbo.ws.on('close', () => addLog('warn', 'WS disconnected'));
+        nimbo.ws.on('open', () => { addLog('info', 'WS connected'); nimbo.ws.send(JSON.stringify({type:'log',data:{level:'info',content:'WS connected'}})); });
+        nimbo.ws.on('close', () => { addLog('warn', 'WS disconnected'); nimbo.ws.send(JSON.stringify({type:'log',data:{level:'warn',content:'WS disconnected'}})); });
         nimbo.ws.on('log', msg => addLog(msg.data?.level || 'info', msg.data?.content || JSON.stringify(msg.data)));
+        logsTimer = setInterval(() => {
+          fetch('/api/log/recent').then(r => r.json()).then(h => {
+            h.forEach(l => { if (!c.querySelector(`[data-i="${l.id}"]`)) { const e=document.createElement('div');e.className='log-entry';e.dataset.i=l.id;e.innerHTML=`<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-level ${l.level}">${l.level}</span>${l.content}`;c.appendChild(e);c.scrollTop=c.scrollHeight; } });
+          }).catch(()=>{});
+        }, 3000);
         addLog('info', 'Logs ready');
       }
+      addLog('info', 'Welcome');
     }
 
     // ── Init ──
