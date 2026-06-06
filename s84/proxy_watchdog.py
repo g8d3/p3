@@ -173,6 +173,36 @@ class ProxyHandler(BaseHTTPRequestHandler):
 
 # ── Web UI ──
 
+TEMPLATE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates", "proxy.html")
+
+def render_template(upstream, agents_dict, logs):
+    with open(TEMPLATE_PATH) as f:
+        tpl = f.read()
+
+    now = time.time()
+    agent_rows = ""
+    for aid, info in sorted(agents_dict.items()):
+        elapsed = now - info["last_request"]
+        status = "🟢 activo" if not info["idle"] else "🟡 idle"
+        cls = "ok" if not info["idle"] else "idle"
+        agent_rows += f'<tr class="{cls}"><td>{html.escape(aid)}</td>' \
+            f'<td class="status-{"on" if not info["idle"] else "off"}">{status}</td>' \
+            f'<td>{elapsed:.0f}s</td></tr>'
+    if not agent_rows:
+        agent_rows = '<tr><td colspan="3" style="color:#666">—</td></tr>'
+
+    log_rows = ""
+    for entry in logs[:30]:
+        cls = "err" if "[ERR]" in entry["msg"] or "[4" in entry["msg"] else "ok" if "[200]" in entry["msg"] else "info"
+        log_rows += f'<tr class="{cls}"><td style="white-space:nowrap">{entry["t"]}</td>' \
+            f'<td>{html.escape(entry["msg"])}</td></tr>'
+    if not log_rows:
+        log_rows = '<tr><td colspan="2" style="color:#666">—</td></tr>'
+
+    return tpl.replace("{{UPSTREAM}}", html.escape(upstream)) \
+              .replace("{{AGENTS_ROWS}}", agent_rows) \
+              .replace("{{LOG_ROWS}}", log_rows)
+
 class UIHandler(BaseHTTPRequestHandler):
     def log_message(self, *a): pass
     def do_GET(self):
@@ -180,39 +210,12 @@ class UIHandler(BaseHTTPRequestHandler):
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Refresh", "3")
         self.end_headers()
-        now = time.time()
-        html_parts = ['<!doctype html><html><head><meta charset="utf-8"/>',
-            '<meta name="viewport" content="width=device-width"/><title>Proxy Watchdog</title>',
-            '<style>body{background:#111;color:#0f0;font-family:monospace;padding:10px;font-size:14px}',
-            '.ok{color:#0f0}.idle{color:#ff0}.err{color:#f00}.info{color:#0af}',
-            'table{width:100%;border-collapse:collapse}td{padding:4px 8px;border-bottom:1px solid #222}',
-            '.bar{height:6px;background:#333;border-radius:3px;margin:4px 0}',
-            '.bar-fill{height:6px;background:#0f0;border-radius:3px;transition:width 1s}</style></head><body>']
-
-        html_parts.append(f'<h2>🔍 Proxy Watchdog</h2>')
-        html_parts.append(f'<p>Upstream: {UPSTREAM_URL}</p>')
-
-        # Agent status
         with agents_lock:
-            html_parts.append('<table><tr><th>Agente</th><th>Estado</th><th>Última request</th></tr>')
-            for aid, info in sorted(agents.items()):
-                elapsed = now - info["last_request"]
-                status = "🟢 activo" if not info["idle"] else "🟡 idle"
-                cls = "ok" if not info["idle"] else "idle"
-                html_parts.append(f'<tr class="{cls}"><td>{aid}</td><td>{status}</td><td>{elapsed:.0f}s</td></tr>')
-            html_parts.append('</table>')
-
-        # Activity log as table
-        html_parts.append('<h3>📋 Actividad reciente</h3>')
-        html_parts.append('<table><tr><th>Hora</th><th>Evento</th></tr>')
+            agents_copy = dict(agents)
         with log_lock:
-            for entry in log_entries[:30]:
-                cls = "err" if "[ERR]" in entry["msg"] or "[4" in entry["msg"] else "ok" if "[200]" in entry["msg"] else "info"
-                html_parts.append(f'<tr class="{cls}"><td style="white-space:nowrap">{entry["t"]}</td>'
-                    f'<td>{html.escape(entry["msg"])}</td></tr>')
-        html_parts.append('</table></body></html>')
-
-        self.wfile.write(''.join(html_parts).encode())
+            logs_copy = list(log_entries)
+        html = render_template(UPSTREAM_URL, agents_copy, logs_copy)
+        self.wfile.write(html.encode())
 
 class ThreadedProxy(ThreadingMixIn, HTTPServer):
     allow_reuse_address = True
