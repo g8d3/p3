@@ -94,12 +94,13 @@ LOG_SCHEMA = [{"name": "source", "type": "string", "default": ""},
 
 
 def register_log_model(app):
-    app._register_model(None, table="log", fields=LOG_SCHEMA)
-
+    # Register custom routes BEFORE model CRUD to avoid <id> catch-all
     @app.route("/api/log/recent", methods=["GET"])
     async def recent_logs(req):
         all_logs = app._db.list("log")
         return all_logs[-50:]
+
+    app._register_model(None, table="log", fields=LOG_SCHEMA)
 
     @app.ws_handler(topic="logs")
     async def ws_logs(ws):
