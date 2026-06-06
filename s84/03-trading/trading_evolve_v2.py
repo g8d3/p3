@@ -172,9 +172,13 @@ def evaluate(strategy, candles, capital=10000):
     pf = gains/abs(losses_sum) if losses_sum != 0 else (999 if gains > 0 else 0)
     score = pf * (wr/100) * min(1, total/20)
 
+    # Penalizar si muy pocas trades (no confiable)
+    trade_penalty = min(1, total / 20)
+    score = pf * (wr/100) * trade_penalty * (1 - abs(drawdown)/100) if total > 5 else 0
+
     return {"total_trades": total, "win_rate": round(wr,1), "avg_pnl": round(avg_pnl,2),
-            "profit_factor": round(pf,2) if pf != 999 else 999, "score": round(score,2),
-            "wins": win, "losses": loss}
+            "profit_factor": round(pf,2) if pf != 999 else 999,
+            "score": round(score,2), "wins": win, "losses": loss}
 
 # ── 4. MUTACIÓN Y CROSS-POLLINATION ──
 

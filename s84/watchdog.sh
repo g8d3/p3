@@ -1,120 +1,40 @@
 #!/bin/bash
-# Watchdog — mantiene a los agentes trabajando
-# Revisa cada N segundos si están activos, los empuja si están idle
+# Watchdog via LLM Proxy — detecta estado por actividad de API
+PROXY_HEALTH="http://localhost:9098/health"
+LOG_FILE="/tmp/watchdog.log"
 
-BUSY_FILE="/tmp/watchdog-busy.txt"
-LAST_PUSH="/tmp/watchdog-last-push.txt"
-WINDOWS=("s84" "evol-trading")
-BRIDGE="/home/vuos/code/p3/s84/shared-bridge"
+log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG_FILE"; }
 
-# Tiempo máximo sin actividad antes de empujar (segundos)
-MAX_IDLE=30
-
-log() {
-    echo "[$(date '+%H:%M:%S')] $*"
-}
-
-is_busy() {
-    local win="$1"
-    local pane
-    pane=$(tmux capture-pane -t "$win" -p 2>/dev/null)
-    # Si está pensando (muestra indicador de carga)
-    if echo "$pane" | grep -qE '⠙|⠹|⠸|⠼|⠴|⠦|⠧|Thinking|Preparing|Writing'; then
-        return 0  # busy
-    fi
-    # Si está en prompt vacío (idle)
-    if echo "$pane" | grep -qE '>:::|> Build|> orchestrator|> Plan'; then
-        return 1  # idle
-    fi
-    return 0  # asumir busy si no podemos determinar
-}
-
-get_age() {
-    local key="$1"
-    if [ -f "$LAST_PUSH" ]; then
-        local last=$(grep "^$key:" "$LAST_PUSH" 2>/dev/null | cut -d: -f2)
-        echo $(( $(date +%s) - ${last:-0} ))
-    else
-        echo 999
-    fi
-}
-
-mark_pushed() {
-    local key="$1"
-    if [ -f "$LAST_PUSH" ]; then
-        sed -i "/^$key:/d" "$LAST_PUSH"
-    fi
-    echo "$key:$(date +%s)" >> "$LAST_PUSH"
-}
-
-remind_agent() {
-    local win="$1" msg="$2"
-    log "📢 Recordatorio a $win: $msg"
-    tmux send-keys -t "$win" Enter
+remind() {
+    local w=$1 msg=$2
+    log "→ $w: $msg"
+    tmux send-keys -t "$w" Enter
     sleep 0.3
-    tmux send-keys -t "$win" "$msg" Enter
-    mark_pushed "$win"
+    tmux send-keys -t "$w" "$msg" Enter
 }
 
-check_discoveries() {
-    local new_discoveries
-    new_discoveries=$(find "$BRIDGE/discoveries" -name "*.md" -newer "$BUSY_FILE" 2>/dev/null | wc -l)
-    if [ "$new_discoveries" -gt 0 ]; then
-        log "🔍 $new_discoveries descubrimientos nuevos encontrados"
-        return 0
-    fi
-    return 1
-}
-
-# Inicializar
-touch "$BUSY_FILE"
-log "🐶 Watchdog iniciado — revisando cada 10s"
+log "Watchdog v3 (proxy) iniciado — ciclo 10s"
 
 while true; do
-    both_idle=true
+    # Consultar proxy para estado de cada agente
+    state=$(curl -s "$PROXY_HEALTH" 2>/dev/null || echo "{}")
     
-    for win in "${WINDOWS[@]}"; do
-        if is_busy "$win"; then
-            both_idle=false
-            log "  $win: ocupado"
-        else
-            local age=$(get_age "$win")
-            log "  $win: idle (${age}s)"
-            
-            # Si está idle por más de MAX_IDLE segundos, empujar
-            if [ "$age" -gt "$MAX_IDLE" ]; then
-                if [ "$win" = "s84" ]; then
-                    remind_agent "$win" "Revisa shared-bridge/discoveries/ y construye sobre lo que encuentres."
-                elif [ "$win" = "evol-trading" ]; then
-                    remind_agent "$win" "Hay descubrimientos nuevos. Revisa shared-bridge/ y mejora evolve.py."
-                fi
-            fi
-        fi
-    done
-
-    # Si ambos están idle por mucho tiempo, iniciar interacción
-    if [ "$both_idle" = true ]; then
-        local age_s84=$(get_age "s84")
-        local age_evol=$(get_age "evol-trading")
-        if [ "$age_s84" -gt 60 ] && [ "$age_evol" -gt 60 ]; then
-            log "🔄 Ambos idle por >60s — iniciando interacción"
-            # s84 le pregunta a evol-trading qué ha hecho
-            tmux send-keys -t evol-trading Enter
-            sleep 0.3
-            tmux send-keys -t evol-trading "¿Cómo va evolve.py? ¿Encontraste algo nuevo? Comparte en shared-bridge/." Enter
-            mark_pushed "evol-trading"
-            sleep 2
-            # Luego s84 se pone a trabajar también
-            remind_agent "s84" "Revisa los ultimos resultados en 04-evolucion-trading/resultados/ y mejora algo."
-        fi
+    # Extraer idle states
+    s84_idle=$(echo "$state" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('opencode',{}).get('idle',False))" 2>/dev/null)
+    evol_idle=$(echo "$state" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('crush',{}).get('idle',False))" 2>/dev/null)
+    
+    log "  s84 idle=$s84_idle | evol idle=$evol_idle"
+    
+    if [ "$s84_idle" = "True" ] && [ "$evol_idle" = "True" ]; then
+        log "🔄 Ambos idle — conectando"
+        tmux send-keys -t evol-trading "Revisa shared-bridge/ y continua trabajando." Enter
+        sleep 1
+        remind s84 "El otro agente sigue trabajando. Revisa shared-bridge/."
+    elif [ "$s84_idle" = "True" ]; then
+        remind s84 "Sigue trabajando. Revisa shared-bridge/."
+    elif [ "$evol_idle" = "True" ]; then
+        remind evol-trading "Sigue trabajando. Revisa shared-bridge/."
     fi
-
-    # Nuevo descubrimiento: avisar al otro agente
-    if check_discoveries; then
-        remind_agent "evol-trading" "Nuevo descubrimiento disponible. Revisalo y construye encima."
-    fi
-
-    # Actualizar timestamp
-    touch "$BUSY_FILE"
+    
     sleep 10
 done
