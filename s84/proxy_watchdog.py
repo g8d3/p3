@@ -111,9 +111,21 @@ class ProxyHandler(BaseHTTPRequestHandler):
         try:
             req_body = json.loads(body)
             model = req_body.get("model", "?")
-            msgs = len(req_body.get("messages", []))
+            messages = req_body.get("messages", [])
+            msgs = len(messages)
+            # Primeros y últimos caracteres del último mensaje del usuario
+            last_user = ""
+            for m in reversed(messages):
+                if m.get("role") == "user":
+                    content = m.get("content", "") or m.get("text", "")
+                    if isinstance(content, list):
+                        content = " ".join(c.get("text","") for c in content if isinstance(c, dict))
+                    if content:
+                        last_user = content[:100]
+                        break
+            snippet = last_user[:3] + "..." + last_user[-3:] if len(last_user) > 6 else last_user
         except:
-            model, msgs = "?", 0
+            model, msgs, snippet = "?", 0, "?"
 
         path = self.path.lstrip("/")
         if path.startswith("v1/"):
@@ -127,7 +139,7 @@ class ProxyHandler(BaseHTTPRequestHandler):
             resp = urllib.request.urlopen(req, timeout=60)
             data = resp.read()
             elapsed = int((time.time() - t0) * 1000)
-            log_entry(f"[200] {agent_id} | {model} | {msgs} mensajes | {elapsed}ms")
+            log_entry(f"[200] {agent_id} | {model} | {msgs} msgs | \"{snippet}\" | {elapsed}ms")
             self.send_response(resp.status)
             for k, v in resp.headers.items():
                 if k.lower() in ("content-type",):
