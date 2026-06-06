@@ -62,7 +62,9 @@
 
     // ── Model-based routing ──
     let cleanup = null;
+    let currentModel = null;
     function switchModel(name) {
+      currentModel = name;
       if (cleanup) { cleanup(); cleanup = null; }
       document.querySelectorAll('.app-nav a').forEach(a => a.classList.remove('active'));
       const link = document.querySelector(`.app-nav a[data-model="${name}"]`);
@@ -75,9 +77,22 @@
       }
       const el = document.getElementById('app-content');
       el.innerHTML = '<div class="card"><p class="text-muted">Loading...</p></div>';
-      fetch(`/api/${name}/schema`).then(r => r.json()).then(schema => {
+      const schemaPromise = fetch(`/api/${name}/schema`).then(r => r.json());
+      const statsPromise = name === 'process' ? fetch('/api/system/resources').then(r => r.json()) : null;
+      Promise.all([schemaPromise, statsPromise].filter(Boolean)).then(([schema, stats]) => {
+        if (currentModel !== name) return;
         el.innerHTML = '';
         cleanup = nimbo.crud.mount(el, name, schema.fields);
+        if (stats) {
+          const s = document.createElement('div');
+          s.style.marginBottom = 'var(--gap)';
+          s.innerHTML =
+            `<div class="stat-grid"><div class="stat-card"><div class="stat-value">${stats.cpu}%</div><div class="stat-label">CPU</div><div class="bar"><div class="bar-fill" style="width:${stats.cpu}%"></div></div></div>` +
+            `<div class="stat-card"><div class="stat-value">${Math.round(stats.memory.percent)}%</div><div class="stat-label">RAM</div><div class="bar"><div class="bar-fill" style="width:${stats.memory.percent}%"></div></div></div>` +
+            `<div class="stat-card"><div class="stat-value">${Math.round(stats.disk.percent)}%</div><div class="stat-label">Disk</div><div class="bar"><div class="bar-fill" style="width:${stats.disk.percent}%"></div></div></div>` +
+            `<div class="stat-card"><div class="stat-value">${(stats.net.bytes_sent / 1e6).toFixed(1)}M</div><div class="stat-label">Net</div></div>`;
+          el.prepend(s);
+        }
       });
     }
 
