@@ -389,6 +389,9 @@ class App:
             dirs.add(self._static_dir)
         if self._framework_static and os.path.isdir(self._framework_static):
             dirs.add(self._framework_static)
+        fw_pkg = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+        if os.path.isdir(fw_pkg):
+            dirs.add(fw_pkg)
         for d in dirs:
             for root, _, fnames in os.walk(d):
                 for f in fnames:

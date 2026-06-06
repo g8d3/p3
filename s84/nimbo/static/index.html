@@ -140,17 +140,21 @@
     }
     function renderLogs() {
       const el = document.getElementById('app-content');
-      el.innerHTML = `
-        <div class="card">
-          <div class="flex items-center justify-between mb">
-            <h3>Live Logs</h3>
-            <button class="btn btn-sm" onclick="document.getElementById('log-container').innerHTML=''">Clear</button>
-          </div>
-          <div id="log-container" style="background:var(--bg);padding:12px;border-radius:var(--radius);max-height:70vh;overflow-y:auto;font-family:monospace;font-size:0.8rem"></div>
-        </div>`;
+      const exists = !!document.getElementById('log-container');
+      if (!exists) {
+        el.innerHTML = `
+          <div class="card">
+            <div class="flex items-center justify-between mb">
+              <h3>Live Logs</h3>
+              <button class="btn btn-sm" onclick="document.getElementById('log-container').innerHTML=''">Clear</button>
+            </div>
+            <div id="log-container" style="background:var(--bg);padding:12px;border-radius:var(--radius);max-height:70vh;overflow-y:auto;font-family:monospace;font-size:0.8rem"></div>
+          </div>`;
+      }
+      // Always load recent history (container was recreated)
+      fetch('/api/log/recent').then(r => r.json()).then(h => h.slice(-50).forEach(l => addLog(l.level, l.content))).catch(()=>{});
       if (!logsInit) {
         logsInit = true;
-        fetch('/api/log/recent').then(r => r.json()).then(h => h.slice(-50).forEach(l => addLog(l.level, l.content))).catch(()=>{});
         nimbo.ws.on('open', () => addLog('info', 'WS connected'));
         nimbo.ws.on('close', () => addLog('warn', 'WS disconnected'));
         nimbo.ws.on('log', msg => addLog(msg.data?.level || 'info', msg.data?.content || JSON.stringify(msg.data)));
