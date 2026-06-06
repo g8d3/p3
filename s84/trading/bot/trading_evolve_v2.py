@@ -6,7 +6,7 @@ import json, os, math, random, time, copy
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 BRIDGE = os.path.join(BASE, "..", "shared-bridge", "discoveries")
-RESULTS = os.path.join(BASE, "evolution-v2.json")
+RESULTS = os.path.join(BASE, "..", "evolution", "evolution-v2.json")
 os.makedirs(BRIDGE, exist_ok=True)
 
 # ── 1. DATOS SINTÉTICOS MULTI-REGIMEN ──

@@ -6,7 +6,7 @@ import json, os, time, urllib.request, urllib.error
 from datetime import datetime
 
 BASE = os.path.dirname(os.path.abspath(__file__))
-SIGNAL_FILE = os.path.join(BASE, "signals.json")
+SIGNAL_FILE = os.path.join(BASE, "..", "resultados", "signals.json")
 HL_INFO = "https://api.hyperliquid.xyz/info"
 SYMBOLS = ["BTC", "ETH", "SOL", "ARB"]
 

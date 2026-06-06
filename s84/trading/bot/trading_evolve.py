@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 BASE = os.path.dirname(os.path.abspath(__file__))
 DATA_FILE = os.path.join(BASE, "synthetic_data.json")
-RESULTS_FILE = os.path.join(BASE, "evolution.json")
+RESULTS_FILE = os.path.join(BASE, "..", "evolution", "evolution.json")
 
 # ── 1. Generador de datos sintéticos ──
 
