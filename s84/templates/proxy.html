@@ -22,7 +22,7 @@ p{margin:4px 0}
 
 <h3>🤖 Agentes</h3>
 <table id="agents-tbl">
-<tr><th>Agente</th><th>Estado</th><th>PID</th><th>CPU</th><th>RAM</th><th>Última request</th></tr>
+<tr><th>Agente</th><th>Estado</th><th>PID</th><th>CPU</th><th>RAM</th><th>Visto</th></tr>
 {{AGENTS_ROWS}}
 </table>
 
@@ -33,23 +33,35 @@ p{margin:4px 0}
 </table>
 
 <script>
-async function refresh() {
-  try {
-    const h = await (await fetch('/health')).json();
+function esc(s) { return String(s||'').replace(/[&<>"']/g,'') }
+function refresh() {
+  fetch('/health').then(r=>r.json()).then(h => {
     document.getElementById('ts').textContent = h.timestamp;
-    const at = document.getElementById('agents-tbl');
-    let ahtml = '<tr><th>Agente</th><th>Estado</th><th>Última request</th></tr>';
-    if (h.agents && Object.keys(h.agents).length > 0) {
+    // Agents table
+    let ag = '<tr><th>Agente</th><th>Estado</th><th>PID</th><th>CPU</th><th>RAM</th><th>Visto</th></tr>';
+    if (h.agents) {
       for (const [name, info] of Object.entries(h.agents)) {
-        const cls = info.idle ? 'status-off' : 'status-on';
         const icon = info.idle ? '🟡' : '🟢';
-        ahtml += `<tr class="${cls}"><td>${name}</td><td>${icon} ${info.status}</td><td>${info.last_s}s</td></tr>`;
+        ag += `<tr class="${info.idle?'idle':'ok'}"><td>${esc(name).slice(0,6)}</td><td>${icon} ${esc(info.status)}</td><td style="color:#888">${info.pid||'-'}</td><td style="color:#888">${info.cpu||'-'}%</td><td style="color:#888">${info.mem_pct||'-'}%</td><td style="color:#666">${info.last_seen_s||info.last_s||'-'}s</td></tr>`;
       }
-    } else {
-      ahtml += '<tr><td colspan="3" style="color:#666">—</td></tr>';
     }
-    at.innerHTML = ahtml;
-  } catch(e) {}
+    if (!h.agents || Object.keys(h.agents).length===0) ag += '<tr><td colspan="6" style="color:#666">—</td></tr>';
+    document.getElementById('agents-tbl').innerHTML = ag;
+    // Log table
+    let lg = '<tr><th>Hora</th><th>Agente</th><th>Modelo</th><th>Req</th><th>Resp</th><th>ms</th></tr>';
+    if (h.logs) {
+      for (const e of h.logs) {
+        const cls = e.type==='http'?(e.status==='200'?'ok':'err'):'info';
+        if (e.type==='http') {
+          lg += `<tr class="${cls}"><td>${esc(e.t)}</td><td>${esc(e.agent).slice(0,10)}</td><td>${esc(e.model)}</td><td class="snip">${esc(e.req)}</td><td class="snip">${esc(e.resp)}</td><td style="text-align:right">${e.ms||''}</td></tr>`;
+        } else {
+          lg += `<tr class="${cls}"><td>${esc(e.t)}</td><td colspan="4">${esc(e.msg)}</td><td></td></tr>`;
+        }
+      }
+    }
+    if (!h.logs || h.logs.length===0) lg += '<tr><td colspan="6" style="color:#666">—</td></tr>';
+    document.getElementById('log-tbl').innerHTML = lg;
+  }).catch(()=>{});
 }
 setInterval(refresh, 3000);
 refresh();

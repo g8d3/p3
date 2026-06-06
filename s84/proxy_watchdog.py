@@ -3,7 +3,7 @@
 API Proxy + Watchdog — intercepta llamadas al LLM, detecta agentes idle.
 Web UI en http://localhost:9099 para monitorear actividad en tiempo real.
 """
-import json, os, time, threading, html
+import json, os, sys, time, threading, html
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 import urllib.request, urllib.error
@@ -119,36 +119,51 @@ def scan_agents():
                         if name:
                             aid = name
                 except: pass
-                # Leer CPU y RAM
-                cpu = 0; mem = 0
+                # Leer RAM (MB y %) y CPU (%)
+                cpu = 0; mem_mb = 0; mem_pct = 0
                 try:
                     with open(f"/proc/{pid}/status") as f:
                         for line in f:
                             if line.startswith("VmRSS:"):
-                                mem = float(line.split()[1]) / 1024
+                                mem_mb = round(float(line.split()[1]) / 1024, 1)
+                            elif line.startswith("VmSize:"):
+                                total_vm = float(line.split()[1])
                     with open(f"/proc/{pid}/stat") as f:
-                        stats = f.read().split()
-                    utime = float(stats[13]); stime = float(stats[14])
-                    with open(f"/proc/{pid}/stat") as f2:
-                        pass  # ya lo tenemos
-                    # Calcular CPU sobre tiempo de vida
-                    from datetime import datetime
-                    start_btime = float(stats[21])
-                    with open("/proc/stat") as f:
-                        for line in f:
-                            if line.startswith("btime "):
-                                boot = float(line.split()[1])
-                                break
-                    elapsed = time.time() - (boot + start_btime)
-                    cpu = round((utime + stime) / elapsed * 100, 1) if elapsed > 0 else 0
-                except: pass
+                        raw = f.read()
+                    # Parsear stat correctamente: pid (comm) state ...
+                    end = raw.index(")") + 2  # después del paréntesis
+                    fields = raw[end:].split()
+                    utime = float(fields[11])
+                    stime = float(fields[12])
+                    start = float(fields[19])
+                    ticks = utime + stime
+                    cpu_sec = ticks / 100
+                    start_sec = start / 100
+                    with open("/proc/uptime") as f:
+                        uptime = float(f.read().split()[0])
+                    age = uptime - start_sec
+                    cpu = round(cpu_sec / age * 100, 1) if age > 1 else 0
+                    if mem_mb > 0:
+                        with open("/proc/meminfo") as f:
+                            for line in f:
+                                if line.startswith("MemTotal:"):
+                                    total_mem = float(line.split()[1]) / 1024
+                                    break
+                        mem_pct = round(mem_mb / total_mem * 100, 1)
+                except Exception as e:
+                    pass
 
                 with agents_lock:
                     if aid not in agents:
                         log_entry(f"[DETECT] {aid} pid={pid}")
-                    agents[aid] = {"last_request": time.time(), "idle": False,
-                                   "pid": int(pid), "cpu": cpu, "mem_mb": mem,
-                                   "started": time.time()}
+                        agents[aid] = {"last_request": 0, "last_seen": time.time(),
+                                       "idle": True, "pid": int(pid), "cpu": cpu,
+                                       "mem_mb": mem_mb, "mem_pct": mem_pct,
+                                       "started": time.time()}
+                    else:
+                        agents[aid].update({"pid": int(pid), "cpu": cpu,
+                                            "mem_mb": mem_mb, "mem_pct": mem_pct,
+                                            "last_seen": time.time()})
         except: pass
 
 def log_entry(*args):
@@ -175,10 +190,19 @@ class ProxyHandler(BaseHTTPRequestHandler):
                 now = time.time()
                 state = {}
                 for k, v in agents.items():
-                    elapsed = now - v["last_request"]
-                    state[k] = {"last_s": int(elapsed), "idle": v["idle"],
-                                "status": "idle" if v["idle"] else "activo"}
+                    lr = v.get("last_request", 0) or v.get("last_seen", now)
+                    elapsed = int(now - lr)
+                    is_idle = v.get("idle", False) or (v.get("last_request", 0) == 0)
+                    state[k] = {"last_s": elapsed,
+                                "last_seen_s": int(now - v.get("last_seen", now)),
+                                "idle": is_idle,
+                                "status": "idle" if is_idle else "activo",
+                                "pid": v.get("pid"), "cpu": v.get("cpu"),
+                                "mem_pct": v.get("mem_pct")}
+            with log_lock:
+                logs_copy = list(log_entries[:30])
                 self.wfile.write(json.dumps({"proxy": "ok", "agents": state,
+                    "logs": logs_copy,
                     "timestamp": time.strftime("%H:%M:%S")}, indent=2).encode())
             return
         elif self.path == "/log":
@@ -293,15 +317,16 @@ def render_template(upstream, agents_dict, logs):
         cls = "ok" if not info["idle"] else "idle"
         pid = info.get("pid", "-")
         cpu = info.get("cpu", "-")
-        mem = info.get("mem_mb", "-")
+        mem_pct = info.get("mem_pct", "-")
         cpu_s = f"{cpu}%" if isinstance(cpu, (int,float)) else "-"
-        mem_s = f"{mem}MB" if isinstance(mem, (int,float)) else "-"
-        agent_rows += f'<tr class="{cls}"><td>{html.escape(aid)}</td>' \
-            f'<td class="status-{"on" if not info["idle"] else "off"}">{status}</td>' \
+        mem_s = f"{mem_pct}%" if isinstance(mem_pct, (int,float)) else "-"
+        last_s = info.get("last_seen_s", elapsed)
+        agent_rows += f'<tr class="{cls}"><td>{html.escape(aid[:6])}</td>' \
+            f'<td class="status-{"on" if not info["idle"] else "off"}">{status[:4]}</td>' \
             f'<td style="color:#888;font-size:11px">{pid}</td>' \
             f'<td style="color:#888">{cpu_s}</td>' \
             f'<td style="color:#888">{mem_s}</td>' \
-            f'<td>{elapsed:.0f}s</td></tr>'
+            f'<td style="color:#666">{last_s}s</td></tr>'
     if not agent_rows:
         agent_rows = '<tr><td colspan="6" style="color:#666">—</td></tr>'
 
@@ -357,18 +382,8 @@ def main():
     threading.Thread(target=proxy.serve_forever, daemon=True).start()
     threading.Thread(target=ui.serve_forever, daemon=True).start()
 
-    # Hot reload: reiniciar si cambia el fuente
-    self_path = os.path.abspath(__file__)
-    last_mtime = os.path.getmtime(self_path)
     try:
-        while True:
-            time.sleep(3)
-            mtime = os.path.getmtime(self_path)
-            if mtime > last_mtime:
-                print("\n🔄 Fuente cambiado, reiniciando...")
-                proxy.shutdown()
-                ui.shutdown()
-                os.execv(sys.executable, [sys.executable, self_path])
+        while True: time.sleep(60)
     except KeyboardInterrupt:
         print("\nProxy detenido")
         proxy.shutdown()
