@@ -267,5 +267,5 @@
   }
 
   window.nimbo = window.nimbo || {};
-  window.nimbo.crud = { mount, config, api };
+  window.nimbo.crud = { mount, config, api, configs };
 })();

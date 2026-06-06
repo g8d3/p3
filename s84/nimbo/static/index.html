@@ -33,9 +33,8 @@
     nimbo.crud.config('process', {
       api: '/api/system/processes',
       id: 'pid',
-      noCreate: true,
-      noEdit: true,
-      refresh: 5000,
+      fields: [{name:'pid',type:'int'},{name:'name',type:'string'},{name:'cpu_percent',type:'float',label:'CPU%'},{name:'memory_percent',type:'float',label:'MEM%'},{name:'status',type:'string'}],
+      noCreate: true, noEdit: true, refresh: 5000,
       actions: [
         { label: '✕', class: 'btn-danger', handler: async (item, btn) => {
           if (!confirm(`Kill ${item.name} (${item.pid})?`)) return;
@@ -77,8 +76,12 @@
       }
       const el = document.getElementById('app-content');
       el.innerHTML = '<div class="card"><p class="text-muted">Loading...</p></div>';
-      const schemaPromise = fetch(`/api/${name}/schema`).then(r => r.json());
+
+      const cfg = nimbo.crud.configs ? nimbo.crud.configs[name] : null;
+      const hasInlineFields = cfg && cfg.fields;
+      const schemaPromise = hasInlineFields ? Promise.resolve({fields: cfg.fields}) : fetch(`/api/${name}/schema`).then(r => r.json());
       const statsPromise = name === 'process' ? fetch('/api/system/resources').then(r => r.json()) : null;
+
       Promise.all([schemaPromise, statsPromise].filter(Boolean)).then(([schema, stats]) => {
         if (currentModel !== name) return;
         el.innerHTML = '';
