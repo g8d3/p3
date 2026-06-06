@@ -1,0 +1,25 @@
+{
+  "strategy": {
+    "name": "sma_cross-2672",
+    "semilla": "sma_cross",
+    "entry_type": "sma_cross",
+    "exit_type": "trailing_stop",
+    "params": {
+      "sma_fast": 8,
+      "sma_slow": 58,
+      "stop_loss": 1.6,
+      "take_profit": 9.0
+    }
+  },
+  "metrics": {
+    "total_trades": 7,
+    "win_rate": 100.0,
+    "avg_pnl": 3.32,
+    "profit_factor": 999,
+    "sharpe": 0.13,
+    "max_drawdown": 44.51,
+    "score": 3.5,
+    "wins": 7,
+    "losses": 0
+  }
+}

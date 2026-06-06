@@ -1,0 +1,173 @@
+{
+  "config": {
+    "generations": 5,
+    "pop_per_seed": 6,
+    "mutation_rate": 0.25,
+    "cross_rate": 0.15,
+    "keep_ratio": 0.3,
+    "train_regimes": [
+      "alcista",
+      "lateral",
+      "volatil"
+    ],
+    "test_regimes": [
+      "bajista",
+      "ciclico"
+    ],
+    "final_regime": "volatil"
+  },
+  "elapsed_seconds": 2.1,
+  "history": [
+    {
+      "gen": 1,
+      "best_name": "sma_cross-2672",
+      "best_score": 186.48,
+      "best_pf": 999,
+      "best_wr": 100.0
+    },
+    {
+      "gen": 2,
+      "best_name": "sma_cross-2672",
+      "best_score": 186.48,
+      "best_pf": 999,
+      "best_wr": 100.0
+    },
+    {
+      "gen": 3,
+      "best_name": "sma_cross-2672",
+      "best_score": 186.48,
+      "best_pf": 999,
+      "best_wr": 100.0
+    },
+    {
+      "gen": 4,
+      "best_name": "sma_cross-2672",
+      "best_score": 186.48,
+      "best_pf": 999,
+      "best_wr": 100.0
+    },
+    {
+      "gen": 5,
+      "best_name": "sma_cross-2672",
+      "best_score": 186.48,
+      "best_pf": 999,
+      "best_wr": 100.0
+    }
+  ],
+  "top5": [
+    {
+      "name": "price_action-9484",
+      "semilla": "price_action",
+      "entry_type": "price_level",
+      "exit_type": "trailing_stop",
+      "params": {
+        "stop_loss": 2.1,
+        "take_profit": 6.2,
+        "max_hold": 45
+      },
+      "metrics": {
+        "total_trades": 7,
+        "win_rate": 100.0,
+        "avg_pnl": 4.49,
+        "profit_factor": 999,
+        "sharpe": 0.65,
+        "max_drawdown": 33.99,
+        "score": 233.1,
+        "wins": 7,
+        "losses": 0
+      }
+    },
+    {
+      "name": "sma_cross-mut-220",
+      "semilla": "sma_cross",
+      "entry_type": "sma_cross",
+      "exit_type": "trailing_stop",
+      "params": {
+        "sma_fast": 8,
+        "sma_slow": 57,
+        "stop_loss": 1.6,
+        "take_profit": 9.0
+      },
+      "metrics": {
+        "total_trades": 3,
+        "win_rate": 100.0,
+        "avg_pnl": 1.15,
+        "profit_factor": 999,
+        "sharpe": 0.22,
+        "max_drawdown": 44.92,
+        "score": 99.9,
+        "wins": 3,
+        "losses": 0
+      }
+    },
+    {
+      "name": "sma_cross-mut-121",
+      "semilla": "sma_cross",
+      "entry_type": "sma_cross",
+      "exit_type": "trailing_stop",
+      "params": {
+        "sma_fast": 8,
+        "sma_slow": 57,
+        "stop_loss": 1.6,
+        "take_profit": 9.0
+      },
+      "metrics": {
+        "total_trades": 3,
+        "win_rate": 100.0,
+        "avg_pnl": 1.15,
+        "profit_factor": 999,
+        "sharpe": 0.22,
+        "max_drawdown": 44.92,
+        "score": 99.9,
+        "wins": 3,
+        "losses": 0
+      }
+    },
+    {
+      "name": "sma_cross-mut-875",
+      "semilla": "sma_cross",
+      "entry_type": "sma_cross",
+      "exit_type": "trailing_stop",
+      "params": {
+        "sma_fast": 8,
+        "sma_slow": 57,
+        "stop_loss": 1.6,
+        "take_profit": 9.0
+      },
+      "metrics": {
+        "total_trades": 3,
+        "win_rate": 100.0,
+        "avg_pnl": 1.15,
+        "profit_factor": 999,
+        "sharpe": 0.22,
+        "max_drawdown": 44.92,
+        "score": 99.9,
+        "wins": 3,
+        "losses": 0
+      }
+    },
+    {
+      "name": "sma_cross-mut-235",
+      "semilla": "sma_cross",
+      "entry_type": "sma_cross",
+      "exit_type": "trailing_stop",
+      "params": {
+        "sma_fast": 8,
+        "sma_slow": 57,
+        "stop_loss": 1.6,
+        "take_profit": 9.0
+      },
+      "metrics": {
+        "total_trades": 3,
+        "win_rate": 100.0,
+        "avg_pnl": 1.15,
+        "profit_factor": 999,
+        "sharpe": 0.22,
+        "max_drawdown": 44.92,
+        "score": 99.9,
+        "wins": 3,
+        "losses": 0
+      }
+    }
+  ]
+}
