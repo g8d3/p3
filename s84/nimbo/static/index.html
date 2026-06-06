@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>nimbo</title>
+<link rel="stylesheet" href="/mobile.css">
+<style>
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; text-align: center; }
+  .stat-value { font-size: 1.6rem; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 0.75rem; color: #8b949e; text-transform: uppercase; }
+  .bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s; }
+  .process-table { font-size: 0.8rem; }
+  .process-table .cpu-bar { display: inline-block; width: 60px; height: 4px; background: var(--border); border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+  .log-entry { padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 0.8rem; font-family: monospace; }
+  .log-time { color: #8b949e; margin-right: 8px; }
+  .log-level { display: inline-block; padding: 0 4px; border-radius: 3px; font-size: 0.7rem; margin-right: 6px; font-weight: 600; }
+  .log-level.info { color: var(--accent); background: rgba(88,166,255,0.1); }
+  .log-level.error { color: var(--danger); background: rgba(248,81,73,0.1); }
+  .log-level.warn { color: var(--warn); background: rgba(210,153,34,0.1); }
+  .tabs { display: flex; gap: 4px; margin-bottom: var(--gap); overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab { padding: 8px 16px; border-radius: var(--radius); cursor: pointer; font-size: 0.9rem; background: transparent; color: var(--fg); border: 1px solid transparent; white-space: nowrap; }
+  .tab:hover { background: var(--hover); }
+  .tab.active { background: var(--card); border-color: var(--border); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .crud-section { margin-bottom: 24px; animation: fadeIn 0.2s ease-out; }
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <h1 id="app-title">nimbo</h1>
+      <span id="ws-status" style="width:8px;height:8px;border-radius:50%;background:#f85149;display:inline-block"></span>
+    </header>
+    <nav class="app-nav" id="app-nav"></nav>
+    <main class="app-content" id="app-content">
+      <div class="tabs" id="tabs">
+        <button class="tab" data-panel="dashboard">Dashboard</button>
+        <button class="tab" data-panel="crud">Data</button>
+        <button class="tab" data-panel="processes">Processes</button>
+        <button class="tab" data-panel="logs">Live Logs</button>
+      </div>
+      <div id="dashboard" class="panel"></div>
+      <div id="crud" class="panel"></div>
+      <div id="processes" class="panel"></div>
+      <div id="logs" class="panel"></div>
+    </main>
+  </div>
+
+  <script src="/ws.js"></script>
+  <script src="/crud.js"></script>
+  <script>
+    const models = window.__NIMBO_RESOURCES__ || [];
+
+    // ── Tab switching with URL state ──
+    function switchTab(name) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      const tab = document.querySelector(`.tab[data-panel="${name}"]`);
+      if (tab) tab.classList.add('active');
+      document.getElementById(name).classList.add('active');
+      history.replaceState(null, '', '#' + name);
+      if (name === 'dashboard') renderDashboard();
+      if (name === 'processes') renderProcesses();
+      if (name === 'crud') renderCRUD();
+      if (name === 'logs') initLogs();
+    }
+
+    document.getElementById('tabs').addEventListener('click', e => {
+      const btn = e.target.closest('.tab');
+      if (btn) switchTab(btn.dataset.panel);
+    });
+
+    // ── Dashboard (partial updates) ──
+    let dashRendered = false;
+    async function renderDashboard() {
+      const el = document.getElementById('dashboard');
+      if (!dashRendered) {
+        el.innerHTML = `
+          <div class="stat-grid">
+            <div class="stat-card"><div class="stat-value" id="stat-cpu">-</div><div class="stat-label">CPU</div><div class="bar"><div class="bar-fill" id="bar-cpu" style="width:0%"></div></div></div>
+            <div class="stat-card"><div class="stat-value" id="stat-ram">-</div><div class="stat-label">RAM</div><div class="bar"><div class="bar-fill" id="bar-ram" style="width:0%"></div></div></div>
+            <div class="stat-card"><div class="stat-value" id="stat-disk">-</div><div class="stat-label">Disk</div><div class="bar"><div class="bar-fill" id="bar-disk" style="width:0%"></div></div></div>
+            <div class="stat-card"><div class="stat-value" id="stat-net">-</div><div class="stat-label">Net Sent</div></div>
+          </div>
+          <div class="card mt">
+            <h3>Quick Exec</h3>
+            <div class="field"><input type="text" id="quick-cmd" placeholder="curl, ps aux, df -h..." style="font-family:monospace"></div>
+            <button class="btn btn-primary" onclick="quickExec()">Run</button>
+            <pre id="quick-output" class="mt" style="background:var(--bg);padding:12px;border-radius:var(--radius);font-size:0.8rem;max-height:300px;overflow:auto;display:none"></pre>
+          </div>`;
+        dashRendered = true;
+      }
+      try {
+        const res = await fetch('/api/system/resources');
+        const d = await res.json();
+        document.getElementById('stat-cpu').textContent = d.cpu + '%';
+        document.getElementById('bar-cpu').style.width = d.cpu + '%';
+        document.getElementById('stat-ram').textContent = Math.round(d.memory.percent) + '%';
+        document.getElementById('bar-ram').style.width = d.memory.percent + '%';
+        document.getElementById('stat-disk').textContent = Math.round(d.disk.percent) + '%';
+        document.getElementById('bar-disk').style.width = d.disk.percent + '%';
+        document.getElementById('stat-net').textContent = (d.net.bytes_sent / 1e6).toFixed(1) + 'M';
+      } catch (e) {
+        document.getElementById('stat-cpu').textContent = 'ERR';
+      }
+    }
+
+    window.quickExec = async function() {
+      const input = document.getElementById('quick-cmd');
+      const output = document.getElementById('quick-output');
+      output.style.display = 'block';
+      output.textContent = 'Running...';
+      try {
+        const res = await fetch('/api/exec', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({command: input.value})
+        });
+        const data = await res.json();
+        output.textContent = data.stdout || data.stderr || '(no output)';
+        if (data.returncode !== 0) output.style.color = 'var(--danger)';
+        else output.style.color = 'var(--fg)';
+      } catch (e) {
+        output.textContent = 'Error: ' + e.message;
+      }
+    };
+
+    // ── Processes ──
+    let procRendered = false;
+    async function renderProcesses() {
+      const el = document.getElementById('processes');
+      if (!procRendered) {
+        el.innerHTML = '<div class="card"><h3>Top Processes</h3><div class="table-wrap"><table class="process-table"><thead><tr><th>PID</th><th>Name</th><th>CPU</th><th>Mem</th><th>Status</th><th></th></tr></thead><tbody id="proc-body"></tbody></table></div></div>';
+        procRendered = true;
+      }
+      try {
+        const res = await fetch('/api/system/processes');
+        const procs = await res.json();
+        const maxCpu = Math.max(...procs.map(p => p.cpu_percent || 0), 1);
+        document.getElementById('proc-body').innerHTML = procs.map(p => `
+          <tr>
+            <td>${p.pid}</td>
+            <td>${p.name || '?'}</td>
+            <td><span class="cpu-bar"><span class="bar-fill" style="width:${((p.cpu_percent||0)/maxCpu*100).toFixed(0)}%"></span></span>${(p.cpu_percent||0).toFixed(1)}%</td>
+            <td>${(p.memory_percent||0).toFixed(1)}%</td>
+            <td><span class="badge ${p.status === 'running' ? 'badge-green' : 'badge-yellow'}">${p.status||'?'}</span></td>
+            <td><button class="btn btn-sm btn-danger" onclick="killProc(${p.pid},this)">✕</button></td>
+          </tr>
+        `).join('');
+      } catch (e) {
+        document.getElementById('proc-body').innerHTML = '<tr><td colspan="6" class="text-muted">Error loading</td></tr>';
+      }
+    }
+
+    window.killProc = async function(pid, btn) {
+      if (!confirm(`Kill process ${pid}?`)) return;
+      btn.disabled = true;
+      btn.textContent = '...';
+      try {
+        const res = await fetch(`/api/system/kill/${pid}`, {method:'POST'});
+        if (res.ok) btn.textContent = '✓';
+        else btn.textContent = '✗';
+      } catch(e) {
+        btn.textContent = '✗';
+      }
+    };
+
+    // ── CRUD ──
+    let crudRendered = false;
+    function renderCRUD() {
+      const el = document.getElementById('crud');
+      if (crudRendered) return;
+      crudRendered = true;
+      modelLoop = models.filter(m => m !== 'log');
+      modelLoop.forEach(name => {
+        const section = document.createElement('div');
+        section.className = 'crud-section';
+        el.appendChild(section);
+        fetch(`/api/${name}/schema`).then(r => r.json()).then(schema => {
+          nimbo.crud.mount(section, name, schema.fields);
+        });
+      });
+    }
+
+    // ── Live Logs ──
+    let logsInit = false;
+    function addLog(level, text) {
+      const container = document.getElementById('log-container');
+      if (!container) return;
+      const el = document.createElement('div');
+      el.className = 'log-entry';
+      const t = new Date().toLocaleTimeString();
+      el.innerHTML = `<span class="log-time">${t}</span><span class="log-level ${level}">${level}</span>${text}`;
+      container.appendChild(el);
+      container.scrollTop = container.scrollHeight;
+    }
+    function logEvent(level, text) {
+      addLog(level, text);
+      if (level !== 'debug') {
+        nimbo.ws.send(JSON.stringify({type:'log', data: {level, content: text, source: 'client'}}));
+      }
+    }
+    async function initLogs() {
+      const el = document.getElementById('logs');
+      if (logsInit) return;
+      logsInit = true;
+      el.innerHTML = `
+        <div class="card">
+          <div class="flex items-center justify-between mb">
+            <h3>Live Logs</h3>
+            <button class="btn btn-sm" onclick="document.getElementById('log-container').innerHTML=''">Clear</button>
+          </div>
+          <div id="log-container" style="background:var(--bg);padding:12px;border-radius:var(--radius);max-height:60vh;overflow-y:auto;font-family:monospace;font-size:0.8rem"></div>
+        </div>
+      `;
+      try {
+        const res = await fetch('/api/log/recent');
+        const history = await res.json();
+        history.slice(-50).forEach(log => addLog(log.level, log.content));
+      } catch(e) {}
+      nimbo.ws.on('open', () => addLog('info', 'WebSocket connected'));
+      nimbo.ws.on('close', () => addLog('warn', 'WebSocket disconnected'));
+      nimbo.ws.on('log', msg => {
+        addLog(msg.data?.level || 'info', msg.data?.content || JSON.stringify(msg.data));
+      });
+      addLog('info', 'Live Logs ready');
+    }
+
+    // ── Init ──
+    nimbo.ws.on('open', () => document.getElementById('ws-status').style.background = '#3fb950');
+    nimbo.ws.on('close', () => document.getElementById('ws-status').style.background = '#f85149');
+    nimbo.ws.connect();
+    const initialTab = location.hash.replace('#', '') || 'dashboard';
+    switchTab(initialTab);
+
+    // ── Auto-refresh (with live log) ──
+    setInterval(() => {
+      const el = document.getElementById('dashboard');
+      if (el && el.classList.contains('active')) {
+        renderDashboard();
+        if (logsInit) addLog('debug', 'Dashboard refreshed');
+      }
+    }, 3000);
+
+    setInterval(() => {
+      const el = document.getElementById('processes');
+      if (el && el.classList.contains('active')) {
+        renderProcesses();
+        if (logsInit) addLog('debug', 'Processes refreshed');
+      }
+    }, 5000);
+  </script>
+</body>
+</html>
