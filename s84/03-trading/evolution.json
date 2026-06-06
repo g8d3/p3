@@ -1,0 +1,241 @@
+{
+  "history": [
+    {
+      "generation": 1,
+      "best": "gen0-21",
+      "best_pf": 999,
+      "best_wr": 100.0,
+      "population": 30
+    },
+    {
+      "generation": 2,
+      "best": "gen0-21",
+      "best_pf": 999,
+      "best_wr": 100.0,
+      "population": 30
+    },
+    {
+      "generation": 3,
+      "best": "gen0-21",
+      "best_pf": 999,
+      "best_wr": 100.0,
+      "population": 30
+    },
+    {
+      "generation": 4,
+      "best": "gen0-21",
+      "best_pf": 999,
+      "best_wr": 100.0,
+      "population": 30
+    },
+    {
+      "generation": 5,
+      "best": "gen0-21",
+      "best_pf": 999,
+      "best_wr": 100.0,
+      "population": 30
+    },
+    {
+      "generation": 6,
+      "best": "gen0-21",
+      "best_pf": 999,
+      "best_wr": 100.0,
+      "population": 30
+    },
+    {
+      "generation": 7,
+      "best": "gen0-21",
+      "best_pf": 999,
+      "best_wr": 100.0,
+      "population": 30
+    },
+    {
+      "generation": 8,
+      "best": "gen0-21",
+      "best_pf": 999,
+      "best_wr": 100.0,
+      "population": 30
+    },
+    {
+      "generation": 9,
+      "best": "gen0-21",
+      "best_pf": 999,
+      "best_wr": 100.0,
+      "population": 30
+    },
+    {
+      "generation": 10,
+      "best": "gen0-21",
+      "best_pf": 999,
+      "best_wr": 100.0,
+      "population": 30
+    },
+    {
+      "generation": 11,
+      "best": "gen0-21",
+      "best_pf": 999,
+      "best_wr": 100.0,
+      "population": 30
+    },
+    {
+      "generation": 12,
+      "best": "gen11-14",
+      "best_pf": 1849.5,
+      "best_wr": 80.0,
+      "population": 30
+    },
+    {
+      "generation": 13,
+      "best": "gen11-14",
+      "best_pf": 1849.5,
+      "best_wr": 80.0,
+      "population": 30
+    },
+    {
+      "generation": 14,
+      "best": "gen11-14",
+      "best_pf": 1849.5,
+      "best_wr": 80.0,
+      "population": 30
+    },
+    {
+      "generation": 15,
+      "best": "gen11-14",
+      "best_pf": 1849.5,
+      "best_wr": 80.0,
+      "population": 30
+    }
+  ],
+  "top5": [
+    {
+      "strategy": "gen11-14",
+      "params": {
+        "timeframe": "15m",
+        "entry_type": "sma_cross",
+        "exit_type": "trailing_stop",
+        "volume_threshold": 3.3,
+        "sma_fast": 8,
+        "sma_slow": 237,
+        "rsi_period": 15,
+        "rsi_overbought": 80,
+        "rsi_oversold": 27,
+        "stop_loss_pct": 3.5,
+        "take_profit_pct": 3.7,
+        "position_size_pct": 8.6,
+        "max_hold_candles": 51
+      },
+      "metrics": {
+        "total_trades": 5,
+        "win_rate": 80.0,
+        "avg_pnl_pct": 7.39,
+        "profit_factor": 1849.5,
+        "wins": 4,
+        "losses": 1
+      }
+    },
+    {
+      "strategy": "gen13-5",
+      "params": {
+        "timeframe": "15m",
+        "entry_type": "sma_cross",
+        "exit_type": "trailing_stop",
+        "volume_threshold": 3.8,
+        "sma_fast": 8,
+        "sma_slow": 237,
+        "rsi_period": 15,
+        "rsi_overbought": 80,
+        "rsi_oversold": 27,
+        "stop_loss_pct": 3.5,
+        "take_profit_pct": 3.8,
+        "position_size_pct": 8.6,
+        "max_hold_candles": 51
+      },
+      "metrics": {
+        "total_trades": 5,
+        "win_rate": 80.0,
+        "avg_pnl_pct": 7.39,
+        "profit_factor": 1849.5,
+        "wins": 4,
+        "losses": 1
+      }
+    },
+    {
+      "strategy": "gen13-18",
+      "params": {
+        "timeframe": "5m",
+        "entry_type": "sma_cross",
+        "exit_type": "trailing_stop",
+        "volume_threshold": 3.3,
+        "sma_fast": 8,
+        "sma_slow": 237,
+        "rsi_period": 15,
+        "rsi_overbought": 80,
+        "rsi_oversold": 31,
+        "stop_loss_pct": 3.5,
+        "take_profit_pct": 3.7,
+        "position_size_pct": 8.6,
+        "max_hold_candles": 51
+      },
+      "metrics": {
+        "total_trades": 5,
+        "win_rate": 80.0,
+        "avg_pnl_pct": 7.39,
+        "profit_factor": 1849.5,
+        "wins": 4,
+        "losses": 1
+      }
+    },
+    {
+      "strategy": "gen14-3",
+      "params": {
+        "timeframe": "5m",
+        "entry_type": "sma_cross",
+        "exit_type": "trailing_stop",
+        "volume_threshold": 3.3,
+        "sma_fast": 8,
+        "sma_slow": 237,
+        "rsi_period": 15,
+        "rsi_overbought": 80,
+        "rsi_oversold": 32,
+        "stop_loss_pct": 3.5,
+        "take_profit_pct": 3.7,
+        "position_size_pct": 8.6,
+        "max_hold_candles": 51
+      },
+      "metrics": {
+        "total_trades": 5,
+        "win_rate": 80.0,
+        "avg_pnl_pct": 7.39,
+        "profit_factor": 1849.5,
+        "wins": 4,
+        "losses": 1
+      }
+    },
+    {
+      "strategy": "gen14-10",
+      "params": {
+        "timeframe": "15m",
+        "entry_type": "sma_cross",
+        "exit_type": "trailing_stop",
+        "volume_threshold": 3.3,
+        "sma_fast": 8,
+        "sma_slow": 237,
+        "rsi_period": 13,
+        "rsi_overbought": 80,
+        "rsi_oversold": 24,
+        "stop_loss_pct": 3.5,
+        "take_profit_pct": 3.7,
+        "position_size_pct": 8.6,
+        "max_hold_candles": 55
+      },
+      "metrics": {
+        "total_trades": 5,
+        "win_rate": 80.0,
+        "avg_pnl_pct": 7.39,
+        "profit_factor": 1849.5,
+        "wins": 4,
+        "losses": 1
+      }
+    }
+  ]
+}

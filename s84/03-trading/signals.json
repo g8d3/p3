@@ -1,0 +1,190 @@
+[
+  {
+    "symbol": "BTC/USDC",
+    "signal": "error",
+    "reason": "unsupported operand type(s) for +: 'NoneType' and 'str'"
+  },
+  {
+    "symbol": "ETH/USDC",
+    "signal": "error",
+    "reason": "unsupported operand type(s) for +: 'NoneType' and 'str'"
+  },
+  {
+    "symbol": "SOL/USDC",
+    "signal": "error",
+    "reason": "unsupported operand type(s) for +: 'NoneType' and 'str'"
+  },
+  {
+    "symbol": "ARB/USDC",
+    "signal": "error",
+    "reason": "unsupported operand type(s) for +: 'NoneType' and 'str'"
+  },
+  {
+    "symbol": "BTC/USDC",
+    "signal": "error",
+    "reason": "unsupported operand type(s) for +: 'NoneType' and 'str'"
+  },
+  {
+    "symbol": "ETH/USDC",
+    "signal": "error",
+    "reason": "unsupported operand type(s) for +: 'NoneType' and 'str'"
+  },
+  {
+    "symbol": "SOL/USDC",
+    "signal": "error",
+    "reason": "unsupported operand type(s) for +: 'NoneType' and 'str'"
+  },
+  {
+    "symbol": "ARB/USDC",
+    "signal": "error",
+    "reason": "unsupported operand type(s) for +: 'NoneType' and 'str'"
+  },
+  {
+    "symbol": "BTC",
+    "signal": "error",
+    "reason": "sin datos"
+  },
+  {
+    "symbol": "ETH",
+    "signal": "error",
+    "reason": "sin datos"
+  },
+  {
+    "symbol": "SOL",
+    "signal": "error",
+    "reason": "sin datos"
+  },
+  {
+    "symbol": "ARB",
+    "signal": "error",
+    "reason": "sin datos"
+  },
+  {
+    "symbol": "BTC",
+    "signal": "error",
+    "reason": "sin datos"
+  },
+  {
+    "symbol": "ETH",
+    "signal": "error",
+    "reason": "sin datos"
+  },
+  {
+    "symbol": "SOL",
+    "signal": "error",
+    "reason": "sin datos"
+  },
+  {
+    "symbol": "ARB",
+    "signal": "error",
+    "reason": "sin datos"
+  },
+  {
+    "symbol": "BTC",
+    "signal": "error",
+    "reason": "sin datos"
+  },
+  {
+    "symbol": "ETH",
+    "signal": "error",
+    "reason": "sin datos"
+  },
+  {
+    "symbol": "SOL",
+    "signal": "error",
+    "reason": "sin datos"
+  },
+  {
+    "symbol": "ARB",
+    "signal": "error",
+    "reason": "sin datos"
+  },
+  {
+    "symbol": "BTC",
+    "signal": "neutral",
+    "price": 61033.0,
+    "confidence": 0,
+    "volume": 134490.34055,
+    "liquidity": 0,
+    "change_pct": -4.42,
+    "reason": "vol $134490; liq baja $0; -4.4%",
+    "timestamp": "2026-06-05T20:39:08.744390"
+  },
+  {
+    "symbol": "ETH",
+    "signal": "neutral",
+    "price": 1582.4,
+    "confidence": 0,
+    "volume": 1462461.7875,
+    "liquidity": 0,
+    "change_pct": -10.6,
+    "reason": "vol $1462462; liq baja $0; -10.6%",
+    "timestamp": "2026-06-05T20:39:09.924379"
+  },
+  {
+    "symbol": "SOL",
+    "signal": "neutral",
+    "price": 63.591,
+    "confidence": 0,
+    "volume": 9162212.31,
+    "liquidity": 0,
+    "change_pct": -7.61,
+    "reason": "vol $9162212; liq baja $0; -7.6%",
+    "timestamp": "2026-06-05T20:39:10.942860"
+  },
+  {
+    "symbol": "ARB",
+    "signal": "neutral",
+    "price": 0.08028,
+    "confidence": 0,
+    "volume": 50926072.6,
+    "liquidity": 0,
+    "change_pct": -10.06,
+    "reason": "vol $50926073; liq baja $0; -10.1%",
+    "timestamp": "2026-06-05T20:39:12.047535"
+  },
+  {
+    "symbol": "BTC",
+    "signal": "observar",
+    "price": 61033.0,
+    "confidence": 1,
+    "volume": 134490.34055,
+    "liquidity": 97072.78063,
+    "change_pct": -4.42,
+    "reason": "vol $134490; liq $97073; -4.4%",
+    "timestamp": "2026-06-05T20:41:03.497898"
+  },
+  {
+    "symbol": "ETH",
+    "signal": "observar",
+    "price": 1582.4,
+    "confidence": 1,
+    "volume": 1462461.7875,
+    "liquidity": 229206.61758,
+    "change_pct": -10.6,
+    "reason": "vol $1462462; liq $229207; -10.6%",
+    "timestamp": "2026-06-05T20:41:04.745955"
+  },
+  {
+    "symbol": "SOL",
+    "signal": "neutral",
+    "price": 63.591,
+    "confidence": 0,
+    "volume": 9162212.31,
+    "liquidity": 2079.25108,
+    "change_pct": -7.61,
+    "reason": "vol $9162212; liq baja $2079; -7.6%",
+    "timestamp": "2026-06-05T20:41:05.878014"
+  },
+  {
+    "symbol": "ARB",
+    "signal": "neutral",
+    "price": 0.08028,
+    "confidence": 0,
+    "volume": 50926072.6,
+    "liquidity": 518.9134399999999,
+    "change_pct": -10.06,
+    "reason": "vol $50926073; liq baja $519; -10.1%",
+    "timestamp": "2026-06-05T20:41:06.965501"
+  }
+]

@@ -193,75 +193,75 @@ def main():
     total_t = sum(tts_durs)
     cast_scale = total_t / cast_dur if cast_dur > 0 else 1
 
-    for orientation, render_fn in [("horizontal", render_horizontal), ("vertical", render_vertical)]:
-        fps = 10
-        nframes = int(total_t * fps)
-        fdir = os.path.join(WD, f"frames_{orientation}")
-        os.makedirs(fdir, exist_ok=True)
+    # Mobile vertical only: 1080x1920
+    OUT = os.path.join(BASE, "demo", "a2a-demo-mobile.mp4")
+    fps = 10
+    nframes = int(total_t * fps)
+    fdir = os.path.join(WD, "frames_mobile")
+    os.makedirs(fdir, exist_ok=True)
 
-        buf = [""]*50
-        evt_i = 0
-        frozen = None
+    buf = [""]*50
+    evt_i = 0
+    frozen = None
 
-        print(f"Rendering {orientation} ({nframes} frames)...")
+    print(f"Rendering mobile ({nframes} frames)...")
 
-        for fi in range(nframes):
-            t = fi / fps
-            cast_t = min(t / cast_scale, cast_dur)
+    for fi in range(nframes):
+        t = fi / fps
+        cast_t = min(t / cast_scale, cast_dur)
 
-            while evt_i < len(evts) and evts[evt_i][0] <= cast_t:
-                _, et, data = evts[evt_i]
-                if et == "o":
-                    txt = data
-                    while '\n' in txt:
-                        idx = txt.index('\n')
-                        buf.append(txt[:idx].rstrip('\r'))
-                        txt = txt[idx+1:]
-                    if txt:
-                        buf[-1] += txt.rstrip('\r')
-                    buf = buf[-120:]
-                evt_i += 1
+        while evt_i < len(evts) and evts[evt_i][0] <= cast_t:
+            _, et, data = evts[evt_i]
+            if et == "o":
+                txt = data
+                while '\n' in txt:
+                    idx = txt.index('\n')
+                    buf.append(txt[:idx].rstrip('\r'))
+                    txt = txt[idx+1:]
+                if txt:
+                    buf[-1] += txt.rstrip('\r')
+                buf = buf[-120:]
+            evt_i += 1
 
-            if cast_t >= cast_dur and frozen is None:
-                frozen = buf.copy()
-            display = frozen if cast_t >= cast_dur and frozen else buf
+        if cast_t >= cast_dur and frozen is None:
+            frozen = buf.copy()
+        display = frozen if cast_t >= cast_dur and frozen else buf
 
-            si = get_step_at(t, tts_durs)
-            progress = t/total_t
+        si = get_step_at(t, tts_durs)
+        progress = t/total_t
 
-            img = render_fn(display, si, progress, t)
-            img.save(os.path.join(fdir, f"f{fi:06d}.png"))
+        img = render_vertical(display, si, progress, t)
+        img.save(os.path.join(fdir, f"f{fi:06d}.png"))
 
-            if fi % 150 == 0:
-                print(f"  {fi}/{nframes}")
+        if fi % 150 == 0:
+            print(f"  {fi}/{nframes}")
 
-        # Audio
-        audio_list = os.path.join(WD, f"audio_{orientation}.txt")
-        with open(audio_list,"w") as f:
-            for af in tts_files:
-                if os.path.exists(af) and os.path.getsize(af)>0:
-                    f.write(f"file '{af}'\n")
-        audio_all = os.path.join(WD, f"narracion_{orientation}.mp3")
-        subprocess.run(["ffmpeg","-y","-f","concat","-safe","0","-i",audio_list,"-c","copy",audio_all],
-            capture_output=True, timeout=30)
+    # Audio concat
+    audio_list = os.path.join(WD, "audio_mobile.txt")
+    with open(audio_list,"w") as f:
+        for af in tts_files:
+            if os.path.exists(af) and os.path.getsize(af)>0:
+                f.write(f"file '{af}'\n")
+    audio_all = os.path.join(WD, "narracion_mobile.mp3")
+    subprocess.run(["ffmpeg","-y","-f","concat","-safe","0","-i",audio_list,"-c","copy",audio_all],
+        capture_output=True, timeout=30)
 
-        # Video
-        vout = os.path.join(WD, f"a2a-demo-{orientation}.mp4")
-        subprocess.run([
-            "ffmpeg","-y","-framerate",str(fps),
-            "-i", f"{fdir}/f%06d.png",
-            "-i", audio_all,
-            "-c:v","libx264","-preset","fast","-crf","28",
-            "-c:a","aac","-pix_fmt","yuv420p","-shortest",
-            vout
-        ], capture_output=True, timeout=300)
+    # Video
+    subprocess.run([
+        "ffmpeg","-y","-framerate",str(fps),
+        "-i", f"{fdir}/f%06d.png",
+        "-i", audio_all,
+        "-c:v","libx264","-preset","fast","-crf","28",
+        "-c:a","aac","-pix_fmt","yuv420p","-shortest",
+        OUT
+    ], capture_output=True, timeout=300)
 
-        sz = os.path.getsize(vout)/1e6
-        r = subprocess.run(["ffprobe","-v","error","-show_entries","format=duration","-of","csv=p=0",vout],
-            capture_output=True,text=True,timeout=10)
-        dur = float(r.stdout.strip() or 0)
-        print(f"\n✅ {vout}")
-        print(f"   {sz:.1f} MB, {dur:.1f}s")
+    sz = os.path.getsize(OUT)/1e6
+    r = subprocess.run(["ffprobe","-v","error","-show_entries","format=duration","-of","csv=p=0",OUT],
+        capture_output=True,text=True,timeout=10)
+    dur = float(r.stdout.strip() or 0)
+    print(f"\n✅ {OUT}")
+    print(f"   {sz:.1f} MB, {dur:.1f}s")
 
 if __name__ == "__main__":
     main()
