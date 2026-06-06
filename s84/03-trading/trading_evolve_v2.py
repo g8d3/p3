@@ -109,11 +109,13 @@ def evaluate(strategy, candles, capital=10000):
         c = candles[i]
 
         # MAs for sma_cross
-        if p.get("sma_slow") and i >= p["sma_slow"]:
-            fast = sum(candles[j]["c"] for j in range(i-p.get("sma_fast",10), i)) / p.get("sma_fast",10)
-            slow = sum(candles[j]["c"] for j in range(i-p["sma_slow"], i)) / p["sma_slow"]
-            pf = sum(candles[j]["c"] for j in range(i-p.get("sma_fast",10)-1, i-1)) / p.get("sma_fast",10)
-            ps = sum(candles[j]["c"] for j in range(i-p["sma_slow"]-1, i-1)) / p["sma_slow"]
+        sf = p.get("sma_fast", 10)
+        ss = p.get("sma_slow", 50)
+        if ss and i >= ss:
+            fast = sum(candles[j]["c"] for j in range(i-sf, i)) / sf
+            slow = sum(candles[j]["c"] for j in range(i-ss, i)) / ss
+            pf = sum(candles[j]["c"] for j in range(i-sf-1, i-1)) / sf
+            ps = sum(candles[j]["c"] for j in range(i-ss-1, i-1)) / ss
 
         # Entry
         if position == 0:
@@ -125,11 +127,13 @@ def evaluate(strategy, candles, capital=10000):
                 avg = sum(candles[j]["v"] for j in range(max(0,i-20), i)) / min(20,i)
                 if avg > 0 and c["v"] > avg * p.get("volume_threshold", 2):
                     enter = True
-            elif et == "rsi" and i >= p.get("rsi_period",14):
-                gains = [max(0, candles[j]["c"]-candles[j-1]["c"]) for j in range(i-p["rsi_period"]+1, i+1)]
-                losses = [max(0, candles[j-1]["c"]-candles[j]["c"]) for j in range(i-p["rsi_period"]+1, i+1)]
-                avg_g = sum(gains)/p["rsi_period"] if gains else 0
-                avg_l = sum(losses)/p["rsi_period"] if losses else 1
+            elif et == "rsi" and i >= p.get("rsi_period", 14):
+                rp = p.get("rsi_period", 14)
+                if i < rp: continue
+                gains = [max(0, candles[j]["c"]-candles[j-1]["c"]) for j in range(i-rp+1, i+1)]
+                losses = [max(0, candles[j-1]["c"]-candles[j]["c"]) for j in range(i-rp+1, i+1)]
+                avg_g = sum(gains)/rp if gains else 0
+                avg_l = sum(losses)/rp if losses else 1
                 rs = avg_g/avg_l if avg_l > 0 else 999
                 rsi = 100 - 100/(1+rs)
                 if rsi < p.get("rsi_oversold",30): enter = True
@@ -170,7 +174,14 @@ def evaluate(strategy, candles, capital=10000):
     gains = sum(t["pnl"] for t in trades if t["pnl"] > 0)
     losses_sum = sum(t["pnl"] for t in trades if t["pnl"] < 0)
     pf = gains/abs(losses_sum) if losses_sum != 0 else (999 if gains > 0 else 0)
-    score = pf * (wr/100) * min(1, total/20)
+    # Drawdown máximo
+    peak = capital
+    dd = 0
+    for t in trades:
+        peak = max(peak, capital * (1 + t["pnl"]/100))
+        dd = max(dd, (peak - capital * (1 + t["pnl"]/100)) / peak * 100)
+    drawdown = dd
+    score = pf * (wr/100) * min(1, total/20) * max(0, 1 - drawdown/200)
 
     # Penalizar si muy pocas trades (no confiable)
     trade_penalty = min(1, total / 20)
@@ -266,7 +277,14 @@ def evolve(generations=20, pop_per_seed=10, keep=0.3):
                 survivors.append(best_in_seed[0][3])
 
         # Nueva generación
-        new_pop = list(set(survivors))
+        # Remove duplicates by name
+        seen = set()
+        unique = []
+        for s in survivors:
+            if s["name"] not in seen:
+                seen.add(s["name"])
+                unique.append(s)
+        new_pop = unique
         while len(new_pop) < len(population):
             if random.random() < 0.15 and len(new_pop) > 5:
                 # Cross-pollination: mezclar dos semillas diferentes

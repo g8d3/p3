@@ -1,0 +1,26 @@
+{
+  "strategy": {
+    "name": "sma_cross-9412",
+    "semilla": "sma_cross",
+    "entry_type": "sma_cross",
+    "exit_type": "trailing_stop",
+    "params": {
+      "sma_fast": 6,
+      "sma_slow": 23,
+      "stop_loss": 1.2,
+      "take_profit": 1.8,
+      "max_hold": 42
+    }
+  },
+  "metrics": {
+    "total_trades": 19,
+    "win_rate": 57.9,
+    "avg_pnl": 1.06,
+    "profit_factor": 9.15,
+    "sharpe": 0.5,
+    "max_drawdown": 28.93,
+    "score": 3.09,
+    "wins": 11,
+    "losses": 8
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "strategy": {
+    "name": "cross-sma_cross+price_action-rsi-307",
+    "semilla": "sma_cross+price_action+rsi",
+    "entry_type": "sma_cross",
+    "exit_type": "trailing_stop",
+    "params": {
+      "sma_fast": 7,
+      "sma_slow": 23,
+      "stop_loss": 0.9,
+      "take_profit": 4.2,
+      "max_hold": 22,
+      "rsi_period": 13
+    }
+  },
+  "metrics": {
+    "total_trades": 21,
+    "win_rate": 76.2,
+    "avg_pnl": 1.5,
+    "profit_factor": 19.67,
+    "sharpe": 0.43,
+    "max_drawdown": 27.84,
+    "score": 5.03,
+    "wins": 16,
+    "losses": 5
+  }
+}

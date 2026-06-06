@@ -1,0 +1,27 @@
+{
+  "strategy": {
+    "name": "sma_cross-mut-983",
+    "semilla": "sma_cross",
+    "entry_type": "sma_cross",
+    "exit_type": "trailing_stop",
+    "params": {
+      "sma_fast": 9,
+      "sma_slow": 36,
+      "stop_loss": 0.6,
+      "take_profit": 4.6,
+      "max_vol": 2.4,
+      "max_hold": 16
+    }
+  },
+  "metrics": {
+    "total_trades": 15,
+    "win_rate": 80.0,
+    "avg_pnl": 1.47,
+    "profit_factor": 20.34,
+    "sharpe": 0.34,
+    "max_drawdown": 20.75,
+    "score": 3.8,
+    "wins": 12,
+    "losses": 3
+  }
+}

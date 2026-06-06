@@ -98,20 +98,22 @@ SEEDS = {
         "entry_types": ["sma_cross"],
         "exit_types": ["stop_loss_take_profit", "trailing_stop"],
         "params": {
-            "sma_fast":    {"lo": 5,   "hi": 20,   "type": int},
-            "sma_slow":    {"lo": 30,  "hi": 200,  "type": int},
-            "stop_loss":   {"lo": 0.5, "hi": 5.0,  "type": float},
-            "take_profit": {"lo": 1.0, "hi": 10.0, "type": float},
+            "sma_fast":    {"lo": 3,   "hi": 15,   "type": int},
+            "sma_slow":    {"lo": 15,  "hi": 100,  "type": int},
+            "stop_loss":   {"lo": 0.5, "hi": 3.0,  "type": float},
+            "take_profit": {"lo": 1.0, "hi": 6.0,  "type": float},
+            "max_vol":     {"lo": 1.0, "hi": 5.0,  "type": float},
         },
     },
     "volume_spike": {
         "entry_types": ["volume_spike"],
         "exit_types": ["stop_loss_take_profit", "time_stop"],
         "params": {
-            "vol_threshold":  {"lo": 1.2, "hi": 5.0, "type": float},
-            "stop_loss":      {"lo": 0.5, "hi": 5.0, "type": float},
-            "take_profit":    {"lo": 1.0, "hi": 10.0,"type": float},
+            "vol_threshold":  {"lo": 1.1, "hi": 3.0, "type": float},
+            "stop_loss":      {"lo": 0.5, "hi": 3.0, "type": float},
+            "take_profit":    {"lo": 1.0, "hi": 6.0, "type": float},
             "max_hold":       {"lo": 5,   "hi": 48,  "type": int},
+            "max_vol":        {"lo": 1.0, "hi": 5.0, "type": float},
         },
     },
     "rsi": {
@@ -119,19 +121,22 @@ SEEDS = {
         "exit_types": ["stop_loss_take_profit", "trailing_stop"],
         "params": {
             "rsi_period":    {"lo": 7,   "hi": 21,  "type": int},
-            "rsi_ob":        {"lo": 65,  "hi": 85,  "type": int},
-            "rsi_os":        {"lo": 15,  "hi": 35,  "type": int},
-            "stop_loss":     {"lo": 0.5, "hi": 5.0, "type": float},
-            "take_profit":   {"lo": 1.0, "hi": 10.0,"type": float},
+            "rsi_ob":        {"lo": 60,  "hi": 80,  "type": int},
+            "rsi_os":        {"lo": 20,  "hi": 40,  "type": int},
+            "stop_loss":     {"lo": 0.5, "hi": 3.0, "type": float},
+            "take_profit":   {"lo": 1.0, "hi": 6.0, "type": float},
+            "max_vol":       {"lo": 1.0, "hi": 5.0, "type": float},
         },
     },
     "price_action": {
         "entry_types": ["price_level"],
         "exit_types": ["trailing_stop", "time_stop"],
         "params": {
-            "stop_loss":     {"lo": 1.0, "hi": 5.0, "type": float},
-            "take_profit":   {"lo": 2.0, "hi": 10.0,"type": float},
+            "pa_lookback":   {"lo": 8,   "hi": 20,  "type": int},
+            "stop_loss":     {"lo": 0.5, "hi": 3.0, "type": float},
+            "take_profit":   {"lo": 1.0, "hi": 6.0, "type": float},
             "max_hold":      {"lo": 5,   "hi": 48,  "type": int},
+            "max_vol":       {"lo": 1.0, "hi": 5.0, "type": float},
         },
     },
 }
@@ -201,19 +206,19 @@ def evaluate(individual: dict, candles: list, capital: float = 10_000) -> dict:
     # Asegurar parámetros requeridos según entry_type
     if et == "rsi" and "rsi_period" not in p:
         p["rsi_period"] = random.randint(7, 21)
-        p["rsi_os"] = p.get("rsi_os", random.randint(15, 35))
-        p["rsi_ob"] = p.get("rsi_ob", random.randint(65, 85))
+        p["rsi_os"] = p.get("rsi_os", random.randint(20, 40))
+        p["rsi_ob"] = p.get("rsi_ob", random.randint(60, 80))
     if et == "sma_cross":
-        if "sma_fast" not in p: p["sma_fast"] = random.randint(5, 20)
-        if "sma_slow" not in p: p["sma_slow"] = random.randint(30, 200)
+        if "sma_fast" not in p: p["sma_fast"] = random.randint(3, 15)
+        if "sma_slow" not in p: p["sma_slow"] = random.randint(15, 100)
     if et == "volume_spike" and "vol_threshold" not in p:
-        p["vol_threshold"] = round(random.uniform(1.2, 5.0), 1)
+        p["vol_threshold"] = round(random.uniform(1.1, 3.0), 1)
 
     # Asegurar parámetros requeridos según exit_type
     if xt in ("stop_loss_take_profit", "trailing_stop") and "stop_loss" not in p:
-        p["stop_loss"] = round(random.uniform(0.5, 5.0), 1)
+        p["stop_loss"] = round(random.uniform(0.5, 3.0), 1)
     if xt == "stop_loss_take_profit" and "take_profit" not in p:
-        p["take_profit"] = round(random.uniform(1.0, 10.0), 1)
+        p["take_profit"] = round(random.uniform(1.0, 6.0), 1)
     if xt in ("time_stop", "trailing_stop") and "max_hold" not in p:
         p["max_hold"] = random.randint(5, 48)
 
@@ -239,8 +244,23 @@ def evaluate(individual: dict, candles: list, capital: float = 10_000) -> dict:
 
         # ── ENTRY ──
         if pos == 0:
+            # Calcular volatilidad reciente para filtro
+            recent_vol = 99
+            vol_window = min(20, i)
+            if vol_window > 5:
+                returns_20 = [
+                    abs((candles[j]["c"] - candles[j - 1]["c"]) / candles[j - 1]["c"]) * 100
+                    for j in range(i - vol_window, i)
+                    if candles[j - 1]["c"] > 0
+                ]
+                recent_vol = sum(returns_20) / len(returns_20) if returns_20 else 0
+
             enter = False
             et = individual["entry_type"]
+
+            # Saltar si volatilidad > máximo permitido
+            if recent_vol > p.get("max_vol", 99):
+                pass
 
             if et == "sma_cross":
                 if fast > slow and prev_fast <= prev_slow:
@@ -257,9 +277,9 @@ def evaluate(individual: dict, candles: list, capital: float = 10_000) -> dict:
                     if rsi < p.get("rsi_os", 30):
                         enter = True
             elif et == "price_level":
-                lookback = min(20, i)
-                hi20 = max(candles[j]["h"] for j in range(i - lookback, i))
-                if c["c"] > hi20:
+                lb = max(1, min(p.get("pa_lookback", 12), i))
+                hi_n = max(candles[j]["h"] for j in range(i - lb, i))
+                if c["c"] > hi_n:
                     enter = True
 
             if enter:
@@ -285,8 +305,8 @@ def evaluate(individual: dict, candles: list, capital: float = 10_000) -> dict:
                     (candles[j]["h"] - entry_px) / entry_px * 100
                     for j in range(entry_bar, i + 1)
                 )
-                trail_pct = p.get("stop_loss", 2.0) * 1.5
-                if max_runup > 2.0 and (max_runup - abs(change)) >= trail_pct:
+                trail_pct = p.get("stop_loss", 2.0) * 1.2
+                if max_runup > 0.8 and (max_runup - abs(change)) >= trail_pct:
                     should_exit, reason = True, "trail"
             elif xt == "time_stop":
                 if held >= p.get("max_hold", 48):
@@ -351,10 +371,26 @@ def evaluate(individual: dict, candles: list, capital: float = 10_000) -> dict:
         if dd > max_dd:
             max_dd = dd
 
-    # Score compuesto: PF_capped * WR * cobertura
+    # Score compuesto: PF_capped * WR * cobertura * dd_penalty * sharpe_boost * loss_penalty
     pf_for_score = min(profit_factor, 10.0) if profit_factor != 999 else 10.0
-    coverage = min(1.0, total / 20)  # necesita ~20 trades para cobertura completa
-    score = pf_for_score * (win_rate / 100.0) * coverage
+    coverage = min(1.0, total / 30)
+    # Penalización progresiva de drawdown
+    dd_penalty = 1.0
+    if max_dd > 15:
+        dd_penalty = max(0.05, 1.0 - (max_dd - 15) / 35)
+    if max_dd > 40:
+        dd_penalty = 0.0
+    if total < 5:
+        dd_penalty = 0.0
+    # Sharpe boost
+    sharpe_boost = min(1.5, max(0.5, 1.0 + sharpe * 0.4))
+    # Penalizar 0 pérdidas: estadísticamente improbable, probable overfitting
+    loss_penalty = 1.0
+    if losses == 0 and total >= 3:
+        loss_penalty = 0.3  # fuertemente penalizado
+    elif losses == 0:
+        loss_penalty = 0.0  # trades insuficientes
+    score = pf_for_score * (win_rate / 100.0) * coverage * dd_penalty * sharpe_boost * loss_penalty
 
     return {
         "total_trades": total,
@@ -379,7 +415,7 @@ def mutate(individual: dict, rate: float = 0.25) -> dict:
     for k, v in child["params"].items():
         if random.random() > rate:
             continue
-        factor = random.gauss(1.0, 0.12)  # ~12% de cambio típico
+        factor = random.gauss(1.0, 0.20)  # ~20% de cambio típico
         new_val = v * factor
         if isinstance(v, int):
             child["params"][k] = max(1, int(round(new_val)))
@@ -496,8 +532,8 @@ def share_discovery(top5: list, config: dict):
 def evolve(
     generations: int = 25,
     pop_per_seed: int = 10,
-    mutation_rate: float = 0.25,
-    cross_rate: float = 0.15,
+    mutation_rate: float = 0.35,
+    cross_rate: float = 0.20,
     keep_ratio: float = 0.3,
     train_regimes: list[str] = None,
     test_regimes: list[str] = None,
@@ -544,22 +580,34 @@ def evolve(
     start_time = time.time()
 
     # Cabecera de tabla
-    print(f"  {'Gen':>4} | {'Mejor':>30} | {'PF':>7} | {'WR':>6} | {'Score':>7} | {'Trades':>6}")
-    print(f"  {'-'*4}-+-{'-'*30}-+-{'-'*7}-+-{'-'*6}-+-{'-'*7}-+-{'-'*6}")
+    print(f"  {'Gen':>4} | {'Mejor':>30} | {'PF':>7} | {'WR':>6} | {'Losses':>6} | {'Score':>7} | {'Trades':>6}")
+    print(f"  {'-'*4}-+-{'-'*30}-+-{'-'*7}-+-{'-'*6}-+-{'-'*6}-+-{'-'*7}-+-{'-'*6}")
 
     history = []
+    best_score_ever = 0.0
+    gens_without_improvement = 0
 
     for gen in range(generations):
         results = []
         for ind in population:
             m_train = evaluate(ind, train_data)
             m_test = evaluate(ind, test_data)
-            # Score compuesto: 65% train + 35% test
-            score = m_train["score"] * 0.65 + m_test["score"] * 0.35
+            # Score compuesto con penalización por overfitting
+            train_part = m_train["score"]
+            test_part = m_test["score"]
+            overfit_penalty = 1.0 - min(1.0, abs(train_part - test_part) / max(train_part, 0.01)) * 0.3
+            score = (train_part * 0.55 + test_part * 0.45) * overfit_penalty
             results.append((score, m_train, m_test, ind))
 
         results.sort(key=lambda x: x[0], reverse=True)
         best = results[0]
+
+        # Anti-stagnation tracking
+        if best[0] > best_score_ever:
+            best_score_ever = best[0]
+            gens_without_improvement = 0
+        else:
+            gens_without_improvement += 1
         history.append({
             "gen": gen + 1,
             "best_name": best[3]["name"],
@@ -572,6 +620,7 @@ def evolve(
             f"  {gen+1:>4} | {best[3]['name']:>30} "
             f"| {best[1]['profit_factor']:>7} "
             f"| {best[1]['win_rate']:>5.1f}% "
+            f"| {best[1]['losses']:>6} "
             f"| {best[0]:>7.1f} "
             f"| {best[1]['total_trades']:>6}"
         )
@@ -616,6 +665,14 @@ def evolve(
                 parent = random.choice(survivors)
                 child = mutate(parent, rate=mutation_rate)
             new_pop.append(child)
+
+        # Anti-stagnation: inyectar 30% de sangre fresca si 4 gens sin mejora
+        if gens_without_improvement >= 4:
+            n_inject = max(4, int(len(new_pop) * 0.30))
+            seed_names = list(SEEDS.keys())
+            for _ in range(n_inject):
+                new_pop.append(spawn(random.choice(seed_names)))
+            gens_without_improvement = 0
 
         population = new_pop
 
@@ -686,8 +743,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("--generations", type=int, default=25, help="Número de generaciones")
     parser.add_argument("--pop-per-seed", type=int, default=10, help="Individuos por semilla")
-    parser.add_argument("--mutation-rate", type=float, default=0.25, help="Tasa de mutación")
-    parser.add_argument("--cross-rate", type=float, default=0.15, help="Tasa de cross-pollination")
+    parser.add_argument("--mutation-rate", type=float, default=0.35, help="Tasa de mutación")
+    parser.add_argument("--cross-rate", type=float, default=0.20, help="Tasa de cross-pollination")
     parser.add_argument("--keep", type=float, default=0.3, help="Fracción de supervivientes")
     parser.add_argument("--final", type=str, default="volatil", help="Régimen de validación final")
     parser.add_argument("--seed", type=int, default=None, help="Semilla aleatoria (reproducibilidad)")

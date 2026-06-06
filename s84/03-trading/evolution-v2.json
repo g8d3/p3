@@ -1,0 +1,43 @@
+{
+  "date": "2026-06-05 21:23",
+  "generations": 20,
+  "population": 32,
+  "seeds": [
+    "sma_cross",
+    "volume_spike",
+    "rsi",
+    "price_action"
+  ],
+  "top5": [
+    {
+      "name": "rsi+rsi-mut-236",
+      "seed": "rsi+rsi",
+      "pf": 33.34,
+      "wr": 76.9
+    },
+    {
+      "name": "rsi+rsi-mut-670",
+      "seed": "rsi+rsi",
+      "pf": 33.34,
+      "wr": 76.9
+    },
+    {
+      "name": "rsi+rsi-mut-234",
+      "seed": "rsi+rsi",
+      "pf": 33.34,
+      "wr": 76.9
+    },
+    {
+      "name": "rsi+rsi-mut-809",
+      "seed": "rsi+rsi",
+      "pf": 33.34,
+      "wr": 76.9
+    },
+    {
+      "name": "rsi+rsi-mut-723",
+      "seed": "rsi+rsi",
+      "pf": 33.34,
+      "wr": 76.9
+    }
+  ]
+}

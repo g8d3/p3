@@ -1,0 +1,28 @@
+{
+  "strategy": {
+    "name": "sma_cross+rsi+rsi-mut-473",
+    "semilla": "sma_cross+rsi+rsi",
+    "entry_type": "sma_cross",
+    "exit_type": "trailing_stop",
+    "params": {
+      "sma_fast": 5,
+      "sma_slow": 25,
+      "stop_loss": 0.6,
+      "take_profit": 1.4,
+      "max_vol": 3.1,
+      "max_hold": 40,
+      "rsi_ob": 67
+    }
+  },
+  "metrics": {
+    "total_trades": 23,
+    "win_rate": 78.3,
+    "avg_pnl": 0.91,
+    "profit_factor": 40.47,
+    "sharpe": 0.41,
+    "max_drawdown": 26.61,
+    "score": 4.67,
+    "wins": 18,
+    "losses": 5
+  }
+}
