@@ -87,6 +87,70 @@ def check_idle():
                     time.sleep(0.2)
                     subprocess.run(["tmux", "send-keys", "-t", win, msg, "Enter"], capture_output=True)
 
+def scan_agents():
+    """Escanea /proc en busca de procesos opencode y los registra."""
+    while True:
+        time.sleep(10)
+        try:
+            for pid_dir in os.listdir("/proc"):
+                if not pid_dir.isdigit(): continue
+                pid = pid_dir
+                try:
+                    with open(f"/proc/{pid}/cmdline") as f:
+                        cmd = f.read().replace("\0", " ")
+                except: continue
+                if "opencode" not in cmd: continue
+                # Leer TMUX_PANE del proceso para obtener nombre ventana
+                aid = "opencode"
+                tmux_pane = ""
+                try:
+                    with open(f"/proc/{pid}/environ") as f:
+                        env = f.read().split("\0")
+                    for e in env:
+                        if e.startswith("TMUX_PANE="):
+                            tmux_pane = e.split("=", 1)[1]
+                            break
+                    if tmux_pane:
+                        import subprocess
+                        name = subprocess.run(
+                            ["tmux", "display-message", "-t", tmux_pane, "-p", "#{window_name}"],
+                            capture_output=True, text=True, timeout=2
+                        ).stdout.strip()
+                        if name:
+                            aid = name
+                except: pass
+                # Leer CPU y RAM
+                cpu = 0; mem = 0
+                try:
+                    with open(f"/proc/{pid}/status") as f:
+                        for line in f:
+                            if line.startswith("VmRSS:"):
+                                mem = float(line.split()[1]) / 1024
+                    with open(f"/proc/{pid}/stat") as f:
+                        stats = f.read().split()
+                    utime = float(stats[13]); stime = float(stats[14])
+                    with open(f"/proc/{pid}/stat") as f2:
+                        pass  # ya lo tenemos
+                    # Calcular CPU sobre tiempo de vida
+                    from datetime import datetime
+                    start_btime = float(stats[21])
+                    with open("/proc/stat") as f:
+                        for line in f:
+                            if line.startswith("btime "):
+                                boot = float(line.split()[1])
+                                break
+                    elapsed = time.time() - (boot + start_btime)
+                    cpu = round((utime + stime) / elapsed * 100, 1) if elapsed > 0 else 0
+                except: pass
+
+                with agents_lock:
+                    if aid not in agents:
+                        log_entry(f"[DETECT] {aid} pid={pid}")
+                    agents[aid] = {"last_request": time.time(), "idle": False,
+                                   "pid": int(pid), "cpu": cpu, "mem_mb": mem,
+                                   "started": time.time()}
+        except: pass
+
 def log_entry(*args):
     """log_entry(status, agent, model, req, resp, ms) o log_entry(msg_string)"""
     with log_lock:
@@ -286,6 +350,7 @@ def main():
     print(f"Idle timeout: {AGENT_TIMEOUT}s\n")
 
     threading.Thread(target=check_idle, daemon=True).start()
+    threading.Thread(target=scan_agents, daemon=True).start()
 
     proxy = ThreadedProxy(("0.0.0.0", PROXY_PORT), ProxyHandler)
     ui = ThreadedProxy(("0.0.0.0", UI_PORT), UIHandler)
