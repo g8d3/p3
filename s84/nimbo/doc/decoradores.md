@@ -139,13 +139,22 @@ Proxy reverso para LLMs. Corre en la misma app o en puerto separado.
 | `discovery` | `"process"` | Cómo detectar agentes: `"process"` (psutil) o `"header"` (X-Agent-ID) |
 
 ```python
-@app.proxy("openai")
-class OpenAIProxy: ...
+@app.proxy
+class OpenAI: ...
 ```
 
-Sin `port`, corre en la misma app en `/proxy/`. El framework conoce los proveedores populares (OpenAI, Anthropic, etc.) y completa `upstream` automáticamente.
+Sin `port`, corre en la misma app en `/proxy/openai`. El framework:
+1. Detecta el proveedor por el nombre de la clase (`OpenAI`)
+2. Busca en el registry: `upstream="https://api.openai.com"`
+3. Usa el nombre en minúscula como ruta: `/proxy/openai`
+4. Provee campos por defecto: `agent_id`, `status`, `pid`, `cpu`, `mem_pct`, `window`, `last_active`
 
-Campos por defecto si la clase está vacía: `agent_id`, `status`, `pid`, `cpu`, `mem_pct`, `window`, `last_active`.
+Forma más corta posible: **2 líneas, 0 parámetros**.
+
+```python
+@app.proxy
+class Anthropic: ...   # → upstream Anthropic, ruta /proxy/anthropic
+```
 
 ---
 
@@ -177,7 +186,7 @@ Los hijos heredan el namespace del padre. Pueden overridearlo con su propio `@ap
 | `@app.run` | campo | — | Botón ▶ |
 | `@app.system` | fuente (`"process"`, etc.) | según fuente | Tabla auto-refresh, ✕ opcional |
 | `@app.log` | — | `source`, `level`, `content`, `time` | Tabla solo lectura |
-| `@app.proxy` | nombre del proxy | `agent_id`, `status`, etc. | Proxy + modelos anidados |
+| `@app.proxy` | — (infiere del nombre) | `agent_id`, `status`, etc. | Proxy + modelos anidados |
 | `@app.namespace` | nombre de ruta | nombre de clase | — |
 
 ## Infraestructura adicional
