@@ -92,7 +92,8 @@ def register_system_endpoints(app):
 
 LOG_SCHEMA = [{"name": "source", "type": "string", "default": ""},
               {"name": "level", "type": "string", "default": "info"},
-              {"name": "content", "type": "string", "default": ""}]
+              {"name": "content", "type": "string", "default": ""},
+              {"name": "time", "type": "string", "default": ""}]
 
 
 def register_log_model(app):
@@ -114,15 +115,18 @@ def register_log_model(app):
                     data = json.loads(msg)
                     if data.get("type") == "log":
                         entry = data.get("data", {})
+                        ts = __import__("time").strftime("%H:%M:%S")
                         app._db.create("log", {
                             "source": entry.get("source", "client"),
                             "level": entry.get("level", "info"),
                             "content": entry.get("content", ""),
+                            "time": ts,
                         })
                         app._db.engine._conn.execute(
                             "DELETE FROM log WHERE id NOT IN (SELECT id FROM log ORDER BY id DESC LIMIT 200)"
                         )
                         app._db.engine._conn.commit()
+                        entry["time"] = ts
                         await app._ws_manager.broadcast(
                             json.dumps({"type": "log", "data": entry}),
                             topic="logs"

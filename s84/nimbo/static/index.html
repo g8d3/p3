@@ -147,13 +147,16 @@
         </div>`;
       if (!logsInit) {
         logsInit = true;
-        nimbo.ws.on('open', () => {});
+        nimbo.ws.on('open', () => {
+          nimbo.ws.send(JSON.stringify({type:'log',data:{level:'info',content:'WS connected',source:'client'}}));
+        });
         nimbo.ws.on('close', () => {});
         nimbo.ws.on('log', msg => {
           const c = document.getElementById('log-container');
           if (!c || !msg.data) return;
           const el=document.createElement('div');el.className='log-entry';
-          el.innerHTML=`<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-level ${msg.data.level||'info'}">${msg.data.level||'info'}</span>${msg.data.content||JSON.stringify(msg.data)}`;
+          const t = msg.data.time || new Date().toLocaleTimeString();
+          el.innerHTML=`<span class="log-time">${t}</span><span class="log-level ${msg.data.level||'info'}">${msg.data.level||'info'}</span>${msg.data.content||JSON.stringify(msg.data)}`;
           c.appendChild(el);c.scrollTop=c.scrollHeight;
         });
       }
@@ -164,7 +167,7 @@
         h.forEach(l=>{
           if(c.querySelector(`[data-i="${l.id}"]`))return;
           const el=document.createElement('div');el.className='log-entry';el.dataset.i=l.id;
-          el.innerHTML=`<span class="log-time">${new Date().toLocaleTimeString()}</span><span class="log-level ${l.level}">${l.level}</span>${l.content}`;
+          el.innerHTML=`<span class="log-time">${l.time||new Date().toLocaleTimeString()}</span><span class="log-level ${l.level}">${l.level}</span>${l.content}`;
           c.appendChild(el);c.scrollTop=c.scrollHeight;
         });
       }).catch(()=>{});
