@@ -6,6 +6,19 @@ Cada decorador sobre una clase expresa **la naturaleza del modelo** — qué es,
 
 No hay lógica procedural en la app. Solo declaración de intenciones.
 
+## Mínimo esfuerzo
+
+Si la clase está vacía, el decorador provee campos por defecto:
+
+```python
+@app.system
+class Process: ...   # → pid, name, cpu_percent, memory_percent, status
+```
+
+El desarrollador escribe 2 líneas y ya tiene algo funcional. Si necesita más, agrega campos sin repetir los defaults.
+
+---
+
 ## Decoradores actuales
 
 ### `@app.model`
@@ -14,27 +27,25 @@ Registra el modelo como tabla en base de datos con CRUD completo.
 
 ```python
 @app.model
-class Producto:
-    nombre: str
-    precio: float = 0
+class Task: ...
 ```
 
-Genera: `GET/POST /api/producto`, `GET/PUT/DELETE /api/producto/<id>`, schema endpoint, y tabla CRUD en el navegador.
+Genera: `GET/POST /api/task`, `GET/PUT/DELETE /api/task/<id>`, schema endpoint, y tabla CRUD en el navegador.
 
-Sin parámetros adicionales. Todo se deduce de las anotaciones de tipo de la clase.
+Campos por defecto si la clase está vacía: `name: str`, `description: str`.
 
 ---
 
 ### `@app.run("campo", ...)`
 
-**Requiere**: `@app.model` (no tiene sentido solo).
-
 Marca un campo como ejecutable (comando shell). Genera `POST /api/{modelo}/run/<id>`.
+
+Requiere `@app.model` (no tiene sentido solo).
 
 | Parámetro | Default | Descripción |
 |---|---|---|
 | `"campo"` | (requerido) | Nombre del campo que contiene el comando shell |
-| `timeout` | `"timeout"` | Nombre del campo que contiene el timeout en segundos |
+| `timeout` | `"timeout"` | Nombre del campo del timeout |
 
 ```python
 @app.model
@@ -44,20 +55,28 @@ class Command:
     timeout: int = 30
 ```
 
-El framework ejecuta `item["shell"]` vía `asyncio.create_subprocess_shell()` con el timeout de `item["timeout"]`.
-
 ---
 
 ### `@app.system`
 
-Modelo virtual sin base de datos. Los datos vienen del sistema operativo vía API.
+Modelo virtual sin base de datos. Recibe un **vocabulario limitado** de fuentes de datos del sistema, no comandos arbitrarios.
+
+```python
+@app.system                  # procesos (default)
+class Process: ...
+
+@app.system("mounts")        # monturas de disco
+class Mount: ...
+
+@app.system("network")       # conexiones de red
+class Connection: ...
+```
 
 | Parámetro | Default | Descripción |
 |---|---|---|
-| `api` | `"/api/system/processes"` | Endpoint que provee los datos |
-| `id` | `"pid"` | Campo usado como identificador único |
+| (primer arg) | `"process"` | Fuente de datos del sistema. Valores: `"process"`, `"mounts"`, `"network"`, `"services"`, `"users"` |
 | `refresh` | `5` | Intervalo de auto-refresh en segundos |
-| `kill` | `True` | Si tiene botón ✕ para matar el recurso |
+| `kill` | `True` | Si tiene botón ✕ (solo para `"process"`) |
 
 ```python
 @app.system
@@ -67,22 +86,29 @@ class Process:
     cpu_percent: float
     memory_percent: float
     status: str
-
-@app.system(kill=False)
-class Mount:
-    device: str
-    mount: str
-    fstype: str
-    usage: float
 ```
 
-El framework genera: schema endpoint, configuración de cliente con `noCreate`, `noEdit`, `auto-refresh`, y botón ✕ si `kill=True`. No crea tabla en DB.
+El framework sabe cómo obtener cada fuente de datos internamente (psutil).
+El usuario no escribe comandos ni endpoints.
+
+Campos por defecto si la clase está vacía (según la fuente):
+
+| Fuente | Campos por defecto |
+|---|---|
+| `"process"` | `pid`, `name`, `cpu_percent`, `memory_percent`, `status` |
+| `"mounts"` | `device`, `mount`, `fstype`, `usage` |
+| `"network"` | `fd`, `family`, `type`, `laddr`, `raddr`, `status` |
+
+Si se omite el nombre de la fuente, el decorador infiere la fuente del nombre de la clase:
+- `class Process:` → fuente `"process"`
+- `class Mount:` → fuente `"mounts"`
+- `class Connection:` → fuente `"network"`
 
 ---
 
 ### `@app.log`
 
-Modelo de auditoría. Es una tabla en DB pero de solo lectura y auto-poblada por el framework.
+Modelo de auditoría. Tabla en DB de solo lectura, auto-poblada por el framework.
 
 Sin parámetros.
 
@@ -95,76 +121,94 @@ class Log:
     time: str
 ```
 
-El framework:
-- Crea la tabla en DB
-- Auto-escribe una entrada en cada CRUD (crear, actualizar, borrar) de cualquier otro modelo
-- Auto-escribe en cada ejecución (`@app.run`)
-- Genera configuración de cliente: solo lectura, auto-refresh 3s
-- Mantiene un máximo de 200 registros (los más recientes)
+Campos por defecto si la clase está vacía: `source`, `level`, `content`, `time`.
+
+El framework auto-escribe en cada CRUD y cada ejecución (`@app.run`). Máximo 200 registros.
+
+---
+
+### `@app.proxy`
+
+Proxy reverso para LLMs. Corre en la misma app o en puerto separado.
+
+| Parámetro | Default | Descripción |
+|---|---|---|
+| `upstream` | (infiere del nombre) | URL del proveedor LLM |
+| `port` | `None` | Puerto separado (misma app si `None`) |
+| `timeout` | `45` | Segundos sin actividad para marcar agente idle |
+| `discovery` | `"process"` | Cómo detectar agentes: `"process"` (psutil) o `"header"` (X-Agent-ID) |
+
+```python
+@app.proxy("openai")
+class OpenAIProxy: ...
+```
+
+Sin `port`, corre en la misma app en `/proxy/`. El framework conoce los proveedores populares (OpenAI, Anthropic, etc.) y completa `upstream` automáticamente.
+
+Campos por defecto si la clase está vacía: `agent_id`, `status`, `pid`, `cpu`, `mem_pct`, `window`, `last_active`.
+
+---
+
+### `@app.namespace`
+
+Define el prefijo de ruta de una clase y sus hijas. No es un modelo — es un organizador de rutas.
+
+| Parámetro | Default | Descripción |
+|---|---|---|
+| (primer arg) | nombre de clase en minúscula | Prefijo de ruta |
+
+```python
+@app.namespace("perro")          # ruta /perro/
+class Api: ...
+
+@app.namespace                   # ruta /api/
+class Api: ...
+```
+
+Los hijos heredan el namespace del padre. Pueden overridearlo con su propio `@app.namespace`.
 
 ---
 
 ## Tabla resumen
 
-| Decorador | Parámetros | Datos | CRUD | UI generada |
-|---|---|---|---|---|
-| `@app.model` | — | DB | crear, leer, actualizar, borrar | Tabla estándar con ±✎✕ |
-| `@app.run` | `campo`, `timeout` | DB (del modelo padre) | + ejecutar | Botón ▶ |
-| `@app.system` | `api`, `id`, `refresh`, `kill` | API externa | solo lectura, auto-refresh | Tabla con ✕ (opcional) |
-| `@app.log` | — | DB (auto-poblado) | solo lectura, auto-refresh | Tabla sin crear/editar/borrar |
+| Decorador | Parámetro principal | Defaults | UI generada |
+|---|---|---|---|
+| `@app.model` | — | `name`, `description` | CRUD completo |
+| `@app.run` | campo | — | Botón ▶ |
+| `@app.system` | fuente (`"process"`, etc.) | según fuente | Tabla auto-refresh, ✕ opcional |
+| `@app.log` | — | `source`, `level`, `content`, `time` | Tabla solo lectura |
+| `@app.proxy` | nombre del proxy | `agent_id`, `status`, etc. | Proxy + modelos anidados |
+| `@app.namespace` | nombre de ruta | nombre de clase | — |
 
-## Reglas de diseño
+## Infraestructura adicional
 
-1. **Un decorador = un aspecto ortogonal** del modelo. No mezclar conceptos.
-   - `@app.model` dice "esto es persistente"
-   - `@app.run` dice "esto se puede ejecutar"
-   - Son independientes: un modelo puede ser `@app.model` sin `@app.run`, y viceversa (aunque `@app.run` sin modelo no tiene sentido práctico).
+### Registry de proveedores conocidos
 
-2. **Los decoradores se leen como lenguaje natural**:
-   ```
-   @app.model          → "Esto es un modelo de datos"
-   @app.run("shell")   → "Esto tiene un shell ejecutable"
-   @app.system         → "Esto es un recurso del sistema"
-   @app.log            → "Esto es un registro de auditoría"
-   ```
+El framework mantiene una tabla interna que mapea nombres de clase a configuraciones:
 
-3. **No hay herencia de decoradores**. `@app.log` no es un subtipo de `@app.model` aunque compartan implementación. La semántica es diferente aunque el mecanismo interno sea similar.
-
-4. **Configuración explícita > magia**. Los parámetros van en el decorador (`@app.run("shell", timeout="timeout")`), no en atributos mágicos de la clase.
-
-## Decoradores futuros (candidatos)
-
-| Decorador | Para qué | Ejemplo |
+| Nombre de clase | `upstream` detectado | `api_key_env` |
 |---|---|---|
-| `@app.export` | Campo descargable (archivo, reporte) | `@app.export("pdf")` |
-| `@app.upload` | Campo que acepta subida de archivos | `@app.upload("avatar")` |
-| `@app.secret` | Campo encriptado en DB | `@app.secret("password")` |
-| `@app.graph` | Modelo que se renderiza como gráfico | `@app.graph("line")` |
-| `@app.map` | Modelo con datos geoespaciales | `@app.map("lat", "lng")` |
+| `OpenAI` | `https://api.openai.com` | `OPENAI_API_KEY` |
+| `Anthropic` | `https://api.anthropic.com` | `ANTHROPIC_API_KEY` |
+| `OpenCode` | `https://opencode.ai/go/v1` | `OPENCODE_API_KEY` |
 
-No todos serán implementados. La lista es exploratoria.
+Se puede overridear: `@app.proxy(upstream="https://..."")`.
 
-## Relación entre conceptos
+### Templates (marketplace)
 
-```
-Modelo en DB  ─── @app.model ─── CRUD completo
-                  │
-                  ├── @app.run ─── + ejecutar comando
-                  │
-                  └── @app.log ─── solo lectura, auto-poblado
+Repositorio de plantillas de modelos que se aplican con:
 
-Modelo virtual ─── @app.system ─── datos vivos del SO
+```bash
+nimbo apply blog           # agrega User, Post, Comment
+nimbo apply monitor        # agrega Process, Mount, Connection
 ```
 
-`@app.run` puede combinarse con cualquier decorador que defina un modelo:
-- `@app.model` + `@app.run` → comando guardado en DB, ejecutable
-- `@app.system` + `@app.run` → proceso del sistema ejecutable (futuro)
-- `@app.log` + `@app.run` → no tendría sentido
+Cada template es código Python explícito que se copia al proyecto.
+
+---
 
 ## Preguntas abiertas
 
-- ¿`@app.log` debería ser `@app.model` + `@app.audit` (combinación de dos decoradores)?
-- ¿`@app.system` necesita su propio schema endpoint o puede reusar el de `@app.model`?
-- ¿Debería existir `@app.model(log=True)` en vez de `@app.log` separado?
-- ¿Los decoradores de comportamiento (`@app.run`) deberían aceptar múltiples campos?
-- ¿Cómo se documentan los decoradores para que el desarrollador los descubra sin leer el código fuente del framework?
+- Los campos por defecto de `@app.model` son genéricos. ¿Tiene sentido que varíen según el nombre de la clase? (ej: `class Contact:` → `name`, `email`, `phone`)
+- ¿`@app.system("mounts")` debería autodetectar el campo `id` o el usuario debe definirlo?
+- ¿El registry de proveedores debería ser extensible por el usuario?
