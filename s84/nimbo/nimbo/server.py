@@ -115,7 +115,7 @@ class App:
             return wrapper
         return self._register_model(cls, **kwargs)
 
-    def _register_model(self, cls, table=None, fields=None, db="default"):
+    def _register_model(self, cls, table=None, fields=None, db="default", run=None):
         name = table or cls.__name__.lower()
         if fields is None:
             fields = []
@@ -134,6 +134,32 @@ class App:
         self._model_db[name] = db
         self._auto_crud(name, db)
         self._register_models_route()
+
+        # Auto-generate run action if field is specified
+        if run:
+            route_path = f"/api/{name}/run/<id>"
+            @self.route(route_path, methods=["POST"])
+            async def run_handler(req, id, _run=run, _name=name):
+                db = self._pool.get(self._model_db.get(_name, "default"))
+                if not db:
+                    return Response("no db", 500)
+                item = db.read(_name, id)
+                if not item:
+                    return Response("", 404)
+                shell = item.get(_run, "")
+                if not shell:
+                    return {"stdout": "", "stderr": "no command", "returncode": -1}
+                timeout = item.get("timeout", 30) or 30
+                try:
+                    proc = await asyncio.create_subprocess_shell(
+                        shell, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+                    )
+                    stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
+                    return {"stdout": stdout.decode(errors="replace"), "stderr": stderr.decode(errors="replace"), "returncode": proc.returncode}
+                except asyncio.TimeoutError:
+                    try: proc.kill(); await proc.wait()
+                    except: pass
+                    return {"stdout": "", "stderr": "Timed out", "returncode": -1}
 
         # Register action endpoints from decorated methods
         for attr_name in dir(cls):
