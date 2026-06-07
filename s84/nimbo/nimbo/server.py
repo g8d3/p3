@@ -108,12 +108,18 @@ class App:
             return cls
         return wrapper
 
-    @staticmethod
-    def system(api="/api/system/processes", id="pid", refresh=5, kill=True):
-        def wrapper(cls):
-            cls.__nimbo_system__ = {"api": api, "id": id, "refresh": refresh, "kill": kill}
-            return cls
-        return wrapper
+    def system(self, cls=None, api=None, id="pid", refresh=5, kill=True):
+        if cls is None:
+            def wrapper(c):
+                self._register_system(c, api=api, id=id, refresh=refresh, kill=kill)
+                return c
+            return wrapper
+        self._register_system(cls, api=api, id=id, refresh=refresh, kill=kill)
+        return cls
+
+    def _register_system(self, cls, api=None, id="pid", refresh=5, kill=True):
+        cls.__nimbo_system__ = {"api": api, "id": id, "refresh": refresh, "kill": kill}
+        self._register_model(cls)
 
     @staticmethod
     def log(cls=None):
@@ -254,7 +260,28 @@ class App:
 
         @self.route(f"{base}", methods=["GET"])
         async def list_all(req):
-            return _db().list(name)
+            result = _db().list(name)
+            raw_limit = req.query.get("limit", [None])[0]
+            if raw_limit is not None:
+                try:
+                    result = result[:int(raw_limit)]
+                except (ValueError, TypeError):
+                    pass
+            raw_sort = req.query.get("sort", [None])[0]
+            if raw_sort is not None:
+                desc = raw_sort.startswith("-")
+                field = raw_sort[1:] if desc else raw_sort
+                try:
+                    result = sorted(result, key=lambda x: (x.get(field) or 0), reverse=desc)
+                except Exception:
+                    pass
+            # Filter by field=value for any field
+            for key, vals in req.query.items():
+                if key in ("limit", "offset", "sort"):
+                    continue
+                if vals:
+                    result = [r for r in result if r.get(key) == vals[0]]
+            return result
 
         @self.route(f"{base}", methods=["POST"])
         async def create_one(req):
@@ -463,7 +490,8 @@ class App:
                         rc = getattr(cls_obj, '__nimbo_run__', None) if cls_obj else None
                         cfg = {}
                         if sc:
-                            cfg.update({"api": sc["api"], "id": sc["id"], "refresh": sc["refresh"]*1000, "noCreate": True, "noEdit": True, "kill": sc.get("kill", True), "fields": self._model_schema[nm]})
+                            api = sc.get("api") or f"/api/{nm}"
+                            cfg.update({"api": api, "id": sc["id"], "refresh": sc["refresh"]*1000, "noCreate": True, "noEdit": True, "kill": sc.get("kill", True), "fields": self._model_schema[nm]})
                         if lc:
                             cfg.update({"refresh": 3000, "noCreate": True, "noEdit": True, "fields": self._model_schema[nm]})
                         if rc:

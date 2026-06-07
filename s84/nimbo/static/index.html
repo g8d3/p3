@@ -47,7 +47,7 @@
         (cfg.actions = cfg.actions || []).push({ label: '✕', class: 'btn-danger', handler: async (item, btn) => {
           if (!confirm(`Kill ${item.name} (${item.pid})?`)) return;
           btn.disabled = true;
-          try { await fetch('/api/system/kill/' + item.pid, {method:'POST'}); btn.textContent = '✓'; }
+          try { await fetch('/api/process/' + item.pid, {method:'DELETE'}); btn.textContent = '✓'; }
           catch(e) { btn.textContent = '✗'; }
         }});
       }
@@ -71,7 +71,7 @@
       const cfg = nimbo.crud.configs ? nimbo.crud.configs[name] : null;
       const hasInlineFields = cfg && cfg.fields;
       const schemaPromise = hasInlineFields ? Promise.resolve({fields: cfg.fields}) : fetch(`/api/${name}/schema`).then(r => r.json());
-      const statsPromise = name === 'process' ? fetch('/api/system/resources').then(r => r.json()) : null;
+      const statsPromise = name === 'process' ? fetch('/api/resources').then(r => r.json()) : null;
 
       Promise.all([schemaPromise, statsPromise].filter(Boolean)).then(([schema, stats]) => {
         if (currentModel !== name) return;

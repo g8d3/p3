@@ -1,6 +1,5 @@
 import asyncio
 import json
-import subprocess
 import psutil
 
 from .server import Response
@@ -14,18 +13,10 @@ PROCESS_FIELDS = [{"name": "pid", "type": "int"},
 
 
 def register_system_endpoints(app):
-    app._model_schema["process"] = PROCESS_FIELDS
-    app._model_db["process"] = None
-    app._register_models_route()
-
-    @app.route("/api/process/schema", methods=["GET"])
-    async def proc_schema(req):
-        return {"name": "process", "fields": PROCESS_FIELDS}
-
     proc_attrs = ["pid", "name", "cpu_percent", "memory_percent", "status", "create_time"]
 
-    @app.route("/api/system/processes", methods=["GET"])
-    async def get_processes(req):
+    @app.route("/api/process", methods=["GET"])
+    async def list_processes(req):
         procs = []
         for p in psutil.process_iter(proc_attrs):
             try:
@@ -39,19 +30,7 @@ def register_system_endpoints(app):
                 pass
         return sorted(procs, key=lambda x: x.get("cpu_percent", 0), reverse=True)[:50]
 
-    @app.route("/api/system/resources", methods=["GET"])
-    async def get_resources(req):
-        loop = asyncio.get_event_loop()
-        cpu = await loop.run_in_executor(None, lambda: psutil.cpu_percent(interval=0.5))
-        return {
-            "cpu": cpu,
-            "memory": psutil.virtual_memory()._asdict(),
-            "disk": psutil.disk_usage("/")._asdict(),
-            "net": psutil.net_io_counters()._asdict(),
-            "uptime": psutil.boot_time(),
-        }
-
-    @app.route("/api/system/kill/<id>", methods=["POST"])
+    @app.route("/api/process/<id>", methods=["DELETE"])
     async def kill_process(req, id):
         try:
             p = psutil.Process(int(id))
@@ -65,29 +44,17 @@ def register_system_endpoints(app):
         except Exception as e:
             return Response({"error": str(e)}, 500)
 
-    @app.route("/api/exec", methods=["POST"])
-    async def execute_command(req):
-        data = req.json
-        cmd = data.get("command", "")
-        timeout = data.get("timeout", 30)
-        if not cmd:
-            return Response({"error": "no command"}, 400)
-        try:
-            proc = await asyncio.create_subprocess_shell(
-                cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
-            )
-            stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-            return {
-                "stdout": stdout.decode(errors="replace"),
-                "stderr": stderr.decode(errors="replace"),
-                "returncode": proc.returncode,
-            }
-        except asyncio.TimeoutError:
-            try: proc.kill(); await proc.wait()
-            except: pass
-            return {"stdout": "", "stderr": "Timed out", "returncode": -1}
-        except Exception as e:
-            return Response({"error": str(e)}, 500)
+    @app.route("/api/resources", methods=["GET"])
+    async def get_resources(req):
+        loop = asyncio.get_event_loop()
+        cpu = await loop.run_in_executor(None, lambda: psutil.cpu_percent(interval=0.5))
+        mem = psutil.virtual_memory()
+        return {
+            "cpu": cpu,
+            "memory": {"percent": mem.percent, "total": mem.total, "available": mem.available},
+            "disk": {"percent": psutil.disk_usage("/").percent},
+            "net": {"bytes_sent": psutil.net_io_counters().bytes_sent, "bytes_recv": psutil.net_io_counters().bytes_recv},
+        }
 
 
 LOG_SCHEMA = [{"name": "source", "type": "string", "default": ""},
@@ -97,12 +64,6 @@ LOG_SCHEMA = [{"name": "source", "type": "string", "default": ""},
 
 
 def register_log_model(app):
-    # Register custom routes BEFORE model CRUD to avoid <id> catch-all
-    @app.route("/api/log/recent", methods=["GET"])
-    async def recent_logs(req):
-        all_logs = app._db.list("log")
-        return all_logs[-50:]
-
     app._register_model(None, table="log", fields=LOG_SCHEMA)
 
     @app.ws_handler(topic="logs")
