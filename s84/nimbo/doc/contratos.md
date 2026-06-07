@@ -21,7 +21,7 @@ Inyectado por `server.py:_serve_static()` en todo `index.html` servido.
 ```json
 {
   "process": {
-    "api": "/api/system/processes",
+    "api": "/api/process",
     "id": "pid",
     "refresh": 5000,
     "noCreate": true,
@@ -62,7 +62,7 @@ Inyectado por `server.py:_serve_static()` en todo `index.html` servido.
 | `refresh` | no | — | Intervalo de auto-refresh (ms) |
 | `noCreate` | no | `false` | Oculta botón "+ New" |
 | `noEdit` | no | `false` | Oculta botón "✎" |
-| `kill` | no | — | Muestra botón "✕" (mata recurso vía `/api/system/kill/{id}`) |
+| `kill` | no | — | Muestra botón "✕" (mata recurso vía `DELETE /api/{model}/{id}`) |
 | `actions` | no | — | Array de acciones personalizadas (ver sección 1.1) |
 
 Inyectado por `server.py:_serve_static()`.
@@ -84,38 +84,38 @@ Actualmente soportadas: `"run"` (ejecuta `POST /api/{model}/run/{id}`).
 
 ## 2. Cliente → Servidor (API REST)
 
-### CRUD estándar (`@app.model`)
+Toda la API sigue un solo estándar. Un modelo es un modelo, tenga respaldo en DB o no.
 
-| Método | Ruta | Cuerpo | Respuesta |
-|---|---|---|---|
-| `GET` | `/api/{model}` | — | `[{...}, {...}]` |
-| `GET` | `/api/{model}/schema` | — | `{"name":"{model}","fields":[...]}` |
-| `GET` | `/api/{model}/{id}` | — | `{...}` |
-| `POST` | `/api/{model}` | `{...}` | `{...}` (creado) |
-| `PUT` | `/api/{model}/{id}` | `{...}` | `{...}` (actualizado) |
-| `DELETE` | `/api/{model}/{id}` | — | `{...}` (eliminado) |
+### CRUD universal
 
-### Acción ejecutable (`@app.run`)
+| Método | Ruta | Cuerpo | Respuesta | Uso |
+|---|---|---|---|---|
+| `GET` | `/api/{model}` | — | `[{...}, ...]` | Listar todos |
+| `GET` | `/api/{model}/schema` | — | `{"name":"{model}","fields":[...]}` | Schema del modelo |
+| `GET` | `/api/{model}/{id}` | — | `{...}` | Leer uno |
+| `POST` | `/api/{model}` | `{...}` | `{...}` | Crear |
+| `PUT` | `/api/{model}/{id}` | `{...}` | `{...}` | Actualizar |
+| `DELETE` | `/api/{model}/{id}` | — | `{...}` | Borrar (o matar, si es proceso) |
+| `POST` | `/api/{model}/run/{id}` | — | `{"stdout":"...","stderr":"...","returncode":0}` | Ejecutar comando |
 
-| Método | Ruta | Cuerpo | Respuesta |
-|---|---|---|---|
-| `POST` | `/api/{model}/run/{id}` | — | `{"stdout":"...","stderr":"...","returncode":0}` |
+No hay rutas especiales fuera de este patrón. Un proceso se lista con `GET /api/process`,
+se mata con `DELETE /api/process/{pid}`, etc.
 
-### Monitoreo del sistema (`@app.system`)
+### Modelos virtuales (sin DB)
 
-| Método | Ruta | Respuesta |
+Los modelos declarados con `@app.system` (ej: `process`) también siguen el mismo patrón.
+La única diferencia es que algunas operaciones no aplican:
+- `POST /api/{model}` → 405 si `noCreate`
+- `PUT /api/{model}/{id}` → 405 si `noEdit`
+
+### Query parameters estándar
+
+| Parámetro | Ejemplo | Descripción |
 |---|---|---|
-| `GET` | `/api/system/processes` | `[{pid, name, cpu_percent, memory_percent, status}, ...]` (top 50) |
-| `GET` | `/api/system/resources` | `{"cpu":%, "memory":{...}, "disk":{...}, "net":{...}}` |
-| `POST` | `/api/system/kill/{pid}` | `{"killed": pid}` |
-| `POST` | `/api/exec` | `{"stdout":"...","stderr":"...","returncode":0}` |
-
-### Utilitarios
-
-| Método | Ruta | Respuesta |
-|---|---|---|
-| `GET` | `/api/models` | `["agent","command",...]` |
-| `GET` | `/api/log/recent` | `[{...}, ...]` (últimos 50) |
+| `?limit=N` | `?limit=50` | Máximo de registros a devolver |
+| `?offset=N` | `?offset=100` | Desplazamiento para paginación |
+| `?sort=campo` | `?sort=-created_at` | Ordenar (prefijo `-` para descendente) |
+| `?{campo}={valor}` | `?status=running` | Filtrar por valor exacto |
 
 ---
 
@@ -127,22 +127,34 @@ Actualmente soportadas: `"run"` (ejecuta `POST /api/{model}/run/{id}`).
 ws://{host}:{port}/ws
 ```
 
-Donde `{port}` es el puerto configurado (mismo que HTTP para backend nativo,
-HTTP+1 para backend `websockets`). El cliente lo obtiene de `window.__NIMBO_WS_PORT__`.
+### Formato universal de mensajes
 
-### Mensajes cliente → servidor
-
-```json
-{"type": "log", "data": {"level": "info|warn|error", "content": "...", "source": "client"}}
-```
-
-### Mensajes servidor → cliente (broadcast)
+Todos los mensajes WebSocket siguen el mismo formato:
 
 ```json
-{"type": "log", "data": {"level": "info|warn|error", "content": "...", "source": "system|client", "time": "HH:MM:SS"}}
+{"type": "{tipo}", "data": {...}}
 ```
 
-El cliente escucha con `nimbo.ws.on('log', callback)`.
+### Tipos de mensajes
+
+| `type` | Dirección | Descripción | Ejemplo `data` |
+|---|---|---|---|
+| `log` | ambas | Evento de log | `{"level":"info","content":"...","source":"system","time":"HH:MM:SS"}` |
+| `crud` | servidor → cliente | Notificación de cambio CRUD | `{"model":"agent","action":"create","id":5,"data":{...}}` |
+| `model:{model}` | servidor → cliente | Actualización de datos vivos | `{"model":"process","data":[{...},{...}]}` |
+| `system` | servidor → cliente | Stats del sistema | `{"cpu":45,"memory":{...}}` |
+| `reload` | servidor → cliente | El servidor se reinició | `{"version":2}` |
+
+### Uso
+
+```javascript
+// Cliente: escuchar cualquier tipo
+nimbo.ws.on('log', msg => { ... });
+nimbo.ws.on('crud', msg => { ... });
+nimbo.ws.on('model:process', msg => { ... });
+// O escuchar todo
+nimbo.ws.on('message', msg => { ... });
+```
 
 ---
 
@@ -166,8 +178,8 @@ sin causar scroll.
 {
   "name": "nombre_del_campo",
   "type": "string|int|float|bool",
-  "label": "Etiqueta visible",       // opcional
-  "default": "valor por defecto"     // opcional
+  "label": "Etiqueta visible",
+  "default": "valor por defecto"
 }
 ```
 
@@ -179,12 +191,12 @@ El tipo determina el control HTML generado:
 
 ---
 
-## 6. Glosario de nombres
+## 6. Glosario
 
 | Término | Significado |
 |---|---|
-| `model` | Clase Python decorada con `@app.model` (u otros) |
-| `resource` | Nombre en minúscula del modelo (usado en URLs) |
+| `model` | Cualquier recurso declarado con un decorador (`@app.model`, `@app.system`, `@app.log`) |
+| `resource` | Sinónimo de modelo. El nombre en minúscula usado en URLs |
 | `schema` | Lista de campos con tipo, label, default |
 | `config` | Objeto JSON que configura el comportamiento del CRUD en cliente |
 | `action` | Botón personalizado en la tabla (▶ para ejecutar, ✕ para matar) |
