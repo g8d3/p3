@@ -90,10 +90,10 @@ Cada decorador tiene un namespace default que se usa si no hay `@app.namespace`:
 
 | Decorador | Namespace default |
 |---|---|
-| `@app.model` | `/api/` |
-| `@app.system` | `/api/` |
-| `@app.log` | `/api/` |
-| `@app.proxy` | `/proxy/` |
+| `@app.model` | nombre de la clase |
+| `@app.system` | nombre de la clase |
+| `@app.log` | nombre de la clase |
+| `@app.proxy` | nombre de la clase |
 | `@app.namespace` (sin args) | nombre de la clase en minúscula |
 
 ### Ejemplos

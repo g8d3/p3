@@ -143,7 +143,7 @@ Proxy reverso para LLMs. Corre en la misma app o en puerto separado.
 class OpenAI: ...
 ```
 
-Sin `port`, corre en la misma app en `/proxy/openai`. El framework:
+Sin `port`, corre en la misma app. La ruta sigue la regla de namespace: nombre de clase en minúscula (`/openai`) o el que defina `@app.namespace`. El framework:
 1. Detecta el proveedor por el nombre de la clase (`OpenAI`)
 2. Busca en el registry: `upstream="https://api.openai.com"`
 3. Usa el nombre en minúscula como ruta: `/proxy/openai`
