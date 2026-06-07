@@ -146,14 +146,14 @@ class OpenAI: ...
 Sin `port`, corre en la misma app. La ruta sigue la regla de namespace: nombre de clase en minúscula (`/openai`) o el que defina `@app.namespace`. El framework:
 1. Detecta el proveedor por el nombre de la clase (`OpenAI`)
 2. Busca en el registry: `upstream="https://api.openai.com"`
-3. Usa el nombre en minúscula como ruta: `/proxy/openai`
+3. Usa el nombre en minúscula como ruta: `/openai`
 4. Provee campos por defecto: `agent_id`, `status`, `pid`, `cpu`, `mem_pct`, `window`, `last_active`
 
 Forma más corta posible: **2 líneas, 0 parámetros**.
 
 ```python
 @app.proxy
-class Anthropic: ...   # → upstream Anthropic, ruta /proxy/anthropic
+class Anthropic: ...   # → upstream Anthropic, ruta /anthropic
 ```
 
 ---

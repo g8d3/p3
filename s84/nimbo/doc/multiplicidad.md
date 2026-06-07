@@ -110,20 +110,20 @@ class Task: ...
 class Task: ...
 # → /data/task
 
-# Proxy sin namespace explícito: usa default /proxy/
-@app.proxy("openai", upstream="...")
-class OpenAIProxy: ...
-# → /proxy/openai/v1/chat
+# Sin namespace explícito: /openai
+@app.proxy
+class OpenAI: ...
+# → /openai/v1/chat
 
-# Proxy con namespace explícito
+# Con namespace explícito: /llm/openai
 @app.namespace("llm")
-@app.proxy("openai", upstream="...")
-class OpenAIProxy: ...
+@app.proxy
+class OpenAI: ...
 # → /llm/openai/v1/chat
 
-# Proxy con puerto separado (namespace irrelevante)
-@app.proxy("openai", upstream="...", port=9098)
-class OpenAIProxy: ...
+# Con puerto separado: http://localhost:9098/v1/chat
+@app.proxy(port=9098)
+class OpenAI: ...
 # → http://localhost:9098/v1/chat
 ```
 
@@ -159,23 +159,23 @@ No puedes definir:
 Cada decorador puede recibir un nombre como primer argumento para crear múltiples instancias:
 
 ```python
-@app.proxy("openai", upstream="https://api.openai.com", port=9098)
-class OpenAIProxy: ...
+@app.proxy
+class OpenAI: ...
 
-@app.proxy("anthropic", upstream="https://api.anthropic.com", port=9099)
-class AnthropicProxy: ...
+@app.proxy
+class Anthropic: ...
 ```
 
-Rutas:
-- `GET /proxy/openai` (agentes del proxy OpenAI)
-- `GET /proxy/anthropic` (agentes del proxy Anthropic)
+Rutas generadas:
+- `GET /openai` (agentes del proxy OpenAI)
+- `GET /anthropic` (agentes del proxy Anthropic)
 
 ### Proxy sin puerto (misma app)
 
 ```python
-@app.namespace("/llm/")
-@app.proxy("openai", upstream="https://api.openai.com")
-class OpenAIProxy: ...
+@app.namespace("llm")
+@app.proxy
+class OpenAI: ...
 ```
 
 Sin `port`, el proxy corre en la misma app:
@@ -252,8 +252,8 @@ Un decorador con nombre actúa como contenedor de modelos hijos.
 ### Proxy con modelos anidados
 
 ```python
-@app.proxy("openai", upstream="https://api.openai.com", port=9098)
-class OpenAIProxy:
+@app.proxy(port=9098)
+class OpenAI:
     agent_id: str
     status: str
     pid: int
@@ -284,10 +284,10 @@ Rutas:
 
 | Ruta | Qué hace |
 |---|---|
-| `GET /proxy/openai` | Lista agentes |
-| `GET /proxy/openai/request` | Lista requests |
-| `POST /proxy/openai/request` | Crea request (lo envía al upstream) |
-| `GET /proxy/openai/token-usage` | Lista uso de tokens |
+| `GET /openai` | Lista agentes |
+| `GET /openai/request` | Lista requests |
+| `POST /openai/request` | Crea request (lo envía al upstream) |
+| `GET /openai/token-usage` | Lista uso de tokens |
 
 ### Reglas de anidación
 
