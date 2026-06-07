@@ -98,10 +98,20 @@
     let headerEl = null;
     let emptyEl = null;
     let firstRender = true;
+    let sortField = '';
+    let sortDir = '';
+    let filterVals = {};
+
+    function buildQuery() {
+      const q = [];
+      if (sortField) q.push('sort=' + (sortDir === 'desc' ? '-' : '') + sortField);
+      Object.keys(filterVals).forEach(k => { if (filterVals[k]) q.push(encodeURIComponent(k) + '=' + encodeURIComponent(filterVals[k])); });
+      return q.length ? '?' + q.join('&') : '';
+    }
 
     async function load() {
       try {
-        items = await api('GET', apiBase);
+        items = await api('GET', apiBase + buildQuery());
         render();
       } catch (e) {
         showToast('Error: ' + e.message, 'error');
@@ -136,8 +146,28 @@
           const tr = document.createElement('tr');
           displayFields.forEach(f => {
             const th = document.createElement('th');
-            th.textContent = f.label || f.name;
+            th.style.cursor = 'pointer';
+            th.textContent = (f.label || f.name) + (sortField === f.name ? (sortDir === 'desc' ? ' ▼' : ' ▲') : '');
+            th.onclick = () => {
+              if (sortField === f.name) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+              else { sortField = f.name; sortDir = 'asc'; }
+              load();
+            };
             tr.appendChild(th);
+            // Filter input per column
+            const filterDiv = document.createElement('div');
+            filterDiv.style.padding = '2px 0';
+            const inp = document.createElement('input');
+            inp.placeholder = '🔍';
+            inp.style.width = '100%'; inp.style.boxSizing = 'border-box'; inp.style.fontSize = '0.75rem'; inp.style.padding = '2px 4px';
+            inp.value = filterVals[f.name] || '';
+            inp.oninput = () => {
+              if (inp.value) filterVals[f.name] = inp.value;
+              else delete filterVals[f.name];
+              load();
+            };
+            filterDiv.appendChild(inp);
+            th.appendChild(filterDiv);
           });
           const thActions = document.createElement('th');
           thActions.textContent = '';
