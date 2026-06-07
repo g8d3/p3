@@ -43,13 +43,50 @@ Sin leer documentación, dos líneas y tenés tabla CRUD con monitoreo de proces
 
 ## Namespace con decorador separado
 
-El prefijo de ruta se define con `@app.namespace`, no como parámetro de otros decoradores:
+`@app.namespace` define el prefijo de ruta de una clase y todas sus hijas.
 
 ```python
-@app.namespace("/llm/")
-@app.proxy("openai", upstream="https://api.openai.com")
-class OpenAIProxy: ...
+@app.namespace("perro")       # La clase se llama Api pero la ruta es /perro/
+class Api: ...
+# → /perro/...
+
+@app.namespace                # Sin nombre = usa el nombre de la clase en minúscula
+class Api: ...
+# → /api/...
 ```
+
+### Herencia a hijos
+
+El namespace se hereda a todas las clases definidas dentro:
+
+```python
+@app.namespace("perro")
+class Api:
+
+    @app.model
+    class User: ...
+    # → /perro/user
+
+    @app.model
+    class Post: ...
+    # → /perro/post
+```
+
+Si un hijo tiene su propio `@app.namespace`, lo overridea:
+
+```python
+@app.namespace("perro")
+class Api:
+
+    @app.namespace("gato")
+    @app.model
+    class User: ...
+    # → /gato/user (no /perro/user)
+```
+
+### Namespace default por decorador
+
+Cada decorador tiene un namespace default que se usa si no hay `@app.namespace`:
 
 | Decorador | Namespace default |
 |---|---|
@@ -57,27 +94,29 @@ class OpenAIProxy: ...
 | `@app.system` | `/api/` |
 | `@app.log` | `/api/` |
 | `@app.proxy` | `/proxy/` |
-| (ninguno) | `/` |
-
-Sin `@app.namespace`, se usa el default del decorador.
-Con `@app.namespace`, se overridea el default.
+| `@app.namespace` (sin args) | nombre de la clase en minúscula |
 
 ### Ejemplos
 
 ```python
-# Default: /api/
+# Default del decorador: /api/
 @app.model
 class Task: ...
 # → /api/task
 
-# Namespace explícito
-@app.namespace("/data/")
+# Namespace explícito overridea el default
+@app.namespace("data")
 @app.model
 class Task: ...
 # → /data/task
 
-# Proxy con namespace explícito dentro de la app
-@app.namespace("/llm/")
+# Proxy sin namespace explícito: usa default /proxy/
+@app.proxy("openai", upstream="...")
+class OpenAIProxy: ...
+# → /proxy/openai/v1/chat
+
+# Proxy con namespace explícito
+@app.namespace("llm")
 @app.proxy("openai", upstream="...")
 class OpenAIProxy: ...
 # → /llm/openai/v1/chat
@@ -94,7 +133,7 @@ class OpenAIProxy: ...
 /{namespace}/{nombre}[/{id}][/{accion}]
 ```
 
-Sin namespaces no sabrías dónde vive cada cosa. Con `@app.namespace`, es explícito.
+Sin namespaces no sabrías dónde vive cada cosa. Con `@app.namespace`, es explícito y heredable.
 
 ---
 
