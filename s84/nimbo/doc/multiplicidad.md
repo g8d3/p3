@@ -8,168 +8,356 @@ Hoy los decoradores son planos y singulares:
 @app.model        # Un solo modelo
 @app.system       # Un solo sistema
 @app.log          # Un solo log
-@app.proxy        # Un solo proxy
+@app.proxy        # Un solo proxy (propuesto)
 ```
 
-No puedes definir **dos proxies** (OpenAI + Anthropic), ni **dos modelos anidados** (Proxy → Request, Proxy → TokenUsage), ni **dos fuentes de sistema** (procesos + monturas de disco).
+No puedes definir:
+- **Dos proxies** (OpenAI + Anthropic cada uno con sus propios modelos)
+- **Dos modelos anidados** (Proxy → Request, Proxy → TokenUsage)
+- **Dos fuentes de sistema** (procesos + monturas de disco)
+- **CRUD batch** (crear 5 registros de 3 modelos distintos en una sola petición)
 
-## Solución: decoradores con nombre y anidación
+---
 
-### Decoradores con nombre
+## 1. Decoradores con nombre
 
-Cada decorador puede recibir un nombre como primer argumento. Ese nombre se usa en rutas y URLs:
-
-```python
-@app.proxy("openai", upstream="https://api.openai.com", port=9098)
-class OpenAIProxy:
-    ...
-
-@app.proxy("anthropic", upstream="https://api.anthropic.com", port=9099)
-class AnthropicProxy:
-    ...
-```
-
-Esto genera rutas como:
-- `GET /api/openai-proxy` (lista agentes del proxy OpenAI)
-- `GET /api/anthropic-proxy` (lista agentes del proxy Anthropic)
-
-### Modelos anidados
-
-Un modelo puede contener otros modelos. El hijo hereda el contexto del padre:
+Cada decorador puede recibir un nombre como primer argumento. Ese nombre se usa en rutas, URLs y referencias.
 
 ```python
 @app.proxy("openai", upstream="https://api.openai.com", port=9098)
 class OpenAIProxy:
     agent_id: str
     status: str
+    ...
 
-    @app.model
-    class Request:
-        prompt: str
-        response: str
-        tokens: int
-        duration_ms: float
-
-    @app.model
-    class TokenUsage:
-        model: str
-        prompt_tokens: int
-        completion_tokens: int
+@app.proxy("anthropic", upstream="https://api.anthropic.com", port=9099)
+class AnthropicProxy:
+    agent_id: str
+    status: str
+    ...
 ```
 
-Esto genera rutas anidadas:
-- `GET /api/openai-proxy` — agentes del proxy
-- `GET /api/openai-proxy/request` — requests de ese proxy
-- `GET /api/openai-proxy/token-usage` — uso de tokens de ese proxy
-- `POST /api/openai-proxy/request` — crear request (se envía al upstream automáticamente)
+### ¿Por qué dos proxies?
 
-La ruta se construye como: `/{nombre-padre}/{nombre-hijo}`.
+**Escenario real:** un sistema multi-agente donde algunos agentes usan OpenAI y otros Anthropic. Cada proxy:
 
-### Multiplicidad en otros decoradores
+- Corre en su propio puerto (9098, 9099) para no interferir
+- Tiene su propia configuración de upstream, timeout, y rate limit
+- Tiene sus propios modelos anidados (Request, TokenUsage) para auditoría separada
+- Se monitorea independientemente en el dashboard
+
+### Casos de uso del proxy
+
+| Configuración | Ejemplo |
+|---|---|
+| Proxy simple, un upstream | `@app.proxy("llm", upstream="https://api.openai.com")` |
+| Proxy con autenticación | `@app.proxy("llm", upstream="...", api_key="sk-...")` |
+| Proxy con rate limiting | `@app.proxy("llm", upstream="...", rpm=60)` |
+| Proxy con cache | `@app.proxy("llm", upstream="...", cache_ttl=300)` |
+| Proxy local (sin upstream) | `@app.proxy("local", port=9097, upstream=None)` — solo registra peticiones |
+
+---
+
+## 2. Multiplicidad en todos los decoradores
+
+### `@app.system` múltiple
 
 ```python
 @app.system("processes", api="/api/process", id="pid")
 class Process:
     pid: int
     name: str
+    cpu_percent: float
+    memory_percent: float
+    status: str
 
 @app.system("mounts", api="/api/mounts", kill=False)
 class Mount:
     device: str
     mount: str
+    fstype: str
     usage: float
 
+@app.system("connections", api="/api/net-connections", refresh=2)
+class Connection:
+    fd: int
+    family: str
+    type: str
+    laddr: str
+    raddr: str
+    status: str
+```
+
+Cada uno:
+- Tiene su propio endpoint de datos (`/api/process`, `/api/mounts`, etc.)
+- Tiene su propia configuración de refresh, kill, etc.
+- Aparece como un modelo independiente en la navegación
+
+### `@app.log` múltiple
+
+```python
 @app.log("audit")
 class AuditLog:
-    ...
+    source: str
+    action: str
+    detail: str
+    time: str
 
 @app.log("proxy-events")
 class ProxyEvent:
-    ...
+    agent_id: str
+    method: str
+    route: str
+    status_code: int
+    duration_ms: float
+    time: str
+
+@app.log("errors")
+class ErrorLog:
+    source: str
+    message: str
+    traceback: str
+    time: str
 ```
 
-## Reglas de anidación
+Cada uno:
+- Es una tabla independiente en DB
+- Tiene su propio auto-refresh y config
+- Se auto-puebla desde diferentes partes del sistema
 
-1. **Un padre puede tener múltiples hijos.** No hay límite de profundidad.
-2. **Los hijos heredan el prefijo de ruta del padre.** Ej: `openai-proxy/request`.
-3. **Los hijos heredan la base de datos del padre** (si el padre tiene DB, los hijos usan la misma).
-4. **Un hijo puede tener sus propios decoradores.** Ej: `@app.model` dentro de `@app.proxy` puede tener `@app.run`.
-5. **Los decoradores sin nombre usan el nombre de la clase en minúscula** (como ahora).
-
-## Implementación
-
-### Registro de modelos
-
-En lugar de una lista plana `_model_schema`, se usa un árbol:
+### `@app.model` múltiple
 
 ```python
-_model_tree = {
-    "openai-proxy": {
-        "cls": OpenAIProxy,
-        "children": {
-            "request": {"cls": Request, "fields": [...]},
-            "token-usage": {"cls": TokenUsage, "fields": [...]},
-        }
-    },
-    "process": {
-        "cls": Process,
-        "children": {}
-    },
-    "audit": {
-        "cls": AuditLog,
-        "children": {}
-    }
+@app.model
+class User:
+    name: str
+    email: str
+
+@app.model
+class Post:
+    title: str
+    body: str
+    user_id: int
+
+@app.model
+class Category:
+    name: str
+    description: str
+```
+
+(Los modelos múltiples ya funcionan hoy. La novedad es poder anidarlos.)
+
+---
+
+## 3. Modelos anidados
+
+Un decorador con nombre actúa como **contenedor** de modelos hijos. Los hijos heredan el contexto del padre.
+
+### Ejemplo completo: proxy con modelos anidados
+
+```python
+@app.proxy("openai", upstream="https://api.openai.com", port=9098)
+class OpenAIProxy:
+    agent_id: str
+    status: str
+    pid: int
+    cpu: float
+    window: str
+    last_active: float
+
+    @app.model
+    class Request:
+        prompt: str
+        response: str
+        model: str
+        tokens: int
+        duration_ms: float
+        agent_id: str       # FK implícita al padre
+
+    @app.model
+    class TokenUsage:
+        model: str
+        date: str
+        prompt_tokens: int
+        completion_tokens: int
+        total_tokens: int
+        cost: float
+```
+
+Rutas generadas:
+
+| Ruta | Qué hace |
+|---|---|
+| `GET /api/openai-proxy` | Lista agentes del proxy |
+| `GET /api/openai-proxy/request` | Lista requests |
+| `POST /api/openai-proxy/request` | Crea request (lo envía al upstream) |
+| `GET /api/openai-proxy/token-usage` | Lista uso de tokens |
+| `POST /api/openai-proxy/token-usage` | Registra uso manual |
+
+### Otro ejemplo: sistema de archivos
+
+```python
+@app.system("filesystem", api="/api/filesystem")
+class FileSystem:
+    device: str
+    mount: str
+    size: int
+    used: int
+    avail: int
+    usage: float
+
+    @app.model
+    class MountOption:
+        mount: str
+        option: str
+        value: str
+
+    @app.model
+    class IOStat:
+        device: str
+        reads: int
+        writes: int
+        read_bytes: int
+        write_bytes: int
+        time: str
+```
+
+### Reglas de anidación
+
+1. **Un padre puede tener múltiples hijos.** No hay límite.
+2. **Los hijos heredan el prefijo de ruta del padre.** Ej: `/api/openai-proxy/request`.
+3. **Los hijos heredan la base de datos del padre** (misma DB, mismas migraciones).
+4. **Un hijo puede tener sus propios decoradores.** Ej: `@app.model` puede tener `@app.run`.
+5. **Los hijos pueden tener hijos** (anidación recursiva).
+6. **La ruta completa se construye concatenando nombres:** `/{abuelo}/{padre}/{hijo}`.
+
+---
+
+## 4. CRUD batch: múltiples operaciones en una petición
+
+Además de multiplicidad en modelos, se necesita multiplicidad en operaciones:
+crear, actualizar y borrar varios registros de varios modelos en **una sola petición HTTP**.
+
+### API batch
+
+```http
+POST /api/batch
+Content-Type: application/json
+
+{
+  "operations": [
+    {"action": "create", "model": "user", "data": {"name": "Alice", "email": "alice@x.com"}},
+    {"action": "create", "model": "user", "data": {"name": "Bob", "email": "bob@x.com"}},
+    {"action": "create", "model": "post", "data": {"title": "Hello", "body": "World", "user_id": 1}},
+    {"action": "update", "model": "category", "id": 3, "data": {"name": "Updated"}},
+    {"action": "delete", "model": "category", "id": 5},
+  ]
 }
 ```
 
-### Generación de rutas
+### Respuesta
 
-Al registrar un modelo anidado, la ruta se construye recursivamente:
+```json
+{
+  "results": [
+    {"action": "create", "model": "user", "status": 201, "id": 1},
+    {"action": "create", "model": "user", "status": 201, "id": 2},
+    {"action": "create", "model": "post", "status": 201, "id": 10},
+    {"action": "update", "model": "category", "status": 200, "id": 3},
+    {"action": "delete", "model": "category", "status": 204, "id": 5}
+  ]
+}
+```
+
+### ¿Para qué sirve?
+
+| Escenario | Sin batch | Con batch |
+|---|---|---|
+| Crear usuario + post + categoría en onboarding | 3 peticiones | 1 petición |
+| Borrar 50 logs viejos | 50 peticiones | 1 petición |
+| Sincronizar datos entre agentes | N peticiones | 1 petición |
+
+### Atomicidad
+
+Por defecto, batch ejecuta en orden y no es atómico (si falla la operación 3,
+las 1 y 2 ya se ejecutaron).
+
+Se puede agregar `"atomic": true` para envolver todo en una transacción:
+
+```json
+{
+  "atomic": true,
+  "operations": [...]
+}
+```
+
+---
+
+## 5. Mapeo `fields`
+
+Todos los decoradores deben soportar `fields` para mapear conceptos del decorador
+a columnas del modelo. Esto es especialmente importante para decoradores como
+`@app.proxy` y `@app.system` donde el decorador necesita saber qué campo usar
+para cada concepto.
 
 ```python
-def register_model(self, cls, parent_name=None, name=None):
-    model_name = name or cls.__name__.lower()
-    full_name = f"{parent_name}/{model_name}" if parent_name else model_name
-    # Registrar schema en /api/{full_name}/schema
-    # Registrar CRUD en /api/{full_name}
-    # Si tiene hijos, registrarlos recursivamente
-```
-
-### Namespaces en la UI
-
-La navegación del frontend se adapta para mostrar nombres compuestos:
-
-```
-openai-proxy
-  └── request
-  └── token-usage
-anthropic-proxy
-  └── request
-  └── token-usage
-process
-audit
-proxy-events
-```
-
-## Preguntas abiertas
-
-1. **¿Hasta qué profundidad de anidación es útil?** 2 niveles (padre → hijo) parece suficiente. ¿3?
-2. **¿Cómo se manejan las relaciones entre modelos anidados?** ¿El hijo tiene automáticamente una FK al padre?
-3. **¿Los decoradores sin nombre (`@app.model`) pueden ser hijos?** ¿O solo los decoradores con nombre pueden ser padres?
-4. **¿Cómo se refleja la anidación en `__NIMBO_CONFIGS__`?** ¿Los hijos heredan configs del padre?
-5. **¿Debe existir `@app.namespace("nombre")` como decorador contenedor sin comportamiento propio?**
-
-## Relación con `fields`
-
-Cada decorador acepta `fields` para mapear conceptos a columnas del modelo:
-
-```python
-@app.system("processes", fields={"id": "pid", "status": "status", "cpu": "cpu_percent"})
+@app.system("processes",
+    fields={
+        "id": "pid",            # campo identificador único
+        "status": "status",      # campo de estado
+        "cpu": "cpu_percent",    # campo de uso de CPU
+        "memory": "mem_pct",     # campo de uso de memoria
+    })
 class Process:
     pid: int
     name: str
     cpu_percent: float
-    ...
+    mem_pct: float
+    status: str
 ```
 
-`fields` es un parámetro estándar que TODO decorador debe soportar.
+### Convención
+
+- Si `fields` no se especifica, el decorador usa defaults por convención de nombre:
+  - `id` → busca `id`, `pid`, `uuid`
+  - `status` → busca `status`, `state`
+  - `cpu` → busca `cpu`, `cpu_percent`, `usage`
+  - `time` → busca `time`, `timestamp`, `created_at`, `date`
+- Si se especifica `fields`, los defaults se sobreescriben.
+
+---
+
+## 6. UI: navegación con namespace
+
+La navegación del frontend muestra nombres compuestos con indentación:
+
+```
+openai-proxy
+  request
+  token-usage
+anthropic-proxy
+  request
+  token-usage
+process
+mounts
+connections
+audit
+proxy-events
+errors
+user
+post
+category
+```
+
+Los modelos anidados se muestran como hijos indentados. `__NIMBO_CONFIGS__` incluye
+un campo `parent` para que el frontend sepa cómo agruparlos.
+
+---
+
+## Preguntas abiertas
+
+1. **Profundidad máxima:** ¿2 niveles (padre → hijo) o más? ¿3?
+2. **FK automática:** ¿El hijo debe tener automáticamente una foreign key al padre? ¿O se declara explícitamente con `fields`?
+3. **Transacciones en batch:** ¿`"atomic": true` se implementa desde el inicio o se deja para después?
+4. **Namespace puro:** ¿Tiene sentido `@app.namespace("nombre")` como contenedor sin comportamiento, para agrupar modelos no relacionados?
+5. **Rendimiento batch:** ¿Hay un límite de operaciones por petición batch?
