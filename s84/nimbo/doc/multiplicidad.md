@@ -6,24 +6,99 @@ Cada decorador debe funcionar **con la menor cantidad de parámetros posible**.
 El default debe ser el caso de uso más común. Todo lo demás es configurable,
 pero no obligatorio.
 
+### Dos líneas y ya funciona
+
+Si la clase está vacía, el decorador provee sus campos por defecto:
+
 ```python
-@app.proxy                      # Sin parámetros = proxy local, mismo puerto
-class Proxy: ...
-
-@app.system                     # Sin parámetros = monitoreo de procesos
+@app.system
 class Process: ...
+# → pid, name, cpu_percent, memory_percent, status
 
-@app.log                         # Sin parámetros = auditoría básica
+@app.log
 class Log: ...
+# → source, level, content, time
 
-@app.model                       # Sin parámetros = CRUD completo
+@app.model
 class Task: ...
+# → name, description (o los que tenga sentido)
+
+@app.proxy
+class Proxy: ...
+# → agent_id, status, pid, cpu, mem_pct, window, last_active
 ```
 
-El desarrollador principiante hace cosas útiles sin leer documentación.
-El desarrollador avanzado afina cada parámetro cuando lo necesita.
+Si el usuario necesita campos extra, los agrega sin repetir los defaults:
 
-## Problema
+```python
+@app.system
+class Process:
+    username: str      # se agrega a los campos por defecto
+    cmdline: str
+```
+
+Sin leer documentación, dos líneas y tenés tabla CRUD con monitoreo de procesos.
+
+---
+
+## Namespace con decorador separado
+
+El prefijo de ruta se define con `@app.namespace`, no como parámetro de otros decoradores:
+
+```python
+@app.namespace("/llm/")
+@app.proxy("openai", upstream="https://api.openai.com")
+class OpenAIProxy: ...
+```
+
+| Decorador | Namespace default |
+|---|---|
+| `@app.model` | `/api/` |
+| `@app.system` | `/api/` |
+| `@app.log` | `/api/` |
+| `@app.proxy` | `/proxy/` |
+| (ninguno) | `/` |
+
+Sin `@app.namespace`, se usa el default del decorador.
+Con `@app.namespace`, se overridea el default.
+
+### Ejemplos
+
+```python
+# Default: /api/
+@app.model
+class Task: ...
+# → /api/task
+
+# Namespace explícito
+@app.namespace("/data/")
+@app.model
+class Task: ...
+# → /data/task
+
+# Proxy con namespace explícito dentro de la app
+@app.namespace("/llm/")
+@app.proxy("openai", upstream="...")
+class OpenAIProxy: ...
+# → /llm/openai/v1/chat
+
+# Proxy con puerto separado (namespace irrelevante)
+@app.proxy("openai", upstream="...", port=9098)
+class OpenAIProxy: ...
+# → http://localhost:9098/v1/chat
+```
+
+### Namespace como concepto unificador
+
+```
+/{namespace}/{nombre}[/{id}][/{accion}]
+```
+
+Sin namespaces no sabrías dónde vive cada cosa. Con `@app.namespace`, es explícito.
+
+---
+
+## Problema actual
 
 Hoy los decoradores son planos y singulares:
 
@@ -31,76 +106,18 @@ Hoy los decoradores son planos y singulares:
 @app.model        # Un solo modelo
 @app.system       # Un solo sistema
 @app.log          # Un solo log
-@app.proxy        # Un solo proxy (propuesto)
 ```
 
 No puedes definir:
-- **Dos proxies** (OpenAI + Anthropic cada uno con sus propios modelos)
-- **Dos modelos anidados** (Proxy → Request, Proxy → TokenUsage)
+- **Dos proxies** (OpenAI + Anthropic cada uno con sus propios modelos anidados)
 - **Dos fuentes de sistema** (procesos + monturas de disco)
-- **CRUD batch** (crear 5 registros de 3 modelos distintos en una sola petición)
-
-## Namespaces de ruta
-
-Cada decorador asigna a sus modelos un **namespace** (prefijo de ruta) por defecto.
-Esto define si una ruta empieza con `/api/`, `/proxy/`, etc.
-
-| Decorador | Namespace default | Ejemplo de ruta |
-|---|---|---|
-| `@app.model` | `/api/` | `GET /api/user` |
-| `@app.system` | `/api/` | `GET /api/process` |
-| `@app.log` | `/api/` | `GET /api/audit` |
-| `@app.proxy` | `/proxy/` | `POST /proxy/openai/v1/chat` |
-| `@app.proxy` (con `port=`) | (su propio puerto) | `POST http://localhost:9098/v1/chat` |
-
-El namespace se puede configurar explícitamente:
-
-```python
-@app.model(namespace="/data/")
-class User: ...
-
-@app.proxy("openai", namespace="/llm/", upstream="...")
-class OpenAIProxy: ...
-```
-
-### ¿Por qué `/api/` vs `/proxy/`?
-
-- `/api/` es para **datos** (CRUD). El cliente pide y recibe JSON.
-- `/proxy/` es para **tráfico externo**. Recibe peticiones, las reenvía al upstream, devuelve la respuesta.
-
-Separarlos evita confusión: `POST /api/command/run/1` es CRUD. `POST /proxy/openai/v1/chat` es proxy.
-
-### Namespace con puerto separado
-
-Con `port=`, el namespace es irrelevante porque el proxy corre en otro puerto:
-
-```python
-@app.proxy("openai", upstream="https://api.openai.com", port=9098)
-# → http://localhost:9098/v1/chat/completions
-```
-
-Sin puerto, el namespace enruta dentro de la misma app:
-
-```python
-@app.proxy("openai", upstream="https://api.openai.com")
-# → http://localhost:8080/proxy/openai/v1/chat/completions
-```
-
-### Namespace como concepto unificador
-
-Todo sigue el mismo patrón:
-
-```
-/{namespace}/{nombre}[/{id}][/{accion}]
-```
-
-Sin namespaces no sabrías si `process` vive en `/api/process` o `/system/process`. Con namespaces, es explícito desde el decorador.
+- **CRUD batch** (múltiples operaciones en una petición)
 
 ---
 
 ## 1. Decoradores con nombre
 
-Cada decorador puede recibir un nombre como primer argumento. Ese nombre se usa en rutas y URLs:
+Cada decorador puede recibir un nombre como primer argumento para crear múltiples instancias:
 
 ```python
 @app.proxy("openai", upstream="https://api.openai.com", port=9098)
@@ -110,22 +127,23 @@ class OpenAIProxy: ...
 class AnthropicProxy: ...
 ```
 
-Rutas generadas:
-- `GET /proxy/openai` (lista agentes del proxy OpenAI)
-- `GET /proxy/anthropic` (lista agentes del proxy Anthropic)
+Rutas:
+- `GET /proxy/openai` (agentes del proxy OpenAI)
+- `GET /proxy/anthropic` (agentes del proxy Anthropic)
 
 ### Proxy sin puerto (misma app)
 
 ```python
-@app.proxy("local", upstream="https://api.openai.com")
-class LocalProxy: ...
+@app.namespace("/llm/")
+@app.proxy("openai", upstream="https://api.openai.com")
+class OpenAIProxy: ...
 ```
 
-Sin `port`, el proxy corre en la misma app en el namespace `/proxy/`:
+Sin `port`, el proxy corre en la misma app:
 
 ```
-http://localhost:8080/proxy/local/v1/chat  ← tráfico proxy
-http://localhost:8080/api/                  ← CRUD normal
+http://localhost:8080/llm/openai/v1/chat  ← tráfico proxy
+http://localhost:8080/api/                 ← CRUD normal
 ```
 
 ### Casos de uso del proxy
@@ -134,19 +152,19 @@ http://localhost:8080/api/                  ← CRUD normal
 |---|---|
 | Proxy simple, mismo puerto | `@app.proxy("llm", upstream="...")` |
 | Proxy con puerto separado | `@app.proxy("llm", upstream="...", port=9098)` |
-| Proxy con autenticación | `@app.proxy("llm", upstream="...", api_key="sk-...")` |
-| Proxy con rate limiting | `@app.proxy("llm", upstream="...", rpm=60)` |
+| Proxy con auth | `@app.proxy("llm", upstream="...", api_key="sk-...")` |
+| Proxy con rate limit | `@app.proxy("llm", upstream="...", rpm=60)` |
 | Proxy con cache | `@app.proxy("llm", upstream="...", cache_ttl=300)` |
-| Proxy local (sin upstream) | `@app.proxy("local", upstream=None)` — solo registra |
+| Proxy local (sin upstream) | `@app.proxy("local", upstream=None)` |
 
-### Mismo puerto vs puerto separado
+### Mismo puerto vs separado
 
 | Situación | Recomendación |
 |---|---|
-| Desarrollo local, un agente | Misma app (sin puerto) |
+| Desarrollo local | Misma app |
 | Producción, varios agentes | Puerto separado |
-| Proxy interno (solo para la app) | Misma app |
-| Proxy público (accesible desde internet) | Puerto separado + auth |
+| Proxy interno | Misma app |
+| Proxy público | Puerto separado + auth |
 
 ---
 
@@ -155,7 +173,7 @@ http://localhost:8080/api/                  ← CRUD normal
 ### `@app.system` múltiple
 
 ```python
-@app.system("processes", api="/api/process", id="pid")
+@app.system("processes")
 class Process:
     pid: int
     name: str
@@ -163,32 +181,19 @@ class Process:
     memory_percent: float
     status: str
 
-@app.system("mounts", api="/api/mounts", kill=False)
+@app.system("mounts", kill=False)
 class Mount:
     device: str
     mount: str
     fstype: str
     usage: float
-
-@app.system("connections", api="/api/net-connections", refresh=2)
-class Connection:
-    fd: int
-    family: str
-    type: str
-    laddr: str
-    raddr: str
-    status: str
 ```
 
 ### `@app.log` múltiple
 
 ```python
 @app.log("audit")
-class AuditLog:
-    source: str
-    action: str
-    detail: str
-    time: str
+class AuditLog: ...
 
 @app.log("proxy-events")
 class ProxyEvent:
@@ -197,21 +202,13 @@ class ProxyEvent:
     route: str
     status_code: int
     duration_ms: float
-    time: str
-
-@app.log("errors")
-class ErrorLog:
-    source: str
-    message: str
-    traceback: str
-    time: str
 ```
 
 ---
 
 ## 3. Modelos anidados
 
-Un decorador con nombre actúa como **contenedor** de modelos hijos.
+Un decorador con nombre actúa como contenedor de modelos hijos.
 
 ### Proxy con modelos anidados
 
@@ -244,57 +241,26 @@ class OpenAIProxy:
         cost: float
 ```
 
-Rutas generadas:
+Rutas:
 
 | Ruta | Qué hace |
 |---|---|
-| `GET /proxy/openai` | Lista agentes del proxy |
+| `GET /proxy/openai` | Lista agentes |
 | `GET /proxy/openai/request` | Lista requests |
 | `POST /proxy/openai/request` | Crea request (lo envía al upstream) |
 | `GET /proxy/openai/token-usage` | Lista uso de tokens |
 
-### Sistema de archivos anidado
-
-```python
-@app.system("filesystem", api="/api/filesystem")
-class FileSystem:
-    device: str
-    mount: str
-    size: int
-    used: int
-    avail: int
-    usage: float
-
-    @app.model
-    class MountOption:
-        mount: str
-        option: str
-        value: str
-
-    @app.model
-    class IOStat:
-        device: str
-        reads: int
-        writes: int
-        read_bytes: int
-        write_bytes: int
-        time: str
-```
-
 ### Reglas de anidación
 
-1. **Un padre puede tener múltiples hijos.** No hay límite.
-2. **Los hijos heredan el prefijo de ruta del padre.** Ej: `/proxy/openai/request`.
-3. **Los hijos heredan la base de datos del padre** (misma DB).
-4. **Un hijo puede tener sus propios decoradores.** Ej: `@app.run`.
-5. **Los hijos pueden tener hijos** (anidación recursiva).
-6. **La ruta completa:** `/{namespace}/{nombre-padre}/{nombre-hijo}`.
+1. **Un padre puede tener múltiples hijos.**
+2. **Los hijos heredan el prefijo de ruta del padre.**
+3. **Los hijos heredan la base de datos del padre.**
+4. **Un hijo puede tener sus propios decoradores** (`@app.run`, etc.).
+5. **Ruta completa:** `/{namespace}/{padre}/{hijo}`.
 
 ---
 
 ## 4. CRUD batch
-
-Múltiples operaciones en una sola petición:
 
 ```http
 POST /api/batch
@@ -315,83 +281,38 @@ Respuesta:
 {
   "results": [
     {"action": "create", "model": "user", "status": 201, "id": 1},
-    {"action": "create", "model": "post", "status": 201, "id": 10},
     {"action": "delete", "model": "category", "status": 204, "id": 5}
   ]
 }
 ```
 
-### Atomicidad
-
-```json
-{"atomic": true, "operations": [...]}
-```
-
-Con `atomic: true`, todo se envuelve en una transacción. Si falla una operación, se revierte todo.
+Atomicidad opcional con `"atomic": true`.
 
 ---
 
 ## 5. Mapeo `fields`
 
-Todos los decoradores soportan `fields` para mapear conceptos a columnas:
-
 ```python
 @app.system("processes",
-    fields={
-        "id": "pid",
-        "status": "status",
-        "cpu": "cpu_percent",
-        "memory": "mem_pct",
-    })
+    fields={"id": "pid", "cpu": "cpu_percent", "memory": "mem_pct"})
 class Process:
     pid: int
-    name: str
     cpu_percent: float
     mem_pct: float
-    status: str
 ```
 
-### Convención por nombre
-
-Si `fields` se omite, el decorador busca por nombre de campo:
-- `id` → busca `id`, `pid`, `uuid`
-- `status` → busca `status`, `state`
-- `cpu` → busca `cpu`, `cpu_percent`, `usage`
-- `time` → busca `time`, `timestamp`, `created_at`, `date`
-
-Si se especifica `fields`, los defaults se sobreescriben.
-
----
-
-## 6. UI: navegación con namespace
-
-```
-/openai
-  request
-  token-usage
-/anthropic
-  request
-  token-usage
-/process
-/mounts
-/connections
-/audit
-/proxy-events
-/errors
-/user
-/post
-/category
-```
-
-Los hijos se muestran indentados. `__NIMBO_CONFIGS__` incluye `parent` y `namespace`
-para que el frontend agrupe correctamente.
+Si `fields` se omite, el decorador busca por convención de nombre:
+- `id` → `id`, `pid`, `uuid`
+- `status` → `status`, `state`
+- `cpu` → `cpu`, `cpu_percent`, `usage`
+- `time` → `time`, `timestamp`, `created_at`, `date`
 
 ---
 
 ## Preguntas abiertas
 
-1. **Profundidad máxima:** ¿2 niveles (padre → hijo) o más?
-2. **FK automática:** ¿El hijo tiene FK al padre automáticamente?
-3. **Transacciones en batch:** ¿`atomic` desde el inicio o después?
-4. **Namespace puro:** ¿`@app.namespace("nombre")` como contenedor sin comportamiento?
-5. **Límite batch:** ¿Cuántas operaciones por petición?
+1. **¿`@app.namespace` puede aplicarse a modelos anidados o solo al nivel raíz?**
+2. **¿Hasta qué profundidad de anidación es útil?**
+3. **FK automática entre padre e hijo?**
+4. **¿`atomic` en batch desde el inicio?**
+5. **¿Límite de operaciones por batch?**
