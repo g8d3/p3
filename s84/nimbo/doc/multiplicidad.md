@@ -72,7 +72,7 @@ class Api:
     # → /perro/post
 ```
 
-Si un hijo tiene su propio `@app.namespace`, lo overridea:
+Si un hijo tiene su propio `@app.namespace`, se concatena al del padre:
 
 ```python
 @app.namespace("perro")
@@ -81,7 +81,22 @@ class Api:
     @app.namespace("gato")
     @app.model
     class User: ...
-    # → /gato/user (no /perro/user)
+    # → /perro/gato/user
+```
+
+Esto crea rutas jerárquicas como un sistema de archivos. Cada nivel agrega un segmento.
+
+```python
+@app.namespace("api")
+class Api:
+
+    @app.namespace("v1")
+    class V1:
+
+        @app.namespace("admin")
+        @app.model
+        class User: ...
+        # → /api/v1/admin/user
 ```
 
 ### Namespace default por decorador
