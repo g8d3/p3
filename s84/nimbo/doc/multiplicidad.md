@@ -1,5 +1,28 @@
 # Multiplicidad y anidación de decoradores
 
+## Filosofía: mínimo esfuerzo, máxima potencia
+
+Cada decorador debe funcionar **con la menor cantidad de parámetros posible**.
+El default debe ser el caso de uso más común. Todo lo demás es configurable,
+pero no obligatorio.
+
+```python
+@app.proxy                      # Sin parámetros = proxy local, mismo puerto
+class Proxy: ...
+
+@app.system                     # Sin parámetros = monitoreo de procesos
+class Process: ...
+
+@app.log                         # Sin parámetros = auditoría básica
+class Log: ...
+
+@app.model                       # Sin parámetros = CRUD completo
+class Task: ...
+```
+
+El desarrollador principiante hace cosas útiles sin leer documentación.
+El desarrollador avanzado afina cada parámetro cuando lo necesita.
+
 ## Problema
 
 Hoy los decoradores son planos y singulares:
@@ -36,6 +59,60 @@ class AnthropicProxy:
     status: str
     ...
 ```
+
+### Proxy sin puerto (misma app)
+
+```python
+@app.proxy("local", upstream="https://api.openai.com")
+class LocalProxy:
+    agent_id: str
+    ...
+```
+
+Sin especificar `port`, el proxy corre **en el mismo puerto que la app**, en una ruta específica:
+
+```
+http://localhost:8080/proxy/   ← intercepta peticiones aquí
+http://localhost:8080/api/     ← CRUD normal
+```
+
+**Ventajas:**
+- Sin puerto extra que abrir en el firewall
+- Sin configuración de red adicional
+- Una sola URL para toda la app
+- El proxy comparte el mismo proceso y event loop
+
+**Desventajas:**
+- El proxy y la app comparten recursos (CPU, memoria)
+- Si el proxy se satura, la app también
+- No se puede escalar el proxy independientemente
+
+### Proxy con puerto separado
+
+```python
+@app.proxy("openai", upstream="https://api.openai.com", port=9098)
+class OpenAIProxy:
+    ...
+```
+
+**Ventajas:**
+- El proxy escala independientemente de la app
+- Se puede poner detrás de un balanceador
+- El proxy no afecta el rendimiento del CRUD
+
+**Desventajas:**
+- Puerto extra que gestionar
+- Posible conflicto con otros servicios
+- Más complejidad de despliegue
+
+### ¿Cuándo usar cada uno?
+
+| Situación | Recomendación |
+|---|---|
+| Desarrollo local, un agente | Misma app (sin puerto) |
+| Producción, varios agentes | Puerto separado |
+| Proxy interno (solo para la app) | Misma app |
+| Proxy público (accesible desde internet) | Puerto separado + auth |
 
 ### ¿Por qué dos proxies?
 
