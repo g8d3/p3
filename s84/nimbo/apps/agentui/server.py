@@ -1,11 +1,9 @@
 import sys
 from pathlib import Path
-
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from nimbo import App
 
-STATIC_DIR = Path(__file__).parent / "static"
-app = App(__name__, static_dir=str(STATIC_DIR), db_url="sqlite:///data/agentui.db")
+app = App(__name__, db_url="sqlite:///data/agentui.db")
 
 
 @app.model
@@ -34,6 +32,22 @@ class Command:
     timeout: int = 30
 
 
+@app.system
+class Process:
+    pid: int
+    name: str
+    cpu_percent: float
+    memory_percent: float
+    status: str
+
+
+@app.log
+class Log:
+    source: str
+    level: str
+    content: str
+    time: str
+
+
 if __name__ == "__main__":
     app.serve(ws_backend="websockets", reload=True)
-

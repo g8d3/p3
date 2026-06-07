@@ -29,39 +29,29 @@
   <script>
     const models = window.__NIMBO_RESOURCES__ || [];
 
-    // ── Configurar modelos especiales ──
-    nimbo.crud.config('process', {
-      api: '/api/system/processes',
-      id: 'pid',
-      fields: [{name:'pid',type:'int'},{name:'name',type:'string'},{name:'cpu_percent',type:'float',label:'CPU%'},{name:'memory_percent',type:'float',label:'MEM%'},{name:'status',type:'string'}],
-      noCreate: true, noEdit: true, refresh: 5000,
-      actions: [
-        { label: '✕', class: 'btn-danger', handler: async (item, btn) => {
+    // ── Config desde decoradores (@app.system, @app.log, @app.run) ──
+    const inj = window.__NIMBO_CONFIGS__ || {};
+    Object.keys(inj).forEach(name => {
+      const cfg = inj[name];
+      if (cfg.actions) {
+        cfg.actions = cfg.actions.map(a => a.handlerTemplate === 'run' ? {
+          label: '▶', class: 'btn-primary', handler: async (item, btn) => {
+            btn.disabled = true;
+            try { const r=await fetch(`/api/${name}/run/${item.id}`,{method:'POST'}); const d=await r.json(); alert('stdout:\n'+(d.stdout||'(none)')+'\nstderr:\n'+(d.stderr||'(none)')); }
+            catch(e) { alert('Error: '+e.message); }
+            btn.disabled = false;
+          }
+        } : a);
+      }
+      if (name === 'process') {
+        (cfg.actions = cfg.actions || []).push({ label: '✕', class: 'btn-danger', handler: async (item, btn) => {
           if (!confirm(`Kill ${item.name} (${item.pid})?`)) return;
           btn.disabled = true;
-          try {
-            await fetch('/api/system/kill/' + item.pid, {method:'POST'});
-            btn.textContent = '✓';
-            if (window.nimbo && window.nimbo.ws) nimbo.ws.send(JSON.stringify({type:'log',data:{level:'info',content:`Killed ${item.name} (${item.pid})`,source:'client'}}));
-          } catch(e) { btn.textContent = '✗'; }
-        }}
-      ]
-    });
-
-    nimbo.crud.config('log', { refresh: 3000, noCreate: true, noEdit: true, fields: [{name:'id',type:'int'},{name:'source',type:'string'},{name:'level',type:'string'},{name:'content',type:'string'},{name:'time',type:'string'}] });
-
-    nimbo.crud.config('command', {
-      actions: [
-        { label: '▶', class: 'btn-primary', handler: async (item, btn) => {
-          btn.disabled = true;
-          try {
-            const r = await fetch('/api/command/run/' + item.id, {method:'POST'});
-            const d = await r.json();
-            alert('stdout:\n' + (d.stdout || '(none)') + '\n\nstderr:\n' + (d.stderr || '(none)'));
-          } catch(e) { alert('Error: ' + e.message); }
-          btn.disabled = false;
-        }}
-      ]
+          try { await fetch('/api/system/kill/' + item.pid, {method:'POST'}); btn.textContent = '✓'; }
+          catch(e) { btn.textContent = '✗'; }
+        }});
+      }
+      nimbo.crud.config(name, cfg);
     });
 
     // ── Model-based routing ──

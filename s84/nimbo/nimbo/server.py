@@ -109,6 +109,24 @@ class App:
         return wrapper
 
     @staticmethod
+    def system(api="/api/system/processes", id="pid", refresh=5):
+        def wrapper(cls):
+            cls.__nimbo_system__ = {"api": api, "id": id, "refresh": refresh}
+            return cls
+        return wrapper
+
+    @staticmethod
+    def log(cls=None):
+        if cls is None:
+            return lambda c: App._setup_log(c)
+        return App._setup_log(cls)
+
+    @staticmethod
+    def _setup_log(cls):
+        cls.__nimbo_log__ = True
+        return cls
+
+    @staticmethod
     def action(name=None):
         def wrapper(method):
             method.__nimbo_action__ = name or method.__name__
@@ -139,7 +157,15 @@ class App:
         self._model_schema[name] = fields
         self._models[name] = cls
         self._model_db[name] = db
-        self._auto_crud(name, db)
+
+        syscfg = getattr(cls, '__nimbo_system__', None)
+        if syscfg:
+            @self.route(f"/api/{name}/schema", methods=["GET"])
+            async def sys_schema(req, _n=name):
+                return {"name": _n, "fields": self._model_schema[_n]}
+        else:
+            self._auto_crud(name, db)
+
         self._register_models_route()
 
         # Auto-generate run action from @app.model(run=...), @app.run, or runnable()
@@ -429,6 +455,23 @@ class App:
                 if self._model_schema:
                     resources_json = json.dumps(self.model_names)
                     scripts.append(f'<script>window.__NIMBO_RESOURCES__={resources_json};</script>')
+                    cfgs = {}
+                    for nm, cls in self._models.items():
+                        cls_obj = cls if isinstance(cls, type) else None
+                        sc = getattr(cls_obj, '__nimbo_system__', None) if cls_obj else None
+                        lc = getattr(cls_obj, '__nimbo_log__', False) if cls_obj else None
+                        rc = getattr(cls_obj, '__nimbo_run__', None) if cls_obj else None
+                        cfg = {}
+                        if sc:
+                            cfg.update({"api": sc["api"], "id": sc["id"], "refresh": sc["refresh"]*1000, "noCreate": True, "noEdit": True, "fields": self._model_schema[nm]})
+                        if lc:
+                            cfg.update({"refresh": 3000, "noCreate": True, "noEdit": True, "fields": self._model_schema[nm]})
+                        if rc:
+                            cfg.setdefault("actions", []).append({"label": "▶", "class": "btn-primary", "handlerTemplate": "run"})
+                        if cfg:
+                            cfgs[nm] = cfg
+                    if cfgs:
+                        scripts.append(f'<script>window.__NIMBO_CONFIGS__={json.dumps(cfgs)};</script>')
                 if getattr(self, '_ws_backend', None) == "websockets" and hasattr(self, '_ws_lib_backend'):
                     ws_port = self._ws_lib_backend.ws_port
                     scripts.append(f'<script>window.__NIMBO_WS_PORT__={ws_port};</script>')
