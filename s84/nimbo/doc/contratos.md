@@ -2,6 +2,22 @@
 
 > Versión inicial. Estos contratos pueden evolucionar.
 
+## Filosofía
+
+El objetivo central del framework es **minimizar la carga cognitiva** del desarrollador.
+Cada decisión de diseño se evalúa contra esta pregunta: *"¿esto hace que el framework sea
+más fácil de recordar y usar, o lo complica?"*
+
+Consecuencias de este principio:
+
+- **Un solo patrón para todo**: la API REST sigue siempre `/api/{model}[/{id}][/acción]`.
+  No hay rutas especiales, no hay excepciones. El desarrollador aprende una regla y aplica
+  a todos los modelos.
+- **Menos imports, menos archivos**: una app cabe en un solo archivo con 30 líneas.
+- **Los decoradores son auto-documentantes**: `@app.system` se lee como "esto es del sistema".
+- **Contratos mínimos**: lo que el frontend necesita saber del backend cabe en dos variables
+  (`__NIMBO_RESOURCES__`, `__NIMBO_CONFIGS__`).
+
 ## 1. Server → Cliente (inyectado en HTML)
 
 ### `window.__NIMBO_RESOURCES__`
