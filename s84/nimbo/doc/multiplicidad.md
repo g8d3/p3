@@ -99,12 +99,12 @@ Cada decorador tiene un namespace default que se usa si no hay `@app.namespace`:
 ### Ejemplos
 
 ```python
-# Default del decorador: /api/
+# Sin namespace: nombre de clase en minúscula
 @app.model
 class Task: ...
-# → /api/task
+# → /task
 
-# Namespace explícito overridea el default
+# Namespace explícito
 @app.namespace("data")
 @app.model
 class Task: ...
@@ -182,7 +182,7 @@ Sin `port`, el proxy corre en la misma app:
 
 ```
 http://localhost:8080/llm/openai/v1/chat  ← tráfico proxy
-http://localhost:8080/api/                 ← CRUD normal
+http://localhost:8080/                     ← CRUD según namespace de cada modelo
 ```
 
 ### Casos de uso del proxy
@@ -302,7 +302,7 @@ Rutas:
 ## 4. CRUD batch
 
 ```http
-POST /api/batch
+POST /batch
 Content-Type: application/json
 
 {
