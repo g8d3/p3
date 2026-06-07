@@ -27,7 +27,7 @@
   <script src="/ws.js"></script>
   <script src="/crud.js"></script>
   <script>
-    const models = (window.__NIMBO_RESOURCES__ || []).filter(m => m !== 'log');
+    const models = window.__NIMBO_RESOURCES__ || [];
 
     // ── Configurar modelos especiales ──
     nimbo.crud.config('process', {
@@ -47,6 +47,8 @@
         }}
       ]
     });
+
+    nimbo.crud.config('log', { refresh: 3000, noCreate: true, noEdit: true, fields: [{name:'id',type:'int'},{name:'source',type:'string'},{name:'level',type:'string'},{name:'content',type:'string'},{name:'time',type:'string'}] });
 
     nimbo.crud.config('command', {
       actions: [
@@ -73,10 +75,6 @@
       if (link) link.classList.add('active');
       history.replaceState(null, '', '#' + name);
 
-      if (name === '__logs__') {
-        renderLogs();
-        return;
-      }
       const el = document.getElementById('app-content');
       el.innerHTML = '<div class="card"><p class="text-muted">Loading...</p></div>';
 
@@ -114,63 +112,7 @@
         a.onclick = (e) => { e.preventDefault(); switchModel(m); };
         nav.appendChild(a);
       });
-      const logsLink = document.createElement('a');
-      logsLink.href = '#logs';
-      logsLink.textContent = 'Logs';
-      logsLink.dataset.model = '__logs__';
-      logsLink.onclick = (e) => { e.preventDefault(); switchModel('__logs__'); };
-      nav.appendChild(logsLink);
-    }
 
-    // ── System stats in nav bar ──
-    async function updateStats() {
-      try {
-        const d = await (await fetch('/api/system/resources')).json();
-        document.getElementById('sys-stats').innerHTML =
-          `<span>CPU <span class="val">${d.cpu}%</span> <span class="mini-bar"><span class="fill" style="width:${d.cpu}%"></span></span></span>` +
-          `<span>RAM <span class="val">${Math.round(d.memory.percent)}%</span> <span class="mini-bar"><span class="fill" style="width:${d.memory.percent}%"></span></span></span>` +
-          `<span>Disk <span class="val">${Math.round(d.disk.percent)}%</span> <span class="mini-bar"><span class="fill" style="width:${d.disk.percent}%"></span></span></span>`;
-      } catch(e) {}
-    }
-
-    // ── Logs ──
-    let logsInit = false;
-    function renderLogs() {
-      const el = document.getElementById('app-content');
-      el.innerHTML = `
-        <div class="card">
-          <div class="flex items-center justify-between mb">
-            <h3>Live Logs</h3>
-            <button class="btn btn-sm" onclick="document.getElementById('log-container').innerHTML=''">Clear</button>
-          </div>
-          <div id="log-container" style="background:var(--bg);padding:12px;border-radius:var(--radius);max-height:70vh;overflow-y:auto;font-family:monospace;font-size:0.8rem"></div>
-        </div>`;
-      if (!logsInit) {
-        logsInit = true;
-        nimbo.ws.on('open', () => {
-          nimbo.ws.send(JSON.stringify({type:'log',data:{level:'info',content:'WS connected',source:'client'}}));
-        });
-        nimbo.ws.on('close', () => {});
-        nimbo.ws.on('log', msg => {
-          const c = document.getElementById('log-container');
-          if (!c || !msg.data) return;
-          const el=document.createElement('div');el.className='log-entry';
-          const t = msg.data.time || new Date().toLocaleTimeString();
-          el.innerHTML=`<span class="log-time">${t}</span><span class="log-level ${msg.data.level||'info'}">${msg.data.level||'info'}</span>${msg.data.content||JSON.stringify(msg.data)}`;
-          c.appendChild(el);c.scrollTop=c.scrollHeight;
-        });
-      }
-      // Load recent logs from DB (persisted events while away)
-      fetch('/api/log/recent').then(r=>r.json()).then(h=>{
-        const c=document.getElementById('log-container');
-        if(!c)return;
-        h.forEach(l=>{
-          if(c.querySelector(`[data-i="${l.id}"]`))return;
-          const el=document.createElement('div');el.className='log-entry';el.dataset.i=l.id;
-          el.innerHTML=`<span class="log-time">${l.time||new Date().toLocaleTimeString()}</span><span class="log-level ${l.level}">${l.level}</span>${l.content}`;
-          c.appendChild(el);c.scrollTop=c.scrollHeight;
-        });
-      }).catch(()=>{});
     }
 
     // ── Init ──
@@ -178,10 +120,8 @@
     nimbo.ws.on('close', () => document.getElementById('ws-status').style.background = '#f85149');
     nimbo.ws.connect();
     buildNav();
-    updateStats();
-    setInterval(updateStats, 5000);
 
-    const initial = location.hash.replace('#', '') || models[0] || '__logs__';
+    const initial = location.hash.replace('#', '') || models[0] || 'log';
     switchModel(initial);
   </script>
 </body>

@@ -168,6 +168,13 @@ class App:
                         shell, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
                     )
                     stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
+                    _name2 = _name
+                    log_db = self._pool.get(self._model_db.get("log", "default"))
+                    if log_db and "log" in self._model_schema:
+                        ts = __import__("time").strftime("%H:%M:%S")
+                        log_db.create("log", {"source": _name2, "level": "info", "content": f"{_name2} #{id} ran", "time": ts})
+                        log_db.engine._conn.execute("DELETE FROM log WHERE id NOT IN (SELECT id FROM log ORDER BY id DESC LIMIT 200)")
+                        log_db.engine._conn.commit()
                     return {"stdout": stdout.decode(errors="replace"), "stderr": stderr.decode(errors="replace"), "returncode": proc.returncode}
                 except asyncio.TimeoutError:
                     try: proc.kill(); await proc.wait()
@@ -204,6 +211,17 @@ class App:
         def _db():
             return self._pool.get(db_name) or self._pool.get("default")
 
+        def _log(level, text):
+            """Write to the log model if it exists (avoid recursion)."""
+            if name == "log":
+                return
+            log_db = self._pool.get(self._model_db.get("log", "default"))
+            if log_db and "log" in self._model_schema:
+                ts = __import__("time").strftime("%H:%M:%S")
+                log_db.create("log", {"source": name, "level": level, "content": text, "time": ts})
+                log_db.engine._conn.execute("DELETE FROM log WHERE id NOT IN (SELECT id FROM log ORDER BY id DESC LIMIT 200)")
+                log_db.engine._conn.commit()
+
         @self.route(f"{base}/schema", methods=["GET"])
         async def get_schema(req):
             return {"name": name, "fields": self._model_schema[name]}
@@ -214,7 +232,9 @@ class App:
 
         @self.route(f"{base}", methods=["POST"])
         async def create_one(req):
-            return _db().create(name, req.json)
+            result = _db().create(name, req.json)
+            _log("info", f"{name} created #{result.get('id','?')}")
+            return result
 
         @self.route(f"{base}/<id>", methods=["GET"])
         async def read_one(req, id):
@@ -228,6 +248,7 @@ class App:
             result = _db().update(name, id, req.json)
             if not result:
                 return Response("", 404)
+            _log("info", f"{name} #{id} updated")
             return result
 
         @self.route(f"{base}/<id>", methods=["DELETE"])
@@ -235,6 +256,7 @@ class App:
             result = _db().delete(name, id)
             if not result:
                 return Response("", 404)
+            _log("warn", f"{name} #{id} deleted")
             return result
 
     @property
