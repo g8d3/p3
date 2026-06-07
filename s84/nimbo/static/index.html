@@ -53,7 +53,7 @@
         { label: '▶', class: 'btn-primary', handler: async (item, btn) => {
           btn.disabled = true;
           try {
-            const r = await fetch('/api/commands/run/' + item.id, {method:'POST'});
+            const r = await fetch('/api/command/run/' + item.id, {method:'POST'});
             const d = await r.json();
             alert('stdout:\n' + (d.stdout || '(none)') + '\n\nstderr:\n' + (d.stderr || '(none)'));
           } catch(e) { alert('Error: ' + e.message); }

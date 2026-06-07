@@ -101,6 +101,13 @@ class App:
         elif len(args) == 2:
             return self._pool.add(args[0], args[1])
 
+    @staticmethod
+    def action(name=None):
+        def wrapper(method):
+            method.__nimbo_action__ = name or method.__name__
+            return method
+        return wrapper
+
     def model(self, cls=None, **kwargs):
         if cls is None:
             def wrapper(c):
@@ -127,6 +134,29 @@ class App:
         self._model_db[name] = db
         self._auto_crud(name, db)
         self._register_models_route()
+
+        # Register action endpoints from decorated methods
+        for attr_name in dir(cls):
+            method = getattr(cls, attr_name)
+            action_name = getattr(method, '__nimbo_action__', None)
+            if action_name:
+                route_path = f"/api/{name}/{action_name}/<id>"
+                @self.route(route_path, methods=["POST"])
+                async def action_handler(req, id, _method=method, _name=name):
+                    db = self._pool.get(self._model_db.get(_name, "default"))
+                    if not db:
+                        return Response("no db", 500)
+                    item = db.read(_name, id)
+                    if not item:
+                        return Response("", 404)
+                    try:
+                        result = _method(item)
+                        if asyncio.iscoroutine(result):
+                            result = await result
+                        return result if result is not None else {"ok": True}
+                    except Exception as e:
+                        return Response({"error": str(e)}, 500)
+
         return cls
 
     def _auto_crud(self, name, db_name="default"):
