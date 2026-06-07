@@ -39,8 +39,11 @@
         { label: '✕', class: 'btn-danger', handler: async (item, btn) => {
           if (!confirm(`Kill ${item.name} (${item.pid})?`)) return;
           btn.disabled = true;
-          try { await fetch('/api/system/kill/' + item.pid, {method:'POST'}); btn.textContent = '✓'; }
-          catch(e) { btn.textContent = '✗'; }
+          try {
+            await fetch('/api/system/kill/' + item.pid, {method:'POST'});
+            btn.textContent = '✓';
+            if (window.nimbo && window.nimbo.ws) nimbo.ws.send(JSON.stringify({type:'log',data:{level:'info',content:`Killed ${item.name} (${item.pid})`,source:'client'}}));
+          } catch(e) { btn.textContent = '✗'; }
         }}
       ]
     });
@@ -144,12 +147,8 @@
         </div>`;
       if (!logsInit) {
         logsInit = true;
-        nimbo.ws.on('open', () => {
-          nimbo.ws.send(JSON.stringify({type:'log',data:{level:'info',content:'WS connected',source:'client'}}));
-        });
-        nimbo.ws.on('close', () => {
-          // Can't send via WS when closed; server doesn't know. That's OK.
-        });
+        nimbo.ws.on('open', () => {});
+        nimbo.ws.on('close', () => {});
         nimbo.ws.on('log', msg => {
           const c = document.getElementById('log-container');
           if (!c || !msg.data) return;

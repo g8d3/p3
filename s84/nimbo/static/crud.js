@@ -260,9 +260,6 @@
     if (cfg.refresh) {
       timer = setInterval(() => {
         load();
-        if (window.nimbo && window.nimbo.ws) {
-          nimbo.ws.send(JSON.stringify({type:'log',data:{level:'info',content:`${resource} refreshed`,source:'client'}}));
-        }
       }, cfg.refresh);
     }
     return () => { if (timer) clearInterval(timer); };
