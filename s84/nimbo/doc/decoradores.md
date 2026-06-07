@@ -12,7 +12,7 @@ No hay lógica procedural en la app. Solo declaración de intenciones.
 |---|---|---|---|---|
 | `@app.model` | Tabla en DB | SQLite (persistente) | crear, leer, actualizar, borrar | Tabla estándar con ±✎✕ |
 | `@app.run("campo")` | Tiene campo ejecutable | mismo que el modelo padre | + ejecutar | Botón ▶ |
-| `@app.system` | Recurso vivo del sistema | API externa (psutil, etc.) | solo lectura, auto-refresh | Tabla sin crear/editar/borrar |
+| `@app.system` | Recurso vivo del sistema | API externa (psutil, etc.) | solo lectura, auto-refresh, kill | Tabla con botón ✕ para matar |
 | `@app.log` | Registro de auditoría | DB (auto-poblado) | solo lectura, auto-refresh | Tabla sin crear/editar/borrar |
 
 ## Reglas de diseño

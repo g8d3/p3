@@ -43,7 +43,7 @@
           }
         } : a);
       }
-      if (name === 'process') {
+      if (cfg.kill) {
         (cfg.actions = cfg.actions || []).push({ label: '✕', class: 'btn-danger', handler: async (item, btn) => {
           if (!confirm(`Kill ${item.name} (${item.pid})?`)) return;
           btn.disabled = true;

@@ -463,7 +463,7 @@ class App:
                         rc = getattr(cls_obj, '__nimbo_run__', None) if cls_obj else None
                         cfg = {}
                         if sc:
-                            cfg.update({"api": sc["api"], "id": sc["id"], "refresh": sc["refresh"]*1000, "noCreate": True, "noEdit": True, "fields": self._model_schema[nm]})
+                            cfg.update({"api": sc["api"], "id": sc["id"], "refresh": sc["refresh"]*1000, "noCreate": True, "noEdit": True, "kill": True, "fields": self._model_schema[nm]})
                         if lc:
                             cfg.update({"refresh": 3000, "noCreate": True, "noEdit": True, "fields": self._model_schema[nm]})
                         if rc:
