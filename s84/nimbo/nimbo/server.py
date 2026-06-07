@@ -102,6 +102,13 @@ class App:
             return self._pool.add(args[0], args[1])
 
     @staticmethod
+    def run(field, **opts):
+        def wrapper(cls):
+            cls.__nimbo_run__ = {"field": field, **opts}
+            return cls
+        return wrapper
+
+    @staticmethod
     def action(name=None):
         def wrapper(method):
             method.__nimbo_action__ = name or method.__name__
@@ -135,11 +142,16 @@ class App:
         self._auto_crud(name, db)
         self._register_models_route()
 
-        # Auto-generate run action if field is specified
+        # Auto-generate run action from @app.model(run=...), @app.run, or runnable()
+        runcfg = getattr(cls, '__nimbo_run__', None)
+        run = run or runcfg.get("field") if runcfg else None
+        if not run:
+            run = getattr(cls, '__nimbo_runnable__', None) and next(iter(cls.__nimbo_runnable__))
         if run:
             route_path = f"/api/{name}/run/<id>"
+            _runcfg = runcfg or (getattr(cls, '__nimbo_runnable__', None) or {}).get(run, {})
             @self.route(route_path, methods=["POST"])
-            async def run_handler(req, id, _run=run, _name=name):
+            async def run_handler(req, id, _run=run, _name=name, _runcfg=_runcfg):
                 db = self._pool.get(self._model_db.get(_name, "default"))
                 if not db:
                     return Response("no db", 500)
@@ -149,7 +161,8 @@ class App:
                 shell = item.get(_run, "")
                 if not shell:
                     return {"stdout": "", "stderr": "no command", "returncode": -1}
-                timeout = item.get("timeout", 30) or 30
+                timeout_field = _runcfg.get("timeout", "timeout") if isinstance(_runcfg, dict) else "timeout"
+                timeout = item.get(timeout_field, 30) or 30
                 try:
                     proc = await asyncio.create_subprocess_shell(
                         shell, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE

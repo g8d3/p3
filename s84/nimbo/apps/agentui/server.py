@@ -25,7 +25,8 @@ class DataSource:
     active: bool = True
 
 
-@app.model(run="shell")
+@app.model
+@app.run("shell", timeout="timeout")
 class Command:
     name: str
     shell: str = ""
@@ -35,3 +36,4 @@ class Command:
 
 if __name__ == "__main__":
     app.serve(ws_backend="websockets", reload=True)
+
