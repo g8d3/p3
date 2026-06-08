@@ -87,6 +87,12 @@ class App:
         self._pool = DBPool()
         self._ws_handlers = {}
         self._restart_count = 0
+        self._namespaces = {}
+        self._ns_registry = {}
+        self._log_models = set()
+        self._proxy_backends = {}
+        self._proxy_configs = {}
+        self._model_redirect = {}
         if db_url:
             self._pool.add("default", db_url)
 
@@ -101,6 +107,75 @@ class App:
         elif len(args) == 2:
             return self._pool.add(args[0], args[1])
 
+    def namespace(self, cls_or_name=None, name=None):
+        if isinstance(cls_or_name, type):
+            # @app.namespace  (without args)
+            return self._register_namespace(cls_or_name, name)
+        # @app.namespace("name")  (with string arg as name)
+        ns = cls_or_name or name
+        return lambda c: self._register_namespace(c, ns)
+
+    def _register_namespace(self, cls, name=None):
+        ns = name or cls.__name__.lower()
+        cls.__nimbo_namespace__ = ns
+        self._namespaces[ns] = cls
+        self._ns_registry[id(cls)] = ns
+        qual_prefix = cls.__qualname__ + '.'
+        to_fix = []
+        for mn, mc in list(self._models.items()):
+            qn = getattr(mc, '__qualname__', '')
+            if qn.startswith(qual_prefix):
+                to_fix.append((mn, mc))
+        for old_name, mc in to_fix:
+            base = getattr(mc, '__nimbo_base_name__', old_name.split('/')[-1])
+            full_ns = self._resolve_namespace_prefix(mc) or ns
+            new_name = f"{full_ns}/{base}"
+            # If old_name != new_name, rename model resources
+            if old_name != new_name:
+                self._model_schema[new_name] = self._model_schema.pop(old_name)
+                self._models[new_name] = self._models.pop(old_name)
+                self._model_db[new_name] = self._model_db.pop(old_name)
+                mc.__nimbo_full_name__ = new_name
+                # Update all redirects that pointed to old_name to point to new_name
+                for k, v in list(self._model_redirect.items()):
+                    if v == old_name:
+                        self._model_redirect[k] = new_name
+                self._model_redirect[old_name] = new_name
+                old_prefix = self._route_base(old_name)
+                new_prefix = f"/{new_name}"
+                self._routes[:] = [
+                    (p.replace(old_prefix, new_prefix, 1), m, h)
+                    if p.startswith(old_prefix) else (p, m, h)
+                    for (p, m, h) in self._routes
+                ]
+        return cls
+
+    def _resolve_namespace_prefix(self, cls):
+        qualname = getattr(cls, '__qualname__', cls.__name__)
+        parts = qualname.split('.')
+        if len(parts) <= 1:
+            return ""
+        # Find registered namespace classes by matching qualname parts
+        prefixes = []
+        for ns_name, ns_cls in self._namespaces.items():
+            ns_qual = getattr(ns_cls, '__qualname__', ns_cls.__name__)
+            if qualname.startswith(ns_qual + '.'):
+                prefixes.append(ns_name)
+        # Sort by qualname depth to get correct order
+        prefixes.sort(key=lambda ns: self._namespaces[ns].__qualname__.count('.') if hasattr(self._namespaces[ns], '__qualname__') else 0)
+        if not prefixes:
+            return ""
+        # Reconstruct full prefix path in qualname order
+        result_parts = []
+        for ns_name, ns_cls in sorted(
+            self._namespaces.items(),
+            key=lambda kv: (getattr(kv[1], '__qualname__', kv[1].__name__).count('.'), kv[0])
+        ):
+            ns_qual = getattr(ns_cls, '__qualname__', ns_cls.__name__)
+            if qualname.startswith(ns_qual + '.'):
+                result_parts.append(ns_name)
+        return '/'.join(result_parts)
+
     @staticmethod
     def run(field, **opts):
         def wrapper(cls):
@@ -108,32 +183,141 @@ class App:
             return cls
         return wrapper
 
-    def system(self, cls=None, api=None, id="pid", refresh=5, kill=True):
-        if cls is None:
-            def wrapper(c):
-                self._register_system(c, api=api, id=id, refresh=refresh, kill=kill)
-                return c
-            return wrapper
-        self._register_system(cls, api=api, id=id, refresh=refresh, kill=kill)
-        return cls
+    def system(self, cls_or_src=None, api=None, id="pid", refresh=5, kill=True):
+        if cls_or_src is None:
+            # @app.system  (no args, no class)
+            return lambda c: self._register_system(c, api=api, id=id, refresh=refresh, kill=kill)
+        if isinstance(cls_or_src, type):
+            # @app.system  (with class, no parens)
+            return self._register_system(cls_or_src, api=api, id=id, refresh=refresh, kill=kill)
+        # @app.system("mount")  (with string source arg)
+        src = cls_or_src
+        return lambda c: self._register_system(c, api=src or api, id=id, refresh=refresh, kill=kill)
 
     def _register_system(self, cls, api=None, id="pid", refresh=5, kill=True):
-        cls.__nimbo_system__ = {"api": api, "id": id, "refresh": refresh, "kill": kill}
-        self._register_model(cls)
+        from .system import infer_source, SYSTEM_SOURCES
+        source = api or infer_source(cls)
+        default_fields = SYSTEM_SOURCES.get(source, [])
+        user_fields = []
+        for attr, typ in cls.__annotations__.items():
+            if attr.startswith("_"):
+                continue
+            default = getattr(cls, attr, None)
+            ftype = "string"
+            if typ is int: ftype = "int"
+            elif typ is float: ftype = "float"
+            elif typ is bool: ftype = "bool"
+            user_fields.append({"name": attr, "type": ftype, "default": default})
+        merged = {f["name"]: f for f in default_fields}
+        for f in user_fields:
+            if f["name"] not in merged:
+                merged[f["name"]] = f
+        cls.__nimbo_system__ = {"api": source, "id": id, "refresh": refresh, "kill": kill if source == "process" else False}
+        cls.__annotations__ = {}
+        self._register_model(cls, table=source, fields=list(merged.values()))
 
-    @staticmethod
-    def log(cls=None):
+    def proxy(self, cls=None, port=None, upstream=None, api_key=None, api_key_env=None, discovery=None):
         if cls is None:
-            return lambda c: App._setup_log(c)
-        return App._setup_log(cls)
+            return lambda c: self._register_proxy(c, port=port, upstream=upstream, api_key=api_key, api_key_env=api_key_env, discovery=discovery)
+        return self._register_proxy(cls, port=port, upstream=upstream, api_key=api_key, api_key_env=api_key_env, discovery=discovery)
 
-    @staticmethod
-    def _setup_log(cls):
+    def _register_proxy(self, cls, port=None, upstream=None, api_key=None, api_key_env=None, discovery=None):
+        from .proxy import infer_provider, PROXY_DEFAULT_FIELDS, KNOWN_PROVIDERS
+
+        base_name = cls.__name__.lower()
+        provider = infer_provider(base_name)
+
+        resolved_upstream = upstream
+        if not resolved_upstream and provider:
+            resolved_upstream = KNOWN_PROVIDERS[provider]["upstream"]
+
+        resolved_api_key_env = api_key_env
+        if not resolved_api_key_env and provider:
+            resolved_api_key_env = KNOWN_PROVIDERS[provider]["api_key_env"]
+
+        user_fields = []
+        for attr, typ in cls.__annotations__.items():
+            if attr.startswith("_"):
+                continue
+            default = getattr(cls, attr, None)
+            ftype = "string"
+            if typ is int: ftype = "int"
+            elif typ is float: ftype = "float"
+            elif typ is bool: ftype = "bool"
+            user_fields.append({"name": attr, "type": ftype, "default": default})
+
+        merged = {f["name"]: f for f in PROXY_DEFAULT_FIELDS}
+        for f in user_fields:
+            if f["name"] not in merged:
+                merged[f["name"]] = f
+
+        cls.__nimbo_proxy__ = True
+        # Act as namespace so nested models inherit route prefix
+        self._register_namespace(cls, base_name)
+        self._proxy_configs[base_name] = {
+            "cls": cls,
+            "port": port,
+            "upstream": resolved_upstream,
+            "api_key": api_key,
+            "api_key_env": resolved_api_key_env,
+            "discovery": discovery,
+            "provider": provider,
+            "fields": list(merged.values()),
+        }
+
+        self._register_model(cls, table=base_name, fields=list(merged.values()))
+        # Register agent list route at /{proxy_name} (without /api/ prefix)
+        @self.route(f"/{base_name}", methods=["GET"])
+        async def proxy_agent_list(req, _pn=base_name):
+            db = self._pool.get(self._model_db.get(_pn, "default"))
+            if db:
+                return db.list(_pn.split('/')[-1])
+            return []
+        return cls
+
+
+
+    def log(self, cls=None):
+        if cls is None:
+            return lambda c: self._register_log(c)
+        return self._register_log(cls)
+
+    def _register_log(self, cls):
         cls.__nimbo_log__ = True
+        base_name = cls.__name__.lower()
+        ns_prefix = self._resolve_namespace_prefix(cls)
+        model_name = f"{ns_prefix}/{base_name}" if ns_prefix else base_name
+        route = self._route_base(model_name)
+
+        log_fields = []
+        for attr, typ in cls.__annotations__.items():
+            if attr.startswith("_"):
+                continue
+            default = getattr(cls, attr, None)
+            ftype = "string"
+            if typ is int: ftype = "int"
+            elif typ is float: ftype = "float"
+            elif typ is bool: ftype = "bool"
+            log_fields.append({"name": attr, "type": ftype, "default": default})
+
+        if not log_fields:
+            log_fields = [{"name": "source", "type": "string", "default": ""},
+                          {"name": "level", "type": "string", "default": "info"},
+                          {"name": "content", "type": "string", "default": ""},
+                          {"name": "time", "type": "string", "default": ""}]
+
+        self._model_schema[model_name] = log_fields
+        self._models[model_name] = cls
+        self._model_db[model_name] = "default"
+        self._log_models.add(model_name)
+        self._auto_crud(model_name, route, tbl=base_name, db_name="default")
         return cls
 
     @staticmethod
     def action(name=None):
+        if callable(name):
+            name.__nimbo_action__ = name.__name__
+            return name
         def wrapper(method):
             method.__nimbo_action__ = name or method.__name__
             return method
@@ -146,8 +330,34 @@ class App:
             return wrapper
         return self._register_model(cls, **kwargs)
 
+    def _resolve_model_name(self, name):
+        seen = set()
+        while name in self._model_redirect and name not in seen:
+            seen.add(name)
+            name = self._model_redirect[name]
+        return name
+
+    def _route_base(self, model_name):
+        """Build the route prefix for a model.
+        Namespaced models: /{namespace}/{model}
+        Non-namespaced:   /api/{model}
+        """
+        if '/' in model_name:
+            return f"/{model_name}"
+        return f"/api/{model_name}"
+
     def _register_model(self, cls, table=None, fields=None, db="default", run=None):
-        name = table or cls.__name__.lower()
+        base_name = table or cls.__name__.lower()
+        ns_prefix = self._resolve_namespace_prefix(cls)
+        qual = getattr(cls, '__qualname__', cls.__name__)
+        if table:
+            model_name = base_name
+        elif ns_prefix:
+            model_name = f"{ns_prefix}/{base_name}"
+        else:
+            model_name = qual.replace('.', '_').replace('<', '').replace('>', '').lower()  # temp key to avoid collisions
+        cls.__nimbo_temp_key__ = model_name
+        cls.__nimbo_base_name__ = base_name
         if fields is None:
             fields = []
             for attr, typ in cls.__annotations__.items():
@@ -160,34 +370,37 @@ class App:
                 elif typ is bool: ftype = "bool"
                 fields.append({"name": attr, "type": ftype, "default": default})
 
-        self._model_schema[name] = fields
-        self._models[name] = cls
-        self._model_db[name] = db
+        self._model_schema[model_name] = fields
+        self._models[model_name] = cls
+        self._model_db[model_name] = db
+
+        route = self._route_base(model_name)
 
         syscfg = getattr(cls, '__nimbo_system__', None)
         if syscfg:
-            @self.route(f"/api/{name}/schema", methods=["GET"])
-            async def sys_schema(req, _n=name):
-                return {"name": _n, "fields": self._model_schema[_n]}
+            @self.route(f"{route}/schema", methods=["GET"])
+            async def sys_schema(req, _n=model_name):
+                mn = self._resolve_model_name(_n)
+                return {"name": mn, "fields": self._model_schema[mn]}
         else:
-            self._auto_crud(name, db)
+            self._auto_crud(model_name, route, base_name, db)
 
         self._register_models_route()
 
-        # Auto-generate run action from @app.model(run=...), @app.run, or runnable()
         runcfg = getattr(cls, '__nimbo_run__', None)
-        run = run or runcfg.get("field") if runcfg else None
+        if runcfg:
+            run = run or runcfg.get("field")
         if not run:
             run = getattr(cls, '__nimbo_runnable__', None) and next(iter(cls.__nimbo_runnable__))
         if run:
-            route_path = f"/api/{name}/run/<id>"
+            route_path = f"{route}/run/<id>"
             _runcfg = runcfg or (getattr(cls, '__nimbo_runnable__', None) or {}).get(run, {})
             @self.route(route_path, methods=["POST"])
-            async def run_handler(req, id, _run=run, _name=name, _runcfg=_runcfg):
-                db = self._pool.get(self._model_db.get(_name, "default"))
+            async def run_handler(req, id, _run=run, _mn=model_name, _runcfg=_runcfg):
+                db = self._pool.get(self._model_db.get(_mn, "default"))
                 if not db:
                     return Response("no db", 500)
-                item = db.read(_name, id)
+                item = db.read(_mn.split('/')[-1], id)
                 if not item:
                     return Response("", 404)
                 shell = item.get(_run, "")
@@ -200,31 +413,34 @@ class App:
                         shell, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
                     )
                     stdout, stderr = await asyncio.wait_for(proc.communicate(), timeout=timeout)
-                    _name2 = _name
-                    log_db = self._pool.get(self._model_db.get("log", "default"))
-                    if log_db and "log" in self._model_schema:
-                        ts = __import__("time").strftime("%H:%M:%S")
-                        log_db.create("log", {"source": _name2, "level": "info", "content": f"{_name2} #{id} ran", "time": ts})
-                        log_db.engine._conn.execute("DELETE FROM log WHERE id NOT IN (SELECT id FROM log ORDER BY id DESC LIMIT 200)")
-                        log_db.engine._conn.commit()
+                    for log_name in self._log_models:
+                        log_schema = self._model_schema.get(log_name, [])
+                        log_fields = {f["name"] for f in log_schema}
+                        if not {"source", "level", "content", "time"}.issubset(log_fields):
+                            continue
+                        log_db = self._pool.get(self._model_db.get(log_name, "default"))
+                        if log_db:
+                            ts = __import__("time").strftime("%H:%M:%S")
+                            log_db.create(log_name.split('/')[-1], {"source": _mn, "level": "info", "content": f"{_mn} #{id} ran", "time": ts})
+                            log_db.engine._conn.execute(f"DELETE FROM {log_name.split('/')[-1]} WHERE id NOT IN (SELECT id FROM {log_name.split('/')[-1]} ORDER BY id DESC LIMIT 200)")
+                            log_db.engine._conn.commit()
                     return {"stdout": stdout.decode(errors="replace"), "stderr": stderr.decode(errors="replace"), "returncode": proc.returncode}
                 except asyncio.TimeoutError:
                     try: proc.kill(); await proc.wait()
                     except: pass
                     return {"stdout": "", "stderr": "Timed out", "returncode": -1}
 
-        # Register action endpoints from decorated methods
         for attr_name in dir(cls):
             method = getattr(cls, attr_name)
             action_name = getattr(method, '__nimbo_action__', None)
             if action_name:
-                route_path = f"/api/{name}/{action_name}/<id>"
+                route_path = f"{route}/{action_name}/<id>"
                 @self.route(route_path, methods=["POST"])
-                async def action_handler(req, id, _method=method, _name=name):
-                    db = self._pool.get(self._model_db.get(_name, "default"))
+                async def action_handler(req, id, _method=method, _mn=model_name):
+                    db = self._pool.get(self._model_db.get(_mn, "default"))
                     if not db:
                         return Response("no db", 500)
-                    item = db.read(_name, id)
+                    item = db.read(_mn.split('/')[-1], id)
                     if not item:
                         return Response("", 404)
                     try:
@@ -237,34 +453,46 @@ class App:
 
         return cls
 
-    def _auto_crud(self, name, db_name="default"):
-        base = f"/api/{name}"
+    def _auto_crud(self, model_name, route, tbl=None, db_name="default"):
+        if tbl is None:
+            tbl = model_name.split('/')[-1]
 
         def _db():
             return self._pool.get(db_name) or self._pool.get("default")
 
         def _log(level, text):
-            """Write to the log model if it exists (avoid recursion)."""
-            if name == "log":
+            if tbl == "log":
                 return
-            log_db = self._pool.get(self._model_db.get("log", "default"))
-            if log_db and "log" in self._model_schema:
-                ts = __import__("time").strftime("%H:%M:%S")
-                log_db.create("log", {"source": name, "level": level, "content": text, "time": ts})
-                log_db.engine._conn.execute("DELETE FROM log WHERE id NOT IN (SELECT id FROM log ORDER BY id DESC LIMIT 200)")
-                log_db.engine._conn.commit()
+            for log_name in self._log_models:
+                log_schema = self._model_schema.get(log_name, [])
+                log_fields = {f["name"] for f in log_schema}
+                if not {"source", "level", "content", "time"}.issubset(log_fields):
+                    continue
+                log_db = self._pool.get(self._model_db.get(log_name, "default"))
+                if log_db:
+                    ts = __import__("time").strftime("%H:%M:%S")
+                    log_db.create(log_name.split('/')[-1], {"source": model_name, "level": level, "content": text, "time": ts})
+                    log_db.engine._conn.execute(f"DELETE FROM {log_name.split('/')[-1]} WHERE id NOT IN (SELECT id FROM {log_name.split('/')[-1]} ORDER BY id DESC LIMIT 200)")
+                    log_db.engine._conn.commit()
 
-        @self.route(f"{base}/schema", methods=["GET"])
-        async def get_schema(req):
-            return {"name": name, "fields": self._model_schema[name]}
+        @self.route(f"{route}/schema", methods=["GET"])
+        async def get_schema(req, _mn=model_name):
+            mn = self._resolve_model_name(_mn)
+            return {"name": mn, "fields": self._model_schema[mn]}
 
-        @self.route(f"{base}", methods=["GET"])
+        @self.route(route, methods=["GET"])
         async def list_all(req):
-            result = _db().list(name)
+            result = _db().list(tbl)
             raw_limit = req.query.get("limit", [None])[0]
             if raw_limit is not None:
                 try:
                     result = result[:int(raw_limit)]
+                except (ValueError, TypeError):
+                    pass
+            raw_offset = req.query.get("offset", [None])[0]
+            if raw_offset is not None:
+                try:
+                    result = result[int(raw_offset):]
                 except (ValueError, TypeError):
                     pass
             raw_sort = req.query.get("sort", [None])[0]
@@ -275,7 +503,6 @@ class App:
                     result = sorted(result, key=lambda x: (x.get(field) or 0), reverse=desc)
                 except Exception:
                     pass
-            # Filter by field=value for any field
             for key, vals in req.query.items():
                 if key in ("limit", "offset", "sort"):
                     continue
@@ -283,33 +510,33 @@ class App:
                     result = [r for r in result if r.get(key) == vals[0]]
             return result
 
-        @self.route(f"{base}", methods=["POST"])
+        @self.route(route, methods=["POST"])
         async def create_one(req):
-            result = _db().create(name, req.json)
-            _log("info", f"{name} created #{result.get('id','?')}")
+            result = _db().create(tbl, req.json)
+            _log("info", f"{model_name} created #{result.get('id','?')}")
             return result
 
-        @self.route(f"{base}/<id>", methods=["GET"])
+        @self.route(f"{route}/<id>", methods=["GET"])
         async def read_one(req, id):
-            result = _db().read(name, id)
+            result = _db().read(tbl, id)
             if not result:
                 return Response("", 404)
             return result
 
-        @self.route(f"{base}/<id>", methods=["PUT"])
+        @self.route(f"{route}/<id>", methods=["PUT"])
         async def update_one(req, id):
-            result = _db().update(name, id, req.json)
+            result = _db().update(tbl, id, req.json)
             if not result:
                 return Response("", 404)
-            _log("info", f"{name} #{id} updated")
+            _log("info", f"{model_name} #{id} updated")
             return result
 
-        @self.route(f"{base}/<id>", methods=["DELETE"])
+        @self.route(f"{route}/<id>", methods=["DELETE"])
         async def delete_one(req, id):
-            result = _db().delete(name, id)
+            result = _db().delete(tbl, id)
             if not result:
                 return Response("", 404)
-            _log("warn", f"{name} #{id} deleted")
+            _log("warn", f"{model_name} #{id} deleted")
             return result
 
     @property
@@ -337,6 +564,70 @@ class App:
             self._ws_handlers[topic] = handler
             return handler
         return wrapper
+
+    async def _forward_proxy(self, method, path, headers, body, pname, pcfg):
+        upstream = pcfg.get("upstream")
+        if not upstream:
+            return Response("no upstream configured", 502)
+        api_key = None
+        if pcfg.get("api_key"):
+            api_key = pcfg["api_key"]
+        elif pcfg.get("api_key_env"):
+            api_key = os.environ.get(pcfg["api_key_env"])
+        if not api_key:
+            env_var = f"{pcfg['cls'].__name__.upper()}_API_KEY"
+            api_key = os.environ.get(env_var)
+        import aiohttp
+        try:
+            async with aiohttp.ClientSession() as session:
+                upstream_path = path[len(pname) + 2:]
+                upstream_url = upstream.rstrip("/") + "/" + upstream_path.lstrip("/")
+                req_headers = {k: v for k, v in headers.items()
+                               if k.lower() not in ("host", "content-length", "transfer-encoding")}
+                if api_key:
+                    auth_header = "Authorization"
+                    if "openai" in upstream.lower():
+                        req_headers[auth_header] = f"Bearer {api_key}"
+                    elif "anthropic" in upstream.lower():
+                        req_headers["x-api-key"] = api_key
+                    else:
+                        req_headers[auth_header] = f"Bearer {api_key}"
+                async with session.request(
+                    method, upstream_url,
+                    headers=req_headers,
+                    data=body if method in ("POST", "PUT") else None,
+                    timeout=aiohttp.ClientTimeout(total=120),
+                ) as resp:
+                    resp_body = await resp.read()
+                    resp_headers = dict(resp.headers)
+                    # Mark agents as active if present
+                    agent_id = resp_headers.get("x-agent-id", "unknown")
+                    ph = self._proxy_backends.get(pname)
+                    if ph and hasattr(ph, "_agents") and agent_id in ph._agents:
+                        ph._agents[agent_id]["last_active"] = __import__("time").time()
+                        ph._agents[agent_id]["status"] = "active"
+                    # Log the call
+                    for log_name in self._log_models:
+                        log_schema = self._model_schema.get(log_name, [])
+                        log_fields = {f["name"] for f in log_schema}
+                        if not {"source", "level", "content", "time"}.issubset(log_fields):
+                            continue
+                        log_db = self._pool.get(self._model_db.get(log_name, "default"))
+                        if log_db:
+                            ts = __import__("time").strftime("%H:%M:%S")
+                            log_db.create(log_name.split('/')[-1], {
+                                "source": pname, "level": "info",
+                                "content": f"{method} {upstream_path} → {resp.status}",
+                                "time": ts,
+                            })
+                            log_db.engine._conn.execute(
+                                f"DELETE FROM {log_name.split('/')[-1]} WHERE id NOT IN (SELECT id FROM {log_name.split('/')[-1]} ORDER BY id DESC LIMIT 200)"
+                            )
+                            log_db.engine._conn.commit()
+                    ctype = resp_headers.get("content-type", "application/octet-stream")
+                    return Response(resp_body, status=resp.status, content_type=ctype)
+        except Exception as e:
+            return Response({"error": f"proxy error: {str(e)}"}, 502)
 
     def _match_route(self, method, path):
         for route_path, methods, handler in self._routes:
@@ -446,7 +737,14 @@ class App:
                     traceback.print_exc()
                     resp = Response({"error": str(e)}, 500)
             else:
-                resp = await self._serve_static(path)
+                # Try proxy forwarding for inline proxies
+                resp = None
+                for pname, pcfg in self._proxy_configs.items():
+                    if not pcfg.get("port") and path.startswith(f"/{pname}/"):
+                        resp = await self._forward_proxy(method, path, headers, body, pname, pcfg)
+                        break
+                if resp is None:
+                    resp = await self._serve_static(path)
 
             writer.write(resp.to_bytes())
             await writer.drain()
@@ -480,7 +778,7 @@ class App:
             if path == "/index.html":
                 scripts = []
                 if self._model_schema:
-                    resources_json = json.dumps(self.model_names)
+                    resources_json = json.dumps([n.split('/')[-1] for n in self.model_names])
                     scripts.append(f'<script>window.__NIMBO_RESOURCES__={resources_json};</script>')
                     cfgs = {}
                     for nm, cls in self._models.items():
@@ -488,16 +786,22 @@ class App:
                         sc = getattr(cls_obj, '__nimbo_system__', None) if cls_obj else None
                         lc = getattr(cls_obj, '__nimbo_log__', False) if cls_obj else None
                         rc = getattr(cls_obj, '__nimbo_run__', None) if cls_obj else None
+                        pc = getattr(cls_obj, '__nimbo_proxy__', None) if cls_obj else None
+                        route = self._route_base(nm)
+                        res_name = nm.split('/')[-1]
                         cfg = {}
                         if sc:
-                            api = sc.get("api") or f"/api/{nm}"
-                            cfg.update({"api": api, "id": sc["id"], "refresh": sc["refresh"]*1000, "noCreate": True, "noEdit": True, "kill": sc.get("kill", True), "fields": self._model_schema[nm]})
-                        if lc:
-                            cfg.update({"refresh": 3000, "noCreate": True, "noEdit": True, "fields": self._model_schema[nm]})
+                            cfg.update({"api": route, "id": sc["id"], "refresh": sc["refresh"]*1000, "noCreate": True, "noEdit": True, "kill": sc.get("kill", True)})
+                        elif lc:
+                            cfg.update({"api": route, "refresh": 3000, "noCreate": True, "noEdit": True})
+                        elif pc:
+                            cfg.update({"api": route, "refresh": 10000, "noCreate": True, "noEdit": True})
+                        else:
+                            cfg.update({"api": route})
                         if rc:
                             cfg.setdefault("actions", []).append({"label": "▶", "class": "btn-primary", "handlerTemplate": "run"})
-                        if cfg:
-                            cfgs[nm] = cfg
+                        cfg["fields"] = self._model_schema[nm]
+                        cfgs[res_name] = cfg
                     if cfgs:
                         scripts.append(f'<script>window.__NIMBO_CONFIGS__={json.dumps(cfgs)};</script>')
                 if getattr(self, '_ws_backend', None) == "websockets" and hasattr(self, '_ws_lib_backend'):
@@ -629,7 +933,8 @@ class App:
 
         by_db = {}
         for mname, db_name in self._model_db.items():
-            by_db.setdefault(db_name, {})[mname] = self._model_schema[mname]
+            tbl = mname.split('/')[-1]
+            by_db.setdefault(db_name, {})[tbl] = self._model_schema[mname]
         if by_db:
             self._pool.migrate_all(by_db)
 
@@ -649,6 +954,23 @@ class App:
                 self._ws_lib_backend = bk
                 ws_port = await bk.start(host, port)
                 print(f"nimbo  WS {host}:{ws_port} (websockets)")
+
+            # Start proxy backends
+            for pname, pcfg in self._proxy_configs.items():
+                proxy_port = pcfg.get("port")
+                if proxy_port:
+                    from .proxy import ProxyBackend
+                    pb = ProxyBackend(self, pcfg, pname)
+                    self._proxy_backends[pname] = pb
+                    await pb.start(host, proxy_port)
+                    print(f"nimbo  PROXY {pname} {host}:{proxy_port}")
+                else:
+                    from .proxy import ProxyInlineHandler
+                    handler = ProxyInlineHandler(self, pcfg, pname)
+                    self._proxy_backends[pname] = handler
+                    asyncio.create_task(handler.start_discovery())
+                    print(f"nimbo  PROXY {pname} (inline)")
+
             self._server_instance = await asyncio.start_server(
                 self._handle_http, host, port
             )
@@ -660,5 +982,7 @@ class App:
             asyncio.run(start())
         except KeyboardInterrupt:
             self._pool.close_all()
+            for pb in self._proxy_backends.values():
+                asyncio.run(pb.close())
             if hasattr(self, '_ws_lib_backend'):
                 asyncio.run(self._ws_lib_backend.close())

@@ -37,7 +37,7 @@
         cfg.actions = cfg.actions.map(a => a.handlerTemplate === 'run' ? {
           label: '▶', class: 'btn-primary', handler: async (item, btn) => {
             btn.disabled = true;
-            try { const r=await fetch(`/api/${name}/run/${item.id}`,{method:'POST'}); const d=await r.json(); alert('stdout:\n'+(d.stdout||'(none)')+'\nstderr:\n'+(d.stderr||'(none)')); }
+            try { const r=await fetch(`${cfg.api}/run/${item.id}`,{method:'POST'}); const d=await r.json(); alert('stdout:\n'+(d.stdout||'(none)')+'\nstderr:\n'+(d.stderr||'(none)')); }
             catch(e) { alert('Error: '+e.message); }
             btn.disabled = false;
           }
@@ -47,7 +47,7 @@
         (cfg.actions = cfg.actions || []).push({ label: '✕', class: 'btn-danger', handler: async (item, btn) => {
           if (!confirm(`Kill ${item.name} (${item.pid})?`)) return;
           btn.disabled = true;
-          try { await fetch('/api/process/' + item.pid, {method:'DELETE'}); btn.textContent = '✓'; }
+          try { await fetch(`${cfg.api}/${item.pid}`, {method:'DELETE'}); btn.textContent = '✓'; }
           catch(e) { btn.textContent = '✗'; }
         }});
       }
@@ -70,7 +70,7 @@
 
       const cfg = nimbo.crud.configs ? nimbo.crud.configs[name] : null;
       const hasInlineFields = cfg && cfg.fields;
-      const schemaPromise = hasInlineFields ? Promise.resolve({fields: cfg.fields}) : fetch(`/api/${name}/schema`).then(r => r.json());
+      const schemaPromise = hasInlineFields ? Promise.resolve({fields: cfg.fields}) : fetch(`${cfg ? cfg.api : '/api/' + name}/schema`).then(r => r.json());
       const statsPromise = name === 'process' ? fetch('/api/resources').then(r => r.json()) : null;
 
       Promise.all([schemaPromise, statsPromise].filter(Boolean)).then(([schema, stats]) => {

@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.2.0 — 2026-06-08
+
+Implementación de features documentadas en manifiesto v2.
+
+### Framework core
+- `@app.namespace`: contenedor jerárquico de rutas (`/api/user`, `/api/v1/user`)
+- `@app.proxy`: proxy reverso para LLMs con registry de proveedores (OpenAI, Anthropic, OpenCode)
+- `@app.system` multi-fuente: process, mount, network, service, user
+- `@app.log` con múltiples instancias (cada una es una tabla independiente)
+- Namespace inheritance: modelos anidados heredan prefijo de ruta del padre
+- Provider registry: upstream y api_key inferidos del nombre de clase
+- Discovery de agentes vía psutil para proxy
+- Soporte para `@app.namespace("nombre")` con nombre personalizado
+
+### Documentación
+- `doc/v2/manifiesto.md` — fuente única de verdad para diseño v2
+
 ## 0.1.0 — 2026-06-06
 
 Primera versión estable. Framework funcional con app base agentui.
