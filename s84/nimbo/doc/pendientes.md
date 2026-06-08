@@ -1,101 +1,182 @@
 # Pendientes y mejoras
 
-> Documento de ideas, bugs y mejoras. No todos serán implementados.
+> Documento de ideas, bugs y mejoras. Checklist para un framework web completo.
 
-## 1. Depurar backend WebSocket nativo
+---
 
-**Contexto**: el backend nativo (0 deps, implementación manual RFC 6455)
-funciona correctamente en pruebas desde Python (envía pong, mantiene conexión),
-pero el navegador reporta el círculo rojo (WS no conectado).
+## Checklist de features para un framework web
 
-**Objetivo**: encontrar el patrón que permita evitar este tipo de errores
-en el futuro. No se trata solo de arreglar el bug puntual, sino de
-establecer una práctica que prevenga errores similares.
+| Feature | Estado | Prioridad |
+|---|---|---|
+| CRUD automático | ✅ Implementado | — |
+| WebSocket | ✅ Implementado (2 backends) | — |
+| Hot reload | ✅ Implementado | — |
+| Auto-logging de operaciones | ✅ Implementado | — |
+| Monitoreo de sistema | ✅ Implementado | — |
+| Proxy para LLM | 📐 Diseñado | Alta |
+| Namespaces y rutas jerárquicas | 📐 Diseñado | Alta |
+| Multiplicidad de modelos | 📐 Diseñado | Alta |
+| Inferencia (DB → código) | ❌ Pendiente | Media |
+| Marketplace de templates | ❌ Pendiente | Media |
+| Migraciones de DB | ❌ Pendiente | Alta |
+| Background jobs | ❌ Pendiente | Media |
+| Autenticación (login, tokens) | ❌ Pendiente | Alta |
+| Autorización (roles, permisos) | ❌ Pendiente | Media |
+| Row Level Security | ❌ Pendiente | Baja |
+| Observabilidad (métricas, tracing) | ❌ Pendiente | Media |
+| Tests automatizados | ❌ Pendiente | Alta |
+| CLI (`nimbo create`, `nimbo apply`) | ❌ Pendiente | Media |
+| README y onboarding | ❌ Pendiente | Alta |
+| Linter y formato | ❌ Pendiente | Media |
 
-**Preguntas abiertas**:
-- ¿Es un error en el frame encoding/decoding?
-- ¿Es un problema de timing (onopen vs onclose)?
-- ¿Es un error de manejo de conexiones concurrentes?
-- ¿El navegador recibe el frame de handshake pero no puede completar la conexión?
+---
 
-**Para implementar**: un test que compare byte a byte las respuestas del
-backend nativo vs el de la librería ante el mismo handshake.
+## 1. Inferencia (DB → código Python)
 
-**Lección esperada**: implementar protocolos de red desde cero tiene un alto
-costo de debugging. La decisión de hacerlo intercambiable (poder cambiar
-entre implementación nativa y librería) fue la correcta porque permitió
-comparar comportamientos.
+Comando que lee una base de datos existente y genera `server.py` con los modelos.
 
-## 2. Propagación de errores del cliente al servidor
-
-El framework necesita un mecanismo para que los errores del navegador
-lleguen al servidor automáticamente.
-
-**Idea de implementación**:
-- Interceptar `window.onerror` y `window.onunhandledrejection`
-- Enviar los errores por WebSocket al servidor con un tipo específico
-- Alternativa: endpoint `POST /api/log-error`
-- El servidor los muestra en consola y los guarda en un modelo `ErrorLog`
-
-## 3. Actualizaciones parciales (no refrescar todo)
-
-Las pantallas de dashboard y procesos reemplazan `innerHTML` completo,
-lo que causa:
-- Scroll al inicio de la página
-- Pérdida de estado de inputs
-- Imposibilidad de interactuar durante la actualización
-
-**Solución propuesta**: actualizar solo los valores que cambian:
-
-```javascript
-// En vez de:
-el.innerHTML = `<div>...completo...</div>`
-
-// Hacer:
-document.getElementById('cpu-value').textContent = data.cpu + '%'
-document.getElementById('ram-bar').style.width = data.memory.percent + '%'
+```bash
+nimbo infer sqlite:///data.db       # genera server.py
+nimbo infer postgresql://...        # genera server.py
 ```
 
-## 4. Barra de navegación desbordada en móvil
+Generaría:
 
-La barra de pestañas (nav) se sale del ancho de la pantalla en móvil.
+```python
+from nimbo import App
+app = App(__name__, db_url="sqlite:///data.db")
 
-**Solución**: hacer el contenedor scrolleable horizontalmente:
+@app.model
+class User:
+    name: str
+    email: str
+    created_at: str
 
-```css
-.app-nav {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
+@app.model
+class Post:
+    title: str
+    body: str
+    user_id: int
+    ...
+
+app.serve()
 ```
 
-## 5. Multi-DB: conexiones a múltiples servidores
+**Abierto:** ¿el archivo generado es la fuente de verdad o la DB? Hoy el código Python es la fuente. La inferencia solo acelera la escritura inicial.
 
-Ya implementado (`app.db("nombre", "url")` + `@app.model(db="nombre")`).
-Pendiente de probar con diferentes motores (SQLite + PostgreSQL simultáneos).
+---
+
+## 2. Marketplace de templates
+
+Repositorio de plantillas de modelos que se aplican con un comando:
+
+```bash
+nimbo apply blog           # agrega User, Post, Comment
+nimbo apply monitor        # agrega Process, Mount, Connection, Log
+nimbo apply openai-proxy   # agrega OpenAI proxy con Request, TokenUsage
+```
+
+Cada template es código Python explícito que se copia al proyecto.
+El usuario puede modificar el código después de aplicarlo.
+
+**Abierto:** ¿repositorio centralizado (GitHub) o local? ¿Quién mantiene los templates?
+
+---
+
+## 3. Migraciones de base de datos
+
+Hoy el framework crea tablas con `CREATE TABLE IF NOT EXISTS`. No hay migraciones.
+
+Necesario para:
+
+- Agregar columnas a tablas existentes
+- Cambiar tipos de datos
+- Renombrar tablas/campos
+- Eliminar columnas
+
+**Idea inicial:** migraciones automáticas detectando diferencias entre el schema del modelo y la tabla real. Rails-style `db/migrate/`.
+
+**Abierto:** ¿migraciones implícitas (detectar diff y aplicar) o explícitas (generar archivos de migración)?
+
+---
+
+## 4. Background jobs
+
+Tareas asíncronas que corren en segundo plano dentro del mismo proceso.
+
+```python
+@app.job(every="5m")
+def check_health():
+    ...
+
+@app.job(cron="0 * * * *")
+def hourly_report():
+    ...
+```
+
+Sin Redis ni workers externos — usan `asyncio` dentro del event loop del servidor.
+
+**Abierto:** ¿persistencia de jobs? ¿Reintentos? ¿Cola de mensajes?
+
+---
+
+## 5. Autenticación
+
+Mecanismo básico de login:
+
+```python
+@app.auth
+class User:
+    username: str
+    password: str    # hasheada automáticamente
+```
+
+Genera: `POST /login`, `POST /logout`, `GET /me`. Protege rutas con decorador `@app.require_auth`.
+
+---
 
 ## 6. Browser APIs bridge
 
-`@app.browser_api("dictation")` está definido en el servidor pero aún no
-se auto-expone al JavaScript. Falta:
-- Que genere automáticamente el endpoint JS
-- Que el cliente pueda llamarlo como `nimbo.api.dictation(text)`
+`@app.browser_api("dictation")` definido en servidor pero no expuesto al JS.
+
+Falta:
+- Que genere automáticamente `nimbo.api.dictation(text)`
 - Soporte para: dictado, geolocalización, cámara, micrófono, notificaciones
 
-## 7. Autenticación y autorización
+---
 
-No hay sistema de usuarios ni tokens. Para una app de administración
-del servidor, es necesario al menos un mecanismo básico.
+## 7. Depurar backend WebSocket nativo
 
-## 8. Template de app `agentui`
+El backend nativo (0 deps) no funciona en navegador. El de la librería `websockets` sí.
 
-La app de ejemplo (`apps/agentui/`) debería ser un template que se pueda
-clonar para empezar proyectos nuevos rápidamente.
+**Pendiente:** encontrar el bug del nativo o descartarlo como opción.
 
-## 9. Comando `nimbo create`
+---
 
-Un comando CLI que cree la estructura de un proyecto nuevo:
+## 8. Propagación de errores del cliente al servidor
+
+Interceptar `window.onerror` y `window.onunhandledrejection` y enviarlos
+al servidor por WebSocket.
+
+---
+
+## 9. Multi-DB con diferentes motores
+
+`app.db("nombre", "url")` soporta SQLite. PostgreSQL planeado via `asyncpg`.
+
+---
+
+## 10. Comando `nimbo create`
 
 ```bash
-python -m nimbo create mi-app
+nimbo create mi-app        # crea estructura de proyecto
+nimbo create mi-app --db postgresql    # con PostgreSQL
 ```
+
+---
+
+## Bugs conocidos
+
+- WS nativo no funciona en navegador (usar `ws_backend="websockets"`)
+- Sin paginación visual en tabla CRUD (API soporta `?limit=` pero UI no lo expone)
+- Sin tests
