@@ -235,12 +235,11 @@ class CustomProxy: ...
 
 | Parámetro | Default | Descripción |
 |---|---|---|
-| `upstream` | inferido del nombre de clase | URL base del proveedor LLM |
 | `port` | `None` (misma app) | Puerto separado para el proxy |
-| `discovery` | `"process"` | `"process"` (psutil) o `"header"` (X-Agent-ID) |
-| `discovery_filter` | `"tmux"` | Filtro para discovery por proceso |
+| `upstream` | inferido del nombre de clase | URL base del proveedor LLM |
 | `api_key` | `None` | API key directa (literal en código) |
 | `api_key_env` | `None` | Variable de entorno con la API key |
+| `discovery` | función por defecto | Función que descubre agentes. Sin parámetro = psutil + whitelist |
 
 **Resolución de api_key (primero que se encuentre):**
 1. `api_key` si se pasó como literal
@@ -255,12 +254,40 @@ class CustomProxy: ...
 | `Anthropic` | `https://api.anthropic.com` | `ANTHROPIC_API_KEY` |
 | `OpenCode` | `https://opencode.ai/go/v1` | `OPENCODE_API_KEY` |
 
+**Discovery y naming de agentes:**
+
+El parámetro `discovery` acepta una función o se omite para usar la default:
+
+```python
+@app.proxy                           # discovery por defecto
+class OpenAI: ...
+
+@app.proxy(discovery=mi_funcion)      # personalizado
+class OpenAI: ...
+```
+
+La función por defecto:
+1. Ejecuta `psutil.process_iter()` y filtra por una whitelist interna: `["tmux", "opencode", "python3", "crush"]`
+2. Para cada proceso encontrado, extrae: nombre (del proceso o ventana tmux), PID, CPU, memoria
+3. Devuelve `[{agent_id, pid, cpu, mem_pct, window}, ...]`
+4. `agent_id` se genera como `"{nombre-proceso}-{pid}"`
+
+Si el usuario necesita extender la default, la importa:
+
+```python
+from nimbo.discovery import default_discovery
+
+def mi_funcion():
+    agentes = default_discovery()
+    return [a for a in agentes if a["cpu"] > 0]
+```
+
 **Campos por defecto (clase vacía):** `agent_id: str`, `status: str`, `pid: int`, `cpu: float`, `mem_pct: float`, `window: str`, `last_active: float`.
 
 **Comportamiento:**
-1. Intercepta peticiones y reenvía al upstream
-2. Descubre agentes vía psutil o header
-3. Marca agente como **activo** mientras su petición está en curso; **idle** en cuanto se envía la respuesta. Sin timeout — el ciclo petición → upstream → respuesta define el estado.
+1. Intercepta peticiones HTTP y reenvía al upstream
+2. Descubre agentes periódicamente vía la función `discovery`
+3. Marca agente como **activo** mientras su petición está en curso; **idle** en cuanto se envía la respuesta
 4. Registra cada llamada en el modelo `Log`
 5. Expone agentes vía CRUD: `GET /{ruta}` lista agentes
 
