@@ -361,7 +361,7 @@ class App:
         if fields is None:
             fields = []
             for attr, typ in cls.__annotations__.items():
-                if attr.startswith("_"):
+                if attr.startswith("_") or attr == "id":
                     continue
                 default = getattr(cls, attr, None)
                 ftype = "string"

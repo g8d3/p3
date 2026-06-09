@@ -1,0 +1,31 @@
+{
+  "resources": {
+    "timestamp": "2026-06-09T22:14:38.790924+00:00",
+    "uptime_seconds": 1251.55,
+    "level_1_survival": {
+      "status": "ok",
+      "api_keys": {
+        "OPENCODE_GO_API_KEY": true,
+        "OPENAI_API_KEY": true,
+        "ANTHROPIC_API_KEY": false
+      },
+      "has_any_inference": true,
+      "disk_free_gb": 72.67,
+      "disk_critical": false,
+      "disk_warning": false,
+      "db_healthy": true
+    },
+    "level_2_stability": {
+      "status": "ok",
+      "temp_free_gb": 7.52,
+      "python_version": "3.12.3",
+      "hanging_ops": 0
+    },
+    "level_4_purpose": {
+      "pending_tasks": 2
+    }
+  },
+  "needs": [],
+  "critical_count": 0,
+  "summary": "\u2705 Todo estable por ahora.\n\n\ud83d\udcca DB: 2 tareas pendientes"
+}

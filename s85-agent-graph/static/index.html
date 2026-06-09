@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>agent-graph</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: ui-monospace, monospace; background: #0d1117; color: #c9d1d9; padding: 12px; font-size: 13px; }
+  @media (min-width:768px) { body { padding: 20px; } }
+  h1 { font-size: 1.1rem; color: #58a6ff; display: inline; }
+  .sub { color: #8b949e; font-size: 0.75rem; display: block; margin-bottom: 10px; }
+  .tabs { display: flex; gap: 4px; margin: 10px 0; overflow-x: auto; }
+  .tab { padding: 8px 12px; background: #161b22; border: 1px solid #30363d; border-radius: 6px 6px 0 0; cursor: pointer; font-size: 0.8rem; color: #8b949e; white-space: nowrap; }
+  .tab.active { background: #1c2a4a; color: #58a6ff; border-color: #58a6ff; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 6px; margin-bottom: 10px; }
+  @media (min-width:768px) { .grid { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); } }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 8px 10px; }
+  .card .num { font-size: 1.3rem; font-weight: 600; color: #58a6ff; }
+  .card .label { font-size: 0.65rem; color: #8b949e; }
+
+  .two-col { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width:768px) { .two-col { grid-template-columns: 1fr 1fr; } }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+  @media (min-width:768px) { table { font-size: 0.78rem; } }
+  th { text-align: left; color: #8b949e; padding: 4px 6px; border-bottom: 1px solid #30363d; font-weight: 600; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.3px; position: sticky; top: 0; background: #0d1117; z-index: 1; }
+  td { padding: 4px 6px; border-bottom: 1px solid #21262d; word-break: break-word; }
+
+  .badge { display: inline-block; padding: 1px 6px; border-radius: 8px; font-size: 0.6rem; font-weight: 500; }
+  .badge-ok { background: #1b3a2d; color: #3fb950; }
+  .badge-warn { background: #3d2e00; color: #d29922; }
+  .badge-critical { background: #3d1111; color: #f85149; }
+
+  input, button { background: #21262d; border: 1px solid #30363d; color: #c9d1d9; padding: 8px; border-radius: 4px; font-size: 0.78rem; font-family: inherit; }
+  button { cursor: pointer; background: #1f6feb; border-color: #1f6feb; color: #fff; }
+  button.danger { background: #da3633; border-color: #da3633; }
+  form { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+  form input { flex: 1; min-width: 100px; }
+
+  #graph-canvas { width: 100%; height: calc(100vh - 250px); min-height: 300px; max-height: 700px; border: 1px solid #30363d; border-radius: 6px; background: #0d1117; display: block; }
+  #detail { margin-top: 8px; background: #161b22; border: 1px solid #30363d; border-radius: 6px; padding: 10px; font-size: 0.75rem; max-height: 180px; overflow-y: auto; }
+  .ops-bar { display: flex; gap: 2px; flex-wrap: wrap; margin: 4px 0; }
+  .ops-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-ok { background: #3fb950; }
+  .dot-timeout, .dot-error { background: #f85149; }
+  .dot-fail { background: #d29922; }
+  .alive { color: #3fb950; } .dead { color: #f85149; }
+  .mono { font-size: 0.7rem; }
+  .section-title { font-size: 0.8rem; color: #8b949e; margin: 12px 0 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .scroll-x { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+<h1>☰ agent-graph</h1>
+<span class="sub" id="status-line">cargando...</span>
+
+<div class="tabs">
+  <div class="tab active" data-tab="dashboard">📊 dashboard</div>
+  <div class="tab" data-tab="graph">🕸 grafo</div>
+  <div class="tab" data-tab="control">🎮 control</div>
+</div>
+
+<div id="p-dashboard" class="panel active">
+  <div class="grid" id="stats-grid"></div>
+  <div class="two-col">
+    <div>
+      <div class="section-title">⏳ tareas pendientes</div>
+      <div id="tasks"><div class="card mono">cargando...</div></div>
+      <div class="section-title">📋 actividad reciente</div>
+      <div style="max-height:220px;overflow-y:auto" id="log-container">
+        <table><thead><tr><th>agente</th><th>accion</th><th>resultado</th><th>fecha</th></tr></thead>
+        <tbody id="log-body"></tbody></table>
+      </div>
+    </div>
+    <div>
+      <div class="section-title">⚠️ necesidades</div>
+      <div id="needs"></div>
+      <div class="section-title">🤖 operadores activos</div>
+      <div id="operators"></div>
+      <div class="section-title">📈 evolucion del grafo</div>
+      <div id="timeline" style="height:40px;background:#161b22;border:1px solid #30363d;border-radius:6px;position:relative"></div>
+      <div style="margin-top:4px;font-size:0.7rem;color:#8b949e" id="node-count-label">0 nodos totales</div>
+    </div>
+  </div>
+</div>
+
+<div id="p-graph" class="panel">
+  <div id="graph-canvas" style="position:relative">
+    <div id="legend" style="position:absolute;top:8px;right:8px;background:#161b22;border:1px solid #30363d;border-radius:6px;padding:6px 10px;font-size:0.65rem;z-index:10;pointer-events:none">
+      <div id="legend-items"></div>
+    </div>
+  </div>
+  <div id="detail">🖱 Toca un nodo para ver detalles</div>
+</div>
+
+<div id="p-control" class="panel">
+  <div class="card" style="max-width:500px">
+    <form id="add-task-form">
+      <input name="name" placeholder="nombre tarea" required>
+      <input name="props" placeholder='{"tipo":"ejemplo"}'>
+      <button type="submit">+ tarea</button>
+    </form>
+    <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px">
+      <button onclick="runWorker()">▶ worker</button>
+      <button class="danger" onclick="killHanging()">✕ colgadas</button>
+    </div>
+    <div id="control-result" class="mono" style="margin-top:6px;color:#8b949e"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.30.4/cytoscape.min.js"></script>
+<script>
+const API = '';
+let network = null, graphData = null, selectedNode = null;
+
+async function get(p) { const r=await fetch(API+p); return r.json(); }
+async function post(p,b={}) { const r=await fetch(API+p,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}); return r.json(); }
+function $(id){return document.getElementById(id)}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+function fmtTime(s){const m=Math.floor(s/60),h=Math.floor(m/60);return h?`${h}h ${m%60}m`:m?`${m}m ${(s%60).toFixed(0)}s`:`${s.toFixed(0)}s`}
+
+// Tabs
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+  t.classList.add('active');
+  $(`p-${t.dataset.tab}`).classList.add('active');
+  if(t.dataset.tab==='graph') setTimeout(renderCytoscape,500);
+}));
+
+// Controls
+document.getElementById('add-task-form').addEventListener('submit',async e=>{
+  e.preventDefault();const fd=new FormData(e.target);
+  await post('/api/control/add-task',{name:fd.get('name'),properties:JSON.parse(fd.get('props')||'{}')});
+  showResult('✔ tarea creada');e.target.reset();renderDashboard();
+});
+async function runWorker(){showResult('▶ lanzado...');const r=await post('/api/control/run-worker');showResult(r.ok?`✔ worker (exit=${r.exit})`:'✘ error');renderDashboard();}
+async function killHanging(){showResult('✕ ok');renderDashboard();}
+function showResult(m){const e=$('control-result');e.textContent=m;setTimeout(()=>e.textContent='',4000);}
+
+const COLORS={agent:'#bc8cff',project:'#58a6ff',task:'#d29922',goal:'#3fb950',artifact:'#8b949e',error:'#f85149',health_check:'#1f6feb',question:'#f0883e',lesson:'#3fb950',skill:'#58a6ff',decision:'#bc8cff',default:'#8b949e'};
+function nc(t){return COLORS[t]||COLORS.default}
+
+function renderDashboard(){
+  Promise.all([get('/api/health'),get('/api/tasks'),get('/api/needs'),get('/api/log'),get('/api/operators'),get('/api/stats'),get('/api/timeline'),get('/api/processes')])
+  .then(([h,t,n,l,ops,s,tl,procs])=>{
+    $('status-line').innerHTML=`<span class="${h.daemon_alive?'alive':'dead'}">●</span> daemon ${h.daemon_alive?'vivo':'muerto'} · ${s.nodes} nodos · ${s.edges} aristas · ${h.heartbeat?.cycle||0} ciclos`;
+    $('stats-grid').innerHTML=[
+      {n:s.nodes,l:'nodos'},{n:s.edges,l:'aristas'},{n:t.length,l:'pendientes'},
+      {n:(s.nodes_by_type?.project||0),l:'proyectos'},{n:(s.nodes_by_type?.agent||0),l:'agentes'},
+      {n:(s.nodes_by_type?.error||0),l:'errores'},
+    ].map(c=>`<div class="card"><div class="num">${c.n}</div><div class="label">${c.l}</div></div>`).join('');
+    $('tasks').innerHTML=!t.length?'<div class="card mono" style="color:#8b949e">(sin tareas)</div>'
+      :'<div class="scroll-x"><table><thead><tr><th>tipo</th><th>nombre</th></tr></thead><tbody>'
+        +t.map(x=>`<tr><td><span class="badge badge-${x.type}">${x.type}</span></td><td>${esc(x.name)}</td></tr>`).join('')+'</tbody></table></div>';
+    $('needs').innerHTML=!n.needs?.length?'<div class="card mono" style="color:#8b949e">(sin necesidades)</div>'
+      :'<div class="scroll-x"><table><thead><tr><th>prioridad</th><th>recurso</th><th>mensaje</th><th>fecha</th></tr></thead><tbody>'
+        +n.needs.map(x=>`<tr><td><span class="badge badge-${x.priority}">${x.priority}</span></td><td>${esc(x.resource)}</td><td>${esc(x.message)}</td><td class="mono" style="color:#8b949e;white-space:nowrap">${(x.created_at||'').slice(0,19)}</td></tr>`).join('')
+        +'</tbody></table></div>';
+    $('operators').innerHTML=!ops.length?'<div class="card mono" style="color:#8b949e">(sin operadores activos)</div>'
+      :'<div class="scroll-x"><table><thead><tr><th>nombre</th><th>tipo</th><th>pid</th><th>tiempo</th><th>tarea</th><th>estado</th><th>atascado</th><th>accion</th></tr></thead><tbody>'
+        +ops.map(x=>{
+          const stuck=x.stuck;
+          const statusBadge=x.status==='stuck'?'critical':x.status==='running'?'ok':'warn';
+          const um=x.unstuck_method||(x.type==='conversational'?'enviar mensaje':x.type==='watchdog'?'SIGTERM':'SIGKILL');
+          return `<tr${stuck?' style="background:#3d1111;"':''}>
+            <td style="font-weight:600">${esc(x.name)}${x.name==='opencode-agent'?' 🤖':''}</td>
+            <td class="mono">${esc(x.type)}</td>
+            <td class="mono" style="color:#8b949e">${x.pid||'-'}</td>
+            <td class="mono" style="color:#8b949e;white-space:nowrap">${x.uptime_s?fmtTime(x.uptime_s):'-'}</td>
+            <td>${esc(x.task||'')}</td>
+            <td><span class="badge badge-${statusBadge}">${x.status}</span></td>
+            <td>${stuck?'🔴 '+esc(x.stuck_reason||'atascado'):'🟢'}</td>
+            <td>${x.pid?`<button class="unstuck-btn" data-pid="${x.pid}" data-type="${x.type}" style="font-size:0.65rem;padding:2px 6px;background:#da3633">destrabar</button><span class="mono" style="color:#8b949e;font-size:0.6rem;display:block">${esc(um)}</span>`:'-'}</td>
+          </tr>`;
+        }).join('')
+        +'</tbody></table></div>';
+    // Unstuck buttons
+    document.querySelectorAll('.unstuck-btn').forEach(b=>b.addEventListener('click',async()=>{
+      const pid=b.dataset.pid,type=b.dataset.type;
+      b.textContent='...';b.disabled=true;
+      const r=await post('/api/control/unstuck',{pid,agent_type:type});
+      b.textContent=r.ok?'✔ '+r.method:'✘ error';
+      setTimeout(()=>renderDashboard(),3000);
+    }));
+    $('log-body').innerHTML=!l.length?'<tr><td colspan="4" style="color:#8b949e">(sin actividad)</td></tr>'
+      :l.slice(0,15).map(x=>`<tr><td style="color:#8b949e">${esc(x.agent_id)}</td><td>${esc(x.action)}</td><td><span class="badge badge-${x.result==='ok'?'ok':'warn'}">${x.result}</span></td><td class="mono" style="color:#8b949e;white-space:nowrap">${(x.created_at||'').slice(0,19)}</td></tr>`).join('');
+    if(tl.points?.length>1){
+      const m=Math.max(...tl.points.map(p=>p.nodes),1);
+      $('timeline').innerHTML=tl.points.map((p,i)=>`<div style="position:absolute;bottom:0;left:${i*100/tl.points.length}%;width:${100/tl.points.length}%;height:${(p.nodes/m)*100}%;background:#58a6ff;opacity:0.6;border-radius:1px 1px 0 0" title="${p.nodes} nodos"></div>`).join('');
+      $('node-count-label').textContent=`${tl.current} nodos totales · ${tl.points.length} mediciones`;
+    }else{$('timeline').innerHTML='';$('node-count-label').textContent=`${tl.current||0} nodos totales`}
+  // Processes watch
+  const procsArr = Array.isArray(procs) ? procs.slice(0,20) : [];
+  let pdiv = document.getElementById('processes-table');
+  if(!pdiv){pdiv=document.createElement('div');pdiv.id='processes-table';$('p-dashboard').appendChild(pdiv);}
+  pdiv.innerHTML = '<div class="section-title">🔍 procesos activos</div>' +
+    (!procsArr.length ? '<div class="card mono" style="color:#8b949e">(sin datos)</div>'
+    : '<div class="scroll-x" style="max-height:200px;overflow-y:auto"><table><thead><tr><th>pid</th><th>cmd</th><th>tiempo</th></tr></thead><tbody>'
+    + procsArr.map(p => `<tr>
+        <td class="mono" style="color:#8b949e">${p.pid}</td>
+        <td>${esc(p.cmd)}</td>
+        <td class="mono" style="color:#8b949e">${p.etime}</td>
+      </tr>`).join('') + '</tbody></table></div>');
+}).catch(e=>$('status-line').textContent='error: '+e.message);
+}
+
+// ── Canvas force-directed graph (0 dependencies) ──
+
+function renderCytoscape(){
+  const el=$('graph-canvas');
+  if(!el){setTimeout(renderCytoscape,200);return}
+  if(network){network.destroy();network=null}
+  el.innerHTML='';
+  get('/api/graph').then(d=>{
+    if(!d.nodes||!d.nodes.length){el.innerHTML='<p style="padding:40px;color:#8b949e;text-align:center">sin datos</p>';return}
+    graphData=d;
+    const cy=(network=cytoscape({
+      container:el,
+      elements:{
+        nodes:d.nodes.map(n=>({data:{id:n.id,label:n.name.length>14?n.name.slice(0,11)+'…':n.name,type:n.type,orig:n}})),
+        edges:d.edges.map(e=>({data:{id:e.id||e.source_id+'-'+e.target_id,source:e.source_id,target:e.target_id,type:e.type}}))
+      },
+      style:[
+        {selector:'node',style:{
+          'background-color':n=>nc(n.data('type')),'label':n=>n.data('label'),
+          'color':'#c9d1d9','font-size':'9px','text-valign':'bottom','text-halign':'center',
+          'width':n=>n.data('type')==='agent'?20:n.data('type')==='project'?16:12,
+          'height':n=>n.data('type')==='agent'?20:n.data('type')==='project'?16:12,
+          'border-width':0,
+        }},
+        {selector:'edge',style:{
+          'line-color':'#30363d','width':0.5,'curve-style':'haystack',
+          'target-arrow-color':'#30363d','target-arrow-shape':'triangle',
+        }},
+        {selector:':selected',style:{'border-width':2,'border-color':'#fff','background-color':'#58a6ff'}}
+      ],
+      layout:{name:'concentric',concentric:function(n){return n.data('type')==='agent'?4:n.data('type')==='project'?3:n.data('type')==='goal'?2:n.data('type')==='task'?1.5:1},levelWidth:function(){return 2},padding:30,animate:false},
+      wheelSensitivity:0.3,
+    }));
+    cy.on('tap','node',function(ev){
+      const n=ev.target.data('orig');
+      selectedNode=n.id;
+      const out=graphData.edges.filter(e=>e.source_id===n.id);
+      const inn=graphData.edges.filter(e=>e.target_id===n.id);
+      $('detail').innerHTML=`<div style="font-weight:600">${esc(n.name)} <span class="badge badge-${n.type}">${n.type}</span></div>
+        <div class="mono" style="color:#8b949e;margin:2px 0">${n.id.slice(0,16)} · ${(n.created_at||'').slice(0,10)} · ${n.agent_id||'-'}</div>
+        ${out.map(e=>{const t=graphData.nodes.find(x=>x.id===e.target_id);return `<div style="font-size:0.7rem">→ ${e.type} → ${t?esc(t.name):''}</div>`}).join('')}
+        ${inn.map(e=>{const s=graphData.nodes.find(x=>x.id===e.source_id);return `<div style="font-size:0.7rem">← ${e.type} ← ${s?esc(s.name):''}</div>`}).join('')}`;
+    });
+    cy.on('tap',function(ev){if(ev.target===cy){selectedNode=null;$('detail').textContent=`🖱 Toca un nodo · ${d.nodes.length} nodos, ${d.edges.length} aristas`}});
+    $('detail').textContent=`🖱 Toca un nodo · ${d.nodes.length} nodos, ${d.edges.length} aristas`;
+    // Legend
+    const typeCount={};d.nodes.forEach(n=>{typeCount[n.type]=(typeCount[n.type]||0)+1});
+    $('legend-items').innerHTML=Object.keys(COLORS).filter(t=>t!=='default'&&typeCount[t]).map(t=>
+      `<div style="display:flex;align-items:center;gap:4px;margin:2px 0"><span style="width:8px;height:8px;border-radius:50%;background:${COLORS[t]};display:inline-block"></span>${t} (${typeCount[t]})</div>`
+    ).join('');
+  }).catch(e=>{el.innerHTML='<p style="padding:40px;color:#f85149;text-align:center">error: '+e.message+'</p>'});
+}
+
+renderDashboard();
+setInterval(renderDashboard,4000);
+</script>
+</body>
+</html>
