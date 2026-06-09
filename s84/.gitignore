@@ -6,3 +6,5 @@ __pycache__/
 workdir/
 .crush/
 .opencode/
+*.db-shm
+*.db-wal
