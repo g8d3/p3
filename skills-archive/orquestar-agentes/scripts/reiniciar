@@ -1,0 +1,20 @@
+#!/bin/bash
+# reiniciar <N>
+# Kills Crush in agent windows and reopens them (same tmux window, new Crush process)
+
+n=${1:-1}
+busdir="/tmp/agent-bus"
+
+for i in $(seq 1 "$n"); do
+  # Send Ctrl+C to cancel anything running, then Ctrl+D to quit Crush
+  tmux send-keys -t "a$i" C-c
+  sleep 0.3
+  tmux send-keys -t "a$i" C-d
+  sleep 0.5
+
+  # Clear the pane and restart Crush
+  tmux send-keys -t "a$i" "crush --yolo" Enter
+  echo "🔄 a$i reiniciado"
+done
+
+echo "✅ $n agente(s) reiniciado(s)."

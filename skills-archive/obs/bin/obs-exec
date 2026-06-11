@@ -1,0 +1,69 @@
+#!/usr/bin/env python3
+"""obs-exec: Send any command to OBS WebSocket.
+
+Usage:
+  obs-exec GetSceneList
+  obs-exec SetCurrentProgramScene '{"sceneName": "Escena 1"}'
+  obs-exec GetSourceActive '{"sourceName": "Video Capturer"}'
+
+Output: JSON with requestStatus and responseData.
+"""
+import sys, json, asyncio, os
+
+# Self-contained: resolve our bin dir for other obs-* commands
+os.environ["PATH"] = os.path.dirname(os.path.abspath(__file__)) + ":" + os.environ.get("PATH", "")
+
+# simpleobsws uses msgpack + websockets (async)
+sys.path.insert(0, os.path.expanduser("~/.local/lib/python3.12/site-packages"))
+import simpleobsws
+
+PASSWORD = "SFT16WlCaNoupRwt"
+PORT = 4455
+TIMEOUT = 10
+
+async def main():
+    if len(sys.argv) < 2:
+        print("Usage: obs-exec <requestType> [requestData_json]", file=sys.stderr)
+        sys.exit(1)
+    
+    request_type = sys.argv[1]
+    request_data = None
+    if len(sys.argv) >= 3:
+        request_data = json.loads(sys.argv[2])
+    
+    ws = simpleobsws.WebSocketClient(
+        url=f"ws://localhost:{PORT}",
+        password=PASSWORD
+    )
+    
+    try:
+        await ws.connect()
+        identified = await ws.wait_until_identified(timeout=TIMEOUT)
+        if not identified:
+            print("ERROR: Could not identify with OBS WebSocket", file=sys.stderr)
+            sys.exit(1)
+        
+        resp = await ws.call(simpleobsws.Request(request_type, request_data), timeout=TIMEOUT)
+        result = {
+            "requestStatus": {
+                "result": resp.requestStatus.result,
+                "code": resp.requestStatus.code,
+            },
+            "responseData": resp.responseData
+        }
+        print(json.dumps(result, indent=2))
+        
+    except simpleobsws.NotIdentifiedError:
+        print("ERROR: OBS WebSocket not available (OBS running?)", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        try:
+            await ws.disconnect()
+        except:
+            pass
+
+if __name__ == "__main__":
+    asyncio.run(main())

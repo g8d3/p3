@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# at-check: Non-blocking check for test results. Optionally waits a few seconds.
+# Usage: at-check <test-dir> [max_wait_seconds]
+#   max_wait_seconds: if >0, poll for up to that long (default 0 = instant check)
+set -euo pipefail
+
+TEST_DIR="${1:?Usage: at-check <test-dir> [max_wait_seconds]}"
+MAX_WAIT="${2:-0}"
+
+RESULT_FILE="$TEST_DIR/result.json"
+PARAMS_FILE="$TEST_DIR/params.json"
+
+[ ! -f "$PARAMS_FILE" ] && { echo "ERROR: params.json not found" >&2; exit 1; }
+
+SPAWN_TIME=$(python3 -c "import json; print(json.load(open('$PARAMS_FILE'))['spawnTime'])" 2>/dev/null || echo "0")
+
+# Poll if max_wait > 0
+if [ "$MAX_WAIT" -gt 0 ] 2>/dev/null; then
+    CHECK_START=$(date +%s.%N)
+    while [ ! -f "$RESULT_FILE" ]; do
+        ELAPSED=$(python3 -c "print(int(( $(date +%s.%N) - $CHECK_START )))" 2>/dev/null || echo 0)
+        if [ "$ELAPSED" -ge "$MAX_WAIT" ]; then
+            break
+        fi
+        sleep 0.5
+    done
+fi
+
+NOW=$(date +%s.%N)
+ELAPSED=$(python3 -c "print(round($NOW - $SPAWN_TIME, 2))" 2>/dev/null || echo "?")
+
+if [ -f "$RESULT_FILE" ]; then
+    echo "▶ Result ready (${ELAPSED}s since spawn):"
+    python3 -c "
+import json
+d = json.load(open('$RESULT_FILE'))
+print(json.dumps(d, indent=2))
+print()
+print(f'  Agent duration: {d.get(\"duration_seconds\", \"?\")}s')
+print(f'  Elapsed since spawn: ${ELAPSED}s')
+print(f'  Details: {d.get(\"details\", \"\")}')
+" 2>/dev/null || cat "$RESULT_FILE"
+else
+    echo "⏳ Not ready yet (${ELAPSED}s since spawn)"
+    echo "   Reintenta: at-check '$TEST_DIR' 10  (espera hasta 10s)"
+fi

@@ -1,0 +1,205 @@
+---
+name: browser
+description: >
+  Browser automation meta-skill. Self-contained: starts Chrome with CDP,
+  connects via Playwright, routes tasks to sub-skills or falls back to
+  LLM-driven execution. Auto-generates new sub-skills on success.
+  Trigger patterns: browser, chrome, web, navigate, create api key,
+  login, scrape, fill form, click, screenshot.
+allowed-tools: Bash
+---
+
+# Browser Meta-Skill — Router de Automatización
+
+Auto-contenida. No depende de otras skills. Todo lo necesario para
+iniciar Chrome, conectar vía CDP, y ejecutar tareas está incluido aquí.
+
+## Arquitectura
+
+```
+~/.agents/skills/browser/
+├── SKILL.md              ← este archivo (meta-skill + router)
+├── cdp.sh                ← script para iniciar Chrome con CDP
+└── sub/                  ← sub-skills especializadas
+    └── create-api-key/   ← crear API keys en servicios web
+        └── SKILL.md
+```
+
+### Ciclo de vida de una sub-skill
+
+```
+Petición del usuario
+    │
+    ▼
+┌─ ¿Existe sub-skill que matchee?
+│   Sí → Ejecutar sub-skill directamente
+│         │
+│         ├─ Éxito → ✅ (rápido, ~segundos)
+│         └─ Fallo → diagnosticar, corregir sub-skill, reintentar
+│
+│   No →
+│       LLM resuelve via CDP (lento, ~minutos, con screenshots)
+│       │
+│       ├─ Éxito → Guardar pasos como sub-skill nueva en sub/
+│       │          → próxima vez: instantáneo
+│       └─ Fallo → diagnosticar, ajustar prompt, reintentar
+│                  → cuando funcione, guardar sub-skill
+```
+
+## 1. Iniciar Chrome con CDP (auto-contenido)
+
+```bash
+# Inicia Chrome con debugging remoto listo para conectar
+start_chrome_cdp() {
+    local port="${1:-9222}"
+    local data_dir="${2:-$HOME/apps/test-dec-2025}"
+    local profile="${3:-Profile 1}"
+
+    # Detectar display real (no confiar en $DISPLAY)
+    local display=""
+    for sock in /tmp/.X11-unix/X*; do
+        [ -e "$sock" ] && display=":${sock##*X}" && break
+    done
+    [ -z "$display" ] && display=":0"
+
+    # Matar Chrome previo y relanzar
+    pkill chrome 2>/dev/null
+    sleep 1
+
+    DISPLAY="$display" google-chrome \
+        --user-data-dir="$data_dir" \
+        --profile-directory="$profile" \
+        --remote-debugging-port="$port" \
+        --disable-features=DownloadRestrictions \
+        --no-first-run \
+        --no-sandbox \
+        &>/tmp/chrome-cdp.log &
+
+    # Esperar a que responda
+    for i in $(seq 1 10); do
+        if curl -s "http://localhost:$port/json/version" >/dev/null 2>&1; then
+            echo "Chrome CDP listo en puerto $port (display $display)"
+            return 0
+        fi
+        sleep 1
+    done
+    echo "ERROR: Chrome no respondió en $port" >&2
+    return 1
+}
+
+# Uso
+start_chrome_cdp
+```
+
+## 2. Verificar conectividad CDP
+
+```bash
+# Información del navegador
+curl -s http://localhost:9222/json/version | jq .
+
+# Pestañas abiertas y sus WebSocket URLs
+curl -s http://localhost:9222/json | jq '.[] | {title, url, webSocketDebuggerUrl}'
+```
+
+## 3. Conectar vía Playwright (helper)
+
+Instalación única:
+```bash
+npm install -g playwright 2>/dev/null || true
+npx playwright install chromium 2>/dev/null || true
+```
+
+Script base de conexión:
+```javascript
+const { chromium } = require('playwright');
+
+async function connect() {
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  // Usar browser.newPage() para nueva pestaña
+  const page = await browser.newPage();
+  return { browser, page };
+}
+```
+
+## 4. Router de sub-skills
+
+El orquestador (opencode) decide qué sub-skill usar basado en el trigger:
+
+```bash
+# Buscar sub-skill que matchee el request
+MATCH=$(ls ~/.agents/skills/browser/sub/*/SKILL.md 2>/dev/null | while read f; do
+    trigger=$(grep '^trigger:' "$f" | sed 's/trigger: *//')
+    echo "$trigger|$f"
+done | grep -iE "$USER_REQUEST" | head -1)
+
+if [ -n "$MATCH" ]; then
+    echo "Usando sub-skill: $(dirname "$MATCH" | xargs basename)"
+    # Cargar y ejecutar sub-skill
+else
+    echo "No hay sub-skill. El LLM resolverá y luego se creará una."
+fi
+```
+
+## 5. Detección de estado de login
+
+Toda sub-skill debe incluir detección de login antes de actuar:
+
+```javascript
+async function detectLogin(page) {
+  const url = page.url().toLowerCase();
+  const body = await page.locator('body').textContent().catch(() => '');
+  const text = body.toLowerCase();
+
+  // Indicadores de NO logueado
+  const needsLogin =
+    url.includes('/login') || url.includes('/signin') || url.includes('/sign-in') ||
+    url.includes('/auth') || url.includes('/log-in') ||
+    /sign.?in|log.?in|log.?out/i.test(text.substring(0, 500));
+
+  // Indicadores de logueado
+  const isLoggedIn =
+    url.includes('/dashboard') || url.includes('/keys') || url.includes('/settings') ||
+    url.includes('/account') || url.includes('/profile') ||
+    /(my )?(api )?keys|account|profile|logout|sign.out/i.test(text.substring(0, 500));
+
+  if (url.includes('google.com/signin')) return 'redirected_google';
+  if (isLoggedIn && !needsLogin) return 'logged_in';
+  if (needsLogin) return 'not_logged_in';
+  return 'ambiguous';
+}
+```
+
+## Sub-skills disponibles
+
+| Sub-skill | Trigger | Estado |
+|---|---|---|
+| `create-api-key` | `create.*api.?key` | ✅ Lista |
+| *(próximas)* | | 📅 |
+
+## Cómo crear una sub-skill nueva
+
+Cuando una tarea se resuelve con éxito por primera vez:
+
+```bash
+# 1. Crear directorio
+mkdir -p ~/.agents/skills/browser/sub/<nombre>/
+
+# 2. Crear SKILL.md siguiendo el formato:
+#    ---
+#    name: <nombre>
+#    parent: browser
+#    description: <qué hace>
+#    trigger: <regex para activación>
+#    allowed-tools: Bash
+#    ---
+
+# 3. Incluir: pasos exactos, URLs, selectores, flujo login→acción
+```
+
+## Notas
+
+- **Display**: No confiar en `$DISPLAY`. Escanear `/tmp/.X11-unix/X*`.
+- **Perfil**: `Profile 1` tiene el ecosistema del AI configurado.
+- **Google SSO**: Si el servicio tiene "Sign in with Google", el perfil ya tiene Google autenticado → login instantáneo.
+- **Persistencia**: No cerrar Chrome entre tareas. Las sesiones se mantienen.
+- **Sub-skills**: Deben ser auto-contenidas (no asumir estado del browser).

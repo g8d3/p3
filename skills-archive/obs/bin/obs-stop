@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# obs-stop: Gracefully stop OBS and clean up.
+# Usage: obs-stop
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PATH="$SCRIPT_DIR:$PATH"
+
+echo "[obs-stop] Stopping OBS..."
+
+# Try graceful shutdown via WebSocket
+if ~/.agents/skills/obs/bin/obs-exec BroadcastShutdown >/dev/null 2>&1; then
+    echo "[obs-stop] Graceful shutdown sent via WebSocket"
+    sleep 2
+fi
+
+# Force kill OBS
+killall obs 2>/dev/null && echo "[obs-stop] OBS killed" || echo "[obs-stop] OBS not running"
+
+# Kill Xvfb if we own it
+if killall Xvfb 2>/dev/null; then
+    echo "[obs-stop] Xvfb stopped"
+fi
+
+echo "[obs-stop] Done"

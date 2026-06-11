@@ -1,0 +1,190 @@
+#!/usr/bin/env bash
+# screen-debug — Diagnóstico de pantalla: accesibilidad + visión
+# Uso: screen-debug [--vision] [--display :N]
+#
+# --vision         También toma screenshot y da comando para análisis vision
+# --display :N     Forzar display específico (si no, escanea todos)
+set -euo pipefail
+
+SHOTDIR="/tmp/screen-debug"
+mkdir -p "$SHOTDIR"
+
+echo "═══ Screen Debug ═══"
+echo "Date: $(date '+%Y-%m-%d %H:%M:%S')"
+echo ""
+
+# ═══════════════════════════════════════════════════════════════════
+# FASE 0: ESCANEAR DISPLAYS
+# ═══════════════════════════════════════════════════════════════════
+# NUNCA asumir que no hay displays porque $DISPLAY está vacío.
+# Escanear sockets X11, procesos Xorg/Xvfb, y logind.
+
+scan_displays() {
+    local -A seen=()
+    
+    # Método 1: Sockets X11
+    for sock in /tmp/.X11-unix/X*; do
+        [ -e "$sock" ] && seen[":${sock##*X}"]=1
+    done 2>/dev/null
+    
+    # Método 2: Procesos Xorg con displayfd
+    while IFS= read -r line; do
+        local pid fd
+        pid=$(echo "$line" | awk '{print $2}')
+        fd=$(echo "$line" | grep -oP 'displayfd \K\d+')
+        if [ -n "$fd" ] && [ -e "/proc/$pid/fd/$fd" ]; then
+            local disp
+            disp=$(cat "/proc/$pid/fd/$fd" 2>/dev/null)
+            [ -n "$disp" ] && seen[":$disp"]=1
+        fi
+    done < <(ps aux | grep "Xorg.*displayfd" | grep -v grep) 2>/dev/null
+    
+    # Método 3: Xvfb corriendo
+    while IFS= read -r line; do
+        local disp
+        disp=$(echo "$line" | grep -oP 'Xvfb[^:]*:\K\d+')
+        [ -n "$disp" ] && seen[":$disp"]=1
+    done < <(ps aux | grep "Xvfb" | grep -v grep) 2>/dev/null
+    
+    # Método 4: logind (si está disponible)
+    if command -v loginctl &>/dev/null; then
+        while IFS= read -r line; do
+            local disp
+            disp=$(echo "$line" | grep -oP 'Display :\K\d+')
+            [ -n "$disp" ] && seen[":$disp"]=1
+        done < <(loginctl seat-status seat0 2>/dev/null) || true
+    fi
+    
+    # Imprimir todos los encontrados (ordenados)
+    for disp in "${!seen[@]}"; do
+        echo "$disp"
+    done | sort -t: -n -k2
+}
+
+# Si el usuario pasó --display :N, solo ese
+FORCED_DISPLAY=""
+for arg in "$@"; do
+    if [[ "$arg" =~ ^--display\ :[0-9]+$ ]]; then
+        FORCED_DISPLAY="${arg#--display }"
+    fi
+done
+
+if [ -n "$FORCED_DISPLAY" ]; then
+    DISPLAYS=("$FORCED_DISPLAY")
+    echo "Display forzado: $FORCED_DISPLAY"
+else
+    mapfile -t DISPLAYS < <(scan_displays)
+    if [ ${#DISPLAYS[@]} -eq 0 ]; then
+        echo "❌ No se detectaron displays en el sistema."
+        echo ""
+        echo "   Métodos de detección usados:"
+        echo "     - Sockets X11:        $(ls /tmp/.X11-unix/ 2>/dev/null || echo 'vacío')"
+        echo "     - Procesos Xorg:      $(ps aux | grep Xorg | grep -v grep | head -1 || echo 'ninguno')"
+        echo "     - Procesos Xvfb:      $(ps aux | grep Xvfb | grep -v grep | head -1 || echo 'ninguno')"
+        echo "     - loginctl:           $(loginctl seat-status seat0 2>/dev/null | grep Display || echo 'no info')"
+        echo ""
+        echo "   Sugerencia: iniciar Xvfb primero o conectar a un display real."
+        exit 1
+    fi
+    echo "Displays detectados: ${DISPLAYS[*]}"
+fi
+echo ""
+
+# ═══════════════════════════════════════════════════════════════════
+# FASE 1: ACCESIBILIDAD (xdotool) — para CADA display
+# ═══════════════════════════════════════════════════════════════════
+
+ALERTAS=0
+ALL_WINS=""
+
+for DISPLAY in "${DISPLAYS[@]}"; do
+    echo "═══ Display $DISPLAY ═══"
+    
+    # Probar conexión
+    if ! DISPLAY="$DISPLAY" xdotool getmouselocation &>/dev/null; then
+        echo "  ⚠️  No se puede conectar (puede ser display headless sin input)"
+        # Intentar de todas formas con search
+    fi
+    
+    # Listar ventanas
+    echo "── Ventanas ──"
+    WINS=$(DISPLAY="$DISPLAY" xdotool search . 2>/dev/null | sort -u || true)
+    FOUND=0
+    for id in $WINS; do
+        name=$(DISPLAY="$DISPLAY" xdotool getwindowname "$id" 2>/dev/null || echo "?")
+        geo=$(DISPLAY="$DISPLAY" xdotool getwindowgeometry "$id" 2>/dev/null | paste -sd ' ' || echo "?")
+        # Filtrar ventanas de sistema
+        case "$name" in
+            "Qt Selection Owner"*|"ibus"*|"IBUS"*|"xscreensaver"*|"XScreenSaver"*|"picom"*|"lxqt"*|"LXQt"*|"blueman"*|"qlipper"*|"nm-tray"*|"xdg-desktop"*)
+                continue ;;
+        esac
+        echo "  [$id] $name"
+        echo "         $geo"
+        FOUND=$((FOUND + 1))
+        ALL_WINS="$ALL_WINS $id"
+    done
+    
+    if [ "$FOUND" -eq 0 ]; then
+        echo "  (sin ventanas de aplicación)"
+    fi
+    echo ""
+    
+    # Buscar patrones de alarma
+    echo "── Patrones de interés ──"
+    for keyword in Crash Error Warning Blocked Waiting Dialog Alert Confirm "Safe Mode" Recovery Fatal Fail; do
+        for id in $WINS; do
+            name=$(DISPLAY="$DISPLAY" xdotool getwindowname "$id" 2>/dev/null || true)
+            if echo "$name" | grep -qi "$keyword" 2>/dev/null; then
+                echo "  ⚠️  [$id] \"$name\" contiene \"$keyword\""
+                ALERTAS=$((ALERTAS + 1))
+            fi
+        done
+    done
+    
+    if [ "$ALERTAS" -eq 0 ]; then
+        echo "  ✅ Sin alarmas en este display"
+    fi
+    echo ""
+done
+
+# ═══════════════════════════════════════════════════════════════════
+# FASE 2: SCREENSHOT (si --vision) del primer display disponible
+# ═══════════════════════════════════════════════════════════════════
+
+SHOT=""
+HAS_VISION=false
+for arg in "$@"; do
+    [ "$arg" = "--vision" ] && HAS_VISION=true && break
+done
+
+if $HAS_VISION; then
+    TARGET="${DISPLAYS[0]}"
+    SHOT="$SHOTDIR/screen-$(date +%Y%m%d-%H%M%S).png"
+    echo "── Screenshot (display $TARGET) ──"
+    if DISPLAY="$TARGET" import -window root "$SHOT" 2>/dev/null; then
+        echo "  ✅ Screenshot: $SHOT ($(du -h "$SHOT" | cut -f1))"
+        echo ""
+        echo "── Analizar con visión (modelo más rápido: MiMo-V2.5, ~10s) ──"
+        echo ""
+        echo "  opencode run 'Describe what is on this screen in detail."
+        echo "  - What windows/dialogs are visible?"
+        echo "  - What text and buttons do they contain?"
+        echo "  - Is there any dialog blocking the application?"
+        echo "  - What is the overall state?' \\"
+        echo "    --model opencode-go/mimo-v2.5 --file $SHOT"
+        echo ""
+        echo "  Si resultado ambiguo, retry con más detalle:"
+        echo "  opencode run 'Describe this screen.' --model opencode-go/qwen3.6-plus --file $SHOT"
+    else
+        echo "  ❌ No se pudo tomar screenshot"
+    fi
+fi
+
+echo ""
+echo "═══ Fin diagnóstico ═══"
+
+if [ "$ALERTAS" -gt 0 ]; then
+    echo "⚠️  Se encontraron $ALERTAS patrón(es) de alarma"
+    exit 2
+fi
+exit 0

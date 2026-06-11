@@ -1,0 +1,22 @@
+#!/bin/bash
+# remove-agent — removes an agent cleanly
+# Usage: remove-agent <name>
+# Example: remove-agent a3
+
+name="${1:-}"
+if [ -z "$name" ]; then echo "Usage: remove-agent <name>"; exit 1; fi
+
+busdir="/tmp/agent-bus"
+
+# 1. Kill tmux window
+tmux kill-window -t "$name" 2>/dev/null && echo "✅ Window $name closed" || echo "⚠️  No window $name"
+
+# 2. Remove inbox
+rm -rf "$busdir/$name" 2>/dev/null && echo "✅ Bus $name removed" || echo "⚠️  No bus dir $name"
+
+# 3. Update supervisor count (reconfigure to N-1)
+count=$(ls -d "$busdir"/a*/in 2>/dev/null | wc -l)
+echo "ℹ️  $count agents remaining"
+echo "   Run: pkill -f supervisor; nohup supervisor $count 4 ... &"
+
+echo "✅ $name removed"

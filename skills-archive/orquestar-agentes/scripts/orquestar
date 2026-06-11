@@ -1,0 +1,127 @@
+#!/bin/bash
+# orquestar <N> [--new-session] [--full]
+# Opens N agent tmux windows with the message bus.
+# --new-session: each agent gets a fresh Crush session via --session flag
+# --full: also starts optional daemons (supervisor, ciclador)
+
+set -e
+
+n=${1:-1}
+new_session=false
+full_mode=false
+for arg in "$@"; do
+  case "$arg" in
+    --new-session) new_session=true ;;
+    --full) full_mode=true ;;
+  esac
+done
+busdir="/tmp/agent-bus"
+self_dir="$(cd "$(dirname "$0")" && pwd)"
+
+# 1. Check / auto-install dependencies
+
+# 1a. tmux
+if ! which tmux >/dev/null 2>&1; then
+  echo "📦 Instalando tmux..."
+  sudo apt install -y tmux >/dev/null 2>&1 || { echo "ERROR: no se pudo instalar tmux"; exit 1; }
+fi
+
+# 1b. Must run inside tmux
+if [ -z "$TMUX" ]; then
+  echo "⚠️  No estás dentro de tmux. Creando sesión 'main'..."
+  tmux new-session -d -s main 2>/dev/null || true
+  exec tmux new-session -A -s main "$0 $*"
+fi
+
+# 1c. inotifywait (busd depende de él)
+if ! which inotifywait >/dev/null 2>&1; then
+  echo "📦 Instalando inotify-tools..."
+  sudo apt install -y inotify-tools >/dev/null 2>&1 || { echo "ERROR: no se pudo instalar inotify-tools"; exit 1; }
+fi
+
+# 1d. crush
+if ! which crush >/dev/null 2>&1; then
+  echo "ERROR: crush no está instalado. Install: npm install -g @charm/cli"; exit 1;
+fi
+
+# 2. Create bus directories
+rm -rf "$busdir"
+mkdir -p "$busdir"
+for i in $(seq 1 "$n"); do
+  mkdir -p "$busdir/a$i/in"
+done
+
+# 3. Install say script
+mkdir -p "$HOME/.agents/bin"
+cp "$self_dir/say" "$HOME/.agents/bin/say"
+chmod +x "$HOME/.agents/bin/say"
+
+# 4. Kill existing busd
+[ -f "$busdir/busd.pid" ] && kill "$(cat "$busdir/busd.pid")" 2>/dev/null
+
+# 5. Start busd daemon
+nohup "$self_dir/busd" > /dev/null 2>&1 &
+echo $! > "$busdir/busd.pid"
+
+# 6. Open tmux windows
+if $new_session; then
+  for i in $(seq 1 "$n"); do
+    tmux new-window -d -n "a$i" "export PATH=\"\$HOME/.agents/bin:\$PATH\"; exec zsh -i -c \"crush --yolo --session s76-a\$i\""
+  done
+else
+  for i in $(seq 1 "$n"); do
+    tmux new-window -d -n "a$i" 'export PATH="$HOME/.agents/bin:$PATH"; exec zsh -i -c "crush --yolo"'
+  done
+fi
+
+# 7. Auto-dismiss init prompt (fire-and-forget, max 6s)
+for i in $(seq 1 "$n"); do
+  (
+    for attempt in $(seq 1 12); do
+      sleep 0.5
+      pane="$(tmux capture-pane -t "a$i" -p 2>/dev/null)"
+      echo "$pane" | grep -q "Would you like to initialize" && {
+        tmux send-keys -t "a$i" "Nope" Enter
+        break
+      }
+    done
+  ) &
+done
+
+# 8. Install maker, checker, and video-maker skills
+skills_src="$self_dir/../skills"
+if [ -d "$skills_src/maker" ]; then
+  mkdir -p "$HOME/.agents/skills"
+  cp -r "$skills_src/maker" "$HOME/.agents/skills/"
+  cp -r "$skills_src/checker" "$HOME/.agents/skills/"
+  cp -r "$skills_src/video-maker" "$HOME/.agents/skills/"
+  # Install video-maker script
+  cp "$self_dir/video-maker" "$HOME/.agents/bin/video-maker"
+  chmod +x "$HOME/.agents/bin/video-maker"
+fi
+
+# 9. Start supervisor (health monitor) — esencial, revive agentes caídos
+nohup "$self_dir/supervisor" "$n" 4 "$HOME/.local/share/orquestar-agentes" > /dev/null 2>&1 &
+echo $! > "$busdir/supervisor.pid"
+
+# 10. Start ciclador (autonomous work cycle) — opcional, solo con --full
+if [ "$full_mode" = true ]; then
+  nohup "$self_dir/ciclador" "$PWD" > /dev/null 2>&1 &
+  echo $! > "$busdir/ciclador.pid"
+fi
+
+# 11. Start web dashboard (port 3030) — esencial
+web_server="$self_dir/../web/server.js"
+if [ -f "$web_server" ]; then
+  nohup node "$web_server" > "$busdir/webui.log" 2>&1 &
+  echo $! > "$busdir/webui.pid"
+fi
+
+echo "✅ $n agente(s) abierto(s) con bus de mensajes."
+echo "   Roles: a1=maker (código), a2=checker, a3=video-maker"
+echo "   Skills instaladas: maker, checker, video-maker"
+echo "   Daemons esenciales: busd, webui, task-runner"
+if [ "$full_mode" = true ]; then
+  echo "   Daemons opcionales: supervisor, ciclador"
+fi
+echo "   WebUI en http://localhost:3030"

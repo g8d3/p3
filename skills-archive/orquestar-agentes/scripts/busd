@@ -1,0 +1,54 @@
+#!/bin/bash
+# busd - bus daemon
+# Watches ALL inboxes under /tmp/agent-bus/ dynamically.
+# Auto-discovers a1/in, a2/in, etc. No need to specify count.
+# Usage: busd
+
+busdir="/tmp/agent-bus"
+history="$busdir/history"
+
+mkdir -p "$history"
+
+# Build watched dirs dynamically from existing agent inboxes
+build_watch_list() {
+  local dirs=""
+  for d in "$busdir"/*/in; do
+    [ -d "$d" ] || continue
+    [[ "$d" == */orchestrator/* ]] && continue
+    dirs="$dirs $d"
+  done
+  echo "$dirs"
+}
+
+# Initial set
+watched=$(build_watch_list)
+logfile="$history/busd.log"
+
+echo "[$(date +%H:%M:%S)] busd started, watching: $watched" >> "$logfile"
+
+inotifywait -m -q -e close_write --format '%w%f' $watched | while read -r filepath; do
+  target=$(echo "$filepath" | awk -F/ '{print $(NF-2)}')
+  fname=$(basename "$filepath")
+  msg=$(cat "$filepath" 2>/dev/null || echo "")
+  rm -f "$filepath" 2>/dev/null
+  if [ -n "$msg" ]; then
+    mkdir -p "$history"
+
+    # ── Extract trace_id from filename (msg-<pid>--<trace_id>) ──
+    trace_id=$(echo "$fname" | sed 's/.*--//' 2>/dev/null || echo "")
+    if [ -z "$trace_id" ] || [ "$trace_id" = "$fname" ]; then
+      trace_id=""
+    fi
+
+    # Write history with optional trace_id
+    if [ -n "$trace_id" ]; then
+      echo "[$(date +%s)] → ${target}: ${msg} [trace_id=${trace_id}]" >> "$history/messages.log"
+    else
+      echo "[$(date +%s)] → ${target}: ${msg}" >> "$history/messages.log"
+    fi
+
+    tmux send-keys -t "$target" Escape
+    sleep 0.3
+    tmux send-keys -t "$target" "$msg" Enter
+  fi
+done

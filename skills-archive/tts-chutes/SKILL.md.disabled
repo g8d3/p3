@@ -1,0 +1,343 @@
+---
+name: tts-chutes
+description: Text-to-speech using Chutes Kokoro API (Kokoro-82M v1.0). Use when the user needs to convert text to audio, create voiceovers, read content aloud, or generate speech files. Triggers include requests to "speak this", "read aloud", "convert to audio", "generate voice", "TTS", or any task requiring text-to-speech synthesis.
+allowed-tools: Bash
+---
+
+# Text-to-Speech with Chutes Kokoro
+
+Kokoro-82M v1.0 — 82M parameter open-weight TTS model. 54 voces en 9 idiomas.
+
+## Core Workflow
+
+1. **Generate speech**: Use `tts-speak` to convert text to audio
+2. **Output options**: Play directly, save to file, or pipe to other tools
+3. **Customize**: Adjust voice, speed, and format as needed
+
+## Basic Usage
+
+```bash
+# Simple speak (plays audio directly)
+tts-speak "Hello, this is a test."
+
+# Save to file (no playback)
+tts-speak "Hello, this is a test." --output speech.mp3
+
+# Save to file with custom voice
+tts-speak "Bonjour, ceci est un test." --voice af_bella --output greeting.mp3
+
+# Adjust speed (0.5 = half speed, 2.0 = double speed)
+tts-speak "Speaking slowly." --speed 0.5 --output slow.mp3
+tts-speak "Speaking quickly." --speed 1.5 --output fast.mp3
+```
+
+## Command Options
+
+```bash
+tts-speak <text> [options]
+
+Options:
+  --output <file>     Save audio to file instead of playing
+  --voice <voice>     Voice ID (default: af_heart)
+  --speed <number>    Speech speed 0.5-2.0 (default: 1.0)
+  --quiet             Output to stdout (for piping)
+  --help              Show help message
+
+Note: API returns WAV/PCM audio (24kHz, mono). File extension doesn't affect format.
+```
+
+## Available Voices
+
+Quality grades (A-F) según el dataset original de Kokoro. Voces marcadas como **★** son las mejores.
+
+### 🇺🇸 American English (11F, 9M)
+`lang_code='a'` — Usar con texto en inglés americano.
+
+| Voz | Género | Calidad | Descripción |
+|-----|--------|---------|-------------|
+| `af_heart` ★ | 🚺 | **A** | Cálida, amigable — la mejor voz general |
+| `af_bella` ★ | 🚺 | **A-** | Clara, profesional — ideal para presentaciones |
+| `af_nicole` | 🚺 | B- | Expresiva, buena para narración larga |
+| `af_aoede` | 🚺 | C+ | Dulce, suave |
+| `af_kore` | 🚺 | C+ | Seria, neutral |
+| `af_nova` | 🚺 | C | Juvenil, enérgica |
+| `af_sarah` | 🚺 | C+ | Amigable, conversacional |
+| `af_sky` | 🚺 | C- | Suave, baja duración de entrenamiento |
+| `af_alloy` | 🚺 | C | Robótica, metálica |
+| `af_jessica` | 🚺 | D | Limitada, pocos datos |
+| `af_river` | 🚺 | D | Limitada, pocos datos |
+| `am_adam` | 🚹 | F+ | Profunda, autoritaria — pero baja calidad |
+| `am_michael` | 🚹 | C+ | Cálida, conversacional |
+| `am_fenrir` | 🚹 | C+ | Grave, robusta |
+| `am_puck` | 🚹 | C+ | Alegre, juguetona |
+| `am_echo` | 🚹 | D | Neutral, duración limitada |
+| `am_eric` | 🚹 | D | Joven, casual |
+| `am_liam` | 🚹 | D | Suave, limitada |
+| `am_onyx` | 🚹 | D | Profunda, limitada |
+| `am_santa` | 🚹 | D- | Navideña, muy limitada |
+
+### 🇬🇧 British English (4F, 4M)
+`lang_code='b'` — Usar con texto en inglés británico.
+
+| Voz | Género | Calidad | Descripción |
+|-----|--------|---------|-------------|
+| `bf_emma` ★ | 🚺 | **B-** | Refinada, la mejor voz británica |
+| `bf_isabella` | 🚺 | C | Elegante, duración limitada |
+| `bf_alice` | 🚺 | D | Suave, pocos datos |
+| `bf_lily` | 🚺 | D | Juvenil, pocos datos |
+| `bm_george` | 🚹 | C | Distinguida, británica clásica |
+| `bm_fable` | 🚹 | C | Narrativa, cuentacuentos |
+| `bm_lewis` | 🚹 | D+ | Profunda, algo más de datos |
+| `bm_daniel` | 🚹 | D | Estándar, pocos datos |
+
+### 🇯🇵 Japanese (4F, 1M)
+`lang_code='j'` — Usar con texto en japonés.
+
+| Voz | Género | Calidad | Descripción |
+|-----|--------|---------|-------------|
+| `jf_alpha` ★ | 🚺 | C+ | La mejor japonesa femenina |
+| `jf_gongitsune` | 🚺 | C | Inspirada en cuento tradicional |
+| `jf_tebukuro` | 🚺 | C | Voz femenina estándar |
+| `jf_nezumi` | 🚺 | C- | Limitada, poca duración |
+| `jm_kumo` | 🚹 | C- | Masculina, limitada |
+
+### 🇨🇳 Mandarin Chinese (4F, 4M)
+`lang_code='z'` — Usar con texto en chino mandarín.
+
+| Voz | Género | Calidad | Nota |
+|-----|--------|---------|------|
+| `zf_xiaobei` | 🚺 | D | |
+| `zf_xiaoni` | 🚺 | D | |
+| `zf_xiaoxiao` | 🚺 | D | |
+| `zf_xiaoyi` | 🚺 | D | |
+| `zm_yunjian` | 🚹 | D | |
+| `zm_yunxi` | 🚹 | D | |
+| `zm_yunxia` | 🚹 | D | |
+| `zm_yunyang` | 🚹 | D | |
+
+### 🇪🇸 Spanish (1F, 2M)
+`lang_code='e'` — Usar con texto en español.
+
+| Voz | Género | Descripción |
+|-----|--------|-------------|
+| `ef_dora` | 🚺 | Femenina, neutra |
+| `em_alex` | 🚹 | Masculina, estándar |
+| `em_santa` | 🚹 | Masculina, navideña |
+
+### 🇫🇷 French (1F)
+`lang_code='f'` — Usar con texto en francés. Solo hay una voz femenina.
+
+| Voz | Género | Calidad | Descripción |
+|-----|--------|---------|-------------|
+| `ff_siwis` ★ | 🚺 | **B-** | La única voz francesa, buena calidad |
+
+### 🇮🇳 Hindi (2F, 2M)
+`lang_code='h'` — Usar con texto en hindi.
+
+| Voz | Género | Calidad |
+|-----|--------|---------|
+| `hf_alpha` | 🚺 | C |
+| `hf_beta` | 🚺 | C |
+| `hm_omega` | 🚹 | C |
+| `hm_psi` | 🚹 | C |
+
+### 🇮🇹 Italian (1F, 1M)
+`lang_code='i'` — Usar con texto en italiano.
+
+| Voz | Género | Calidad |
+|-----|--------|---------|
+| `if_sara` | 🚺 | C |
+| `im_nicola` | 🚹 | C |
+
+### 🇧🇷 Brazilian Portuguese (1F, 2M)
+`lang_code='p'` — Usar con texto en portugués brasileño.
+
+| Voz | Género | Nota |
+|-----|--------|------|
+| `pf_dora` | 🚺 | |
+| `pm_alex` | 🚹 | |
+| `pm_santa` | 🚹 | |
+
+## Cómo elegir voz según el idioma
+
+1. **Detectar el idioma del texto** del usuario
+2. **Usar el prefijo correcto**:
+
+| Idioma | Prefijo | Mejor voz |
+|--------|---------|-----------|
+| Inglés (EEUU) | `af_` / `am_` | `af_heart`, `af_bella` |
+| Inglés (UK) | `bf_` / `bm_` | `bf_emma` |
+| Japonés | `jf_` / `jm_` | `jf_alpha` |
+| Chino | `zf_` / `zm_` | `zf_xiaobei` |
+| Español | `ef_` / `em_` | `ef_dora` |
+| Francés | `ff_` | `ff_siwis` |
+| Hindi | `hf_` / `hm_` | `hf_alpha` |
+| Italiano | `if_` / `im_` | `if_sara` |
+| Portugués BR | `pf_` / `pm_` | `pf_dora` |
+
+3. **Elegir género**: prefijo `f` = femenino, `m` = masculino
+4. **Calidad**: preferir voces con grado más alto (A > B > C > D)
+
+## Common Patterns
+
+### Read Aloud Content
+
+```bash
+# Read a message
+tts-speak "Your build completed successfully."
+
+# Read file contents
+tts-speak "$(cat article.txt)" --output article.mp3
+
+# Read with custom pacing
+tts-speak "Important announcement. Please listen carefully." --speed 0.8
+```
+
+### Generate Audio Files
+
+```bash
+# Create voiceover for video
+tts-speak "Welcome to our tutorial series." --voice am_michael --output intro.mp3
+
+# Generate multiple segments
+tts-speak "Chapter one: Getting Started." --output ch1.mp3
+tts-speak "Chapter two: Installation." --output ch2.mp3
+tts-speak "Chapter three: Configuration." --output ch3.mp3
+
+# Create audio in different formats
+tts-speak "High quality audio." --format flac --output hq.flac
+tts-speak "Web optimized." --format mp3 --output web.mp3
+```
+
+### Pipeline Integration
+
+```bash
+# Pipe to ffmpeg for processing
+tts-speak "Text content" --quiet | ffmpeg -i pipe:0 -ar 44100 output.wav
+
+# Chain with other audio tools
+tts-speak "Announcement" --quiet | sox -t mp3 - -t wav announcement.wav
+
+# Combine multiple TTS segments
+tts-speak "Part one" --quiet > combined.mp3
+tts-speak "Part two" --quiet >> combined.mp3
+```
+
+### Accessibility & Notifications
+
+```bash
+# System notification
+tts-speak "Battery low. Please connect charger." --voice af_bella
+
+# Reading long content in chunks
+tts-speak "$(head -n 50 document.txt)" --output doc_part1.mp3
+tts-speak "$(tail -n +51 document.txt)" --output doc_part2.mp3
+
+# Quick pronunciation check
+tts-speak "The quick brown fox jumps over the lazy dog." --speed 0.7
+```
+
+## Shell Command
+
+The `tts-speak` command is installed at `~/.local/bin/tts-speak`:
+
+```bash
+# Play audio directly
+tts-speak "Hello world"
+
+# Save to file
+tts-speak "Hello world" --output speech.mp3
+
+# Custom voice and speed
+tts-speak "Hello world" --voice am_michael --speed 0.9 --output greeting.mp3
+
+# Pipe to other tools
+tts-speak "Hello world" --quiet | ffmpeg -i pipe:0 output.wav
+```
+
+## Shell Function (alternative for playback only)
+
+Add to your shell config for quick playback without saving:
+
+```bash
+speak() {
+    curl -s -X POST https://chutes-kokoro.chutes.ai/speak \
+        -H "Authorization: Bearer $CHUTES_API_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d "{\"text\": \"$*\", \"speed\": 1, \"voice\": \"af_heart\"}" | \
+        ffplay -nodisp -autoexit -loglevel error -i pipe:0
+}
+
+# Usage: speak "Hello world"
+```
+
+## Error Handling
+
+```bash
+# Check API token is set
+if [ -z "$CHUTES_API_TOKEN" ]; then
+    echo "Error: CHUTES_API_TOKEN not set"
+    exit 1
+fi
+
+# Retry on failure
+tts-speak "Important message" --output msg.mp3 || \
+    tts-speak "Important message" --output msg.mp3
+```
+
+## Best Practices
+
+1. **Elegir voz por idioma**: Usa el prefijo correcto según el idioma del texto
+2. **Calidad over cantidad**: Prefiere voces con grado A o B sobre las D
+3. **Texto corto**: Textos de 100-200 tokens funcionan mejor
+4. **Ajustar velocidad**: 0.9-1.0 para narración, 0.7-0.8 para texto complejo
+5. **Cachear audio**: Reusa archivos generados para contenido repetido
+6. **Probar antes**: Verifica voz y velocidad con una muestra corta
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| No audio playback | Check ffplay is installed (`brew install ffmpeg`) |
+| API error 401 | Verify `CHUTES_API_TOKEN` is set and valid |
+| Audio cuts off | Text may be too long; split into segments |
+| Wrong voice | Check voice ID spelling; see available voices table |
+| Slow generation | Reduce text length or check network connection |
+| Voice suena mal | Usar una voz con mejor grado de calidad (A > B > C > D) |
+
+## Examples
+
+```bash
+# English narration
+tts-speak "Welcome to this tutorial." --voice af_heart --output intro_en.mp3
+
+# Spanish voiceover
+tts-speak "Bienvenidos a este tutorial." --voice ef_dora --output intro_es.mp3
+
+# French narration
+tts-speak "Bienvenue dans ce tutoriel." --voice ff_siwis --output intro_fr.mp3
+
+# Japanese
+tts-speak "こんにちは、ようこそ。" --voice jf_alpha --output intro_ja.mp3
+
+# Chinese
+tts-speak "欢迎来到本教程。" --voice zf_xiaobei --output intro_zh.mp3
+
+# Hindi
+tts-speak "इस ट्यूटोरियल में आपका स्वागत है।" --voice hf_alpha --output intro_hi.mp3
+
+# Italian
+tts-speak "Benvenuti a questo tutorial." --voice if_sara --output intro_it.mp3
+
+# Brazilian Portuguese
+tts-speak "Bem-vindo a este tutorial." --voice pf_dora --output intro_pt.mp3
+
+# British English
+tts-speak "Welcome to this tutorial." --voice bf_emma --output intro_uk.mp3
+
+# Multilingual greeting set
+for lang in "en:af_heart:Hello" "es:ef_dora:Hola" "fr:ff_siwis:Bonjour" "ja:jf_alpha:こんにちは" "zh:zf_xiaobei:你好" "hi:hf_alpha:नमस्ते"; do
+  IFS=":" read -r lang_code voice text <<< "$lang"
+  tts-speak "$text" --voice "$voice" --output "greeting_${lang_code}.mp3"
+done
+```

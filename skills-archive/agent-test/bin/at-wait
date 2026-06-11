@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# at-wait: Block until the agent finishes, then print results with timing.
+# Usage: at-wait <test-dir> [timeout_seconds]
+# Note: This BLOCKS until the result is ready. For non-blocking, use at-check.
+set -euo pipefail
+
+TEST_DIR="${1:?Usage: at-wait <test-dir> [timeout]}"
+TIMEOUT="${2:-180}"
+
+RESULT_FILE="$TEST_DIR/result.json"
+PARAMS_FILE="$TEST_DIR/params.json"
+
+[ ! -f "$PARAMS_FILE" ] && { echo "ERROR: params.json not found in $TEST_DIR" >&2; exit 1; }
+
+WINDOW_NAME=$(python3 -c "import json; print(json.load(open('$PARAMS_FILE'))['windowName'])" 2>/dev/null || echo "?")
+SPAWN_TIME=$(python3 -c "import json; print(json.load(open('$PARAMS_FILE'))['spawnTime'])" 2>/dev/null || echo "$(date +%s.%N)")
+
+echo "⏳ Waiting for agent '$WINDOW_NAME' to finish (timeout: ${TIMEOUT}s)..."
+
+WAIT_START=$(date +%s.%N)
+while [ ! -f "$RESULT_FILE" ]; do
+    ELAPSED=$(python3 -c "print(int(( $(date +%s.%N) - $WAIT_START )))" 2>/dev/null || echo 0)
+    if [ "$ELAPSED" -ge "$TIMEOUT" ]; then
+        echo "❌ TIMEOUT: Agent did not finish within ${TIMEOUT}s" >&2
+        exit 1
+    fi
+    sleep 0.5
+done
+
+NOW=$(date +%s.%N)
+WAIT_TIME=$(python3 -c "print(round($NOW - $WAIT_START, 2))")
+END_TO_END=$(python3 -c "print(round($NOW - $SPAWN_TIME, 2))")
+
+echo "✅ Result ready"
+echo "   Wait time: ${WAIT_TIME}s"
+echo "   End-to-end (spawn→now): ${END_TO_END}s"
+echo ""
+python3 -c "
+import json
+d = json.load(open('$RESULT_FILE'))
+print('=== RESULT ===')
+print(json.dumps(d, indent=2))
+print()
+print(f'  Success: {d.get(\"success\", \"?\")}')
+print(f'  Agent duration: {d.get(\"duration_seconds\", \"?\")}s')
+print(f'  End-to-end: ${END_TO_END}s')
+print(f'  Details: {d.get(\"details\", \"\")}')
+"

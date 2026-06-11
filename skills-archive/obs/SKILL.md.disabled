@@ -1,0 +1,85 @@
+---
+name: obs
+description: OBS Studio control via WebSocket. Start/stop OBS, switch scenes, control sources, and query state. Use when the user needs to record/stream, control OBS, or interact with broadcasting.
+allowed-tools: Bash
+---
+
+# OBS Studio Control
+
+OBS Studio 32.1.2 con plugin obs-websocket.
+Puerto: `4455` | Password: `SFT16WlCaNoupRwt`
+
+## Comandos
+
+### `obs-start` — Iniciar OBS
+```bash
+obs-start
+# Maneja Xvfb automáticamente si no hay display gráfico.
+# Espera hasta que WebSocket esté listo.
+```
+
+### `obs-stop` — Detener OBS
+```bash
+obs-stop
+# Apagado graceful vía WebSocket + kill.
+```
+
+### `obs-exec <comando> [datos_json]` — Enviar cualquier comando
+```bash
+# Obtener versiones
+obs-exec GetVersion
+
+# Listar escenas
+obs-exec GetSceneList
+
+# Cambiar escena
+obs-exec SetCurrentProgramScene '{"sceneName": "Escena 1"}'
+
+# Obtener estado de grabación
+obs-exec GetRecordStatus
+
+# Iniciar grabación
+obs-exec StartRecord
+
+# Detener grabación
+obs-exec StopRecord
+
+# Obtener lista de fuentes
+obs-exec GetInputList
+
+# Obtener estado de streaming
+obs-exec GetStreamStatus
+```
+
+## Flujo típico
+
+```
+1. obs-start          → inicia OBS + WebSocket
+2. obs-exec GetSceneList → ver escenas disponibles
+3. obs-exec SetCurrentProgramScene '{"sceneName": "MiEscena"}' → cambiar escena
+4. obs-exec StartRecord → empezar a grabar
+5. obs-exec StopRecord  → parar grabación
+6. obs-stop           → cerrar OBS
+```
+
+## Atajos comunes
+
+| Acción | Comando |
+|--------|---------|
+| Iniciar OBS | `obs-start` |
+| Detener OBS | `obs-stop` |
+| Cambiar escena | `obs-exec SetCurrentProgramScene '{"sceneName":"..."}'` |
+| Iniciar grabación | `obs-exec StartRecord` |
+| Detener grabación | `obs-exec StopRecord` |
+| Iniciar streaming | `obs-exec StartStream` |
+| Detener streaming | `obs-exec StopStream` |
+| Silenciar/Dessilenciar fuente | `obs-exec SetInputMute '{"inputName":"Mic","inputMuted":true}'` |
+| Ajustar volumen fuente | `obs-exec SetInputVolume '{"inputName":"Mic","inputVolumeMul":0.8}'` |
+
+## Troubleshooting
+
+| Problema | Solución |
+|----------|----------|
+| WebSocket no responde | ¿OBS está corriendo? `obs-start` |
+| "Could not identify" | Esperar 2s e intentar de nuevo |
+| Grabación no inicia | Verificar que hay una escena activa |

@@ -1,0 +1,35 @@
+#!/bin/bash
+# detener <N>
+# Stops all daemons and closes agent tmux windows
+
+n=${1:-1}
+busdir="/tmp/agent-bus"
+
+# 1. Kill supervisor
+if [ -f "$busdir/supervisor.pid" ]; then
+  kill "$(cat "$busdir/supervisor.pid")" 2>/dev/null && echo "✅ supervisor detenido" || echo "⚠️  supervisor no estaba corriendo"
+fi
+
+# 2. Kill ciclador
+if [ -f "$busdir/ciclador.pid" ]; then
+  kill "$(cat "$busdir/ciclador.pid")" 2>/dev/null && echo "✅ ciclador detenido" || echo "⚠️  ciclador no estaba corriendo"
+fi
+
+# 3. Kill webui
+if [ -f "$busdir/webui.pid" ]; then
+  kill "$(cat "$busdir/webui.pid")" 2>/dev/null && echo "✅ webui detenido" || echo "⚠️  webui no estaba corriendo"
+fi
+
+# 4. Kill busd
+if [ -f "$busdir/busd.pid" ]; then
+  kill "$(cat "$busdir/busd.pid")" 2>/dev/null && echo "✅ busd detenido" || echo "⚠️  busd no estaba corriendo"
+fi
+
+# 4. Close tmux windows
+for i in $(seq 1 "$n"); do
+  tmux kill-window -t "a$i" 2>/dev/null && echo "✅ Ventana a$i cerrada" || echo "⚠️  Ventana a$i no encontrada"
+done
+
+# 5. Cleanup
+rm -rf "$busdir" 2>/dev/null
+echo "✅ Bus limpiado."

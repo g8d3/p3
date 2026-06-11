@@ -1,0 +1,123 @@
+---
+name: agent-test
+description: Spawn AI agents in detached tmux windows via opencode run, send tasks, collect results via file-based IPC. Non-blocking — you can keep working while the agent runs in background.
+allowed-tools: Bash
+---
+
+# Agent Test Skill
+
+Orquestación de agentes AI en ventanas tmux separadas usando `opencode run`
+(no interactivo). Comunicación por archivos JSON — sin long-polling ni
+notificaciones que ensucien el chat.
+
+## Filosofía
+
+- **`at-spawn`** es no bloqueante: crea el agente, inicia la tarea, retorna al instante.
+  Tú (o el orquestador) pueden seguir haciendo otras cosas.
+- **`at-check`** consulta el resultado sin bloquear: "¿ya terminó?" → sí/no.
+- **`at-wait`** es bloqueante (para scripts o cuando sabes que quieres esperar).
+- **File-based**: el agente escribe `result.json`, tú lo lees cuando quieras.
+  Sin `tmux send-keys`, sin contaminar el chat.
+
+## Protocolo
+
+1. **Agent A** ejecuta `at-spawn`:
+   - Crea `/tmp/agent-test.<time>.<pid>/` con `params.json` + `task.txt` + `runner.sh`
+   - Crea ventana tmux (detached por defecto, `-v` para visible)
+   - **Retorna inmediatamente** con la ruta del directorio
+2. **Agent B** (el runner) ejecuta `opencode run` en esa ventana, hace su trabajo,
+   y escribe el resultado en `result.json`
+3. **Agent A** consulta con `at-check` (no bloqueante) o espera con `at-wait` (bloqueante)
+
+## Comandos
+
+### `at-spawn [-v] [-m <model>] <window-name> <task...|@file>`
+
+Lanza un nuevo agente. Retorna **inmediatamente** — no bloquea.
+
+```bash
+# Detached (default): no roba foco, la ventana se cierra al terminar
+at-spawn obs-test "Inicia OBS, verifica, deténlo, reporta"
+
+# Visible: te cambia a la ventana para ver al agente trabajar
+at-spawn -v obs-test "..."
+
+# Con modelo específico
+at-spawn -m "opencode-go/deepseek-v4-flash" mi-test "..."
+
+# Task desde archivo
+at-spawn mi-test @/ruta/al/task.txt
+```
+
+Output: la ruta del directorio de test (`/tmp/agent-test.*`).
+
+### `at-check <test-dir>`
+
+No bloqueante. Revisa si el agente ya terminó.
+
+```bash
+at-check /tmp/agent-test.12345.6789/
+# → "⏳ Not ready yet (12.5s since spawn)"
+# o
+# → "▶ Result ready (30.2s since spawn): {success: true, ...}"
+```
+
+### `at-wait <test-dir> [timeout=180]`
+
+**Bloqueante**. Espera hasta que el agente termine.
+
+```bash
+# Útil en scripts o cuando no hay otra cosa que hacer
+at-wait /tmp/agent-test.12345.6789/ 300
+```
+
+### `at-capture <window-name> [tail_lines]`
+
+Captura output de la ventana del agente (debugging).
+
+```bash
+at-capture obs-test 30
+```
+
+## Modos de ventana
+
+| Modo | Flag | Comportamiento |
+|------|------|---------------|
+| **Detached** | *(default)* | Ventana oculta, no roba foco, se cierra al terminar |
+| **Visible** | `-v` | Cambia a la ventana, ves al agente, la ventana queda abierta al terminar |
+
+## Timing
+
+Tres métricas de tiempo disponibles:
+
+| Métrica | Dónde | Qué mide |
+|---------|-------|----------|
+| `duration_seconds` | En `result.json` (reportado por el agente) | Tiempo que el runner estuvo ejecutándose |
+| `Elapsed since spawn` | `at-check` | Tiempo desde `at-spawn` hasta ahora |
+| `End-to-end` | `at-wait` | Tiempo desde `at-spawn` hasta que el resultado está listo |
+
+El timestamp de spawn se guarda en `params.json` (`spawnTime`) al momento de
+ejecutar `at-spawn`.
+
+## Ejemplo de flujo no bloqueante
+
+```bash
+# 1. Lanzas el test (no bloquea)
+TEST_DIR=$(at-spawn -m "opencode-go/deepseek-v4-flash" obs-test "inicia OBS...")
+echo "Test corriendo en: $TEST_DIR"
+
+# 2. Sigues trabajando en otras cosas...
+
+# 3. Más tarde consultas
+at-check "$TEST_DIR"
+
+# O si quieres esperar:
+at-wait "$TEST_DIR" 120
+```
+
+## Paths
+
+Todos los scripts usan `$HOME/.agents/skills/` — portables entre máquinas.
+El runner del agente agrega al PATH:
+- `$HOME/.agents/skills/agent-test/bin`
+- `$HOME/.agents/skills/obs/bin`

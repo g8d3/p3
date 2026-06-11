@@ -1,0 +1,76 @@
+#!/bin/bash
+# web-checker — tests the web dashboard and reports issues
+# Can be run by the checker agent (a2) autonomously.
+# Usage: web-checker [url]
+
+url="${1:-http://localhost:3030}"
+busdir="/tmp/agent-bus"
+issues=""
+
+check() {
+  local label="$1"
+  shift
+  if eval "$@" 2>/dev/null; then
+    echo "  ✅ $label"
+  else
+    echo "  ❌ $label"
+    issues="$issues|$label"
+  fi
+}
+
+echo "🔍 Web Checker — probando $url"
+echo ""
+
+# 1. Server responds
+check "Servidor responde" "node -e 'http.get(\"$url/\",r=>{let d=\"\";r.on(\"data\",c=>d+=c);r.on(\"end\",()=>process.exit(d?0:1))}).on(\"error\",()=>process.exit(1))'"
+
+# 2. API returns valid JSON
+check "API /status es JSON válido" "node -e 'http.get(\"$url/api/status\",r=>{let d=\"\";r.on(\"data\",c=>d+=c);r.on(\"end\",()=>{try{JSON.parse(d);process.exit(0)}catch(e){process.exit(1)}})})'"
+
+# 3. Daemons alive
+check "Daemons reportados como vivos" "node -e 'http.get(\"$url/api/status\",r=>{let d=\"\";r.on(\"data\",c=>d+=c);r.on(\"end\",()=>{const s=JSON.parse(d);const ok=s.daemons.every(d=>d.alive);process.exit(ok?0:1)})})'"
+
+# 4. HTML has video player (mainPlayer)
+check "HTML contiene reproductor de video" "node -e 'http.get(\"$url/\",r=>{let d=\"\";r.on(\"data\",c=>d+=c);r.on(\"end\",()=>process.exit(d.includes(\"mainPlayer\")?0:1))})'"
+
+# 5. HTML has unified table
+check "HTML tiene tabla unificada" "node -e 'http.get(\"$url/\",r=>{let d=\"\";r.on(\"data\",c=>d+=c);r.on(\"end\",()=>process.exit(d.includes(\"mainBody\")?0:1))})'"
+
+# 6. API /events returns array
+check "API /events responde con datos" "node -e 'http.get(\"$url/api/events\",r=>{let d=\"\";r.on(\"data\",c=>d+=c);r.on(\"end\",()=>{try{const e=JSON.parse(d);process.exit(Array.isArray(e)?0:1)}catch(e){process.exit(1)}})})'"
+
+# 7. API /processes returns processes
+check "API /processes responde" "node -e 'http.get(\"$url/api/processes\",r=>{let d=\"\";r.on(\"data\",c=>d+=c);r.on(\"end\",()=>{try{const p=JSON.parse(d);process.exit(p.processes&&Array.isArray(p.processes)?0:1)}catch(e){process.exit(1)}})})'"
+
+# 8. API /traces returns traces
+check "API /traces responde" "node -e 'http.get(\"$url/api/traces\",r=>{let d=\"\";r.on(\"data\",c=>d+=c);r.on(\"end\",()=>{try{const t=JSON.parse(d);process.exit(t.traces&&Array.isArray(t.traces)?0:1)}catch(e){process.exit(1)}})})'"
+
+# 9. API /stream route exists (responds 200 with data or 404 without FIFO)
+check "API /stream ruta configurada" "node -e 'const r=http.get(\"$url/api/stream\",r2=>{r2.destroy();process.exit(r2.statusCode===200||r2.statusCode===404?0:1)});r.setTimeout(2000,()=>{r.destroy();process.exit(0)})'"
+
+echo ""
+if [ -z "$issues" ]; then
+  echo "✅ Todas las pruebas pasaron"
+  exit 0
+else
+  echo "❌ Issues encontrados:$issues"
+  # Write a structured task (task-runner will execute it, not AI)
+  if [ -d "$busdir/a1/in" ]; then
+    mkdir -p "$busdir/a1/tasks"
+    task_file="$busdir/a1/tasks/checker-task-$(date +%s)"
+    cat > "$task_file" << TASKEOF
+INSTRUCCIÓN PARA MAKER (a1) — ejecutar AHORA:
+
+Issues encontrados por web-checker en el dashboard:
+$issues
+
+Ejecuta los siguientes pasos:
+1. Revisa /home/vuos/.agents/skills/orquestar-agentes/web/server.js y /home/vuos/.agents/skills/orquestar-agentes/web/index.html
+2. Si el reproductor de video no carga, verifica que la URL del stream sea accesible y que el server soporte chunked transfer
+3. Corre los tests de nuevo con: bash /home/vuos/.agents/skills/orquestar-agentes/scripts/web-checker
+4. Si todo pasa, ejecuta: say checker "web-checker: fix aplicado"
+TASKEOF
+    echo "   → Tarea estructurada enviada a maker (a1)"
+  fi
+  exit 1
+fi

@@ -1,0 +1,114 @@
+#!/usr/bin/env bash
+# at-spawn: Spawn a new agent in a new tmux window, returns immediately.
+# Usage: at-spawn [-v] [-m <model>] <window-name> <task-message...|@file>
+#   -v: visible mode — switch to the new window (default: detached, no focus steal)
+#
+# Output: prints the test directory path. Non-blocking — you can continue working.
+# Use `at-check <test-dir>` later to get the result, or `at-wait` to block.
+set -euo pipefail
+
+MODEL=""
+VISIBLE=false
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -v|--visible) VISIBLE=true; shift ;;
+        -m) MODEL="$2"; shift 2 ;;
+        *) break ;;
+    esac
+done
+[ $# -lt 2 ] && { echo "Usage: at-spawn [-v] [-m <model>] <window-name> <task...|@file>" >&2; exit 1; }
+
+WINDOW_NAME="$1"; shift
+
+if [[ "$1" == @* ]]; then
+    TASK_FILE="${1#@}"
+    [ ! -f "$TASK_FILE" ] && { echo "ERROR: Task file not found: $TASK_FILE" >&2; exit 1; }
+    export AT_TASK_MESSAGE="$(cat "$TASK_FILE")"
+else
+    export AT_TASK_MESSAGE="$*"
+fi
+
+# 1. Create temp directory
+SPAWN_TIME=$(date +%s.%N)
+TEST_DIR="/tmp/agent-test.${SPAWN_TIME}.$$"
+mkdir -p "$TEST_DIR"
+RESULT_FILE="$TEST_DIR/result.json"
+RUNNER="$TEST_DIR/runner.sh"
+MODEL_FLAG="${MODEL:+-m $MODEL}"
+
+# 2. Generate files via Python
+python3 - "$TEST_DIR" "$RESULT_FILE" "$WINDOW_NAME" "$MODEL_FLAG" "$VISIBLE" "$SPAWN_TIME" << 'PYEOF'
+import json, os, sys
+
+test_dir = sys.argv[1]
+result_file = sys.argv[2]
+window_name = sys.argv[3]
+model_flag = sys.argv[4]
+visible = sys.argv[5] == 'True'
+spawn_time = sys.argv[6]
+
+task_message = os.environ.get('AT_TASK_MESSAGE', '')
+
+# --- params.json ---
+with open(os.path.join(test_dir, 'params.json'), 'w') as f:
+    json.dump({
+        'resultFile': result_file,
+        'windowName': window_name,
+        'visible': visible,
+        'spawnTime': spawn_time,
+    }, f)
+
+# --- task.txt (full prompt for opencode) ---
+full_prompt = task_message + f"""
+
+IMPORTANT: After completing the task, write the result to {result_file} as JSON:
+{{"success": true/false (bool), "duration_seconds": float, "details": "summary string"}}
+"""
+with open(os.path.join(test_dir, 'task.txt'), 'w') as f:
+    f.write(full_prompt)
+
+# --- runner.sh ---
+# NOTE: $HOME is literal — bash expands it at runtime (portable)
+mode_note = "visible" if visible else "detached"
+runner = rf'''#!/usr/bin/env bash
+set -euo pipefail
+
+export PATH="$HOME/.agents/skills/agent-test/bin:$PATH"
+export PATH="$HOME/.agents/skills/obs/bin:$PATH"
+
+TEST_DIR="{test_dir}"
+RESULT_FILE="{result_file}"
+TASK_FILE="{test_dir}/task.txt"
+START_TIME=$(date +%s.%N)
+
+cleanup() {{
+    local ec=$?
+    END_TIME=$(date +%s.%N)
+    DURATION=$(python3 -c "print(round($END_TIME - $START_TIME, 2))")
+    if [ $ec -eq 0 ] && [ -f "$RESULT_FILE" ]; then
+        :  # agent wrote result already
+    else
+        python3 -c "import json; json.dump({{'success': $ec == 0, 'duration_seconds': $DURATION, 'details': 'Runner exited code $ec'}}, open('$RESULT_FILE','w'))" 2>/dev/null || true
+    fi
+}}
+trap cleanup EXIT
+
+echo "=== AGENT TEST ({mode_note}): {window_name} ==="
+echo "Result file: $RESULT_FILE"
+echo ""
+TASK=$(cat "$TASK_FILE")
+opencode run {model_flag} "$TASK"
+'''
+with open(os.path.join(test_dir, 'runner.sh'), 'w') as f:
+    f.write(runner)
+os.chmod(os.path.join(test_dir, 'runner.sh'), 0o755)
+PYEOF
+
+# 3. Create tmux window
+if $VISIBLE; then
+    tmux new-window -n "$WINDOW_NAME" "bash '$RUNNER'; echo ''; echo '===== FINALIZADO ====='; echo 'Regresa con: Ctrl+B 2'; exec bash -i"
+else
+    tmux new-window -d -n "$WINDOW_NAME" "bash '$RUNNER'"
+fi
+
+echo "$TEST_DIR"

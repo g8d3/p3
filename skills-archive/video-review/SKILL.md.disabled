@@ -1,0 +1,155 @@
+---
+name: video-review
+description: Review videos and OBS recordings for quality and errors. Use when the user asks to review a video, check a recording for errors, verify OBS output quality, or debug why a screen recording failed. Triggers include "revisa el video", "check the recording", "review this video", "what's wrong with the video", "analyze the footage", or any request to inspect a video file produced by OBS or screen capture.
+allowed-tools: Bash, Write, Read, Glob, Grep
+---
+
+# Video Review Workflow
+
+Post-production quality check for OBS recordings using programmatic frame analysis.
+
+## ⚠ Known Limitation: opencode & Image Support
+
+**opencode v1.14.48** tiene un límite de tamaño inline para imágenes (~69 bytes). 
+Cualquier imagen mayor es omitida con el mensaje:
+`"could not be resized below the inline image size limit"`
+
+Los pocos modelos que reportan ver la imagen (`minimax-m2.7`, `qwen3.6-plus`) 
+**alucinan el contenido** (describen cosas que no existen en la imagen).
+
+**Ningún modelo opencode-go procesa imágenes de forma confiable.**
+
+## Core Workflow (Programmatic Analysis)
+
+Usar Python + Pillow para analizar frames directamente.
+
+### 1. Extract Key Frames
+
+```bash
+VIDEO="/path/to/video.mp4"
+FRAMES_DIR="/tmp/video_frames_$(date +%s)"
+mkdir -p "$FRAMES_DIR"
+
+DUR=$(ffprobe -v quiet -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "$VIDEO")
+
+INTERVAL=5
+for i in $(seq 0 $INTERVAL $(printf "%.0f" "$DUR")); do
+    ffmpeg -ss "$i" -i "$VIDEO" -vframes 1 -q:v 2 \
+        "$FRAMES_DIR/frame_$(printf "%02d" $((i/INTERVAL))).jpg" -loglevel error -y
+done
+```
+
+### 2. Video Properties Check
+
+```bash
+ffprobe -v quiet -print_format json -show_streams -show_format "$VIDEO" | \
+    python3 -c "
+import json, sys
+d = json.load(sys.stdin)
+fmt = d.get('format', {})
+print(f'Format: {fmt.get(\"format_name\")}, Duration: {fmt.get(\"duration\")}s, '
+      f'Size: {int(fmt.get(\"size\",0))/1024/1024:.1f} MB')
+for s in d.get('streams', []):
+    codec = s.get('codec_type')
+    if codec == 'video':
+        print(f'  Video: {s.get(\"codec_name\")} {s.get(\"width\")}x{s.get(\"height\")} '
+              f'@ {s.get(\"r_frame_rate\")} fps')
+    elif codec == 'audio':
+        print(f'  Audio: {s.get(\"codec_name\")} {s.get(\"sample_rate\")}Hz '
+              f'{s.get(\"channels\")}ch ({s.get(\"codec_bit_rate\",\"?\")}bps)')
+"
+```
+
+### 3. Frame Content Analysis (Pillow)
+
+```python
+from PIL import Image
+import os
+
+frames_dir = "$FRAMES_DIR"
+frames = sorted([f for f in os.listdir(frames_dir) if f.endswith('.jpg')])
+
+for fname in [frames[0], frames[len(frames)//3], frames[2*len(frames)//3], frames[-1]]:
+    img = Image.open(os.path.join(frames_dir, fname))
+    pixels = list(img.getdata())
+    unique_colors = len(set(pixels))
+    non_black = sum(1 for p in pixels if p[0] > 10 or p[1] > 10 or p[2] > 10)
+    avg_color = (
+        sum(p[0] for p in pixels) // len(pixels),
+        sum(p[1] for p in pixels) // len(pixels),
+        sum(p[2] for p in pixels) // len(pixels),
+    )
+    print(f'{fname}: {img.size}, avg_color={avg_color}, '
+          f'unique={unique_colors}, non_black_px={non_black}')
+    if non_black == 0:
+        print('  ⚠ FRAME COMPLETAMENTE NEGRO')
+```
+
+### 4. Alternative: Direct API Call (if vision is needed)
+
+Si se necesita análisis visual real (no programático), usar la API directamente:
+
+```bash
+# Example with Google Gemini API
+B64=$(base64 -w0 /tmp/frame.jpg)
+curl -s "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"contents\": [{
+      \"parts\": [
+        {\"text\": \"Describe esta imagen en detalle.\"},
+        {\"inline_data\": {\"mime_type\": \"image/jpeg\", \"data\": \"$B64\"}}
+      ]
+    }]
+  }" | jq -r '.candidates[0].content.parts[0].text'
+```
+
+### 5. Common Error Diagnosis
+
+| Symptom | Probable Causa | Solución |
+|---------|---------------|----------|
+| **Todos los frames negros** | Captura XSHM no conectada al display | Recrear escena OBS; verificar DISPLAY=:0; togglear visibilidad del source |
+| **Resolución 720p (esperada 1080p)** | Config OBS reseteada (fresh config) | Configurar resolución vía OBS WebSocket |
+| **30fps (esperado 60fps)** | Config OBS reseteada | Configurar FPS vía OBS WebSocket |
+| **Solo primer frame, el resto estático** | Source no refresca; XSHM permissions | Toggle source visibility; revisar permisos X11 |
+| **Audio intacto, video negro** | Escena vacía o source deshabilitado | Verificar sceneItemEnabled=true al crear input |
+| **Frames todos iguales** | Video congelado en primer frame | Verificar XSHM capture_mode; probar xdg-desktop-portal |
+
+### 6. Root Cause: XSHM Capture Failure
+
+La causa más común de video negro: **el source `xshm_input_v2` no se conecta al display después de resetear el config de OBS**.
+
+Pasos para prevenir:
+1. Después de crear el source, hacer toggle de visibilidad (enable→disable→enable)
+2. Verificar que DISPLAY=:0 esté configurado
+3. Usar `inputSettings: { "capture_mode": "region" }` explícitamente
+4. Si falla, matar OBS, borrar `~/.config/obs-studio` y empezar fresco con WebSocket habilitado
+
+## opencode-go Models: Vision Capability Test Results
+
+Test realizado el 2026-05-12 con imagen de prueba (200x200px, fondo azul, círculo rojo, texto "TEST"):
+
+```
+Modelo                  Visión   Notas
+──────────────────────  ───────  ─────────────────────────────
+deepseek-v4-flash        ❌      Límite inline size
+deepseek-v4-pro          ❌      Límite inline size
+glm-5                    ❌      Límite inline size
+glm-5.1                  ❌      No respondió (timeout)
+kimi-k2.5                ❌      Límite inline size
+kimi-k2.6                ❌      No respondió (timeout)
+mimo-v2.5                ❌      Límite inline size
+mimo-v2.5-pro            ❌      Límite inline size
+minimax-m2.5             ⚠      Ve imagen pero alucina contenido
+minimax-m2.7             ⚠      Ve imagen pero alucina contenido
+qwen3.5-plus             ❌      Límite inline size
+qwen3.6-plus             ⚠      Ve imagen pero alucina contenido
+```
+
+**Ningún modelo procesa imágenes de forma confiable vía opencode.**
+
+## Notes
+
+- El análisis programático con Python+Pillow es más confiable que la visión del modelo para detectar frames negros.
+- Si se necesita descripción visual real, usar la API del modelo directamente (no opencode).
+- marcar: `[OBS]`, `[video-review]`, `[debug]`

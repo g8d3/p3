@@ -1,0 +1,120 @@
+#!/usr/bin/env python3.12
+"""trace-helper: create/update trace files in /tmp/agent-bus/traces/"""
+import json, os, sys, time
+
+TRACE_DIR = "/tmp/agent-bus/traces"
+
+def create(trace_id, route, hops, status, message):
+    os.makedirs(TRACE_DIR, exist_ok=True)
+    ts = int(time.time())
+    data = {
+        "id": trace_id,
+        "route": route,
+        "hops": hops,
+        "status": status,
+        "message": message[:200] if message else "",
+        "created": ts,
+        "updated": ts,
+    }
+    fp = f"{TRACE_DIR}/{trace_id}.json"
+    with open(fp, "w") as f:
+        json.dump(data, f, indent=2)
+    # Symlink latest for easy access
+    latest = f"{TRACE_DIR}/latest.json"
+    try: os.unlink(latest)
+    except: pass
+    try: os.symlink(f"{trace_id}.json", latest)
+    except: pass
+
+def find_matching(needle):
+    """Find trace IDs where message content matches needle."""
+    if not os.path.isdir(TRACE_DIR):
+        return []
+    results = []
+    for fname in sorted(os.listdir(TRACE_DIR), reverse=True):
+        if not fname.endswith(".json") or fname == "latest.json":
+            continue
+        fp = f"{TRACE_DIR}/{fname}"
+        if not os.path.isfile(fp):
+            continue
+        try:
+            with open(fp) as f:
+                data = json.load(f)
+                if needle in data.get("message", ""):
+                    results.append(data["id"])
+        except:
+            pass
+        if len(results) >= 5:
+            break
+    return results
+
+def update_status(trace_id, new_status, hop_from=None, hop_to=None, ts=None, error=None):
+    fp = f"{TRACE_DIR}/{trace_id}.json"
+    if not os.path.exists(fp):
+        return None
+    with open(fp) as f:
+        data = json.load(f)
+    updated = False
+    if hop_from and hop_to:
+        for hop in data["hops"]:
+            if hop.get("from") == hop_from and hop.get("to") == hop_to:
+                hop["status"] = new_status
+                if ts: hop["ts"] = ts
+                if error: hop["error"] = error
+                updated = True
+                break
+    if not updated:
+        data["status"] = new_status
+    data["updated"] = int(time.time())
+    with open(fp, "w") as f:
+        json.dump(data, f, indent=2)
+    return data
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage:", file=sys.stderr)
+        print("  trace-helper create <id> <route_json> <hops_json> <status>   (message on stdin)", file=sys.stderr)
+        print("  trace-helper update-status <id> <status> [from] [to] [ts] [error]", file=sys.stderr)
+        print("  trace-helper find <needle>", file=sys.stderr)
+        sys.exit(1)
+
+    cmd = sys.argv[1]
+
+    if cmd == "create":
+        if len(sys.argv) < 5:
+            print("Usage: trace-helper create <id> <route_json> <hops_json> <status>", file=sys.stderr)
+            sys.exit(1)
+        trace_id = sys.argv[2]
+        route = json.loads(sys.argv[3])
+        hops = json.loads(sys.argv[4])
+        status = sys.argv[5]
+        message = sys.stdin.read()
+        create(trace_id, route, hops, status, message)
+
+    elif cmd == "update-status":
+        if len(sys.argv) < 4:
+            print("Usage: trace-helper update-status <id> <status> [from] [to] [ts] [error]", file=sys.stderr)
+            sys.exit(1)
+        trace_id = sys.argv[2]
+        new_status = sys.argv[3]
+        hop_from = sys.argv[4] if len(sys.argv) > 4 else None
+        hop_to = sys.argv[5] if len(sys.argv) > 5 else None
+        ts = int(sys.argv[6]) if len(sys.argv) > 6 and sys.argv[6] != "null" else None
+        error = sys.argv[7] if len(sys.argv) > 7 and sys.argv[7] != "null" else None
+        result = update_status(trace_id, new_status, hop_from, hop_to, ts, error)
+        if result is None:
+            print(f"trace {trace_id} not found", file=sys.stderr)
+            sys.exit(1)
+        print(f"trace {trace_id} updated to {new_status}")
+
+    elif cmd == "find":
+        if len(sys.argv) < 3:
+            print("Usage: trace-helper find <needle>", file=sys.stderr)
+            sys.exit(1)
+        ids = find_matching(sys.argv[2])
+        for i in ids:
+            print(i)
+
+    else:
+        print(f"unknown command: {cmd}", file=sys.stderr)
+        sys.exit(1)

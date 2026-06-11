@@ -1,0 +1,138 @@
+#!/bin/bash
+# ciclador — autonomous work cycle daemon
+# Watches project for file changes (inotify) and runs maker+checker cycle instantly.
+# Also does periodic deep scans (hourly).
+# Usage: ciclador <project_dir>
+
+project_dir="${1:-$PWD}"
+busdir="/tmp/agent-bus"
+web_dir="$(cd "$(dirname "$0")/../web" && pwd 2>/dev/null)"  # web dashboard code
+logfile="$busdir/ciclador.log"
+cycle=0
+
+log() { echo "[$(date +%H:%M:%S)] cycle $cycle: $*" >> "$logfile"; }
+
+log "ciclador started (project=$project_dir)"
+
+# ── Scan function ──
+scan_project() {
+  cycle=$((cycle + 1))
+  log "scanning..."
+  local issues=""
+  local targets=()
+
+  # Determine what to scan: project src, or web/ as fallback
+  [ -d "$project_dir/src" ] && targets+=("$project_dir/src")
+  [ -d "$web_dir" ] && targets+=("$web_dir")
+
+  # Build the watched dirs list (first run) — just use web/ if no project src
+  if [ ${#targets[@]} -eq 0 ]; then
+    log "no source dirs to scan"
+    return
+  fi
+
+  for scan_dir in "${targets[@]}"; do
+    # Check TODOs/FIXMEs
+    todos=$(grep -r "TODO\|FIXME\|HACK" "$scan_dir" 2>/dev/null | wc -l)
+    [ "$todos" -gt 0 ] && issues="$issues|$todos TODOs/FIXMEs en $scan_dir"
+
+    # Check JS/TS syntax errors
+    if which node >/dev/null 2>&1; then
+      syntax_errors=$(find "$scan_dir" -name "*.js" -o -name "*.jsx" -o -name "*.mjs" 2>/dev/null | head -10 | while read -r f; do
+        out=$(node --check "$f" 2>&1) && continue
+        echo "$out" | grep -qi "error" && echo "$f"
+      done | wc -l)
+      [ "$syntax_errors" -gt 0 ] && issues="$issues|$syntax_errors errores de sintaxis en $scan_dir"
+    fi
+  done
+
+  # Check for orphaned inbox files (messages stuck > 1h)
+  for i in a1 a2 a3; do
+    stuck=$(find "$busdir/$i/in" -type f -mmin +60 2>/dev/null | wc -l)
+    [ "$stuck" -gt 0 ] && issues="$issues|$stuck mensajes atascados en $i/in (>{60}m)"
+  done
+
+  # Check video cache for corrupted files
+  if [ -d /tmp/video-cache ]; then
+    corrupted=0
+    for v in /tmp/video-cache/*.mp4; do
+      [ -f "$v" ] && ffprobe "$v" 2>/dev/null | grep -q "Invalid" && corrupted=$((corrupted + 1))
+    done
+    [ "$corrupted" -gt 0 ] && issues="$issues|$corrupted videos corruptos en cache"
+  fi
+
+  # Run web-checker against the dashboard
+  webcheck_out=$("$web_dir/../scripts/web-checker" 2>/dev/null | grep "❌" | head -3)
+  if [ -n "$webcheck_out" ]; then
+    issues="$issues|web dashboard: $(echo "$webcheck_out" | tr '\n' ';')"
+  fi
+
+  if [ -z "$issues" ]; then
+    log "no issues found"
+    return
+  fi
+
+  log "issues found: $issues"
+
+  # ── Create trace for this cycle ──
+  trace_id="trace-ciclador-${cycle}-$(date +%s)"
+  trace_helper="$(cd "$(dirname "$0")" && pwd)/trace-helper"
+  ts=$(date +%s)
+  echo "$issues" | "$trace_helper" create "$trace_id" \
+    '["ciclador","a1"]' \
+    '[{"from":"ciclador","to":"a1","status":"assigned","ts":'$ts',"error":null}]' \
+    "assigned"
+  log "trace $trace_id created"
+
+  # Write a short, actionable task with trace ID
+  mkdir -p "$busdir/a1/tasks"
+  task_file="$busdir/a1/tasks/task-$cycle"
+  cat > "$task_file" << TASKEOF
+TRACE_ID: $trace_id
+INSTRUCCIÓN PARA MAKER
+
+Issues: $issues
+
+Ejecuta:
+1. node --check /home/vuos/.agents/skills/orquestar-agentes/web/server.js
+2. say checker "revisa fix ciclo $cycle"
+TASKEOF
+  log "assigned to maker (task-$cycle)"
+}
+
+# ── 1. Initial scan ──
+scan_project
+
+# ── 2. Watch for file changes (instant reaction) ──
+watch_dirs=()
+[ -d "$project_dir/src" ] && watch_dirs+=("$project_dir/src")
+[ -d "$web_dir" ] && watch_dirs+=("$web_dir")
+
+if [ ${#watch_dirs[@]} -gt 0 ]; then
+  log "watching: ${watch_dirs[*]}..."
+  rm -f /tmp/ciclador-fifo
+  mkfifo /tmp/ciclador-fifo
+  inotifywait -m -q -e close_write -r "${watch_dirs[@]}" --format '%w%f' > /tmp/ciclador-fifo 2>/dev/null &
+  echo $! > "$busdir/ciclador-watch.pid"
+  # Background reader to avoid blocking the main loop
+  (
+    while read -r filepath < /tmp/ciclador-fifo; do
+      ext="${filepath##*.}"
+      case "$ext" in
+        ts|tsx|js|jsx|css|html|json|mjs)
+          echo "[$(date +%H:%M:%S)] file changed: $filepath" >> "$logfile"
+          scan_project
+          ;;
+      esac
+    done
+  ) &
+  echo $! > "$busdir/ciclador-reader.pid"
+else
+  log "no dirs to watch, skipping inotify"
+fi
+
+# ── 3. Periodic deep scan (every 60 min) ──
+while true; do
+  sleep 3600
+  scan_project
+done

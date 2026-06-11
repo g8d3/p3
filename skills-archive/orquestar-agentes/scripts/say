@@ -1,0 +1,11 @@
+#!/bin/bash
+# say <target> <message>
+# Send a message to another agent via the bus
+target="$1"
+[ -z "$target" ] && echo "Usage: say <target> <message>" && exit 1
+shift
+msg="$*"
+[ -z "$msg" ] && echo "Usage: say <target> <message>" && exit 1
+
+f="/tmp/agent-bus/${target}/in/msg-$(date +%s)-$$"
+echo "$msg" > "$f"

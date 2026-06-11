@@ -1,0 +1,94 @@
+#!/bin/bash
+# task-runner — executes tasks from maker's inbox directly via shell
+# Uses fifo to avoid subshell / pipeline death issues.
+# Usage: task-runner
+
+busdir="/tmp/agent-bus"
+logfile="$busdir/task-runner.log"
+
+log() { echo "[$(date +%H:%M:%S)] $*" >> "$logfile"; }
+
+log "task-runner started"
+
+mkdir -p "$busdir/a1/tasks"
+
+rm -f /tmp/task-runner-fifo
+mkfifo /tmp/task-runner-fifo
+
+inotifywait -m -q -e close_write -e moved_to "$busdir/a1/tasks" --format '%w%f' > /tmp/task-runner-fifo 2>/dev/null &
+echo $! > "$busdir/task-runner-watch.pid"
+
+while read -r filepath < /tmp/task-runner-fifo; do
+  [ -f "$filepath" ] || continue
+  task=$(cat "$filepath" 2>/dev/null)
+  echo "$task" | grep -q "INSTRUCCIÓN PARA MAKER" || {
+    # Not a structured task, let the AI handle it
+    rm -f "$filepath"
+    continue
+  }
+
+  log "executing: $(basename "$filepath")"
+
+  # ── Extract trace ID from task preamble ──
+  trace_id=$(echo "$task" | head -1 | grep "^TRACE_ID:" | sed 's/^TRACE_ID: *//')
+  trace_helper="$(cd "$(dirname "$0")" && pwd)/trace-helper"
+
+  # Update trace to running
+  if [ -n "$trace_id" ]; then
+    "$trace_helper" update-status "$trace_id" "running" "ciclador" "a1" "$(date +%s)" 2>/dev/null \
+      || log "  trace $trace_id not found for running"
+    "$trace_helper" update-status "$trace_id" "running" "maker" "a1" "$(date +%s)" 2>/dev/null \
+      || true
+    log "  trace $trace_id → running"
+  fi
+
+  # Extract and run commands from the task
+  echo "$task" | while IFS= read -r line; do
+    # Extract command after "N. Texto: comando"
+    cmd=$(echo "$line" | sed -n 's/^[[:space:]]*[0-9][0-9]*\.[[:space:]]*[^:]*:[[:space:]]*//p')
+    [ -z "$cmd" ] && continue
+    cmd=$(echo "$line" | sed 's/^[0-9]*\.\s*[^:]*:\s*//')
+    [ -z "$cmd" ] && continue
+
+    if echo "$cmd" | grep -q "^say "; then
+      raw_target=$(echo "$cmd" | awk '{print $2}')
+      msg=$(echo "$cmd" | cut -d' ' -f3-)
+      case "$raw_target" in
+        maker|a1) target="a1" ;;
+        checker|a2) target="a2" ;;
+        video-maker|a3) target="a3" ;;
+        *) target="$raw_target" ;;
+      esac
+      # Write inbox file with trace ID embedded in filename for busd
+      trace_suffix=""
+      [ -n "$trace_id" ] && trace_suffix="--${trace_id}"
+      echo "$msg" > "$busdir/$target/in/msg-$$${trace_suffix}"
+      log "  → sent to $target (as $raw_target): $msg"
+
+      # ── Update trace ──
+      if [ -n "$trace_id" ]; then
+        ts=$(date +%s)
+        new_status="sent"
+        echo "$msg" | grep -qi "say checker\|checker:" && new_status="verified"
+        "$trace_helper" update-status "$trace_id" "$new_status" "a1" "$target" "$ts" 2>/dev/null \
+          || log "  trace $trace_id update failed"
+        log "  trace $trace_id → $new_status (maker→$target)"
+      fi
+    else
+      # Run anything else as a shell command
+      log "  ⚡ $cmd"
+      eval "$cmd" 2>&1 | while IFS= read -r line; do log "     $line"; done
+      log "  ✓ done"
+    fi
+  done
+
+  # ── Mark trace completed ──
+  if [ -n "$trace_id" ]; then
+    "$trace_helper" update-status "$trace_id" "completed" "" "" "$(date +%s)" 2>/dev/null \
+      || true
+    log "  trace $trace_id → completed"
+  fi
+
+  rm -f "$filepath"
+  log "task done"
+done

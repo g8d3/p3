@@ -1,0 +1,46 @@
+#!/bin/bash
+# add-agent — adds a new agent without restarting existing ones
+# Usage: add-agent [role_name]
+# Determines next available number automatically.
+
+busdir="/tmp/agent-bus"
+self_dir="$(cd "$(dirname "$0")" && pwd)"
+
+# Find next available agent number
+next=1
+while [ -d "$busdir/a$next" ]; do
+  next=$((next + 1))
+done
+name="a$next"
+role="${1:-free}"
+
+echo "➕ Agregando $name (rol: $role)..."
+
+# 1. Create bus directories
+mkdir -p "$busdir/$name/in"
+
+# 2. Open tmux window
+tmux new-window -d -n "$name" 'export PATH="$HOME/.agents/bin:$PATH"; exec zsh -i -c "crush --yolo"'
+
+# 3. Restart busd with new agent count (safe — no message loss)
+old_pid=$(cat "$busdir/busd.pid" 2>/dev/null)
+kill "$old_pid" 2>/dev/null
+nohup "$self_dir/busd" "$next" > /dev/null 2>&1 &
+echo $! > "$busdir/busd.pid"
+echo "   busd reconectado (watches $name)"
+
+# 4. Auto-dismiss init prompt (fire-and-forget)
+(
+  for attempt in $(seq 1 12); do
+    sleep 0.5
+    pane="$(tmux capture-pane -t "$name" -p 2>/dev/null)"
+    echo "$pane" | grep -q "Would you like to initialize" && {
+      tmux send-keys -t "$name" "Nope" Enter
+      break
+    }
+  done
+) &
+
+echo "✅ $name agregado con rol '$role'"
+echo "   Aparecerá automáticamente en el web dashboard"
+echo "   Para asignarle rol: echo 'rol:$role' > $busdir/$name/role"

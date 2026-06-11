@@ -1,0 +1,12 @@
+#!/bin/bash
+# nueva-sesion <N>
+# Presses Ctrl+N in each agent to create a new Crush session
+
+n=${1:-1}
+
+for i in $(seq 1 "$n"); do
+  tmux send-keys -t "a$i" C-n
+  echo "📄 Ctrl+N enviado a a$i"
+done
+
+echo "✅ Nueva sesión creada en $n agente(s)."

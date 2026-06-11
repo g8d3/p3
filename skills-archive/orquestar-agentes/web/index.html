@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orquestar Agentes</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0d1117;color:#c9d1d9;padding:20px}
+h1{font-size:1.2rem;color:#58a6ff;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+h1 small{color:#8b949e;font-weight:normal;font-size:0.8rem}
+.subtitle{font-size:0.8rem;color:#8b949e;margin-bottom:12px}
+
+/* ── Toolbar (view toggles + filters + agent actions, single row) ── */
+.toolbar{display:flex;gap:4px;align-items:center;margin-bottom:6px;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:4px 8px;flex-wrap:nowrap}
+.toolbar-btn{padding:4px 10px;border-radius:5px;cursor:pointer;font-size:0.78rem;color:#8b949e;user-select:none;white-space:nowrap;border:none;background:none;font-family:inherit}
+.toolbar-btn:hover{color:#c9d1d9;background:#21262d}
+.toolbar-btn.active{background:#238636;color:#fff}
+.toolbar input,.toolbar select{padding:3px 6px;border-radius:5px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;font-size:0.78rem;width:auto}
+.toolbar input{width:160px;min-width:0}
+.toolbar .gear{position:relative;cursor:pointer;padding:2px 6px;border-radius:4px;font-size:0.9rem;user-select:none}
+.toolbar .gear:hover{background:#21262d}
+.gear-drop{display:none;position:absolute;top:100%;right:0;background:#161b22;border:1px solid #30363d;border-radius:6px;padding:6px;z-index:10;min-width:140px;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.gear-drop.show{display:block}
+.gear-drop label{display:flex;align-items:center;gap:6px;padding:3px 6px;font-size:0.75rem;cursor:pointer;color:#c9d1d9;white-space:nowrap}
+.gear-drop label:hover{background:#21262d;border-radius:4px}
+.gear-drop input{cursor:pointer}
+
+/* ── Table ── */
+.table-wrap{overflow-x:auto;border:1px solid #30363d;border-radius:8px;background:#161b22;margin-bottom:12px}
+table{width:100%;border-collapse:collapse;font-size:0.82rem;min-width:600px}
+thead th{text-align:left;padding:6px 10px;font-size:0.7rem;color:#8b949e;text-transform:uppercase;letter-spacing:0.3px;border-bottom:1px solid #30363d;font-weight:500;background:#0d1117;white-space:nowrap;cursor:pointer;user-select:none;position:relative}
+thead th:hover{color:#c9d1d9}
+thead th .sort-arrow{color:#58a6ff;margin-left:3px;font-size:0.65rem}
+thead th.dragging{opacity:.5}
+thead th.drag-over{border-left:2px solid #58a6ff}
+tbody td{padding:5px 10px;border-bottom:1px solid #21262d;vertical-align:middle;white-space:nowrap}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.03)}
+tbody tr.expandable{cursor:pointer}
+tbody tr.expanded{background:rgba(88,166,255,.04)}
+tbody tr.expand-row td{padding:0;border-bottom:1px solid #21262d}
+tbody tr.expand-row:hover{background:transparent}
+tbody tr.expand-row .expand-inner{padding:8px 10px 8px 30px;background:#0d1117;font-size:0.78rem}
+.expand-inner .sub-item{padding:3px 0;display:flex;gap:8px;align-items:flex-start;color:#8b949e}
+.expand-inner .sub-item .st{color:#c9d1d9;flex:1;word-break:break-word}
+
+.name-col{display:flex;align-items:center;gap:6px;font-weight:600}
+.expand-icon{display:inline-block;width:14px;text-align:center;color:#8b949e;font-size:0.7rem;flex-shrink:0}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle;flex-shrink:0}
+.dot.green{background:#3fb950;box-shadow:0 0 4px rgba(63,185,80,.4)}
+.dot.red{background:#f85149;box-shadow:0 0 4px rgba(248,81,73,.4)}
+.dot.yellow{background:#d29922;box-shadow:0 0 4px rgba(210,153,34,.4)}
+.badge{font-size:0.65rem;padding:1px 8px;border-radius:8px;font-weight:500;white-space:nowrap}
+.badge.daemon{background:rgba(63,185,80,.12);color:#3fb950;border:1px solid rgba(63,185,80,.2)}
+.badge.agent{background:rgba(88,166,255,.12);color:#58a6ff;border:1px solid rgba(88,166,255,.2)}
+.badge.process{background:rgba(139,148,158,.12);color:#8b949e;border:1px solid rgba(139,148,158,.2)}
+.badge.human{background:rgba(210,153,34,.12);color:#d29922;border:1px solid rgba(210,153,34,.2)}
+.badge.orchestrator{background:rgba(188,140,255,.12);color:#bc8cff;border:1px solid rgba(188,140,255,.2)}
+.badge.essential{background:rgba(63,185,80,.12);color:#3fb950}
+.badge.maker{background:rgba(88,166,255,.12);color:#58a6ff}
+.badge.checker{background:rgba(188,140,255,.12);color:#bc8cff}
+.badge.video-maker{background:rgba(210,153,34,.12);color:#d29922}
+.badge.free{background:rgba(139,148,158,.12);color:#8b949e}
+.badge.spawned{background:rgba(139,148,158,.12);color:#8b949e}
+.badge.thinking{background:rgba(210,153,34,.12);color:#d29922}
+.badge.online{background:rgba(63,185,80,.12);color:#3fb950}
+.badge.offline{background:rgba(139,148,158,.12);color:#8b949e}
+.badge.crush{background:rgba(210,153,34,.12);color:#d29922;border:1px solid rgba(210,153,34,.2)}
+.desc{color:#8b949e;font-size:0.75rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pid{color:#8b949e;font-size:0.75rem;font-family:monospace}
+.stat{font-size:0.82rem;text-align:center;min-width:32px}
+.bar{display:inline-block;height:8px;border-radius:4px;min-width:2px}
+.bar.cpu{background:#58a6ff}
+.bar.mem{background:#3fb950}
+.cpuval{color:#58a6ff;font-size:0.75rem}
+.memval{color:#3fb950;font-size:0.75rem}
+.status-text{font-size:0.75rem}
+.status-text.active,.status-text.online{color:#3fb950}
+.status-text.down,.status-text.offline{color:#f85149}
+.status-text.running,.status-text.thinking{color:#d29922}
+
+/* ── Pagination ── */
+.pagination{display:flex;gap:4px;align-items:center;padding:8px 14px;justify-content:center;font-size:0.75rem;color:#8b949e}
+.pagination button{padding:3px 10px;border-radius:4px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;cursor:pointer;font-size:0.75rem}
+.pagination button:hover{background:#21262d}
+.pagination button:disabled{opacity:.4;cursor:not-allowed}
+.pagination .pcur{color:#58a6ff;font-weight:600}
+.filter-count{color:#8b949e;font-size:0.75rem;margin-left:auto;white-space:nowrap}
+.del-icon{cursor:pointer;font-size:0.85rem;opacity:.5;transition:opacity .15s}
+.del-icon:hover{opacity:1}
+
+/* ── Flow groups (for by-flow mode) ── */
+.flow-group{border:1px solid #30363d;border-radius:6px;margin-bottom:8px;background:#0d1117;overflow:hidden}
+.flow-header{display:flex;gap:8px;align-items:center;padding:8px 12px;background:#161b22;border-bottom:1px solid #30363d;font-size:0.82rem}
+.flow-path{font-family:monospace;color:#58a6ff;font-weight:600}
+.flow-tag{padding:2px 8px;border-radius:10px;font-size:0.7rem;font-weight:500}
+.flow-tag.planned{background:#1f6feb22;color:#58a6ff;border:1px solid #1f6feb}
+.flow-tag.delivered{background:#23863622;color:#3fb950;border:1px solid #238636}
+.flow-tag.verified{background:#bc8cff22;color:#bc8cff;border:1px solid #bc8cff}
+.flow-tag.failed{background:#da363322;color:#f85149;border:1px solid #da3633}
+.flow-tag.sent{background:#d2992222;color:#d29922;border:1px solid #d29922}
+.flow-tag.chat{background:#58a6ff22;color:#58a6ff;border:1px solid #58a6ff}
+.flow-tag.bus{background:#8b949e22;color:#8b949e;border:1px solid #8b949e}
+.flow-msgs{padding:6px 12px}
+.flow-hop{color:#8b949e;font-size:0.75rem;padding:2px 0;display:flex;gap:8px;align-items:center}
+.flow-error{color:#f85149;font-size:0.7rem}
+
+/* ── Video ── */
+.vid-item{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid #21262d}
+.vid-item:last-child{border-bottom:none}
+.vid-info{flex:1}
+.vid-info .name{font-size:0.85rem}
+.vid-info .meta{font-size:0.75rem;color:#8b949e}
+.vid-thumb{width:120px;height:68px;background:#0d1117;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;border:1px solid #30363d;flex-shrink:0}
+.vid-thumb:hover{border-color:#58a6ff}
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 20px;border-radius:6px;font-size:0.85rem;transition:opacity .3s;opacity:0;z-index:100}
+.toast.show{opacity:1}
+.toast.ok{background:#238636}
+.toast.err{background:#da3633}
+
+/* .send-bar replaced — card below table */
+.send-card{display:flex;gap:8px;align-items:center;margin-top:8px;padding:10px 14px;background:#161b22;border:1px solid #30363d;border-radius:8px}
+.send-card select,.send-card input,.send-card button{flex-shrink:0}
+
+@media(max-width:600px){
+  .toolbar{flex-wrap:wrap;gap:2px}
+  .toolbar-btn{flex:1;text-align:center;padding:4px 6px}
+  .toolbar input{width:100%}
+  .send-card{flex-direction:column;align-items:stretch}
+  .send-card input{width:100%}
+}
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:center;justify-content:center}
+.modal-card{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px;width:320px;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+.name-col{display:flex;align-items:center;gap:6px;font-weight:600}
+</style></head><body>
+<h1>⚙️ Orquestar Agentes <small id="subtitle">cargando...</small></h1>
+<div class="subtitle">Bus de mensajes · Agentes · Procesos</div>
+
+<!-- Video player — direct file with auto-reload -->
+<div style="margin-bottom:12px;position:relative">
+  <video autoplay muted loop controls playsinline style="width:100%;max-height:400px;border-radius:8px;background:#000;display:block" id="mainPlayer">
+    <source src="/api/stream" type="video/mp4">
+  </video>
+  <!-- Live indicator overlay -->
+  <div style="position:absolute;top:10px;left:10px;display:flex;gap:8px;align-items:center">
+    <span style="background:#da3633;color:#fff;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:0.5px">● LIVE</span>
+    <span style="background:rgba(0,0,0,.5);color:#c9d1d9;font-size:0.72rem;padding:2px 8px;border-radius:4px" id="streamUptime">0s</span>
+  </div>
+  <!-- Thin active bar -->
+  <div style="height:2px;background:#30363d;border-radius:0 0 2px 2px;overflow:hidden">
+    <div id="streamBar" style="height:100%;width:0%;background:#3fb950;border-radius:0 0 2px 2px;transition:width 1s linear"></div>
+  </div>
+</div>
+
+<!-- Metrics bar (populated by /api/metrics) -->
+<div id="metricsBar" style="display:none;margin-bottom:8px;padding:6px 12px;background:#161b22;border:1px solid #30363d;border-radius:6px;font-size:0.75rem;color:#8b949e;gap:16px;align-items:center;flex-wrap:wrap">
+  <span style="color:#c9d1d9;font-weight:600">📊 Metrics</span>
+  <span id="metricCpu">CPU —</span>
+  <span id="metricMem">RAM —</span>
+  <span id="metricBus">Bus —</span>
+  <span id="metricDaemons">Daemons —</span>
+  <span id="metricAgents">Agentes —</span>
+  <span id="metricMsgs">Msgs/h —</span>
+</div>
+
+<!-- Agent states bar -->
+<div id="agentStates" style="margin-bottom:8px;display:flex;gap:12px;padding:6px 12px;background:#161b22;border:1px solid #30363d;border-radius:6px;font-size:0.78rem;color:#8b949e;align-items:center;flex-wrap:wrap"></div>
+
+<!-- Toolbar: view toggles + filters + agent actions -->
+<div class="toolbar">
+  <button class="toolbar-btn active" id="viewRaw" onclick="setView('raw')">📋 Raw</button>
+  <button class="toolbar-btn" id="viewAgent" onclick="setView('agent')">🤖 Agent</button>
+  <span style="color:#30363d;margin:0 2px">|</span>
+  <button class="toolbar-btn" id="toggleTrace" onclick="toggleTraceGroup()" style="font-size:0.72rem">🔀</button>
+  <input id="filterInput" placeholder="Filtrar..." oninput="applyFilters()">
+  <select id="typeFilter" onchange="applyFilters()">
+    <option value="">Todos</option>
+    <option value="agent">Agentes</option>
+    <option value="daemon">Daemons</option>
+    <option value="process">Procesos</option>
+    <option value="human">Humanos</option>
+    <option value="orchestrator">Orquestador</option>
+  </select>
+  <span class="gear">⚙️
+    <div class="gear-drop" id="gearDrop"></div>
+  </span>
+  <span class="filter-count" id="filterCount"></span>
+  <button onclick="showAddAgent()" style="padding:3px 8px;border-radius:5px;border:1px solid #238636;background:#238636;color:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap">+ Agent</button>
+</div>
+<div class="table-wrap">
+  <table><thead><tr id="colHeaders"></tr></thead>
+  <tbody id="mainBody"></tbody></table>
+  <div class="pagination" id="pagination"></div>
+</div>
+<div class="send-card">
+  <span style="color:#8b949e;font-size:0.82rem;font-weight:600;white-space:nowrap">📨</span>
+  <select id="sendTarget" style="width:130px;padding:5px 8px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;font-size:0.82rem"><option value="">a quién...</option></select>
+  <input id="sendMsg" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter') sendQuick()" style="flex:1;min-width:0;padding:5px 8px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;font-size:0.82rem">
+  <button onclick="sendQuick()" style="padding:5px 14px;border-radius:6px;border:1px solid #238636;background:#238636;color:#fff;cursor:pointer;font-size:0.82rem;font-weight:500;white-space:nowrap">Enviar</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Add Agent Modal -->
+<div class="modal-overlay" id="addModal" style="display:none" onclick="if(event.target===this)hideAddForm()">
+  <div class="modal-card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <strong style="color:#f0f6fc;font-size:0.95rem">➕ Nuevo Agente</strong>
+      <span onclick="hideAddForm()" style="cursor:pointer;color:#8b949e;font-size:1.2rem">&times;</span>
+    </div>
+    <label style="color:#8b949e;font-size:0.8rem;display:block;margin-bottom:4px">Nombre</label>
+    <input id="newAgentName" placeholder="ej: a4" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;font-size:0.9rem;margin-bottom:10px">
+    <label style="color:#8b949e;font-size:0.8rem;display:block;margin-bottom:4px">Rol</label>
+    <select id="newAgentRole" style="width:100%;padding:8px 10px;border-radius:6px;border:1px solid #30363d;background:#0d1117;color:#c9d1d9;font-size:0.9rem;margin-bottom:16px">
+      <option value="free">free</option>
+      <option value="maker">maker</option>
+      <option value="checker">checker</option>
+      <option value="video-maker">video-maker</option>
+    </select>
+    <button onclick="createAgent()" style="width:100%;padding:10px;border-radius:6px;border:none;background:#238636;color:#fff;font-weight:600;cursor:pointer;font-size:0.9rem">Crear Agente</button>
+  </div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+
+async function api(url,opts={}){const r=await fetch(url,{headers:{'Content-Type':'application/json'},...opts});return r.json()}
+function showToast(msg,type='ok'){const t=$('#toast');t.textContent=msg;t.className='toast '+type+' show';setTimeout(()=>t.className='toast',3000)}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
+
+// ── State ──
+let viewMode = 'raw';
+let columns = [];
+let visibleCols = [];
+let sortCol = '';
+let sortDir = 'asc';
+let page = 0;
+let pageSize = 50;
+let _lastEvents = [];
+let _lastProcs = [];
+let dragSrc = null;
+let expandedRows = {}; // { name: true/false }
+let traceGroup = false; // raw view: group by trace_id
+
+// ── View mode toggle ──
+function setView(mode){
+  viewMode = mode;
+  ['viewRaw','viewAgent'].forEach(id=>{
+    document.getElementById(id).className='toolbar-btn'+(mode===id.replace('view','').toLowerCase()?' active':'');
+  });
+  sortCol = ''; sortDir = 'asc'; page = 0;
+  buildColumns();
+  buildHeaders();
+  render();
+}
+
+// ── Build columns based on view mode ──
+function buildColumns(){
+  if (viewMode === 'raw') {
+    columns = [
+      {id:'time',label:'Hora',always:true},
+      {id:'source',label:'Origen'},
+      {id:'target',label:'Destino'},
+      {id:'content',label:'Mensaje',always:true},
+      {id:'type',label:'Tipo'},
+      {id:'ago',label:'Antigüedad'},
+    ];
+  } else { // agent
+    columns = [
+      {id:'name',label:'Nombre',always:true},
+      {id:'type',label:'Tipo'},
+      {id:'role',label:'Rol'},
+      {id:'status',label:'Estado'},
+      {id:'cpu',label:'CPU%'},
+      {id:'mem',label:'RAM%'},
+      {id:'lastMsg',label:'Último mensaje',always:true},
+      {id:'lastSeen',label:'Visto'},
+      {id:'actions',label:'',always:true},
+    ];
+  }
+  visibleCols = columns.map(c => c.always ? true : true);
+}
+
+// ── Drag-and-drop column reorder ──
+document.addEventListener('click', e => {
+  const drop = $('#gearDrop');
+  if (!e.target.closest('.gear')) drop.classList.remove('show');
+});
+
+function buildHeaders(){
+  const tr = $('#colHeaders');
+  tr.innerHTML = columns.map((c,i)=>{
+    if (!visibleCols[i] && !c.always) return '';
+    const arrow = sortCol === c.id ? (sortDir==='asc'?' ▲':' ▼') : '';
+    return `<th data-idx="${i}" draggable="true" onclick="sortBy(${i})"
+      ondragstart="dragStart(event,${i})" ondragover="dragOver(event,${i})" ondrop="dropCol(event,${i})" ondragend="dragEnd()"
+      class="${c.always?'':'draggable'}">${c.label}<span class="sort-arrow">${arrow}</span></th>`;
+  }).join('');
+}
+
+function dragStart(e,idx){dragSrc=idx;e.target.classList.add('dragging')}
+function dragOver(e,idx){e.preventDefault();if(idx!==dragSrc)e.target.classList.add('drag-over')}
+function dragEnd(){$$('th').forEach(t=>t.classList.remove('dragging','drag-over'))}
+function dropCol(e,idx){
+  e.preventDefault();
+  if(dragSrc===null||dragSrc===idx)return;
+  const tmp=columns[dragSrc];columns[dragSrc]=columns[idx];columns[idx]=tmp;
+  const vtmp=visibleCols[dragSrc];visibleCols[dragSrc]=visibleCols[idx];visibleCols[idx]=vtmp;
+  dragSrc=null;buildHeaders();render();
+}
+
+// ── Columns toggle ──
+function toggleColumns(){
+  const drop=$('#gearDrop');
+  drop.classList.toggle('show');
+  drop.innerHTML=columns.map((c,i)=>c.always?'':
+    `<label><input type="checkbox" ${visibleCols[i]?'checked':''} onchange="toggleCol(${i})"> ${c.label}</label>`
+  ).join('');
+  // Click on gear
+}
+$$('.gear').forEach(g=>g.addEventListener('click',toggleColumns));
+
+function toggleCol(idx){
+  visibleCols[idx]=!visibleCols[idx];
+  buildHeaders();render();
+}
+
+// ── Sorting ──
+function sortBy(idx){
+  const c=columns[idx];
+  if(sortCol===c.id)sortDir=sortDir==='asc'?'desc':'asc';
+  else{sortCol=c.id;sortDir='asc';}
+  buildHeaders();render();
+}
+
+// ── Filter ──
+function applyFilters(){page=0;render();}
+// ── Trace group toggle ──
+function toggleTraceGroup(){
+  traceGroup = !traceGroup;
+  $('#toggleTrace').style.background = traceGroup ? '#238636' : 'none';
+  $('#toggleTrace').style.color = traceGroup ? '#fff' : '';
+  page = 0;
+  render();
+}
+
+// ── Pagination ──
+function goPage(delta){page=Math.max(0,page+delta);render();}
+
+// ── Expand/collapse agent row ──
+function toggleExpand(name){
+  expandedRows[name]=!expandedRows[name];
+  render();
+}
+
+// ── MAIN RENDER ──
+function render(){
+  if (viewMode === 'raw') renderRaw();
+  else if (viewMode === 'agent') renderAgent();
+}
+
+function getFilter(){
+  const text=($('#filterInput')||{}).value||'';
+  const type=($('#typeFilter')||{}).value||'';
+  return {text:text.toLowerCase(),type};
+}
+
+// ── Raw feed view ──
+function renderRaw(){
+  const {text,type}=getFilter();
+  let items = _lastEvents.slice();
+  if (type) items = items.filter(e => (e.type||'chat') === type || (e.source||'').includes(type));
+  if (text) items = items.filter(e => (e.source||'').toLowerCase().includes(text) || (e.target||'').toLowerCase().includes(text) || (e.content||'').toLowerCase().includes(text) || (e.trace_id||'').toLowerCase().includes(text));
+
+  if (sortCol) {
+    items.sort((a,b)=>{
+      let va=a[sortCol],vb=b[sortCol];
+      if (va==null) va=''; if (vb==null) vb='';
+      if (typeof va==='string') va=va.toLowerCase();
+      if (typeof vb==='string') vb=vb.toLowerCase();
+      return va<vb? (sortDir==='asc'?-1:1) : va>vb? (sortDir==='asc'?1:-1) : 0;
+    });
+  }
+
+  if (traceGroup) {
+    // Group items by trace_id
+    const groups = {};
+    const noTrace = [];
+    items.forEach(e => {
+      if (e.trace_id) {
+        if (!groups[e.trace_id]) groups[e.trace_id] = { trace_id: e.trace_id, msgs: [] };
+        groups[e.trace_id].msgs.push(e);
+      } else {
+        noTrace.push(e);
+      }
+    });
+    const grpList = Object.values(groups).sort((a,b) => {
+      const at = a.msgs[0]?.ts||0, bt = b.msgs[0]?.ts||0;
+      return bt - at;
+    });
+    applyPagination([...noTrace, ...grpList], (list) => {
+    if (!list.length) return '<tr><td colspan="'+(columns.length)+'" style="color:#8b949e;text-align:center;padding:14px">Sin resultados</td></tr>';
+    return list.map(e => {
+      // Check if this is a trace group (has msgs array)
+      if (e.msgs) {
+        const id = 'trace-'+e.trace_id;
+        const exp = expandedRows[id];
+        const msgs = e.msgs.sort((a,b) => (a.ts||0) - (b.ts||0));
+        const route = msgs.map(m => (m.source||'?')+'→'+(m.target||'?')).filter((v,i,a) => i===0||v!==a[i-1]).join(' | ');
+        const steps = msgs.length;
+        const first = msgs[0]||{};
+        const expandRow = exp ? `<tr class="expand-row"><td colspan="${columns.length}"><div class="expand-inner"><table style="width:100%;font-size:0.78rem;border-collapse:collapse">
+          <thead><tr><th style="padding:4px 8px;color:#8b949e;border-bottom:1px solid #30363d;text-align:left">#</th>
+          <th style="padding:4px 8px;color:#8b949e;border-bottom:1px solid #30363d;text-align:left">Route</th>
+          <th style="padding:4px 8px;color:#8b949e;border-bottom:1px solid #30363d;text-align:left">Message</th>
+          <th style="padding:4px 8px;color:#8b949e;border-bottom:1px solid #30363d;text-align:left">Time</th></tr></thead><tbody>${
+            msgs.map((m,i) => `<tr>
+              <td style="padding:3px 8px;color:#8b949e">${i+1}</td>
+              <td style="padding:3px 8px">${esc(m.source||'?')} → ${esc(m.target||'?')}</td>
+              <td style="padding:3px 8px;color:#c9d1d9;max-width:200px;overflow:hidden;text-overflow:ellipsis">${esc((m.content||'').slice(0,60))}</td>
+              <td style="padding:3px 8px;color:#8b949e">${m.time||'—'}</td>
+            </tr>`).join('')
+          }</tbody></table></div></td></tr>` : '';
+        return `<tr class="expandable${exp?' expanded':''}" onclick="toggleExpand('${id}')">
+          <td style="color:#8b949e;font-size:0.75rem"><span class="expand-icon">${exp?'▼':'▶'}</span> <span style="color:#58a6ff">🔀</span></td>
+          <td colspan="5" style="font-size:0.78rem"><span class="flow-path">${esc(route)}</span> <span style="color:#8b949e;font-size:0.7rem">(${steps} steps · ${esc(e.trace_id)})</span></td>
+        </tr>`+expandRow;
+      }
+      // Regular event row
+      return '<tr>'+columns.map((c,i)=>{
+      if (!visibleCols[i]&&!c.always) return '';
+      switch(c.id){
+        case 'time': return `<td><span class="pid">${e.time||''}</span></td>`;
+        case 'source': return `<td><span class="badge ${(e.source||'?').toLowerCase()}">${esc(e.source||'?')}</span></td>`;
+        case 'target': return `<td>${e.target ? esc(e.target) : '<span style="color:#8b949e">—</span>'}</td>`;
+        case 'content': return `<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis">${esc(e.content||'')}</td>`;
+        case 'type': {
+          const isCrush=/^(a[0-9]|orchestrator)$/i.test((e.source||'').trim());
+          const label = isCrush ? 'Crush' : e.type==='log' ? 'log' : 'bus';
+          return `<td><span class="flow-tag ${e.type||'chat'}">${label}</span></td>`;
+        }
+        case 'ago': return `<td style="color:#8b949e;font-size:0.75rem">${e.ago||''}</td>`;
+        default: return '<td></td>';
+      }
+    }).join('')+'</tr>';
+    }).join('');
+  });
+  } else {
+    applyPagination(items, (items) => {
+    if (!items.length) return '<tr><td colspan="'+(columns.length)+'" style="color:#8b949e;text-align:center;padding:14px">Sin resultados</td></tr>';
+    return items.map(e => '<tr>'+columns.map((c,i)=>{
+      if (!visibleCols[i]&&!c.always) return '';
+      switch(c.id){
+        case 'time': return `<td><span class="pid">${e.time||''}</span></td>`;
+        case 'source': return `<td><span class="badge ${(e.source||'?').toLowerCase()}">${esc(e.source||'?')}</span></td>`;
+        case 'target': return `<td>${e.target ? esc(e.target) : '<span style="color:#8b949e">—</span>'}</td>`;
+        case 'content': return `<td style="max-width:300px;overflow:hidden;text-overflow:ellipsis">${esc(e.content||'')}</td>`;
+        case 'type': {
+          const isCrush=/^(a[0-9]|orchestrator)$/i.test((e.source||'').trim());
+          const label = isCrush ? 'Crush' : e.type==='log' ? 'log' : 'bus';
+          return `<td><span class="flow-tag ${e.type||'chat'}">${label}</span></td>`;
+        }
+        case 'ago': return `<td style="color:#8b949e;font-size:0.75rem">${e.ago||''}</td>`;
+        default: return '<td></td>';
+      }
+    }).join('')+'</tr>').join('');
+  });
+  }
+}
+
+// ── By agent view ──
+function renderAgent(){
+  const {text,type}=getFilter();
+  // Build entity map from processes + events
+  const entities = {};
+  // From process list
+  (_lastProcs||[]).forEach(p => {
+    const key = p.name.toLowerCase();
+    entities[key] = {
+      name: p.name, type: p.type||'process', role: p.role||'', status: p.status||'offline',
+      cpu: p.cpu, mem: p.mem, pid: p.pid, desc: p.desc||'', removeable: !!p.removeable,
+    };
+  });
+  // From events — add sources and targets
+  function ensureEntity(name){
+    const k=name.toLowerCase().replace(/[^a-z0-9]/g,'');
+    if(!entities[k]){
+      const type=name==='🌐'?'human':name.includes('trace')?'orchestrator':'agent';
+      entities[k]={name,type,role:'',status:'active',cpu:null,mem:null,pid:null,desc:'',removeable:false,msgs:[]};
+    }
+    return k;
+  }
+  _lastEvents.forEach(e => {
+    const src = (e.source||'').trim();
+    const tgt = (e.target||'').trim();
+    // Add as sent (source)
+    if (src) {
+      const k=ensureEntity(src);
+      // Avoid duplicates within same batch
+      if (!entities[k].msgs.some(m => m.ts===e.ts && m.content===e.content && m.source===e.source)) {
+        entities[k].msgs.push({...e, direction: 'sent'});
+      }
+    }
+    // Add as received (target) — skip self-send
+    if (tgt && tgt !== src) {
+      const k=ensureEntity(tgt);
+      if (!entities[k].msgs.some(m => m.ts===e.ts && m.content===e.content && m.source===e.source)) {
+        entities[k].msgs.push({...e, direction: 'received'});
+      }
+    }
+  });
+
+  let list = Object.values(entities);
+  // Filter
+  if (type) list = list.filter(e => e.type === type);
+  if (text) list = list.filter(e => (e.name||'').toLowerCase().includes(text) || (e.type||'').includes(text));
+
+  // Sort
+  if (sortCol) {
+    list.sort((a,b)=>{
+      let va=a[sortCol],vb=b[sortCol];
+      if (sortCol==='lastMsg') { va=a.msgs&&a.msgs[0]?a.msgs[0].content:''; vb=b.msgs&&b.msgs[0]?b.msgs[0].content:''; }
+      if (sortCol==='lastSeen') { va=a.msgs&&a.msgs[0]?a.msgs[0].time:''; vb=b.msgs&&b.msgs[0]?b.msgs[0].time:''; }
+      if (va==null) va=''; if (vb==null) vb='';
+      if (typeof va==='string') va=va.toLowerCase();
+      if (typeof vb==='string') vb=vb.toLowerCase();
+      return va<vb? (sortDir==='asc'?-1:1) : va>vb? (sortDir==='asc'?1:-1) : 0;
+    });
+  }
+
+  applyPagination(list, (list) => {
+    if (!list.length) return '<tr><td colspan="'+(columns.length)+'" style="color:#8b949e;text-align:center;padding:14px">Sin resultados</td></tr>';
+    return list.map(e => {
+      const isExpanded = expandedRows[e.name];
+      const msgs = (e.msgs||[]).slice(0,15);
+      const lastMsg = msgs[0];
+      const lastSeen = lastMsg ? lastMsg.time + ' ' + lastMsg.ago : '—';
+      const statusDot = e.status==='active'||e.status==='online'||e.status==='running'?'green':e.status==='down'||e.status==='offline'?'red':'yellow';
+      const statusText = e.status==='active'?'online':e.status==='down'?'offline':e.status;
+      const mainRow = '<tr class="expandable'+(isExpanded?' expanded':'')+'" onclick="toggleExpand(\''+esc(e.name)+'\')">'+
+        columns.map((c,i)=>{
+          if (!visibleCols[i]&&!c.always) return '';
+          switch(c.id){
+            case 'name':
+              return `<td><span class="name-col"><span class="expand-icon">${isExpanded?'▼':'▶'}</span><span class="dot ${statusDot}"></span>${esc(e.name)}</span></td>`;
+            case 'type': return `<td><span class="badge ${e.type}">${e.type}</span></td>`;
+            case 'role': return `<td><span class="badge ${e.role||'free'}">${esc(e.role||'—')}</span></td>`;
+            case 'status': return `<td><span class="badge ${statusText}">${statusText}</span></td>`;
+            case 'cpu':
+              if (e.cpu!=null) return `<td><span class="cpuval">${e.cpu.toFixed(1)}%</span> <span class="bar cpu" style="width:${Math.min(e.cpu*3,50)}px"></span></td>`;
+              return `<td style="color:#8b949e">—</td>`;
+            case 'mem':
+              if (e.mem!=null) return `<td><span class="memval">${e.mem.toFixed(1)}%</span> <span class="bar mem" style="width:${Math.min(e.mem*20,50)}px"></span></td>`;
+              return `<td style="color:#8b949e">—</td>`;
+            case 'lastMsg': return `<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;font-size:0.78rem;color:#8b949e">${lastMsg?esc(lastMsg.content||'').slice(0,60):'—'}</td>`;
+            case 'lastSeen': return `<td style="color:#8b949e;font-size:0.75rem">${lastSeen}</td>`;
+            case 'actions': return `<td style="text-align:right">${e.removeable ? `<span class="del-icon" onclick="removeAgent('${esc(e.name)}')">🗑️</span>` : ''}</td>`;
+            default: return '<td></td>';
+          }
+        }).join('')+'</tr>';
+
+      const expandRow = isExpanded ? `<tr class="expand-row"><td colspan="${columns.length}"><div class="expand-inner">${
+        msgs.length ? msgs.map(m => {
+          const dirIcon = m.direction === 'sent' ? '↑' : '↓';
+          const isCrush=/^(a[0-9]|orchestrator)$/i.test((m.source||'').trim());
+          const badge = isCrush ? 'Crush' : 'bus';
+          return `<div class="sub-item"><span class="pid" style="min-width:50px">${m.time}</span><span style="color:#8b949e;font-size:0.7rem;min-width:20px">${dirIcon}</span><span class="flow-tag ${isCrush?'chat':'bus'}">${badge}</span><span class="st">${esc(m.content||'')}</span><span style="color:#8b949e;font-size:0.7rem;white-space:nowrap">${m.ago}</span></div>`;
+        }).join('') : '<div style="color:#8b949e;padding:4px 0">Sin mensajes de esta entidad.</div>'
+      }</div></td></tr>` : '';
+
+      return mainRow + expandRow;
+    }).join('');
+  });
+}
+
+// ── Shared pagination logic ──
+function applyPagination(items, renderFn){
+  const total = items.length;
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  if (page >= pages) page = pages - 1;
+  const start = page * pageSize;
+  const pageData = items.slice(start, start + pageSize);
+
+  $('#filterCount').textContent = total + ' resultados';
+  const body = $('#mainBody');
+  const html = renderFn(pageData);
+  if (html) body.innerHTML = html;
+
+  $('#pagination').innerHTML = pages > 1 ? `
+    <button onclick="goPage(-1)" ${page===0?'disabled':''}>‹</button>
+    <span class="pcur">${page+1}</span><span style="color:#8b949e"> / ${pages}</span>
+    <button onclick="goPage(1)" ${page>=pages-1?'disabled':''}>›</button>
+  ` : '';
+}
+
+// ── Send quick (mini toolbar) ──
+async function sendQuick(){
+  const target=$('#sendTarget').value;
+  const msg=$('#sendMsg').value.trim();
+  if(!target||!msg)return showToast('Destino y mensaje requeridos','err');
+  try{const r=await api('/api/send',{method:'POST',body:JSON.stringify({target,message:msg})});if(r.ok){showToast('✅ Enviado a '+target);$('#sendMsg').value='';}else showToast('❌ '+r.error,'err');}catch(e){showToast('❌ '+e.message,'err');}
+}
+
+// ── Add/Remove Agent ──
+function showAddAgent(){
+  document.getElementById('addModal').style.display='flex';
+  document.getElementById('newAgentName').value='';
+  document.getElementById('newAgentName').focus();
+}
+function hideAddForm(){
+  document.getElementById('addModal').style.display='none';
+}
+async function createAgent(){
+  const name=document.getElementById('newAgentName').value.trim();
+  const role=document.getElementById('newAgentRole').value;
+  if(!name)return showToast('Nombre requerido','err');
+  hideAddForm();
+  try{
+    const r=await api('/api/agents/add',{method:'POST',body:JSON.stringify({name,role})});
+    if(r.ok){showToast('✅ Agente '+name+' creado');refresh();}
+    else showToast('❌ '+r.error,'err');
+  }catch(e){showToast('❌ '+e.message,'err');}
+}
+
+async function removeAgent(name){
+  if(!confirm('¿Eliminar agente '+name+'?'))return;
+  try{
+    const r=await api('/api/agents/remove',{method:'POST',body:JSON.stringify({name})});
+    if(r.ok){showToast('✅ Agente '+name+' eliminado');refresh();}
+    else showToast('❌ '+r.error,'err');
+  }catch(e){showToast('❌ '+e.message,'err');}
+}
+
+// ── Stream uptime ──
+let streamStart = Date.now();
+(function trackUptime(){
+  const el=$('#streamUptime');
+  if(el){
+    const sec=Math.floor((Date.now()-streamStart)/1000);
+    const m=Math.floor(sec/60), s=sec%60;
+    el.textContent=(m?m+'m ':'')+s+'s';
+  }
+  const bar=$('#streamBar');
+  if(bar){
+    // Pulse the bar to show activity — resets to 100% every 2s
+    bar.style.transition='width 1.8s linear';
+    bar.style.width='0%';
+    setTimeout(()=>{bar.style.transition='width 0.2s linear';bar.style.width='100%'},1800);
+  }
+  setTimeout(trackUptime, 1000);
+})();
+
+// ── Refresh ──
+async function refresh(){
+  try{
+    const [statusRes,events,procs,metrics] = await Promise.all([
+      api('/api/status'), api('/api/events'), api('/api/processes'),
+      api('/api/metrics').catch(()=>null)
+    ]);
+    _lastEvents = (events||[]).slice(0, 500);
+    _lastProcs = (procs.processes) || [];
+    render();
+    // Update metrics bar
+    const mbar=$('#metricsBar');
+    if(metrics){
+      mbar.style.display='flex';
+      $('#metricCpu').textContent='CPU '+(metrics.cpu!=null?metrics.cpu.toFixed(1)+'%':'—');
+      $('#metricMem').textContent='RAM '+(metrics.mem!=null?metrics.mem.toFixed(1)+'%':'—');
+      $('#metricBus').textContent='Bus '+(metrics.busMsgs!=null?metrics.busMsgs+' pend':'—');
+      $('#metricDaemons').textContent='Daemons '+(metrics.daemonsAlive!=null?metrics.daemonsAlive+'/'+metrics.daemonsTotal:'—');
+      $('#metricAgents').textContent='Agentes '+(metrics.agentsOnline!=null?metrics.agentsOnline+'/'+metrics.agentsTotal:'—');
+      $('#metricMsgs').textContent='Msgs/h '+(metrics.msgsPerHour!=null?metrics.msgsPerHour:'—');
+    }
+
+    // Update agent states
+    try {
+      const states = await api('/api/agent-states');
+      const bar = document.getElementById('agentStates');
+      const dots = Object.entries(states).map(([name, s]) => {
+        const colors = {idle:'#8b949e', thinking:'#d29922', running:'#58a6ff', frozen:'#f85149', offline:'#da3633'};
+        const c = colors[s.status] || '#8b949e';
+        return '<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:50%;background:'+c+'"></span>'+name+' <span style="color:#8b949e;font-size:0.72rem">'+s.status+(s.last_change?' · '+s.last_change:'')+'</span></span>';
+      }).join('');
+      bar.innerHTML = dots || '<span style="color:#8b949e">No agents tracked</span>';
+    } catch {} else {
+      mbar.style.display='none';
+    }
+    // Update agents in send target — only rewrite if changed (avoids closing open dropdown)
+    if(statusRes.agents){
+      const sel=$('#sendTarget');
+      const newHtml='<option value="">a quién...</option>'+statusRes.agents.map(a=>`<option value="${a.name}">${a.name} (${a.role})</option>`).join('');
+      if(sel.innerHTML!==newHtml) sel.innerHTML=newHtml;
+    }
+    const essential=(statusRes.daemons||[]).filter(d=>d.essential);
+    const alive=essential.filter(d=>d.alive);
+    $('#subtitle').textContent='Bus: '+(statusRes.busAlive?'✓':'✗')+' · Daemons: '+alive.length+'/'+essential.length+' · '+(statusRes.agents||[]).length+' agentes';
+  }catch(e){$('#subtitle').textContent='❌ sin conexión';}
+}
+
+buildColumns();
+buildHeaders();
+refresh();
+setInterval(refresh, 2000);
+
+// ── MSE continuous stream — fetch new fragments via Range ──
+async function startMSE(){
+  const CODEC = 'video/mp4; codecs="avc1.64001F, mp4a.40.2"';
+  const v = document.getElementById('mainPlayer');
+  let ms = null, sb = null, offset = 0, curMtime = 0, initSize = 0;
+
+  async function initSource(){
+    // Fetch init segment (ftyp+moov)
+    const r = await fetch('/api/stream?init=1');
+    if (r.status !== 200) { setTimeout(initSource, 500); return; }
+    const init = await r.arrayBuffer();
+    initSize = init.byteLength;
+    offset = initSize;
+
+    ms = new MediaSource();
+    v.src = URL.createObjectURL(ms);
+    ms.onsourceopen = () => {
+      sb = ms.addSourceBuffer(CODEC);
+      sb.appendBuffer(init);
+    };
+    pollStream();
+  }
+
+  async function pollStream(){
+    try {
+      const r = await fetch('/api/stream?info=1');
+      const info = await r.json();
+      if (!info.exists || info.size < 100) { setTimeout(pollStream, 500); return; }
+
+      // File restarted — re-init (mtime changed)
+      if (info.mtime !== curMtime) {
+        curMtime = info.mtime;
+        offset = 0;
+        initSource();
+        return;
+      }
+
+      // New bytes available
+      if (info.size > offset && sb && !sb.updating) {
+        const end = info.size - 1;
+        const rr = await fetch('/api/stream', {
+          headers: { 'Range': `bytes=${offset}-${end}` }
+        });
+        if (rr.status === 206) {
+          const chunk = await rr.arrayBuffer();
+          if (chunk.byteLength > 0) {
+            sb.appendBuffer(chunk);
+            offset += chunk.byteLength;
+          }
+        }
+      }
+    } catch {}
+    setTimeout(pollStream, 1000);
+  }
+
+  initSource();
+}
+setTimeout(startMSE, 300);
+</script></body></html>

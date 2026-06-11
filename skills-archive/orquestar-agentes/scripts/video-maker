@@ -1,0 +1,35 @@
+#!/bin/bash
+# video-maker — generates a short video clip from text
+# Uses ffmpeg (drawtext + sine audio)
+# Usage: video-maker "texto" output.mp4 [duration_secs]
+
+text="${1:-Video generado por IA}"
+output="${2:-/tmp/video-cache/video-$(date +%s).mp4}"
+duration="${3:-10}"
+
+mkdir -p "$(dirname "$output")"
+
+# Color based on text hash for variety
+bg_color=$(echo "$text" | md5sum | head -c 6)
+r=$((16#${bg_color:0:2}))
+g=$((16#${bg_color:2:2}))
+b=$((16#${bg_color:4:2}))
+# Ensure minimum brightness
+bg="#${bg_color}"
+
+# Generate video with colored background, text overlay, and chord audio
+ffmpeg -y -f lavfi -i "color=c=${bg}:s=1280x720:d=$duration" \
+  -f lavfi -i "sine=frequency=261.63:duration=$duration" \
+  -f lavfi -i "sine=frequency=329.63:duration=$duration" \
+  -f lavfi -i "sine=frequency=392.00:duration=$duration" \
+  -filter_complex "[1:a][2:a][3:a]amix=inputs=3:duration=first:weights=1 1 1,volume=0.3[a]; \
+    drawtext=text='$text':fontcolor=white:fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2:box=1:boxcolor=black@0.5:boxborderw=20,
+    drawtext=text='orquestar-agentes':fontcolor=white@0.6:fontsize=20:x=20:y=h-40:box=1:boxcolor=black@0.3:boxborderw=10" \
+  -map "[a]" -c:v libx264 -preset ultrafast -crf 28 -c:a aac -shortest "$output" 2>/dev/null
+
+if [ -f "$output" ]; then
+  echo "✅ Video: $output ($(du -h "$output" | cut -f1))"
+else
+  echo "❌ Error generando video"
+  exit 1
+fi

@@ -1,0 +1,403 @@
+---
+name: create-api-key
+parent: browser
+description: >
+  Crea API keys en servicios web. Lee credenciales de
+  ~/.secrets/credentials/services.yml, se registra o loguea según sea
+  necesario, navega a la página de API keys, y guarda la key en
+  ~/.secrets/.env. Detecta email verification y la resuelve via Gmail.
+trigger: create.*api.?key, generar.*llave, new.*api.*key
+allowed-tools: Bash
+---
+
+# Sub-skill: Create API Key
+
+## Dependencias
+
+- Chrome con CDP (incluido en meta-skill `browser`)
+- Google autenticado en el perfil de Chrome (para leer Gmail)
+- Playwright: `npm install playwright && npx playwright install chromium`
+
+## Archivos de datos (no incluir en la skill)
+
+| Archivo | Propósito |
+|---|---|
+| `~/.secrets/credentials/services.yml` | Email + password por servicio |
+| `~/.secrets/.env` | API keys generadas |
+
+## Plataformas
+
+| Servicio | URL Keys | Registro |
+|---|---|---|
+| OpenRouter | https://openrouter.ai/keys | email+password |
+| Black Forest Labs | https://dashboard.bfl.ai | email+password |
+| Fal.ai | https://fal.ai/dashboard/keys | email+password |
+| Prodia | https://app.prodia.com/api | email+password |
+| HuggingFace | https://huggingface.co/settings/tokens | email+password |
+
+## Pipeline completo
+
+### 1. Leer credenciales
+
+```javascript
+const fs = require('fs');
+const YAML = require('yaml'); // npm install yaml
+
+const creds = YAML.parse(fs.readFileSync(
+  process.env.HOME + '/.secrets/credentials/services.yml', 'utf-8'
+));
+```
+
+El campo `email` puede estar vacío si el usuario no lo ha configurado aún.
+En ese caso, preguntar al usuario por su email antes de continuar.
+
+### 2. Generar password único
+
+```javascript
+const crypto = require('crypto');
+function generatePassword() {
+  return crypto.randomBytes(20).toString('base64').slice(0, 24)
+    + 'Aa1!';  // cumple requisitos mínimos de complejidad
+}
+```
+
+### 3. Detectar si hay sesión
+
+```javascript
+async function detectLogin(page) {
+  const url = page.url().toLowerCase();
+
+  const needsLogin =
+    url.includes('/login') || url.includes('/signin') || url.includes('/sign-in') ||
+    url.includes('/auth');
+
+  const isLoggedIn =
+    url.includes('/dashboard') || url.includes('/keys') || url.includes('/settings') ||
+    url.includes('/account') || url.includes('/tokens');
+
+  if (isLoggedIn && !needsLogin) return 'logged_in';
+  if (needsLogin) return 'not_logged_in';
+  return 'ambiguous';
+}
+```
+
+### 4. Login con email+password
+
+```javascript
+async function loginWithPassword(page, email, password) {
+  // Buscar campos de email/username y password
+  const emailInput = page.locator(
+    'input[type="email"], input[name="email"], input[name="username"], ' +
+    'input[placeholder*="email" i], input[placeholder*="mail" i], ' +
+    'input:not([type="hidden"]):not([type="password"]):not([type="checkbox"])'
+  ).first();
+
+  const passInput = page.locator(
+    'input[type="password"], input[name="password"]'
+  ).first();
+
+  const submitBtn = page.locator(
+    'button[type="submit"], button:has-text("Sign In"), button:has-text("Log In"), ' +
+    'button:has-text("Continue"), button:has-text("Login")'
+  ).first();
+
+  if (await emailInput.isVisible()) {
+    await emailInput.fill(email);
+  }
+  if (await passInput.isVisible()) {
+    await passInput.fill(password);
+  }
+  if (await submitBtn.isVisible()) {
+    await submitBtn.click();
+    await page.waitForTimeout(5000);
+  }
+}
+```
+
+### 5. Registro (cuando no existe cuenta)
+
+```javascript
+async function registerWithPassword(page, email, password) {
+  // Buscar link/botón de registro
+  const signupLink = page.locator(
+    'a:has-text("Sign Up"), a:has-text("Create"), a:has-text("Register"), ' +
+    'button:has-text("Sign Up"), button:has-text("Create"), ' +
+    'a[href*="signup"], a[href*="register"]'
+  ).first();
+
+  if (await signupLink.isVisible().catch(() => false)) {
+    await signupLink.click();
+    await page.waitForTimeout(2000);
+  }
+
+  // Llenar formulario de registro
+  const allInputs = page.locator('input:not([type="hidden"])');
+  const count = await allInputs.count();
+
+  let emailFilled = false;
+  for (let i = 0; i < count; i++) {
+    const input = allInputs.nth(i);
+    const type = await input.getAttribute('type');
+    const name = ((await input.getAttribute('name')) || '').toLowerCase();
+    const placeholder = ((await input.getAttribute('placeholder')) || '').toLowerCase();
+
+    if (type === 'email' || name.includes('email') || placeholder.includes('email') || placeholder.includes('mail')) {
+      await input.fill(email);
+      emailFilled = true;
+    } else if (type === 'password' && !name.includes('confirm') && !placeholder.includes('confirm')) {
+      await input.fill(password);
+    } else if ((name.includes('confirm') || placeholder.includes('confirm')) && type === 'password') {
+      await input.fill(password); // confirm password
+    } else if (type === 'text' && !emailFilled && (name.includes('email') || placeholder.includes('email') || placeholder.includes('mail'))) {
+      await input.fill(email);
+      emailFilled = true;
+    }
+  }
+
+  // Checkbox de términos si existe
+  const termsCheckbox = page.locator(
+    'input[type="checkbox"]'
+  ).first();
+  if (await termsCheckbox.isVisible().catch(() => false)) {
+    await termsCheckbox.check();
+  }
+
+  // Submit
+  const submitBtn = page.locator(
+    'button[type="submit"], button:has-text("Sign Up"), button:has-text("Create"), ' +
+    'button:has-text("Continue"), button:has-text("Register")'
+  ).first();
+
+  if (await submitBtn.isVisible().catch(() => false)) {
+    await submitBtn.click();
+    await page.waitForTimeout(5000);
+  }
+}
+```
+
+### 6. Verificar email vía Gmail
+
+```javascript
+async function verifyEmailViaGmail(page) {
+  // Abrir Gmail en nueva pestaña
+  await page.goto('https://mail.google.com', { waitUntil: 'domcontentloaded', timeout: 20000 });
+  await page.waitForTimeout(5000);
+
+  // El perfil de Chrome ya tiene Google autenticado
+  // Buscar el último email de verificación
+  const verifyEmail = page.locator(
+    'tr[class*="zE"], tr:has(a[href*="verify"]), tr:has(a[href*="confirm"])'
+  ).first();
+
+  if (await verifyEmail.isVisible().catch(() => false)) {
+    await verifyEmail.click();
+    await page.waitForTimeout(3000);
+
+    // Buscar link de verificación en el cuerpo del email
+    const verifyLink = page.locator('a[href*="verify"], a[href*="confirm"], a[href*="activate"]').first();
+    if (await verifyLink.isVisible().catch(() => false)) {
+      const href = await verifyLink.getAttribute('href');
+      if (href) {
+        // Abrir link de verificación
+        await page.goto(href, { waitUntil: 'domcontentloaded', timeout: 20000 });
+        await page.waitForTimeout(3000);
+        return true;
+      }
+    }
+  }
+
+  // Fallback: buscar por texto "verify" en la página
+  const body = await page.locator('body').textContent().catch(() => '');
+  const verifyUrl = body.match(/https?:\/\/[^\s"']*(?:verify|confirm|activate)[^\s"']*/i);
+  if (verifyUrl) {
+    await page.goto(verifyUrl[0], { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await page.waitForTimeout(3000);
+    return true;
+  }
+
+  return false; // No se encontró verificación
+}
+```
+
+### 7. Crear API key
+
+```javascript
+async function createKey(page) {
+  const btn = page.locator(
+    'button:has-text("Create"), button:has-text("New"), button:has-text("Generate"), ' +
+    'a:has-text("Create"), a:has-text("New")'
+  ).first();
+
+  if (!(await btn.isVisible().catch(() => false))) {
+    return null; // No encontrado → screenshot para LLM
+  }
+
+  await btn.click();
+  await page.waitForTimeout(3000);
+
+  // Capturar key (input readonly, code block, o texto)
+  const keyEl = page.locator(
+    'input[readonly], input[type="text"], ' +
+    '[class*="key"] input, [class*="token"] input, ' +
+    'code, pre, [class*="key-value"]'
+  ).first();
+
+  return await keyEl.inputValue().catch(() =>
+    keyEl.textContent().catch(() => null)
+  );
+}
+```
+
+### 8. Guardar resultados
+
+```javascript
+function saveKey(varName, newKey) {
+  const envFile = process.env.HOME + '/.secrets/.env';
+  let env = fs.readFileSync(envFile, 'utf-8');
+
+  const regex = new RegExp(`export ${varName}=.*`, 'm');
+  if (regex.test(env)) {
+    env = env.replace(regex, `export ${varName}='${newKey}'`);
+  } else {
+    env += `\nexport ${varName}='${newKey}'`;
+  }
+  fs.writeFileSync(envFile, env);
+  console.log(`✅ ${varName} guardada en ~/.secrets/.env`);
+}
+
+function savePassword(serviceName, email, password) {
+  const credFile = process.env.HOME + '/.secrets/credentials/services.yml';
+  let creds = YAML.parse(fs.readFileSync(credFile, 'utf-8'));
+
+  if (!creds.services) creds.services = {};
+  if (!creds.services[serviceName]) creds.services[serviceName] = {};
+  creds.services[serviceName].email = email;
+  creds.services[serviceName].password = password;
+
+  fs.writeFileSync(credFile, YAML.stringify(creds));
+  console.log(`✅ Password guardado en services.yml para ${serviceName}`);
+}
+```
+
+### 9. Orquestación por servicio
+
+```javascript
+async function setupService(serviceName, config) {
+  const { url, email, password: existingPassword } = config;
+  const password = existingPassword || generatePassword();
+  const isNewAccount = !existingPassword;
+
+  const browser = await chromium.connectOverCDP('http://localhost:9222');
+  const page = await browser.newPage();
+
+  try {
+    // Ir a la URL principal
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await page.waitForTimeout(2000);
+
+    const status = await detectLogin(page);
+
+    if (status === 'logged_in') {
+      console.log(`${serviceName}: ya logueado`);
+    } else if (isNewAccount) {
+      console.log(`${serviceName}: registrando nueva cuenta...`);
+      await registerWithPassword(page, email, password);
+      await page.waitForTimeout(3000);
+
+      // Verificar email si es necesario
+      const stillNotLoggedIn = await detectLogin(page);
+      if (stillNotLoggedIn === 'not_logged_in') {
+        console.log(`${serviceName}: verificando email...`);
+        const verifyPage = await browser.newPage();
+        await verifyEmailViaGmail(verifyPage);
+        await verifyPage.close();
+
+        // Navegar de nuevo a la URL
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 20000 });
+        await page.waitForTimeout(2000);
+
+        // Login después de verificar
+        await loginWithPassword(page, email, password);
+        await page.waitForTimeout(3000);
+      }
+
+      // Guardar password
+      savePassword(serviceName, email, password);
+    } else {
+      console.log(`${serviceName}: haciendo login...`);
+      await loginWithPassword(page, email, password);
+      await page.waitForTimeout(3000);
+    }
+
+    // Navegar a página de API keys y crear key
+    const keyUrl = getKeyUrl(serviceName);
+    await page.goto(keyUrl, { waitUntil: 'domcontentloaded', timeout: 20000 });
+    await page.waitForTimeout(3000);
+
+    const newKey = await createKey(page);
+    if (newKey) {
+      saveKey(config.varName, newKey.trim());
+      console.log(`✅ ${serviceName}: API key creada`);
+    } else {
+      await page.screenshot({ path: `/tmp/cdp-${serviceName}-fail.png` });
+      console.log(`⚠️  ${serviceName}: no se encontró botón Create. Screenshot guardado.`);
+    }
+
+  } finally {
+    await page.close();
+    await browser.close();
+  }
+}
+```
+
+### 10. Mapa URL → variable de entorno
+
+```javascript
+function getKeyUrl(service) {
+  const urls = {
+    openrouter: 'https://openrouter.ai/keys',
+    bfl: 'https://dashboard.bfl.ai',
+    fal: 'https://fal.ai/dashboard/keys',
+    prodia: 'https://app.prodia.com/api',
+    huggingface: 'https://huggingface.co/settings/tokens',
+  };
+  return urls[service];
+}
+
+const varMap = {
+  openrouter: 'OPENROUTER_API_KEY',
+  bfl: 'BFL_API_KEY',
+  fal: 'FAL_KEY',
+  prodia: 'PRODIA_TOKEN',
+  huggingface: 'HF_TOKEN',
+};
+```
+
+## Flujo de primera ejecución
+
+La primera vez que se ejecuta para un servicio:
+
+1. El script intenta seguir los pasos genéricos
+2. Si algún paso falla (selector no encontrado, UI diferente), **toma screenshot**
+3. El LLM analiza el screenshot y determina el selector correcto
+4. Se actualiza la skill con el selector específico
+5. Se reintenta
+
+## Troubleshooting
+
+| Problema | Causa | Solución |
+|---|---|---|
+| Chrome no responde | CDP no iniciado | `start_chrome_cdp` del meta-skill |
+| No encuentra input email | UI diferente | Screenshot + LLM diagnostica |
+| Gmail no carga | Google no autenticado | Abrir Chrome manual, loguear Google |
+| Email verification no aparece | Ya verificado o spam | Revisar Gmail manual como fallback |
+| Botón Create no visible | No logueado o UI cambió | Screenshot + LLM |
+| Selector genérico no funciona | UI específica del servicio | LLM diagnostica y actualiza skill |
+
+## Notas
+
+- **Portable**: Ningún dato personal en la skill. Todo en `~/.secrets/`.
+- **Contraseñas**: Únicas por servicio, generadas criptográficamente, guardadas en `services.yml`.
+- **Email verification**: Se resuelve automáticamente via Gmail (el perfil Chrome ya tiene Google).
+- **Primera vez**: Más lenta (~minutos por servicio). Después: instantánea.
+- **Fallos**: Screenshot automático + LLM diagnostica → skill se auto-corrige.

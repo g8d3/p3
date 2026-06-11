@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# at-capture: Capture pane output from a tmux window (for debugging).
+# Usage: at-capture <window-name> [tail_lines]
+set -euo pipefail
+
+WINDOW_NAME="${1:?Usage: at-capture <window-name> [tail_lines]}"
+TAIL="${2:-0}"
+
+if [ "$TAIL" -gt 0 ]; then
+    tmux capture-pane -t "$WINDOW_NAME" -p -S -"$TAIL" 2>/dev/null || echo "(window '$WINDOW_NAME' not found)"
+else
+    tmux capture-pane -t "$WINDOW_NAME" -p 2>/dev/null || echo "(window '$WINDOW_NAME' not found)"
+fi

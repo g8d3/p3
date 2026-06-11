@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+# obs-start: Start OBS with WebSocket support.
+# Usage: obs-start
+# Handles Xvfb automatically if no display is available.
+set -euo pipefail
+
+# Self-contained: add our bin dir to PATH for other obs-* commands
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export PATH="$SCRIPT_DIR:$PATH"
+
+OBS_WS_PORT=4455
+OBS_WS_PASS="SFT16WlCaNoupRwt"
+OBS_DISPLAY="${OBS_DISPLAY:-:99}"
+OBS_CONFIG_DIR="$HOME/.config/obs-studio"
+OBS_WS_CONFIG="$OBS_CONFIG_DIR/plugin_config/obs-websocket/config.json"
+
+# 1. Ensure websocket plugin is configured and enabled
+mkdir -p "$(dirname "$OBS_WS_CONFIG")"
+if [ ! -f "$OBS_WS_CONFIG" ]; then
+    echo "[obs-start] Creating websocket config..."
+    cat > "$OBS_WS_CONFIG" <<-EOF
+{
+  "alerts_enabled": false,
+  "auth_required": true,
+  "first_load": false,
+  "server_enabled": true,
+  "server_password": "$OBS_WS_PASS",
+  "server_port": $OBS_WS_PORT
+}
+EOF
+elif ! grep -q '"server_enabled": true' "$OBS_WS_CONFIG" 2>/dev/null; then
+    echo "[obs-start] Enabling websocket server in existing config..."
+    # Enable server if disabled
+    sed -i 's/"server_enabled": false/"server_enabled": true/' "$OBS_WS_CONFIG"
+    # Ensure password is set
+    sed -i "s/\"server_password\": \"[^\"]*\"/\"server_password\": \"$OBS_WS_PASS\"/" "$OBS_WS_CONFIG"
+fi
+
+# 2. Clean any stale OBS state
+rm -f /tmp/obs-* 2>/dev/null || true
+# Remove sentinel/crash markers so OBS doesn't detect "unclean shutdown"
+rm -rf "$OBS_CONFIG_DIR/.sentinel" 2>/dev/null || true
+
+# 3. Display handling
+if [ -z "${DISPLAY:-}" ]; then
+    echo "[obs-start] No DISPLAY set. Starting Xvfb on $OBS_DISPLAY..."
+    export DISPLAY="$OBS_DISPLAY"
+    # Kill any leftover Xvfb on our display
+    killall Xvfb 2>/dev/null || true
+    sleep 0.3
+    # Use nohup + disown so Xvfb survives if the parent shell session is killed
+    nohup Xvfb "$DISPLAY" -screen 0 1920x1080x24 > /dev/null 2>&1 &
+    XVFB_PID=$!
+    disown "$XVFB_PID" 2>/dev/null || true
+    sleep 1
+    if ! kill -0 "$XVFB_PID" 2>/dev/null; then
+        echo "ERROR: Xvfb failed to start" >&2
+        exit 1
+    fi
+    echo "[obs-start] Xvfb started (PID $XVFB_PID)"
+fi
+
+# 4. Start window manager (needed for OBS to not self-close)
+if which openbox >/dev/null 2>&1; then
+    echo "[obs-start] Starting Openbox window manager..."
+    openbox --sm-disable 2>/dev/null &
+    WM_PID=$!
+    disown "$WM_PID" 2>/dev/null || true
+    sleep 0.5
+fi
+
+# 5. Kill existing OBS if running (clean restart)
+killall obs 2>/dev/null || true
+sleep 0.5
+
+# 6. Launch OBS (detached from terminal entirely)
+echo "[obs-start] Launching OBS Studio..."
+setsid obs --disable-shutdown-check --minimize-to-tray </dev/null >/dev/null 2>&1 &
+OBS_PID=$!
+disown "$OBS_PID" 2>/dev/null || true
+echo "[obs-start] OBS PID: $OBS_PID"
+
+# 7. Wait for WebSocket to be ready (up to 30s)
+echo "[obs-start] Waiting for WebSocket on port $OBS_WS_PORT..."
+for i in $(seq 1 60); do
+    if ss -tlnp 2>/dev/null | grep -q ":$OBS_WS_PORT "; then
+        echo "[obs-start] OBS WebSocket ready on port $OBS_WS_PORT (${i}x0.5s)"
+        
+        # Give OBS a moment to fully initialize, then verify
+        sleep 1
+        if obs-exec GetVersion >/dev/null 2>&1; then
+            echo "[obs-start] ✅ OBS is running and WebSocket is operational"
+            echo "[obs-start] Password: $OBS_WS_PASS"
+            exit 0
+        fi
+    fi
+    sleep 0.5
+done
+
+echo "ERROR: OBS WebSocket did not become ready within 30s" >&2
+exit 1
