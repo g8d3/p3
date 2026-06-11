@@ -83,7 +83,7 @@ def compute_ic_decay(pairs, window=10):
         if not np.isnan(ic): ics.append(ic)
     return ics
 
-COINS = ["ETH", "BTC", "SOL", "HYPE"]
+COINS = ["ETH", "BTC", "SOL", "HYPE", "ARB", "OP", "AVAX", "LINK"]
 
 def run_cycle():
     global cycle_count, prev_prices, prev_signals

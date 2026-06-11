@@ -690,3 +690,35 @@ El mercado de perps es fuertemente **trending**, no mean-reverting. Comprar el d
 - **Win rate 43% es suficiente** si avg win / avg loss > 10
 - **Funding rate** es la señal más predictiva en HL (confirmado por nuestro backtest: IC=0.13)
 - **Tendencia > reversión**: las señales de momentum deben tener más peso que mean reversion
+
+## IC Report: 2026-06-11 17:50 UTC
+
+**Assets analizados**: ETH, BTC, SOL, HYPE (4/8 — ARB, OP, AVAX, LINK agregados al runner pero sin datos aún)
+**Muestras por asset**: N=4 pares señal→forward return (insuficiente para significancia estadística)
+**Runner**: v5 con IC persistente, 8 assets configurados
+
+### IC por asset (Spearman rank correlation: RSI vs forward return)
+
+| Asset | Pairs | Pearson IC | Spearman IC | Señal media | Retorno medio |
+|-------|-------|-----------|-------------|-------------|---------------|
+| BTC | 4 | -0.9695 | -0.4000 | +0.1382 | +0.4260% |
+| ETH | 4 | -0.9692 | -1.0000 | +0.0616 | +0.6291% |
+| HYPE | 4 | -0.9180 | -0.4000 | +0.3057 | +0.9159% |
+| SOL | 4 | -0.9938 | -1.0000 | +0.2116 | +0.6102% |
+
+### Interpretación (preliminar, N<10)
+
+Todos los assets muestran correlación negativa entre RSI y forward return — consistente con el comportamiento esperado: RSI alto (sobrecompra) precede correcciones, RSI bajo (sobreventa) precede rebotes.
+
+### Limitaciones
+
+| Limitación | Impacto | Solución |
+|-----------|---------|----------|
+| N=4 pairs | IC no significativo (p>0.05) | Esperar a N≥30 (~2.5h más) |
+| Solo RSI como señal | No evaluamos MACD, funding, OB | Requiere refactor del tracking |
+| Reinicios del runner | Buffer se perdió parcialmente | ic_pairs.json persistente (✅ desde v5) |
+| Sin separación por régimen | IC puede variar en trends vs ranges | Requiere más datos |
+
+### Próximo reporte
+
+Cuando N≥10 (~50 min): IC con intervalo de confianza. Cuando N≥30 (~2.5h): IC estadísticamente significativo. El runner acumula automáticamente.
