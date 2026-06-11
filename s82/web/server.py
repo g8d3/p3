@@ -339,12 +339,13 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self._html()
 
     def _html(self):
-        return open("/home/vuos/code/p3/s82/web/dashboard.html").read()
+        path = "/home/vuos/code/p3/s82/web/dashboard.html"
+        data = open(path, "rb").read()
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Cache-Control", "no-cache")
         self.end_headers()
-        self.wfile.write(html.encode())
+        self.wfile.write(data)
 
     def _json(self, data):
         body = json.dumps(data, default=str).encode()
