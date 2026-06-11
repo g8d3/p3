@@ -328,3 +328,43 @@ Mercado: ETH $1636.5 | BTC $62446.0 | Funding: ETH=0.00000% BTC=0.00000% | OB im
 - **CSV**: columnas `ic`, `ic_decay`
 
 IC necesita ≥10 ciclos (~50 min) para valores significativos. El runner los acumula automáticamente.
+
+## Research: QuantAgent (arXiv 2509.09995)
+
+Artículo leído: **"QuantAgent: Price-Driven Multi-Agent LLMs for High-Frequency Trading"** — Stony Brook, CMU, Yale, UBC, Fudan (2025).
+
+### Arquitectura
+
+4 agentes especializados que operan solo sobre OHLC (sin news ni sentiment):
+
+| Agente | Función | Tools |
+|--------|---------|-------|
+| **IndicatorAgent** | Señales numéricas | RSI, MACD, ROC, Stoch, Williams %R |
+| **PatternAgent** | Patrones geométricos | Chart drawing, pattern library (double bottom, flag, etc.) |
+| **TrendAgent** | Direccionalidad y pendiente | Support/resistance OLS, trend channels |
+| **RiskAgent** | Stop-loss, take-profit, sizing | Risk-reward ratio (1.2–1.8), SL fijo 0.05% |
+
+### Resultados clave
+
+| Métrica | QuantAgent | XGBoost | Linear Reg | Random |
+|---------|-----------|---------|------------|--------|
+| Directional Accuracy | **72%** | 58% | 52% | 50% |
+| Best RoR (8 assets) | **7/8 wins** | — | — | — |
+| SPX 1h accuracy | **80%** (10-window) | — | — | — |
+
+- **Solo precio basta**: toda la info del mercado se refleja en OHLC (eficiente)
+- **LLM + tools**: el razonamiento estructurado supera a ML clásico en 1h/4h
+- **Cross-validation entre agentes**: PatternAgent valida visual, TrendAgent valida direccional
+- **Limitación**: pierde precisión en <15min (demasiado ruido)
+
+### Aplicación a nuestro sistema
+
+| QuantAgent | Nuestro sistema |
+|-----------|----------------|
+| 4 agentes LLM | 4 assets (ETH/BTC/SOL/HYPE) |
+| RSI + MACD + ROC | RSI + MACD + funding + OB |
+| LangGraph orchestration | busd message bus |
+| PatternAgent (chart vision) | — (futuro: añadir) |
+| RiskAgent (SL/TP fijo) | RiskManager en s39 |
+
+**Próximo paso posible**: añadir un PatternAgent que dibuje charts de ETH/BTC y los analice con visión para detectar patrones (double bottom, head & shoulders) como señal complementaria.
