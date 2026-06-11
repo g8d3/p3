@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trading Report</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,monospace; background:#0d1117; color:#c9d1d9; padding:20px; }
+h1 { color:#58a6ff; font-size:20px; margin-bottom:16px; }
+h2 { color:#8b949e; font-size:14px; text-transform:uppercase; letter-spacing:1px; margin:20px 0 8px; }
+.card { background:#161b22; border:1px solid #30363d; border-radius:8px; padding:16px; margin-bottom:12px; }
+.signal { display:inline-block; padding:2px 10px; border-radius:10px; font-size:12px; font-weight:bold; }
+.long { background:#1b4a1b; color:#3fb950; }
+.short { background:#4a1b1b; color:#f85149; }
+.neutral { background:#4a3b1b; color:#d29922; }
+table { width:100%; border-collapse:collapse; font-size:12px; }
+th { text-align:left; color:#8b949e; padding:8px 4px; border-bottom:1px solid #30363d; }
+td { padding:6px 4px; border-bottom:1px solid #21262d; }
+.stat { display:inline-block; margin:8px 24px 8px 0; }
+.stat .n { font-size:26px; font-weight:bold; }
+.stat .l { font-size:11px; color:#484f58; }
+.alert { display:inline-block; padding:3px 10px; border-radius:10px; font-size:11px; background:#4a1b1b; color:#f85149; margin:2px; }
+.meta { color:#484f58; font-size:11px; margin-top:16px; }
+a { color:#58a6ff; }
+</style></head>
+<body>
+<h1>📊 Trading Report</h1>
+<p style="color:#8b949e;margin-bottom:16px">2026-06-11 17:12 UTC · 28 registros</p>
+
+<div class="card">
+  <h2>Señales Actuales</h2>
+  <table><tr><th>Asset</th><th>Dirección</th><th>RSI</th><th>MACDh</th><th>Funding</th><th>OB Imb</th></tr>
+  <tr><td>ETH</td><td><span class='signal neutral'>NEUTRAL</span></td><td>40.8</td><td>-1.57</td><td>0.00000%</td><td>-0.0934</td></tr>
+<tr><td>BTC</td><td><span class='signal neutral'>NEUTRAL</span></td><td>46.0</td><td>-40.9</td><td>0.00000%</td><td>-0.2576</td></tr>
+<tr><td>SOL</td><td><span class='signal neutral'>NEUTRAL</span></td><td>53.3</td><td>0.04</td><td>0.00000%</td><td>0.0965</td></tr>
+<tr><td>HYPE</td><td><span class='signal neutral'>NEUTRAL</span></td><td>60.4</td><td>0.2</td><td>0.00000%</td><td>-0.4541</td></tr>
+</table>
+</div>
+
+<div class="card">
+  <h2>Performance</h2>
+  <div class="stat"><div class="n" style="color:#3fb950">0</div><div class="l">LONG</div></div>
+  <div class="stat"><div class="n" style="color:#f85149">1</div><div class="l">SHORT</div></div>
+  <div class="stat"><div class="n" style="color:#d29922">1</div><div class="l">NEUTRAL</div></div>
+  <div class="stat"><div class="n" style="color:#58a6ff">28</div><div class="l">Total Cycles</div></div>
+  <div class="stat"><div class="n" style="color:#f85149">0</div><div class="l">Alertas RSI</div></div>
+</div>
+
+<div class="card">
+  <h2>Information Coefficient (IC)</h2>
+  <table><tr><th>Asset</th><th>IC</th><th>Samples</th><th>Trend</th></tr>
+  <tr><td colspan=4 style="color:#484f58">Acumulando datos (necesita ≥10 ciclos)</td></tr>
+  </table>
+  <p style="color:#484f58;font-size:11px;margin-top:8px">IC = Spearman rank correlation between signal and forward return. IC > 0 = predictivo.</p>
+</div>
+
+<div class="card">
+  <h2>RSI & MACD History</h2>
+  <img src="trading_chart.png" style="width:100%;max-width:800px;border-radius:6px;margin-top:10px">
+</div>
+
+<div class="card">
+  <h2>Últimas 24h</h2>
+  <div style="max-height:400px;overflow-y:auto">
+  <table><tr><th>Time</th><th>Asset</th><th>Price</th><th>RSI</th><th>MACDh</th><th>Funding</th><th>Signal</th></tr>
+  <tr><td>13+00:00</td><td>ETH</td><td>$1645.8</td><td>53.8</td><td>-0.75</td><td></td><td><span class='signal neutral'>NEUTR</span></td></tr>
+<tr><td>13+00:00</td><td>BTC</td><td>$62718.0</td><td>65.5</td><td>-8.98</td><td></td><td><span class='signal short'>SHORT</span></td></tr>
+<tr><td>51+00:00</td><td>ETH</td><td>$1644.1</td><td>52.7</td><td>-0.86</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>51+00:00</td><td>BTC</td><td>$62685.0</td><td>64.4</td><td>-11.09</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>99+00:00</td><td>ETH</td><td>$1641.6</td><td>51.0</td><td>-1.02</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>99+00:00</td><td>BTC</td><td>$62612.0</td><td>62.0</td><td>-15.74</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>16+00:00</td><td>ETH</td><td>$1642.5</td><td>51.6</td><td>-0.96</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>16+00:00</td><td>BTC</td><td>$62640.0</td><td>62.9</td><td>-13.96</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>84+00:00</td><td>ETH</td><td>$1640.9</td><td>50.5</td><td>-1.06</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>84+00:00</td><td>BTC</td><td>$62625.0</td><td>62.4</td><td>-14.91</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>03+00:00</td><td>ETH</td><td>$1641.7</td><td>51.0</td><td>-1.01</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>03+00:00</td><td>BTC</td><td>$62652.0</td><td>63.3</td><td>-13.19</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>44+00:00</td><td>ETH</td><td>$1641.5</td><td>50.9</td><td>-1.02</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>44+00:00</td><td>BTC</td><td>$62636.0</td><td>62.8</td><td>-14.21</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>40+00:00</td><td>ETH</td><td>$1638.3</td><td>48.9</td><td>-1.23</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>40+00:00</td><td>BTC</td><td>$62562.0</td><td>60.5</td><td>-18.93</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>84+00:00</td><td>ETH</td><td>$1639.6</td><td>49.7</td><td>-1.15</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>84+00:00</td><td>BTC</td><td>$62564.0</td><td>60.6</td><td>-18.81</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>58+00:00</td><td>ETH</td><td>$1639.1</td><td>39.6</td><td>-1.65</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>58+00:00</td><td>BTC</td><td>$62533.0</td><td>46.0</td><td>-40.97</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>41+00:00</td><td>ETH</td><td>$1637.6</td><td>38.7</td><td>-1.75</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>41+00:00</td><td>BTC</td><td>$62450.0</td><td>43.6</td><td>-46.26</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>71+00:00</td><td>ETH</td><td>$1638.9</td><td>39.5</td><td>-1.66</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>71+00:00</td><td>BTC</td><td>$62485.0</td><td>44.6</td><td>-44.03</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>77+00:00</td><td>ETH</td><td>$1640.4</td><td>40.8</td><td>-1.57</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>77+00:00</td><td>BTC</td><td>$62534.0</td><td>46.0</td><td>-40.9</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>77+00:00</td><td>SOL</td><td>$65.43</td><td>53.3</td><td>0.04</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+<tr><td>77+00:00</td><td>HYPE</td><td>$56.31</td><td>60.4</td><td>0.2</td><td></td><td><span class='signal neutral'>0.000</span></td></tr>
+</table>
+  </div>
+</div>
+
+<div class="meta">
+  Generado automáticamente ·
+  <a href="/p3/s82/data/trading_log.csv">CSV</a> ·
+  <a href="/p3/s82/progress/TRADING.md">Progreso</a>
+</div>
+</body></html>

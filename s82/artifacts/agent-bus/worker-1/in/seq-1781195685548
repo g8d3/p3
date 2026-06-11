@@ -1,0 +1,1 @@
+Lee sobre Kelly criterion para position sizing. Escribe una función en Python que calcule Kelly optimal f dado un historial de returns. Prueba: python3 -c 'import numpy as np; print(np.mean([0.1,-0.05,0.2,-0.02,0.15]))'

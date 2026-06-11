@@ -1,0 +1,55 @@
+{
+  "timestamp": "2026-06-11T17:15:28.391407+00:00",
+  "regime": "NEUTRAL",
+  "avg_rsi": 49.4,
+  "total_assets": 4,
+  "extremes": [],
+  "signals": [
+    {
+      "asset": "ETH",
+      "rsi": 40.8,
+      "direction": "NEUTRAL",
+      "funding": 0.0,
+      "ob_imb": -0.0934
+    },
+    {
+      "asset": "BTC",
+      "rsi": 46.0,
+      "direction": "NEUTRAL",
+      "funding": 0.0,
+      "ob_imb": -0.2576
+    },
+    {
+      "asset": "SOL",
+      "rsi": 53.3,
+      "direction": "NEUTRAL",
+      "funding": 0.0,
+      "ob_imb": 0.0965
+    },
+    {
+      "asset": "HYPE",
+      "rsi": 57.5,
+      "direction": "NEUTRAL",
+      "funding": 0.0,
+      "ob_imb": 0.183
+    }
+  ],
+  "ic": {
+    "rsi_ob_correlation": 0.8033,
+    "method": "Pearson correlation: RSI vs Order Book Imbalance"
+  },
+  "risk_flags": {
+    "order_book_extreme": false,
+    "max_ob_long": 0.183,
+    "min_ob_short": -0.2576
+  },
+  "narrative": "Mercado NEUTRAL. RSI promedio: 49.4. HYPE flippe\u00f3 OB de negativo a positivo (+0.18), posible se\u00f1al de reversi\u00f3n.",
+  "recommendations": [
+    "No trading signals extremas actualmente. Mantener monitoreo.",
+    "ETH con RSI 40.8 m\u00e1s cercano a sobreventa \u2014 watchlist.",
+    "HYPE con mayor RSI (60.4) y OB negativo (-0.45) \u2014 posible divergencia.",
+    "IC RSI-OB: correlaci\u00f3n negativa sugiere que RSI alto no atrae compras.",
+    "HYPE: OB flippe\u00f3 de -0.45 a +0.18 \u2014 posible agotamiento de vendedores, monitorear."
+  ],
+  "updated": "17:15:28 UTC"
+}

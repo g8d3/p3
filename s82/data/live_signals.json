@@ -1,0 +1,60 @@
+{
+  "signals": [
+    {
+      "asset": "ETH",
+      "direction": "NEUTRAL",
+      "rsi": "37.5",
+      "macd": "-1.88",
+      "funding": "0.00000%",
+      "ob_imbalance": 0.0443,
+      "signal": "Se\u00f1ales mixtas, mercado lateral"
+    },
+    {
+      "asset": "BTC",
+      "direction": "NEUTRAL",
+      "rsi": "43.9",
+      "macd": "-45.56",
+      "funding": "0.00000%",
+      "ob_imbalance": 0.5524,
+      "signal": "Se\u00f1ales mixtas, mercado lateral"
+    },
+    {
+      "asset": "SOL",
+      "direction": "NEUTRAL",
+      "rsi": "48.5",
+      "macd": "0.02",
+      "funding": "0.00000%",
+      "ob_imbalance": 0.1758,
+      "signal": "Se\u00f1ales mixtas, mercado lateral"
+    },
+    {
+      "asset": "HYPE",
+      "direction": "NEUTRAL",
+      "rsi": "57.5",
+      "macd": "0.18",
+      "funding": "0.00000%",
+      "ob_imbalance": 0.183,
+      "signal": "Se\u00f1ales mixtas, mercado lateral"
+    }
+  ],
+  "ic": {
+    "ETH": {
+      "ic": 0.0,
+      "trend": "insufficient"
+    },
+    "BTC": {
+      "ic": 0.0,
+      "trend": "insufficient"
+    },
+    "SOL": {
+      "ic": 0.0,
+      "trend": "insufficient"
+    },
+    "HYPE": {
+      "ic": 0.0,
+      "trend": "insufficient"
+    }
+  },
+  "status": "live",
+  "updated": "2026-06-11T17:15:55.285296+00:00"
+}
