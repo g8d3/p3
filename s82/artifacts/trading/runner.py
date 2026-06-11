@@ -22,9 +22,27 @@ REPORT_INTERVAL = 6
 ALERT_THRESHOLD = 0.0001
 
 cycle_count = 0
-# IC tracking: {coin: {signal: [(price, value), ...]}} — stores prev value + current price for return calc
+# IC tracking: persists pairs across cycles (and to file for survival across restarts)
+IC_PAIRS_FILE = DATA_DIR / "ic_pairs.json"
 prev_prices = {}
 prev_signals = {}
+ic_pair_buffer: dict = {}  # {coin: [{"sig": val, "ret": ret}, ...]}
+
+def load_ic_pairs():
+    global ic_pair_buffer
+    if IC_PAIRS_FILE.exists():
+        try:
+            with open(IC_PAIRS_FILE) as f: ic_pair_buffer = json.load(f)
+        except: ic_pair_buffer = {}
+    for k in list(ic_pair_buffer.keys()):
+        if not isinstance(ic_pair_buffer[k], list):
+            ic_pair_buffer[k] = []
+
+def save_ic_pairs():
+    with open(IC_PAIRS_FILE, "w") as f:
+        json.dump(ic_pair_buffer, f, indent=2)
+
+load_ic_pairs()
 
 def hl_post(data):
     b = json.dumps(data).encode()
@@ -125,42 +143,34 @@ def run_cycle():
     if not siglist:
         return
 
-    # --- IC tracking ---
-    # For each coin, compute forward return from previous cycle and pair with previous signal value
-    ic_results = {}
+    # --- IC tracking (persistent) ---
     for s in siglist:
         coin = s["coin"]
         curr_price = s["close"]
         signal_val = s["signal_val"]
-        # Forward return
-        if coin in prev_prices:
+        if coin in prev_prices and coin in prev_signals:
             fwd_ret = (curr_price - prev_prices[coin]) / prev_prices[coin]
-            # Pair with previous signal
-            if coin in prev_signals:
-                prev_sig = prev_signals[coin]
-                # Initialize IC history
-                if coin not in ic_results:
-                    ic_results[coin] = {"rsi_pairs": [], "direction": []}
-                ic_results[coin]["rsi_pairs"].append((prev_sig, fwd_ret))
-                ic_results[coin]["direction"].append((1 if s["direction"] in ("LONG","SHORT") else 0, fwd_ret))
-        # Store for next cycle
+            prev_sig = prev_signals[coin]
+            if coin not in ic_pair_buffer:
+                ic_pair_buffer[coin] = []
+            ic_pair_buffer[coin].append({"sig": prev_sig, "ret": fwd_ret})
         prev_prices[coin] = curr_price
         prev_signals[coin] = signal_val
 
-    # Compute IC values
+    # Compute IC from accumulated buffer
     ic_summary = {}
-    for coin, data in ic_results.items():
-        pairs = data["rsi_pairs"]
-        ic = compute_ic(pairs)
-        decay = compute_ic_decay(pairs)
+    for coin, pairs in ic_pair_buffer.items():
+        pair_list = [(p["sig"], p["ret"]) for p in pairs]
+        ic = compute_ic(pair_list)
+        decay = compute_ic_decay(pair_list)
         ic_summary[coin] = {
             "ic": round(ic, 4),
-            "n": len(pairs),
+            "n": len(pair_list),
             "ic_decay": round(decay[-1] - decay[0], 4) if len(decay) > 5 else 0,
             "ic_trend": "improving" if len(decay) > 5 and decay[-1] > decay[0] else "decaying" if len(decay) > 5 else "insufficient"
         }
 
-    # Write IC stats
+    save_ic_pairs()
     with open(IC_FILE, "w") as f:
         json.dump(ic_summary, f, indent=2)
 

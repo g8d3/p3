@@ -3,37 +3,37 @@
     {
       "asset": "ETH",
       "direction": "NEUTRAL",
-      "rsi": "37.5",
-      "macd": "-1.88",
+      "rsi": "61.0",
+      "macd": "0.71",
       "funding": "0.00000%",
-      "ob_imbalance": 0.0443,
+      "ob_imbalance": 0.0804,
       "signal": "Se\u00f1ales mixtas, mercado lateral"
     },
     {
       "asset": "BTC",
       "direction": "NEUTRAL",
-      "rsi": "43.9",
-      "macd": "-45.56",
+      "rsi": "65.8",
+      "macd": "15.83",
       "funding": "0.00000%",
-      "ob_imbalance": 0.5524,
+      "ob_imbalance": 0.2459,
       "signal": "Se\u00f1ales mixtas, mercado lateral"
     },
     {
       "asset": "SOL",
       "direction": "NEUTRAL",
-      "rsi": "48.5",
-      "macd": "0.02",
+      "rsi": "67.8",
+      "macd": "0.12",
       "funding": "0.00000%",
-      "ob_imbalance": 0.1758,
+      "ob_imbalance": 0.2676,
       "signal": "Se\u00f1ales mixtas, mercado lateral"
     },
     {
       "asset": "HYPE",
       "direction": "NEUTRAL",
-      "rsi": "57.5",
-      "macd": "0.18",
+      "rsi": "70.3",
+      "macd": "0.32",
       "funding": "0.00000%",
-      "ob_imbalance": 0.183,
+      "ob_imbalance": 0.1113,
       "signal": "Se\u00f1ales mixtas, mercado lateral"
     }
   ],
@@ -56,5 +56,20 @@
     }
   },
   "status": "live",
-  "updated": "2026-06-11T17:15:55.285296+00:00"
+  "updated": "2026-06-11T17:47:15.325822+00:00",
+  "alerts": [
+    {
+      "timestamp": "2026-06-11T17:47:44.416703+00:00",
+      "type": "RSI_EXTREME",
+      "asset": "HYPE",
+      "rsi": 70.3,
+      "price": 58.16,
+      "ob_imb": 0.1113,
+      "macd_hist": 0.32,
+      "funding": "0.00000%",
+      "signal_val": 0.405,
+      "analysis": "HYPE en sobrecompra (RSI=70.3). Tercer flip de OB en la sesion: -0.45->+0.18->-0.19->+0.11. Alta volatilidad de flujo. MACD alcista (0.32).",
+      "recommendation": "MONITOREAR - RSI extremo + OB inestable. Esperar direccion clara."
+    }
+  ]
 }

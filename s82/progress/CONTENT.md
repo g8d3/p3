@@ -514,3 +514,25 @@ bash artifacts/scripts/scene-setup.sh cleanup
 | `artifacts/scripts/watch-dashboard.sh` | Watch loop mostrando dashboard API |
 | `artifacts/scripts/narrate.sh` | Genera TTS + combina con video |
 | `scripts/record-screen.sh` | Graba pantalla + narración opcional |
+
+## Nueva Escena Narrada (2026-06-11 12:33)
+
+### Pipeline
+```bash
+bash scripts/record-screen.sh 20 artifacts/videos/new-scene.mp4
+edge-tts --voice es-MX-DaliaNeural --text 'guión específico de la escena' --write-media artifacts/videos/new-narration.mp3
+ffmpeg -i new-scene.mp4 -i new-narration.mp3 -c:v copy -c:a aac -map 0:v -map 1:a -shortest new-scene-narrated.mp4
+```
+
+### Resultados
+| Métrica | Valor |
+|---|---|
+| Archivo | `artifacts/videos/new-scene-narrated.mp4` |
+| Duración | 20.00s |
+| Tamaño | 458 KB |
+| Video | H.264 1280x720, 15fps, 110 kb/s |
+| Audio | AAC mono 24kHz, 72 kb/s (voz DaliaNeural) |
+| Contenido | ✅ REAL (px centro (6,3,48)) |
+
+### Narración
+"Este es el sistema multi-agente s82 en funcionamiento. En la pantalla vemos el monitor del sistema con los agentes activos. El proxy watchdog rastrea cada worker en tiempo real, mostrando sus segundos de actividad, uso de CPU y memoria. Worker uno y worker dos están activos, ejecutando tareas autónomamente. El supervisor coordina todo el equipo."
