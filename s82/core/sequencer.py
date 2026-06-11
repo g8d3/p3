@@ -149,6 +149,8 @@ def main():
                 send_task(w, f"[SISTEMA] Consumo alto de tokens (~{tokens}). Prioriza respuestas cortas y evita loops largos.")
 
         time.sleep(CYCLE)
+    if cycle % 90 == 0:
+        subprocess.Popen(["bash", str(BASE / "scripts/git-autocommit.sh")])
 
 
 if __name__ == "__main__":
