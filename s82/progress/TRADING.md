@@ -551,3 +551,54 @@ Memoria episódica separada del contexto de trading — cuando enfrenta una situ
 ### Lección principal
 
 El dual-level reflection (táctico + estratégico) es el patrón más valioso. Nuestro runner ya hace logging táctico (cada ciclo escribe a CSV y calcula forward returns). Falta el **estratégico**: que el runner (o supervisor) revise semanalmente qué señales funcionaron mejor y ajuste pesos automáticamente.
+
+## Research: TiMi — Trade in Minutes (arXiv 2510.04787)
+
+Leído: **"TiMi: Rationality-Driven Agentic System for Quantitative Financial Trading"** — 200+ trading pairs, stocks + crypto.
+
+### Innovación clave: separación strategy vs deployment
+
+La mayoría de agentes trading usan LLMs en cada decisión (lento, caro, sesgado). TiMi separa en 2 capas:
+
+```
+LLM Layer (estratégico, offline)
+  ├─ Macro Analysis Agent → identifica régimen de mercado
+  ├─ Strategy Adaptation Agent → personaliza para cada pair
+  ├─ Bot Evolution Agent → genera código del bot
+  └─ Feedback Reflection Agent → optimiza parámetros post-trade
+  
+Deterministic Layer (táctico, minuto-a-minuto)
+  └─ Trading Bot (código generado, sin LLM) → ejecuta señales
+```
+
+### 4 Agentes
+
+| Agente | Rol | Output |
+|--------|-----|--------|
+| **Macro Analysis** | Identifica patrones macro, estrategia general | Trading strategy S |
+| **Strategy Adaptation** | Personaliza S para cada trading pair | Reglas S_P con parámetros Θ |
+| **Bot Evolution** | Genera código del bot de trading | Bot B ejecutable |
+| **Feedback Reflection** | Evalúa resultados, ajusta parámetros | Feedback F* + parámetros refinados |
+
+### Resultados (200+ trading pairs)
+
+| Métrica | TiMi | Baseline |
+|---------|------|----------|
+| Sharpe (crypto) | **1.2–2.8** (según pair) | 0.5–1.0 |
+| Sharpe (stocks) | **1.5–3.1** | 0.8–1.2 |
+| Drawdown | **<8%** | 12–20% |
+| Costo de inferencia | **1 LLM call/día** (offline) | 1 LLM call/ciclo |
+
+### Aplicación directa a nuestro sistema
+
+TiMi es el paper que más se alinea con lo que ya tenemos:
+
+| TiMi | Nuestro sistema |
+|------|----------------|
+| Macro Analysis Agent | Runner (detecta régimen: RSI promedio 49.4 = NEUTRAL) |
+| Strategy Adaptation | direction() con umbrales por asset |
+| Bot Evolution | s39-trading-bot (código generado, deterministico) |
+| Feedback Reflection | IC tracking + forward returns |
+| Deployment (minute-level) | runner.py cada 5min sin LLM |
+
+**Conclusión**: No necesitamos un LLM en cada ciclo. El runner determinista cada 5min + revisión LLM semanal (Feedback Reflection) es el patrón correcto. TiMi valida nuestra arquitectura.
