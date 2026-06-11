@@ -502,3 +502,52 @@ Fine-tunearon Qwen3-8B con datos sintéticos del pipeline (1,080 trajectories) u
 
 ### Lección principal
 El self-reflection + data pipeline cierra el loop: señal → trade → log → evaluación → mejora. Nuestro runner ya tiene el logging (trading_log.csv, ic_pairs.json). El siguiente paso es añadir el "review" automático: que el runner evalúe sus propias señales comparando con forward returns reales y ajuste pesos.
+
+## Research: FinAgent (KDD 2024, arXiv 2402.18485)
+
+Leído: **"FinAgent: A Multimodal Foundation Agent for Financial Trading"** — NTU Singapore, ACM KDD 2024.
+
+### Innovación clave: multimodal + dual-level reflection
+
+Primer agente que procesa **3 modalidades** en un mismo loop:
+
+| Modalidad | Input | Procesamiento |
+|-----------|-------|---------------|
+| **Numérico** | Precios, OHLC, indicadores | Técnico (RSI, MACD, etc.) |
+| **Textual** | News, reports, sentimiento | LLM + RAG |
+| **Visual** | Kline charts, patrones | Visión (chart recognition) |
+
+### Dual-Level Reflection
+
+| Nivel | Frecuencia | Qué hace |
+|-------|-----------|----------|
+| **Tactical** (low-level) | Post-trade inmediato | Evalúa la última operación: "¿fue correcta?" |
+| **Strategic** (high-level) | Diario/semanal | Revisa patrones entre trades, ajusta estrategia |
+
+El reflejo táctico permite correcciones rápidas intra-sesión. El estratégico evita deriva estratégica a largo plazo.
+
+### Memory Retrieval (RAG especializado)
+
+Memoria episódica separada del contexto de trading — cuando enfrenta una situación nueva, recupera episodios similares del pasado para informar la decisión. Esto reduce ruido vs una RAG genérica.
+
+### Resultados
+
+| Métrica | FinAgent | Mejor baseline | Mejora |
+|---------|----------|---------------|--------|
+| Profit (6 datasets) | **+36% avg** | — | 36% sobre SOTA |
+| DJIA dataset | **92.27%** return | 50.04% (FinMem) | +84% relativo |
+| Crypto dataset | **Supera** | Buy&Hold | Consistente |
+
+### Aplicación a nuestro sistema
+
+| FinAgent | Nuestro sistema |
+|----------|----------------|
+| Market Intelligence (3 modalidades) | Runner (OHLC + funding + OB) |
+| Dual-level Reflection | — (futuro: post-trade review + weekly) |
+| Episodic Memory (RAG) | ic_pairs.json + forward returns |
+| Tool augmentation | busd + supervisor + workers |
+| Visual (Kline charts) | — (futuro: PatternAgent con chart vision) |
+
+### Lección principal
+
+El dual-level reflection (táctico + estratégico) es el patrón más valioso. Nuestro runner ya hace logging táctico (cada ciclo escribe a CSV y calcula forward returns). Falta el **estratégico**: que el runner (o supervisor) revise semanalmente qué señales funcionaron mejor y ajuste pesos automáticamente.
