@@ -1,6 +1,6 @@
 # ORCHESTRATION.md — Análisis Crítico del Sistema
 
-*Fecha: 2026-06-11*
+*Fecha: 2026-06-11 (actualizado post-análisis de 7 papers/experimentos)*
 
 ## 1. Estado Actual
 
@@ -18,8 +18,30 @@
 
 | Worker | Estado | Última actividad |
 |--------|--------|------------------|
-| worker-1 | ❌ Idle > 15 min | Sin tarea asignada |
+| worker-1 | ❌ Idle permanente | Sin tarea asignada desde el inicio |
 | worker-2 | ❓ Activo (QUEUED) | Procesando tarea anterior |
+
+### Procesos duplicados (confirmado)
+
+```
+3× busd    (178662, 188932, 202661) — supervisor.py + otros scripts lanzan sin matar anterior
+2× runner  (195581, 202660) — lockfile no implementado
+1× dashboard (186540) — bien, singleton
+```
+
+### Research validación
+
+7 papers/experimentos analizados que validan o contradicen nuestras decisiones:
+
+| Fuente | Lo que valida | Lo que cuestiona |
+|--------|---------------|------------------|
+| QuantAgent (2025) | Solo OHLC basta, sin news | — |
+| TiMi (2025) | Runner determinista + LLM offline = patrón correcto | — |
+| 22 Agents en HL (2026) | Funding rate mejor señal, mean reversion no funciona | — |
+| TradingGroup (2025) | Self-reflection + data pipeline mejora resultados | Necesitamos fine-tuning |
+| FinAgent (KDD 2024) | Dual-level reflection (táctico + estratégico) | Solo tenemos táctico |
+| Swarm Patterns (2026) | Risk Gate determinista entre señal y ejecución | No tenemos risk gate |
+| Hyperliquid Backtest (Keel) | 12 meses mínimos, 15m OHLC + 1h funding | Nuestro backtest fue solo 7 días |
 
 ## 2. Qué Funciona (Fortalezas)
 
@@ -54,46 +76,79 @@ El runner no verifica si ya hay otro runner corriendo. Fácil de arreglar con lo
 ### ❌ IC tracking necesita ~2h para madurar
 `compute_ic()` requiere N≥10 pares. Con 1 par por ciclo de 5min, toma ~50 min tener IC significativo. Y cada reinicio del runner pierde el buffer (parcialmente mitigado con `ic_pairs.json` persistente).
 
-### ❌ Sin test automatizado
-No hay forma de verificar que el sistema funciona sin mirar manualmente los logs. Si runner.py crashea silenciosamente, nadie se entera hasta que HELPERD avisa.
+### ❌ Sin risk gate entre señal y ejecución
+Los 7 papers coinciden: debe haber un risk gate determinista (Python, no LLM) entre la señal y cualquier acción. Nuestro runner genera señales pero no las filtra por riesgo — no hay circuit breaker, ni Kelly sizing, ni stop-loss conectado.
 
-## 4. Qué Mejoraría (Priorizado)
+### ❌ Sin fine-tuning con datos propios
+TradingGroup demostró que fine-tunear Qwen3-8B con solo 1,080 samples sintéticas supera a GPT-4o-mini. Nosotros tenemos `trading_log.csv` + `ic_pairs.json` acumulando datos — no los estamos usando.
 
-### P1 — Lock de procesos
-Añadir PID file a runner.py y dashboard.py. Antes de arrancar, verificar si el PID existe y el proceso está vivo. `flock` en el archivo.
+### ❌ Backtest insuficiente (7 días)
+Keel recomienda mínimo 12 meses de datos HL con 15m OHLC + 1h funding para validar estrategias. Nuestro backtest fue solo 7 días. El Sharpe 4.63 puede ser overfit al régimen de esa ventana.
 
-### P2 — Asignar worker-1
-worker-1 debería correr el backtest de s39 periódicamente o hacer análisis históricos de `trading_log.csv`. También podría ser el "research agent" que lee papers y actualiza TRADING.md automáticamente.
+### ❌ Sin healthcheck ni tests automatizados
+No hay forma de verificar que el sistema funciona sin mirar manualmente los logs. Si runner.py crashea silenciosamente, nadie se entera hasta que HELPERD avisa. No hay tests unitarios ni de integración.
 
-### P3 — Healthcheck endpoint
-Añadir un endpoint HTTP simple al runner (puerto 9096) que devuelva:
-- Último ciclo ejecutado
-- Señales actuales
-- IC stats
-- Uptime
-- Si el runner está atrasado (>6min sin ciclo)
+## 4. Qué Mejoraría (Priorizado con evidencia de research)
 
-### P4 — Auto-cleanup de busd duplicados
-El supervisor debería matar busds antiguos antes de arrancar uno nuevo. O mejor: que busd escriba su PID y se verifique.
-
-### P5 — Review estratégico semanal
-El runner ya calcula forward returns pero no los consume. Añadir un ciclo semanal que:
-1. Lea `ic_pairs.json` completo
-2. Compute IC por señal (RSI, MACD, funding, OB)
-3. Ajuste pesos de `direction()` según IC histórico
-4. Escriba reporte a `TRADING.md`
-
-### P6 — Más assets
-Añadir TOPIX, ARB, DOGE, TRUMP al runner. La API de HL responde en ~900ms para todos los assets simultáneamente — no hay costo adicional.
-
-### P7 — Modo dry-run conectado al RiskManager de s39
-Conectar el RiskManager de `s39-trading-bot/mega_alpha` al runner para tener:
+### P1 — Risk Gate determinista (Swarm Patterns + TiMi)
+Antes de que cualquier señal llegue a worker-2, debe pasar por un risk gate Python:
 - Circuit breaker si drawdown > 15%
-- Position sizing por Kelly
-- Stop-loss automático
+- Position sizing por Kelly (s39 ya lo tiene)
+- Stop-loss automático por ATR
+- Validación: funding rate como filtro adicional
 
-### P8 — Fine-tuning con datos propios
-`trading_log.csv` + `ic_pairs.json` ya tienen datos estructurados. Fine-tunear Qwen3-8B (como hizo TradingGroup con 1,080 samples) para crear un modelo especializado en señales HL.
+**Evidencia**: TiMi y Swarm Patterns coinciden: "Reserve LLMs solo para análisis — la ejecución debe ser código puro."
+
+### P2 — Lock de procesos + auto-cleanup
+- PID file para runner.py y dashboard.py con verificación al arrancar
+- Supervisor: matar busds antiguos antes de lanzar nuevo
+- `flock` en archivos de salida para prevenir corrupción por duplicados
+
+### P3 — Asignar worker-1 a backtesting extenso (Keel + 22 Agents)
+worker-1 debe correr backtests de 12+ meses con datos HL (15m OHLC + 1h funding) para:
+- Validar que Sharpe 4.63 no es overfit a 7 días
+- Probar regimenes múltiples (bull funding 2023-24 vs neutral 2025)
+- Testear nuevas señales (funding arbitrage, grid trading, trend following puro)
+
+**Evidencia**: Keel recomienda mínimo 12 meses y 2 regimenes de funding. 22 Agents en HL mostró que mean reversion pierde -18 a -33% en perps.
+
+### P4 — Healthcheck endpoint (puerto 9096)
+Endpoint HTTP que devuelva en JSON:
+- Último ciclo ejecutado y timestamp
+- Señales actuales con RSI y funding
+- IC stats por asset
+- Uptime del proceso
+- Warning si ciclo atrasado (>6min)
+
+### P5 — Review estratégico semanal (FinAgent dual-level + TradingGroup)
+El runner ya tiene el **reflejo táctico** (cada ciclo escribe CSV + forward returns). Falta el **reflejo estratégico** semanal:
+1. Leer `ic_pairs.json` completo (>350 pares/semana)
+2. Computar IC real por señal (RSI vs forward return, funding vs forward return)
+3. Identificar qué señales están decayendo (IC decay)
+4. Ajustar pesos de `direction()` automáticamente
+5. Escribir reporte a TRADING.md
+
+**Evidencia**: FinAgent demostró que dual-level reflection da +36% sobre sin-reflection. TradingGroup lo implementa con pipeline de datos → fine-tuning.
+
+### P6 — Fine-tuning con datos propios (TradingGroup)
+Cuando `trading_log.csv` tenga >1,000 filas (~4 días de datos):
+- Extraer pares señal→forward return de `ic_pairs.json`
+- Fine-tunear Qwen3-8B con LoRA (0.5% parámetros, ~6h en V100)
+- Generar Qwen3-Trader-HL-8B
+
+**Evidencia**: TradingGroup fine-tuneó con solo 1,080 samples y superó a GPT-4o-mini en TSLA y NFLX.
+
+### P7 — Backtest multiciclo (12 meses)
+worker-1 debe:
+1. Fetch 12 meses de datos HL (15m OHLC + 1h funding) usando `s41-dex-volume-fetcher`
+2. Correr el optimizer de s39 sobre múltiples ventanas
+3. Reportar: Sharpe en bull funding regime vs neutral funding regime
+4. Si Sharpe se mantiene >1.5 en ambos regimenes → considerar live trading
+
+**Evidencia**: Keel: "A reasonable minimum is two full regime cycles — for Hyperliquid that means at least 12 months."
+
+### P8 — Más assets con funding arb señal
+Añadir ARB, DOGE, TRUMP. No por su precio, sino por el **spread de funding** entre exchanges. El artículo de funding arb mostró spreads de 21-61% APR en long-tail perps. Nueva señal: `cross_exchange_funding_spread`.
 
 ## 5. Riesgos
 
@@ -107,10 +162,30 @@ Conectar el RiskManager de `s39-trading-bot/mega_alpha` al runner para tener:
 
 ## 6. Resumen
 
-El sistema genera señales de trading funcionales (Sharpe 4.63 backtest, 4 assets en vivo), pero la orquestación tiene problemas de运维 (procesos duplicados, workers ociosos, sin healthcheck). Las 3 prioridades inmediatas son:
+El sistema genera señales de trading funcionales (Sharpe 4.63 backtest, 4 assets en vivo), validado por 7 papers/experimentos que confirman nuestra dirección. Pero la orquestación tiene problemas concretos.
 
-1. **PID lock** para evitar duplicados
-2. **Asignar worker-1** a backtesting/research
-3. **Healthcheck endpoint** para detectar caídas
+### Lo que está bien
+- ✅ Runner determinista cada 5min (TiMi pattern)
+- ✅ Solo OHLC + datos de HL, sin news (QuantAgent)
+- ✅ Funding rate como señal principal (22 Agents HL)
+- ✅ IC tracking persistente (TradingGroup data pipeline)
+- ✅ Logging estructurado (CSV + JSON)
 
-Después: review estratégico semanal con IC → ajuste de pesos → fine-tuning.
+### Lo que falta
+- ❌ Risk gate determinista entre señal y ejecución
+- ❌ Backtest > 12 meses para validar Sharpe
+- ❌ Healthcheck endpoint
+- ❌ Dual-level reflection (táctico ✅, estratégico ❌)
+- ❌ Fine-tuning con datos propios
+- ❌ worker-1 inactivo
+
+### Prioridades
+
+| # | Qué | Por qué | Evidencia |
+|---|-----|---------|-----------|
+| P1 | Risk Gate | Protege capital | Swarm Patterns + TiMi |
+| P2 | PID lock | Elimina duplicados | Problemas actuales |
+| P3 | worker-1 → backtest 12m | Validar Sharpe real | Keel + 22 Agents HL |
+| P4 | Healthcheck :9096 | Detectar caídas | Sin esto, operamos ciegos |
+| P5 | Review estratégico | Ajustar pesos por IC | FinAgent dual-level |
+| P6 | Fine-tuning Qwen3 | Modelo HL propio | TradingGroup LoRA |
