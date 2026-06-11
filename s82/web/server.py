@@ -209,67 +209,55 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     "focus": meta["current_focus"],
                 })
 
-            # Goal tree: high-level objectives → by agent
-            goal_tree = {
-                "Trading HyperLiquid": {
-                    "status": "active",
-                    "sub": {
-                        "Runner 24/7": {"status": "✅", "agent": "runner"},
-                        "Señales RSI+MACD+Funding": {"status": "✅", "agent": "worker-1"},
-                        "IC Analysis": {"status": "⚠️", "agent": "worker-1"},
-                        "Backtest Sharpe 4.63": {"status": "✅", "agent": "worker-1"},
-                        "Live trading": {"status": "⏳", "agent": "worker-1"},
-                    }
-                },
-                "Content Creation": {
-                    "status": "active",
-                    "sub": {
-                        "Screen recording pipeline": {"status": "✅", "agent": "worker-2"},
-                        "Narración edge-tts": {"status": "✅", "agent": "worker-2"},
-                        "Video final publicable": {"status": "⚠️", "agent": "worker-2"},
-                        "Guión escena por escena": {"status": "⚠️", "agent": "worker-2"},
-                    }
-                },
-                "System Infrastructure": {
-                    "status": "active",
-                    "sub": {
-                        "7 componentes funcionando": {"status": "✅", "agent": "supervisor"},
-                        "Autoheal revive caídos": {"status": "✅", "agent": "supervisor"},
-                        "Git disciplina": {"status": "⚠️", "agent": "system"},
-                        "Calidad con Mimo v2.5": {"status": "⚠️", "agent": "reviewer"},
-                    }
-                },
-            }
+            # Hierarchy tree: zoomable from general to specific
+            hierarchy = [
+                # (id, parent_id, label, type, data)
+                ("root", None, "s82 System", "root", {"status":"active"}),
+                ("trading", "root", "Trading", "area", {"agent":"worker-1","status":"active"}),
+                ("trading-pipeline", "trading", "Pipeline", "group", {}),
+                ("trading-pipe-runner", "trading-pipeline", "Runner 24/7", "item", {"status":"✅"}),
+                ("trading-pipe-signals", "trading-pipeline", "RSI+MACD+Funding", "item", {"status":"✅"}),
+                ("trading-pipe-ic", "trading-pipeline", "IC Analysis", "item", {"status":"⚠️"}),
+                ("trading-pipe-backtest", "trading-pipeline", "Backtest Sharpe 4.63", "item", {"status":"✅"}),
+                ("trading-pipe-live", "trading-pipeline", "Live Trading", "item", {"status":"⏳"}),
+                ("trading-signals", "trading", "Current Signals", "group", {}),
+            ]
+            signals_list = signals.get("signals", [])
+            for s in signals_list:
+                sid = "sig-" + s.get("asset", "?").lower()
+                direction = s.get("direction", "?")
+                hierarchy.append((sid, "trading-signals", f"{s.get('asset','?')}: {direction} RSI={s.get('rsi','?')}", "leaf", s))
+            hierarchy.append(("trading-metrics", "trading", "Metrics", "group", {}))
+            w1_csv = BASE / "data" / "trading_log.csv"
+            w1_count = len(w1_csv.read_text().strip().split("\n")) - 1 if w1_csv.exists() else 0
+            hierarchy.append(("trading-metrics-count", "trading-metrics", f"Signals logged: {w1_count}", "leaf", {}))
+            hierarchy.append(("trading-metrics-assets", "trading-metrics", "Assets: ETH, BTC, SOL, HYPE", "leaf", {}))
+            hierarchy.append(("trading-metrics-sharpe", "trading-metrics", "Best Sharpe: 4.63", "leaf", {}))
 
-            # Per-agent pipeline data
-            agent_pipelines = {}
-            trlog = BASE / "data" / "trading_log.csv"
-            w1_signal_count = len(trlog.read_text().strip().split("\n")) - 1 if trlog.exists() else 0
-            agent_pipelines["worker-1"] = {
-                "pipeline": [
-                    {"step": "HL API Integration", "status": "✅"},
-                    {"step": "Signal Runner 24/7", "status": "✅"},
-                    {"step": "Backtest Sharpe 4.63", "status": "✅"},
-                    {"step": "IC Analysis", "status": "⚠️"},
-                    {"step": "Live Trading", "status": "⏳"},
-                ],
-                "metrics": {"signals_logged": w1_signal_count, "assets": "ETH, BTC, SOL, HYPE", "sharpe": "4.63"},
-                "latest": f"{w1_signal_count} señales en log, runner activo",
-            }
-            # Worker-2: Content
-            w2_videos = [f for f in (BASE / "artifacts" / "videos").iterdir() if f.suffix in (".mp4",".mp3")] if (BASE / "artifacts" / "videos").exists() else []
-            w2_total_size = sum(f.stat().st_size for f in w2_videos) / 1024
-            agent_pipelines["worker-2"] = {
-                "pipeline": [
-                    {"step": "Screen Recording (ffmpeg)", "status": "✅"},
-                    {"step": "Narración edge-tts", "status": "✅"},
-                    {"step": "Scene Script (guión)", "status": "⚠️"},
-                    {"step": "Video Final Publicable", "status": "⚠️"},
-                    {"step": "YouTube Upload Pipeline", "status": "⏳"},
-                ],
-                "metrics": {"videos": len(w2_videos), "total_size_kb": round(w2_total_size), "latest": "20s narrated clip"},
-                "latest": f"{len(w2_videos)} archivos, {round(w2_total_size)}KB total",
-            }
+            hierarchy.append(("content", "root", "Content", "area", {"agent":"worker-2","status":"active"}))
+            hierarchy.append(("content-pipeline", "content", "Pipeline", "group", {}))
+            w2_videos = sorted((BASE / "artifacts" / "videos").glob("*.mp4")) if (BASE / "artifacts" / "videos").exists() else []
+            hierarchy.append(("content-pipe-recording", "content-pipeline", "Screen Recording (ffmpeg)", "item", {"status":"✅"}))
+            hierarchy.append(("content-pipe-tts", "content-pipeline", "Narración edge-tts", "item", {"status":"✅"}))
+            hierarchy.append(("content-pipe-guion", "content-pipeline", "Guión escena por escena", "item", {"status":"⚠️"}))
+            hierarchy.append(("content-pipe-final", "content-pipeline", "Video Final Publicable", "item", {"status":"⚠️"}))
+            hierarchy.append(("content-pipe-youtube", "content-pipeline", "YouTube Upload", "item", {"status":"⏳"}))
+            hierarchy.append(("content-videos", "content", "Videos", "group", {}))
+            for v in reversed(w2_videos[-5:]):
+                size = v.stat().st_size / 1024
+                hierarchy.append((f"vid-{v.stem[:20]}", "content-videos", f"{v.name} ({round(size)}KB)", "leaf", {}))
+            hierarchy.append(("content-metrics", "content", "Metrics", "group", {}))
+            hierarchy.append(("content-metrics-count", "content-metrics", f"Total videos: {len(w2_videos)}", "leaf", {}))
+
+            hierarchy.append(("infra", "root", "Infrastructure", "area", {"status":"active"}))
+            hierarchy.append(("infra-components", "infra", "Components", "group", {}))
+            for name, ok in components.items():
+                hierarchy.append((f"comp-{name}", "infra-components", f"{name}: {'✅' if ok else '❌'}", "leaf", {}))
+            hierarchy.append(("infra-git", "infra", "Git", "group", {}))
+            hierarchy.append(("infra-git-commit", "infra-git", f"Last commit: {subprocess.run(['git','log','--oneline','-1'], capture_output=True,text=True,timeout=5).stdout.strip()[:60]}", "leaf", {}))
+            hierarchy.append(("infra-files", "infra", "Artifacts", "group", {}))
+            hierarchy.append(("infra-files-count", "infra-files", f"{artifact_count} files ({round(artifact_size/1024)}KB)", "leaf", {}))
+            hierarchy.append(("infra-files-progress", "infra-files", f"{progress_lines} lines in {len(progress_files)} docs", "leaf", {}))
 
             # Tmux windows description
             tmux_windows = []
@@ -285,8 +273,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             except: pass
 
             self._json({
-                "agent_pipelines": agent_pipelines,
-                "tmux_windows": tmux_windows,
+                "hierarchy": hierarchy,
                 "components": components,
                 "agents": agent_list,
                 "signals": signals,
@@ -294,7 +281,6 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 "progress": {"files": len(progress_files), "lines": progress_lines},
                 "artifacts": {"count": artifact_count, "size_kb": round(artifact_size/1024)},
                 "latest_review": latest_review[:300],
-                "goal_tree": goal_tree,
                 "tmux_windows": tmux_windows,
             })
             return

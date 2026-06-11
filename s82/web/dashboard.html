@@ -67,10 +67,8 @@ tr:hover td{background:#1c2333}
 </div>
 
 <div class="panel" id="panel-goals">
-  <h2>Agent Pipelines</h2>
+  <h2>Zoomable Tree</h2>
   <div id="goals-content"></div>
-  <h2 style="margin-top:20px">Goal Tree</h2>
-  <div class="table-wrap" id="goals-t"></div>
 </div>
 
 <div class="panel" id="panel-log">
@@ -122,7 +120,7 @@ function pageGo(id, p){
   _pages[id] = Math.max(0, p);
   load();
 }
-function esc(t){ return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(t){ return String(t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function exportCsv(tableId){
   const el = document.getElementById(tableId);
   if(!el) return;
@@ -144,37 +142,11 @@ document.getElementById('tabs').addEventListener('click', function(e){
   document.getElementById('panel-'+tab.dataset.panel).classList.add('active');
 });
 
-function pipelineHtml(agent, pipe){
-  if(!pipe || !pipe.pipeline) return '';
-  let html = '<div style="background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px;margin:12px 0">';
-  html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">';
-  html += '<strong style="color:#58a6ff;font-size:15px">'+esc(agent)+'</strong>';
-  html += '<span style="font-size:11px;color:#8b949e">'+esc(pipe.latest||'')+'</span>';
-  html += '</div>';
-  // Metrics
-  if(pipe.metrics){
-    html += '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;font-size:11px">';
-    for(const [k,v] of Object.entries(pipe.metrics)){
-      html += '<span style="color:#8b949e">'+esc(k)+': <b style="color:#c9d1d9">'+esc(v)+'</b></span>';
-    }
-    html += '</div>';
-  }
-  // Pipeline steps as table
-  html += '<table style="font-size:12px;width:100%"><tbody>';
-  pipe.pipeline.forEach(p => {
-    html += '<tr><td style="padding:3px 8px;border:none">'+esc(p.status)+'</td><td style="padding:3px 8px;border:none;color:#8b949e">'+esc(p.step)+'</td></tr>';
-  });
-  html += '</tbody></table></div>';
-  return html;
-}
-
 async function load(){
   const r = await fetch('/api/status').then(r=>r.json());
   const agents = r.agents || [];
   const signals = r.signals || {};
-  const goals = r.goal_tree || {};
   const ws = r.tmux_windows || [];
-  const pipes = r.agent_pipelines || {};
 
   // Stats bar
   const realAgents = agents.filter(a=>!a.never_active).length;
@@ -212,52 +184,84 @@ async function load(){
     {key:'focus', label:'Current Focus'},
   ], {perPage:15});
 
-  // ── AGENT PIPELINES (per-agent cards with pipeline tables) ──
-  let pipesHtml = '';
-  for(const [agent, pipe] of Object.entries(pipes)){
-    pipesHtml += pipelineHtml(agent, pipe);
-  }
-  // Also include signals as a metrics table under the trading pipeline
-  const sigList = (signals.signals||[]).map(s => ({
-    asset: s.asset||'?', direction: s.direction||'?', rsi: s.rsi||'?',
-    macd: s.macd||'?', funding: s.funding||'', ob: s.ob_imbalance!==undefined?s.ob_imbalance:'',
-    timeframe: s.timeframe || '1H',
-    duration: s.duration || (s.first_seen ? Math.round((Date.now()-new Date(s.first_seen).getTime())/60000)+'min' : '—'),
-    trend: s.trend || (s.direction==='NEUTRAL'?'flat':s.direction),
-    updated: s.updated ? new Date(s.updated).toLocaleTimeString() : (signals.updated ? new Date(signals.updated).toLocaleTimeString() : '?'),
-  }));
-  if(sigList.length){
-    pipesHtml += '<h2 style="margin-top:20px">Current Trading Signals</h2>';
-    pipesHtml += '<div class="table-wrap">';
-    const tmpId = 'signals-ts-' + Date.now();
-    // signals are inside goals tab now
-    // inline signals table
-    let stable = '<table id="'+tmpId+'"><thead><tr><th>Asset</th><th>Signal</th><th>RSI</th><th>MACD</th><th>Funding</th><th>OB</th><th>TF</th><th>Duration</th><th>Trend</th><th>Updated</th></tr></thead><tbody>';
-    sigList.forEach(s => {
-      stable += '<tr><td>'+esc(s.asset)+'</td><td><span class="badge '+(s.direction==='LONG'?'b-long':s.direction==='SHORT'?'b-short':'b-neutral')+'">'+esc(s.direction)+'</span></td>';
-      stable += '<td>'+esc(s.rsi)+'</td><td>'+esc(s.macd)+'</td><td>'+esc(s.funding)+'</td><td>'+esc(s.ob)+'</td>';
-      stable += '<td>'+esc(s.timeframe)+'</td><td>'+esc(s.duration)+'</td><td>'+esc(s.trend)+'</td><td>'+esc(s.updated)+'</td></tr>';
+  // ── ZOOMABLE TREE (Goals tab) ──
+  const tree = r.hierarchy || [];
+  // Build tree structure
+  const children = {};
+  const nodeMap = {};
+  tree.forEach(n => {
+    nodeMap[n[0]] = n;
+    const p = n[1] || '';
+    if(!children[p]) children[p] = [];
+    children[p].push(n);
+  });
+  // Only show direct children of currently zoomed node + its ancestors as breadcrumbs
+  const zoomStack = window._zoomStack || ['root'];
+  const currentZoom = zoomStack[zoomStack.length - 1];
+  const currentChildren = children[currentZoom] || [];
+
+  // Breadcrumbs
+  let bread = '<div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin:8px 0;font-size:12px">';
+  zoomStack.forEach((zid, i) => {
+    const n = nodeMap[zid];
+    if(!n) return;
+    if(i > 0) bread += '<span style="color:#30363d">›</span>';
+    const cls = i === zoomStack.length - 1 ? 'style="color:#58a6ff;font-weight:bold"' : 'style="color:#8b949e;cursor:pointer" onclick="window._zoomStack=window._zoomStack.slice(0,'+(i+1)+');load()"';
+    bread += `<span ${cls}>${esc(n[2]||zid)}</span>`;
+  });
+  bread += '</div>';
+
+  // Bookmarks
+  const bookmarks = JSON.parse(localStorage.getItem('s82_tree_bookmarks') || '[]');
+  if(bookmarks.length){
+    bread += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 8px;font-size:11px">';
+    bread += '<span style="color:#484f58">🔖</span>';
+    bookmarks.forEach((b, i) => {
+      bread += `<span style="color:#58a6ff;cursor:pointer" onclick="window._zoomStack=['${b.join("','")}'];load()">#${i+1}</span>`;
     });
-    stable += '</tbody></table></div>';
-    pipesHtml += stable;
+    bread += '</div>';
   }
 
-  document.getElementById('goals-content').innerHTML = pipesHtml || '<div class="notice">No pipeline data yet</div>';
+  // Tree table
+  let tbody = '';
+  currentChildren.forEach(n => {
+    const [id, parent, label, type, data] = n;
+    const hasChildren = children[id] && children[id].length > 0;
+    const toggle = hasChildren
+      ? `<span style="cursor:pointer;color:#58a6ff" onclick="window._zoomStack.push('${id}');load()">+</span>`
+      : '<span style="color:#30363d">·</span>';
+    const icon = type === 'area' ? '📁' : type === 'group' ? '📂' : type === 'leaf' ? '📄' : type === 'item' ? '⚙️' : '•';
+    const status = data && data.status ? `<span style="font-size:11px;margin-left:6px">${data.status}</span>` : '';
+    const agent = data && data.agent ? `<span style="color:#484f58;font-size:10px;margin-left:6px">[${data.agent}]</span>` : '';
+    tbody += `<tr>
+      <td style="padding:4px 8px;white-space:nowrap">${toggle}</td>
+      <td style="padding:4px 8px">${icon} ${esc(label)}${status}${agent}</td>
+      <td style="padding:4px 8px;font-size:11px;color:#8b949e">${esc(id)}</td>
+      <td style="padding:4px 8px;font-size:11px;color:#484f58">${esc(type)}</td>
+    </tr>`;
+  });
 
-  // ── GOAL TREE as proper table ──
-  let goalRows = [];
-  for(const [root, g] of Object.entries(goals)){
-    goalRows.push({_tree:'tree-root', objective: root, sub:'', status:g.status||'', agent:'', focus:''});
-    for(const [sub, s] of Object.entries(g.sub||{})){
-      goalRows.push({_tree:'tree-row', objective:'', sub: sub, status: s.status||'', agent: s.agent||'', focus: ''});
-    }
-  }
-  renderTable('goals-t', goalRows, [
-    {key:'objective', label:'Objective'},
-    {key:'sub', label:'Sub-goal'},
-    {key:'status', label:'Status'},
-    {key:'agent', label:'Agent'},
-  ], {perPage:50});
+  // Bookmark button
+  const canBookmark = zoomStack.length > 1;
+  const bookmarkBtn = canBookmark
+    ? `<button class="btn" onclick="let b=JSON.parse(localStorage.getItem('s82_tree_bookmarks')||'[]');b.push(${JSON.stringify(zoomStack)});localStorage.setItem('s82_tree_bookmarks',JSON.stringify(b));load()" style="margin-left:8px">🔖 Bookmark this level</button>`
+    : '';
+
+  const treeHtml = `
+    <div class="toolbar">
+      <button class="btn" onclick="window._zoomStack=['root'];load()">🏠 Root</button>
+      ${bookmarkBtn}
+      <span style="color:#484f58;font-size:12px;margin-left:8px">${tree.length} nodes</span>
+    </div>
+    ${bread}
+    <div class="table-wrap" style="max-height:60vh">
+    <table>
+      <thead><tr><th style="width:30px">+/-</th><th>Node</th><th style="width:150px">ID</th><th style="width:80px">Type</th></tr></thead>
+      <tbody>${tbody || '<tr><td colspan="4" style="padding:20px;text-align:center;color:#484f58">No children at this level</td></tr>'}</tbody>
+    </table>
+    </div>`;
+
+  document.getElementById('goals-content').innerHTML = treeHtml;
 
   // ── LOG TABLE ──
   const logR = await fetch('/api/log').then(r=>r.json());
