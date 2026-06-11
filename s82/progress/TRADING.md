@@ -646,3 +646,47 @@ Nuestra arquitectura (runner determinista + busd message bus + workers) ya sigue
 1. **Risk Gate determinista** entre señal y ejecución — conectar RiskManager de s39
 2. **Healthcheck endpoint** en runner.py — sin esto no sabemos si está vivo
 3. **3 agentes mínimo** — tenemos runner (signal) + falta risk gate + worker-2 (executor)
+
+## Research: 22 Agents Racing on Hyperliquid (Senpi, 2026)
+
+Leído: **"Hiring 22 Agents to Race on Hyperliquid, What Did I Discover?"** — Experimento real con $1000 por agente en HL.
+
+### Configuración del experimento
+
+22 agentes autónomos, cada uno con $1000 reales en Hyperliquid, ejecutando distintas estrategias. Resultados documentados en Marzo 2026.
+
+### Hallazgos clave
+
+#### 1. Disciplina > Señales
+El agente **Fox** (selectivo, pocas ejecuciones) logró **+23% ROI**. Su gemelo **Ghost Fox** (mismas señales pero ejecutaba más frecuentemente) quedó **56 puntos porcentuales detrás**. Conclusión: esperar la señal correcta es más importante que operar seguido.
+
+#### 2. Mean Reversion NO funciona en perps
+Los 3 agentes basados en mean reversion perdieron dinero:
+
+| Agente | ROI | Causa |
+|--------|-----|-------|
+| Viper | **-18%** | Comprar dips en tendencia bajista |
+| Mamba | **-33%** | Mismo error |
+| Anaconda | **-22%** | "Support levels" no sostienen |
+
+El mercado de perps es fuertemente **trending**, no mean-reverting. Comprar el dip es la forma más cara de perder dinero.
+
+#### 3. Lo que sí funciona
+- **Trend following** con trailing stop (DSL High Water)
+- **Conviction high**: entrar con fuerza, cortar pérdidas rápido (minutos)
+- **Dejar correr ganancias**: win rate tan bajo como 43% es rentable si la ganancia promedio es 10× la pérdida promedio
+
+### Aplicación a nuestro sistema
+
+| Experimento | Nuestro sistema |
+|-------------|----------------|
+| Fox (selectivo, +23%) | direction() con filtros RSI+MACD+funding |
+| Mean reversion (-18 a -33%) | Nuestro backtest mostró funding rate como mejor señal (IC=0.13), no mean reversion |
+| Trailing stop DSL | RiskManager de s39 |
+| Macro filter (BTC trend) | Pendiente: añadir filtro de régimen macro |
+
+### Números útiles para el runner
+
+- **Win rate 43% es suficiente** si avg win / avg loss > 10
+- **Funding rate** es la señal más predictiva en HL (confirmado por nuestro backtest: IC=0.13)
+- **Tendencia > reversión**: las señales de momentum deben tener más peso que mean reversion
