@@ -1,0 +1,24 @@
+{
+  "hello": {
+    "name": "hello",
+    "cmd": "echo hello world && sleep 2 && echo done",
+    "timeout": 30,
+    "started_at": "2026-06-11T13:20:11.424768",
+    "pid": 230062,
+    "status": "done",
+    "exit_code": 0,
+    "ended_at": "2026-06-11T13:20:13.445814",
+    "duration_s": 2.0
+  },
+  "hangs": {
+    "name": "hangs",
+    "cmd": "sleep 10 && echo should not appear",
+    "timeout": 3,
+    "started_at": "2026-06-11T13:20:20.274731",
+    "pid": 230092,
+    "status": "timeout",
+    "exit_code": -1,
+    "ended_at": "2026-06-11T13:20:23.277548",
+    "duration_s": 3.0
+  }
+}
