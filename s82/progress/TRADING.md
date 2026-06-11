@@ -602,3 +602,47 @@ TiMi es el paper que más se alinea con lo que ya tenemos:
 | Deployment (minute-level) | runner.py cada 5min sin LLM |
 
 **Conclusión**: No necesitamos un LLM en cada ciclo. El runner determinista cada 5min + revisión LLM semanal (Feedback Reflection) es el patrón correcto. TiMi valida nuestra arquitectura.
+
+## Research: Multi-Agent Swarm Trading Patterns (Sentinel, 2026)
+
+Leído: **"Multi-Agent Swarm Trading Architecture"** — guía práctica de patrones de orquestación.
+
+### 4 patrones de arquitectura
+
+| Patrón | Descripción | Cuándo usarlo |
+|--------|-------------|---------------|
+| **Peer-to-Peer** | Agentes se comunican directo, sin coordinador | Baja latencia, equipos chicos |
+| **Market-Making Swarm** | Agentes compiten por liquidez | MM, HFT |
+| **Hierarchical** | Supervisor + agentes especializados | Trading general, equipos grandes |
+| **Blackboard (Shared State)** | Todos leen/escriben estado común | Coordinación compleja |
+
+### Regla de oro del artículo
+
+> **No todo agente necesita ser un LLM.** El risk gate puede ser una función Python determinista. El execution agent debe ser código puro sin LLM. Reserva LLMs para análisis, adaptación de estrategia, y detección de anomalías.
+
+### Minimum Viable Swarm: 3 agentes
+
+```
+Signal Generator → Risk Gate → Executor
+     (LLM)         (Python)     (Código)
+```
+
+Exactamente lo que tenemos: runner.py genera señales (determinista), risk vendría de s39, y worker-2 ejecuta.
+
+### Stack recomendado vs nuestro stack
+
+| Capa | Recomendado | Nosotros |
+|------|-------------|----------|
+| Orchestration | LangGraph / CrewAI | busd + supervisor |
+| Comunicación | A2A / MCP | inotify + tmux send-keys |
+| Risk Gate | Determinista (Python) | RiskManager de s39 |
+| Data | Redis/pub-sub | Archivos JSON + CSV |
+| Healthcheck | Endpoint HTTP | — (pendiente P3) |
+
+### Lección principal
+
+Nuestra arquitectura (runner determinista + busd message bus + workers) ya sigue el patrón correcto. Las mejoras concretas del artículo:
+
+1. **Risk Gate determinista** entre señal y ejecución — conectar RiskManager de s39
+2. **Healthcheck endpoint** en runner.py — sin esto no sabemos si está vivo
+3. **3 agentes mínimo** — tenemos runner (signal) + falta risk gate + worker-2 (executor)
