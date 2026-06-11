@@ -28,10 +28,10 @@
     },
     {
       "asset": "HYPE",
-      "rsi": 57.5,
+      "rsi": 68.4,
       "direction": "NEUTRAL",
       "funding": 0.0,
-      "ob_imb": 0.183
+      "ob_imb": -0.1867
     }
   ],
   "ic": {
@@ -51,5 +51,29 @@
     "IC RSI-OB: correlaci\u00f3n negativa sugiere que RSI alto no atrae compras.",
     "HYPE: OB flippe\u00f3 de -0.45 a +0.18 \u2014 posible agotamiento de vendedores, monitorear."
   ],
-  "updated": "17:15:28 UTC"
+  "updated": "17:15:28 UTC",
+  "alerts": [
+    {
+      "timestamp": "2026-06-11T17:47:44.416703+00:00",
+      "type": "RSI_EXTREME",
+      "asset": "HYPE",
+      "rsi": 70.3,
+      "price": 58.16,
+      "ob_imb": 0.1113,
+      "macd_hist": 0.32,
+      "funding": "0.00000%",
+      "signal_val": 0.405,
+      "analysis": "HYPE en sobrecompra (RSI=70.3). Tercer flip de OB en la sesion: -0.45->+0.18->-0.19->+0.11. Alta volatilidad de flujo. MACD alcista (0.32).",
+      "recommendation": "MONITOREAR - RSI extremo + OB inestable. Esperar direccion clara."
+    },
+    {
+      "timestamp": "2026-06-11T17:42:00",
+      "asset": "HYPE",
+      "event": "OB_flip",
+      "from": 0.1734,
+      "to": -0.1867,
+      "rsi": 68.4,
+      "implication": "Segundo flip de OB en <30min. RSI alto + OB negativo = divergencia bajista potencial."
+    }
+  ]
 }

@@ -68,19 +68,37 @@ def tasks_for(worker, cycle):
         base = content
     else:
         base = all_tasks
-    # Cycle through tasks, when exhausted generate random new ones
-    idx = cycle % len(base) if base else 0
-    if cycle < len(base):
+    # Generate infinite role-specific tasks
+    idx = cycle % max(len(base), 1) if base else 0
+    if base and cycle < len(base):
         return base[idx]
     else:
-        # Generate novel tasks after predefined ones
-        novel = [
-            f"Explora un proyecto aleatorio en /home/vuos/code/p3/ y propón cómo integrarlo: ls -d /home/vuos/code/p3/s*/ | shuf -n 1",
-            f"Lee un artículo sobre trading/agent systems (usa curl a una URL) y resume lo aprendido en TRADING.md",
-            f"Crea un dashboard simple en python que muestre datos en tiempo real: usa http.server para servir un HTML con datos del proxy.",
-            f"Escribe un análisis crítico del sistema actual en ORCHESTRATION.md: qué funciona, qué no, qué mejorarías.",
-            f"Haz un experimento: corre 10 consultas a la API en paralelo y mide el tiempo de respuesta. Usa python con threading.",
+        # Infinite role-specific tasks (never generic)
+        trading_novel = [
+            "Calcula el Information Coefficient (IC) de las señales actuales. Usa: python3 -c 'import numpy as np; print(np.corrcoef([1,2,3],[2,4,6])[0,1])' como referencia. Reporta en TRADING.md.",
+            "Agrega un nuevo activo al análisis: SOL, ARB, OP, AVAX o LINK. Modifica el runner para incluirlo. Documenta los cambios.",
+            "Haz forward-testing: ejecuta el runner por 1 hora y compara señales predichas vs reales. Guarda resultados en trading_log.csv.",
+            "Crea un RiskManager: script que calcule Kelly sizing, max drawdown, y position limits para cada activo. Ponlo en artifacts/trading/risk_manager.py.",
+            "Analiza correlaciones entre activos: calcula matriz de correlación de returns entre ETH, BTC, SOL. Usa pandas. Reporta en TRADING.md.",
+            "Implementa un nuevo indicador: Order Flow Imbalance (OFI) usando datos de orderbook de HL. Documenta la fórmula y resultados.",
+            "Lee sobre RenTech y Two Sigma — busca en Wikipedia sus métodos cuantitativos. Extrae 3 lecciones aplicables a nuestro sistema. Documenta.",
+            f"Ejecuta el runner por 5 ciclos y genera un reporte de performance: cuántas señales LONG vs SHORT, win rate estimado, Sharpe trailing.",
+            "Crea un script que genere data sintética con propiedades conocidas (trending, mean-reverting, random) y prueba tus señales contra ella. Ponlo en artifacts/trading/synthetic_test.py.",
+            "Agrega un healthcheck endpoint al runner: que responda en http para verificar que está vivo. Documenta en TRADING.md.",
         ]
+        content_novel = [
+            "Mejora el pipeline de grabación: agrega detección automática de ventanas abiertas antes de grabar (xdotool search --name).",
+            "Crea un video de 30s mostrando el goal tree del dashboard. Graba: abre http://localhost:9093, navega a Goals tab, graba. Ponlo en artifacts/videos/goal-tree-demo.mp4.",
+            "Escribe un guión detallado para un video de 3min sobre 'Cómo funciona el sistema multi-agente s82'. 6 escenas, cada una con: qué se ve + qué se dice. Ponlo en artifacts/scripts/guion-completo.md.",
+            "Prueba diferentes voces de edge-tts: es-MX-DaliaNeural, es-ES-AlvaroNeural, es-US-SofiaNeural. Compara calidad y velocidad. Documenta en CONTENT.md.",
+            "Crea una intro animada para los videos: usa ffmpeg drawtext para crear un título animado de 5s con el logo 's82'. Ponlo en artifacts/videos/intro-s82.mp4.",
+            "Automatiza la post-producción: crea un script que tome un video raw + un audio de narración y genere el video final con overlay de título. Ponlo en artifacts/scripts/auto-produce.sh.",
+            f"Analiza el mejor video hasta ahora: revisa artifacts/videos/ con ffprobe, elige el de mayor calidad, documenta por qué en CONTENT.md como 'Best Video Analysis'.",
+            "Propón una serie de 3 videos sobre trading automatizado (en colaboración con worker-1). Cada video: tema, qué mostrar, qué decir. Documéntalo en CONTENT.md.",
+            "Graba un clip de 15s de los workers activos: muestra tmux con worker-1 y worker-2 funcionando. Ponlo en artifacts/videos/workers-live.mp4.",
+            "Crea un pipeline de publicación: script que tome el video final, genere miniatura con ffmpeg, y prepare metadata para YouTube. Ponlo en artifacts/scripts/publish.sh.",
+        ]
+        novel = trading_novel if worker == "worker-1" else content_novel if worker == "worker-2" else trading_novel + content_novel
         return novel[idx % len(novel)]
 
 
@@ -148,10 +166,9 @@ def main():
             for w in ["worker-1", "worker-2"]:
                 send_task(w, f"[SISTEMA] Consumo alto de tokens (~{tokens}). Prioriza respuestas cortas y evita loops largos.")
 
+        if cycle % 90 == 0:
+            subprocess.Popen(["bash", str(BASE / "scripts/git-autocommit.sh")])
         time.sleep(CYCLE)
-    if cycle % 90 == 0:
-        subprocess.Popen(["bash", str(BASE / "scripts/git-autocommit.sh")])
-
 
 if __name__ == "__main__":
     main()

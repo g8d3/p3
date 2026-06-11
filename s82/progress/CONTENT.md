@@ -536,3 +536,54 @@ ffmpeg -i new-scene.mp4 -i new-narration.mp3 -c:v copy -c:a aac -map 0:v -map 1:
 
 ### Narración
 "Este es el sistema multi-agente s82 en funcionamiento. En la pantalla vemos el monitor del sistema con los agentes activos. El proxy watchdog rastrea cada worker en tiempo real, mostrando sus segundos de actividad, uso de CPU y memoria. Worker uno y worker dos están activos, ejecutando tareas autónomamente. El supervisor coordina todo el equipo."
+
+## Mejor Video: final-cut-v2.mp4
+
+| Métrica | Valor |
+|---|---|
+| Archivo | `artifacts/videos/final-cut-v2.mp4` |
+| Duración | 54s |
+| Tamaño | 1.1 MB |
+| Escenas | 4 (Dashboard, Proxy Health, Tmux Workers, Overview) |
+| Narración | Específica por escena (DaliaNeural) |
+| Contenido | ✅ REAL |
+| Pipeline | `scene-setup.sh` → `record-screen.sh` → `edge-tts` → `ffmpeg concat` |
+
+### Por qué es el mejor
+- **Narración específica**: cada escena describe EXACTAMENTE lo que se ve
+- **Múltiples visuales**: 4 xterms diferentes por escena (dashboard API, proxy health, tmux, overview)
+- **Pipeline completo**: setup → record → narrate → stitch — todo documentado y reusable
+- **Tamaño eficiente**: 1.1MB por 54s (~20KB/s)
+
+## Próximo Video: "HYPE RSI Extreme — Análisis en Vivo"
+
+### Concepto
+Video corto (30s) mostrando el dashboard de señales de trading cuando HYPE alcanzó RSI=70.3 (sobrecompra). Explicar la divergencia con order book y los 3 flips de OB.
+
+### Escenas
+| # | Duración | Visual | Narración |
+|---|---|---|---|
+| 1 | 10s | `live_signals.json` con alerta RSI extrema | "HYPE acaba de marcar RSI 70.3 — sobrecompra. Esto activó una alerta automática en nuestro sistema de trading." |
+| 2 | 10s | Dashboard :9093 mostrando señales HYPE | "El dashboard muestra la señal en tiempo real: RSI extremo con MACD alcista y order book inestable." |
+| 3 | 10s | Análisis publicado en `market_analysis.json` | "El sistema publicó un análisis completo con 3 escenarios: corrección, breakout, o continuación lateral." |
+
+### Pipeline
+```bash
+# Setup scene 1: live_signals.json
+xterm -e 'watch -n 3 "cat /home/vuos/code/p3/s82/data/live_signals.json | python3 -m json.tool | head -20"' &
+bash scripts/record-screen.sh 10 artifacts/videos/hype-s1.mp4
+
+# Scene 2: dashboard
+xterm -e 'watch -n 3 "curl -s localhost:9093/api/team | python3 -m json.tool | head -30"' &
+bash scripts/record-screen.sh 10 artifacts/videos/hype-s2.mp4
+
+# Scene 3: market analysis
+xterm -e 'watch -n 3 "cat /home/vuos/code/p3/s82/data/market_analysis.json | python3 -m json.tool | head -25"' &
+bash scripts/record-screen.sh 10 artifacts/videos/hype-s3.mp4
+
+# Narrate & stitch
+edge-tts --voice es-MX-DaliaNeural --text 'escena 1...' --write-media hype-n1.mp3
+edge-tts --voice es-MX-DaliaNeural --text 'escena 2...' --write-media hype-n2.mp3
+edge-tts --voice es-MX-DaliaNeural --text 'escena 3...' --write-media hype-n3.mp3
+# Combine each scene with its narration, then concat all
+```

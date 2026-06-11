@@ -1,25 +1,25 @@
 {
   "ETH": {
     "ic": 0.0,
-    "n": 1,
+    "n": 4,
     "ic_decay": 0,
     "ic_trend": "insufficient"
   },
   "BTC": {
     "ic": 0.0,
-    "n": 1,
+    "n": 4,
     "ic_decay": 0,
     "ic_trend": "insufficient"
   },
   "SOL": {
     "ic": 0.0,
-    "n": 1,
+    "n": 4,
     "ic_decay": 0,
     "ic_trend": "insufficient"
   },
   "HYPE": {
     "ic": 0.0,
-    "n": 1,
+    "n": 4,
     "ic_decay": 0,
     "ic_trend": "insufficient"
   }

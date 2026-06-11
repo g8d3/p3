@@ -3,37 +3,73 @@
     {
       "asset": "ETH",
       "direction": "NEUTRAL",
-      "rsi": "61.0",
-      "macd": "0.71",
+      "rsi": "65.6",
+      "macd": "1.61",
       "funding": "0.00000%",
-      "ob_imbalance": 0.0804,
+      "ob_imbalance": 0.1261,
       "signal": "Se\u00f1ales mixtas, mercado lateral"
     },
     {
       "asset": "BTC",
       "direction": "NEUTRAL",
-      "rsi": "65.8",
-      "macd": "15.83",
+      "rsi": "67.5",
+      "macd": "23.81",
       "funding": "0.00000%",
-      "ob_imbalance": 0.2459,
+      "ob_imbalance": 0.0919,
       "signal": "Se\u00f1ales mixtas, mercado lateral"
     },
     {
       "asset": "SOL",
       "direction": "NEUTRAL",
-      "rsi": "67.8",
-      "macd": "0.12",
+      "rsi": "70.3",
+      "macd": "0.14",
       "funding": "0.00000%",
-      "ob_imbalance": 0.2676,
+      "ob_imbalance": -0.0174,
       "signal": "Se\u00f1ales mixtas, mercado lateral"
     },
     {
       "asset": "HYPE",
       "direction": "NEUTRAL",
-      "rsi": "70.3",
-      "macd": "0.32",
+      "rsi": "72.8",
+      "macd": "0.36",
       "funding": "0.00000%",
-      "ob_imbalance": 0.1113,
+      "ob_imbalance": 0.0214,
+      "signal": "Se\u00f1ales mixtas, mercado lateral"
+    },
+    {
+      "asset": "ARB",
+      "direction": "NEUTRAL",
+      "rsi": "65.8",
+      "macd": "0.0",
+      "funding": "0.00000%",
+      "ob_imbalance": 0.1829,
+      "signal": "Se\u00f1ales mixtas, mercado lateral"
+    },
+    {
+      "asset": "OP",
+      "direction": "NEUTRAL",
+      "rsi": "62.9",
+      "macd": "0.0",
+      "funding": "0.00000%",
+      "ob_imbalance": -0.2534,
+      "signal": "Se\u00f1ales mixtas, mercado lateral"
+    },
+    {
+      "asset": "AVAX",
+      "direction": "NEUTRAL",
+      "rsi": "58.6",
+      "macd": "0.01",
+      "funding": "0.00000%",
+      "ob_imbalance": 0.3332,
+      "signal": "Se\u00f1ales mixtas, mercado lateral"
+    },
+    {
+      "asset": "LINK",
+      "direction": "NEUTRAL",
+      "rsi": "61.1",
+      "macd": "0.01",
+      "funding": "0.00000%",
+      "ob_imbalance": 0.051,
       "signal": "Se\u00f1ales mixtas, mercado lateral"
     }
   ],
@@ -56,20 +92,5 @@
     }
   },
   "status": "live",
-  "updated": "2026-06-11T17:47:15.325822+00:00",
-  "alerts": [
-    {
-      "timestamp": "2026-06-11T17:47:44.416703+00:00",
-      "type": "RSI_EXTREME",
-      "asset": "HYPE",
-      "rsi": 70.3,
-      "price": 58.16,
-      "ob_imb": 0.1113,
-      "macd_hist": 0.32,
-      "funding": "0.00000%",
-      "signal_val": 0.405,
-      "analysis": "HYPE en sobrecompra (RSI=70.3). Tercer flip de OB en la sesion: -0.45->+0.18->-0.19->+0.11. Alta volatilidad de flujo. MACD alcista (0.32).",
-      "recommendation": "MONITOREAR - RSI extremo + OB inestable. Esperar direccion clara."
-    }
-  ]
+  "updated": "2026-06-11T17:50:00.697073+00:00"
 }

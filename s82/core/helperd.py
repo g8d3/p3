@@ -119,70 +119,146 @@ class Helperd:
 
         now = time.time()
 
+        # ── OODA: OBSERVE ──
+        # Coordinator heartbeat check
+        hb_file = BASE / "data" / "coordinator.heartbeat"
+        if hb_file.exists():
+            try:
+                hb_age = now - hb_file.stat().st_mtime
+                if hb_age > 300 and not self._on_cooldown("coordinator"):
+                    self.last_help["coordinator"] = now
+                    # OODA: OBSERVE → check if coordinator is really stuck
+                    pane = tmux_capture(0)
+                    stuck_cmd = ""
+                    for line in pane.split("\n")[-10:]:
+                        s = line.strip()
+                        if s and not s.startswith(("┃", "╹", "⬝", "■", "●")):
+                            stuck_cmd = s[:120]
+                    # OODA: ACT
+                    try:
+                        subprocess.run(["tmux", "send-keys", "-t", "0", "Escape"],
+                                       timeout=2, capture_output=True)
+                        subprocess.run(["tmux", "send-keys", "-t", "0",
+                                       f"echo '[SISTEMA] Coordinador parece estar trabado ({int(hb_age)}s sin heartbeat). Comando: {stuck_cmd}. Continuando...'",
+                                       "Enter"], timeout=2, capture_output=True)
+                        append_log({
+                            "cycle": self.cycle, "event": "coordinator_unstick",
+                            "heartbeat_age_s": int(hb_age), "last_cmd": stuck_cmd,
+                        })
+                        print(f"[helperd] coordinator unstick (hb_age={int(hb_age)}s cmd={stuck_cmd[:50]})", flush=True)
+                    except Exception as e:
+                        print(f"[helperd] coordinator unstick failed: {e}", flush=True)
+            except Exception:
+                pass
+
         for name, info in agents.items():
+            # OODA: OBSERVE — skip synthetic agents that never recover
             if info.get("never_active", True):
                 continue
-            if name.startswith(("agent-", "supervisor", "watcher")):
-                continue  # skip synthetic/daemon agents
+            if name.startswith(("agent-", "supervisor", "supervisor-test", "watcher")):
+                continue
 
             last_s = info.get("last_s", 999)
             is_idle = info.get("idle", False)
 
-            if is_idle and last_s > IDLE_AFTER and not self._on_cooldown(name):
-                self._reflex_help(name, agents, "idle", last_s)
+            # OODA: ORIENT — check if truly stuck (not just thinking)
+            out = tmux_capture(name) if last_s > STUCK_AFTER else ""
+            at_prompt = False
+            stuck_cmd = ""
+            if out:
+                for line in out.split("\n")[-8:]:
+                    s = line.strip().removeprefix("┃").strip()
+                    if s in ("", ">", "$") or s.endswith(("$", "#", ">")):
+                        at_prompt = True
+                    elif s and not s.startswith(("┃", "╹", "⬝", "■", "●", "Build", "esc")):
+                        stuck_cmd = s[:100]
+            at_idle_prompt = "::: " in out[-50:] if out else False
 
+            # OODA: DECIDE — skip if agent is just at idle prompt (normal)
+            if at_prompt or at_idle_prompt:
+                continue
+
+            # OODA: ACT — but only if not recently helped and truly stuck
             if last_s > STUCK_AFTER and not is_idle and not self._on_cooldown(name):
-                self._reflex_help(name, agents, "stuck", last_s)
+                self._reflex_ooda(name, agents, "stuck", last_s, stuck_cmd)
 
+        # OODA: VERIFY — check if previous helps resolved
         self._check_resolved_helps(agents)
 
-    def _reflex_help(self, stuck_name: str, agents: dict, reason: str, last_s: int):
-        peer = find_peer_to_help(stuck_name, agents)
-        if not peer:
-            append_log({"cycle": self.cycle, "event": "no_peer",
-                        "stuck": stuck_name, "reason": reason})
+    def _reflex_ooda(self, stuck_name: str, agents: dict, reason: str, last_s: int, stuck_cmd: str = ""):
+        """
+        OODA loop for unsticking agents:
+        1. OBSERVE: already done (cycle_once checks state)
+        2. ORIENT: determine escalation level
+        3. DECIDE: what action to take
+        4. ACT: execute the action
+        5. VERIFY: next cycle will check if resolved
+        """
+        # ORIENT: how many times have we tried to help this agent?
+        history = self.help_history.get(stuck_name, [])
+        recent_attempts = [h for h in history if not h.get("resolved")]
+        attempt_count = len(recent_attempts)
+
+        # ESCALATION: different actions based on attempt count
+        if attempt_count == 0:
+            # Level 1: Nudge — send a gentle check message
+            peer = find_peer_to_help(stuck_name, agents)
+            if not peer:
+                return
+            action = f"ask {peer} to check"
+            msg = f"[HELPERD] {stuck_name} seems stuck ({last_s}s). Can you check on them?"
+            write_bus_message(peer, msg, trace_id=f"help-{int(time.time())}")
+            print(f"[helperd] L1: asked {peer} to check {stuck_name}", flush=True)
+
+        elif attempt_count == 1:
+            # Level 2: Direct interrupt
+            action = "tmux send-keys Escape"
+            try:
+                subprocess.run(["tmux", "send-keys", "-t", stuck_name, "Escape"],
+                               timeout=2, capture_output=True)
+            except: pass
+            print(f"[helperd] L2: sent Escape to {stuck_name}", flush=True)
+
+        elif attempt_count == 2:
+            # Level 3: Kill stuck command + fresh prompt
+            action = "interrupt + new prompt"
+            try:
+                subprocess.run(["tmux", "send-keys", "-t", stuck_name, "Escape"],
+                               timeout=2, capture_output=True)
+                time.sleep(0.5)
+                subprocess.run(["tmux", "send-keys", "-t", stuck_name, "echo '💥 Comando interrumpido. Continúa con tu tarea.'", "Enter"],
+                               timeout=2, capture_output=True)
+            except: pass
+            print(f"[helperd] L3: interrupt + fresh prompt to {stuck_name}", flush=True)
+
+        else:
+            # Level 4+: Escalate to system — log and skip (avoid infinite spam)
+            action = f"escalated (>{attempt_count} attempts)"
+            append_log({"cycle": self.cycle, "event": "escalated",
+                        "stuck": stuck_name, "attempts": attempt_count})
+            print(f"[helperd] L4: {stuck_name} escalated after {attempt_count} attempts", flush=True)
+            self.last_help[stuck_name] = time.time() + 3600  # don't retry for an hour
             return
 
+        # Record the attempt
         help_id = f"help-{int(time.time())}"
-        window = None
-        for w, n in WINDOW_NAMES.items():
-            if n == peer:
-                window = w
-                break
-
-        context = tmux_capture(window) if window else ""
-        last_lines = context.strip().split("\n")[-5:] if context else []
-        context_snippet = "; ".join(l.strip() for l in last_lines if l.strip())[:200]
-
-        msg_lines = [
-            f"[HELPERD] {stuck_name} seems {reason} ({last_s}s without activity).",
-            f"Can you check on them? Window: {stuck_name}",
-        ]
-        if context_snippet:
-            msg_lines.append(f"Recent activity from {peer}: {context_snippet}")
-        msg = "\n".join(msg_lines)
-
-        write_bus_message(peer, msg, trace_id=help_id)
-        self.last_help[stuck_name] = time.time()
-
         if stuck_name not in self.help_history:
             self.help_history[stuck_name] = []
         self.help_history[stuck_name].append({
             "help_id": help_id,
-            "peer": peer,
+            "action": action,
             "reason": reason,
             "last_s": last_s,
+            "stuck_cmd": stuck_cmd[:100],
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "resolved": False,
         })
+        self.last_help[stuck_name] = time.time()
         self._save_acks()
 
-        append_log({
-            "cycle": self.cycle, "event": "help_sent",
-            "help_id": help_id, "stuck": stuck_name,
-            "peer": peer, "reason": reason, "last_s": last_s
-        })
-        print(f"[helperd] {help_id}: asked {peer} to help {stuck_name} ({reason}, {last_s}s)", flush=True)
+        append_log({"cycle": self.cycle, "event": "ooda_act",
+                    "help_id": help_id, "stuck": stuck_name,
+                    "action": action, "level": attempt_count + 1})
 
     def _check_resolved_helps(self, agents: dict):
         for stuck_name, helps in list(self.help_history.items()):

@@ -14,6 +14,6 @@ BUS_HISTORY = f"{BUS_DIR}/history"
 STUCK_AFTER = int(os.environ.get("STUCK_AFTER", "120"))  # 2min sin LLM = stuck (antes 25s, causaba falsos positivos)
 IDLE_AFTER = int(os.environ.get("IDLE_AFTER", "600"))   # 10min idle before alerting peers
 POLL_INTERVAL = int(os.environ.get("POLL_INTERVAL", "5"))  # faster: every 5s
-HELP_COOLDOWN = int(os.environ.get("HELP_COOLDOWN", "30"))  # reduced: 30s
+HELP_COOLDOWN = int(os.environ.get("HELP_COOLDOWN", "180"))  # 3min entre ayudas al mismo agente
 
 AGENT_WINDOWS = os.environ.get("AGENT_WINDOWS", "1:worker-1,2:worker-2,3:watcher")
