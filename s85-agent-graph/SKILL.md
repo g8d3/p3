@@ -1,5 +1,11 @@
 # Multi-Agent Company System
 
+> Sesión: 2026-06-10 — ~3 horas construyendo y rompiendo.
+> Objetivo: que N agentes opencode trabajen como una compañía humana,
+> se ayuden entre sí, y generen valor económico sin supervisión.
+> Resultado: infraestructura sólida pero el talón de Aquiles sigue siendo
+> que los LLMs son reactivos — no tienen iniciativa propia.
+
 Sistema multi-agente donde N instancias de opencode trabajan como equipo,
 un watcher las monitorea, y un pulso social las mantiene activas.
 
@@ -116,6 +122,44 @@ tail -f /tmp/company-pulse.log
 ```
 
 ## Lecciones Aprendidas
+
+### Visión General
+El objetivo no es construir un "sistema de agentes" sino una **organización de personas digitales**.
+Una compañía donde cada agente es autónomo, se organiza orgánicamente, y los grupos
+se forman y disuelven solos. El organigrama es emergente, no impuesto.
+
+Meta final: un comando `./start-company.sh` que cualquiera ejecuta y el sistema genera
+valor económico autónomamente — como un minero de Bitcoin, pero minando actividad económica real.
+
+### Contenido (Video)
+- ❌ Renderizar por CPU (ffmpeg): 200x más lento que grabar pantalla
+- ✅ Screen recording + Edge TTS (voz colombiana) es el método correcto
+- ✅ Sin guión rígido: el agente reacciona a lo que ve en pantalla, no lee un script
+- ✅ El guión está bien como plan, pero cuando la realidad se desvía, el agente debe corregir sobre la marcha
+- 🔴 DeepSeek no tiene capacidad de visión — esto limita la creación de contenido
+
+### Trading (DEX)
+- Los proyectos relevantes están en p3/: s41-dex-volume-fetcher, s43-crypto-strategy-lab, s40-trading-backtester, s1-funding-rate-scraper, s39-trading-bot
+- El objetivo es un pipeline: datos on-chain → estrategia → ejecución automatizada
+- No es el interés principal del usuario, pero es un medio para generar ingresos automatizados
+
+### El Problema de Fondo
+
+Los agentes LLM son **reactivos por naturaleza**:
+- Reciben mensaje → piensan → responden → esperan
+- No tienen iniciativa interna, no sienten curiosidad, no se aburren
+- No importa cuánta infraestructura les pongas alrededor — sin un input, no hacen nada
+- **La pieza que falta no es técnica: es que el agente quiera hacer cosas sin que se las pidan**
+
+Esto no existe en los LLMs actuales. El sistema que construimos (proxy + pulse + watcher)
+es un **simulacro de iniciativa** — un mecanismo externo que los empuja, no un impulso interno.
+
+### Filosofía de Interacción
+- ❌ Mensajes imperativos ("haz X, luego Y") matan la autonomía
+- ✅ Mensajes colaborativos ("explora este proyecto, tú decides qué vale la pena")
+- ✅ El watcher es un colega, no un jefe — sugiere, no ordena
+- ✅ Los agentes necesitan un **sentido de sociedad**: saber que hay otros, preocuparse por ellos
+- ✅ La ayuda no debería necesitar un pedido explícito — como humanos que ven a un colega trabado y se acercan
 
 ### Limitaciones Fundamentales
 - **openCode es reactivo**: necesita un mensaje para actuar. No tiene iniciativa interna.
