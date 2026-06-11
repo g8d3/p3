@@ -1835,6 +1835,15 @@
       "timestamp": "2026-06-11T17:15:37.312197+00:00",
       "resolved": true,
       "resolved_at": "2026-06-11T17:16:20.351136+00:00"
+    },
+    {
+      "help_id": "h1781200742",
+      "level": 1,
+      "action": "asked supervisor to check",
+      "last_s": 500,
+      "stuck_cmd": "",
+      "timestamp": "2026-06-11T17:59:02.754817+00:00",
+      "resolved": false
     }
   ],
   "worker-2": [
