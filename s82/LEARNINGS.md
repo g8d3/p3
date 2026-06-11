@@ -2,12 +2,63 @@
 
 *Live document. Updated as the system evolves.*
 
-## Current Objectives
+## Índice de procesos creados (y por qué se eliminaron)
 
-### 1. All agents must work, not just the supervisor
-The supervisor, helperd, proxy, and dashboard are active — but worker-1 and worker-2 sit idle. This is wasted capacity. **The supervisor must assign tasks to idle workers automatically.**
+| Proceso | Archivo | Qué hacía | Problema | Estado |
+|---------|---------|-----------|----------|--------|
+| **proxy_watchdog** | `s84/proxy/proxy_watchdog.py` | Intercepta llamadas LLM, detecta agentes por /proc, sirve health endpoint | Útil como herramienta de visibilidad | ✅ Conservado |
+| **helperd** | `core/helperd.py` | Detectaba agents stuck y pedía ayuda a un peer vía busd | Spam sin verificar, sin OODA, asumía que sus acciones funcionaban | ❌ Rediseñar |
+| **supervisor** | `core/supervisor.py` | Ciclo cada 5s, monitoreaba salud, reiniciaba componentes caídos | Duplicaba función del helperd, sin LLM para razonar | ❌ Rediseñar |
+| **sequencer** | `core/sequencer.py` | Asignaba tareas infinitas a workers cada 20s | Se quedó sin tareas específicas y empezó a dar tareas genéricas mezclando roles | ❌ Eliminado |
+| **reviewer_agent** | `core/reviewer_agent.py` | Revisaba calidad de videos y trading con Mimo v2.5 | Separado innecesariamente, yo puedo revisar | ❌ Eliminado |
+| **runner** | `artifacts/trading/runner.py` | Generaba señales de trading cada 5min, escribía a CSV y JSON | Útil pero debería ser parte de worker-1 | ❌ Delegado a worker-1 |
+| **guardian** | `core/guardian.py` | Unificaba todo en un solo proceso con LLM cada 30s | Acababa de crearlo cuando el usuario señaló que YO soy ese agente pensante | ❌ Eliminado |
+| **autoheal** | `scripts/autoheal.sh` | Revivía componentes caídos cada 30s | Causó procesos zombis que se re-parentaban a init, difíciles de matar | ❌ Eliminado |
+| **busd** | `orquestar-agentes/scripts/busd` | Message bus via inotify, entregaba mensajes entre agentes | Spam, mensajes se acumulaban sin entregar, múltiples instancias | ❌ Reemplazar |
+| **dashboard** | `web/server.py` | Web UI con tabs, tablas, señales, goal tree | Útil para visualización | ✅ Conservado |
+| **graph** | `core/graph.py` | SQLite DB para tracking de relaciones entre agentes | Infraestructura útil | ✅ Conservado |
 
-### 2. Cycles must be fast
+### Lección: Un solo proceso con IA > múltiples procesos deterministas
+
+La arquitectura inicial tenía múltiples procesos independientes porque asumí que necesitaba componentes especializados (uno para salud, otro para stuck, otro para tareas). Pero esto creó:
+
+1. **Coordinación entre procesos**: Tenían que comunicarse entre sí (vía busd o archivos)
+2. **Duplicación de lógica**: helperd y supervisor hacían cosas similares
+3. **Detección falsa de stuck**: agentes sintéticos (agent-9, supervisor-test) generaban spam infinito
+4. **Sin verificación**: Los procesos asumían que sus acciones funcionaban sin comprobar
+5. **Procesos zombis**: autoheal dejaba hijos huérfanos que seguían corriendo
+
+La solución correcta: **un solo proceso que use un LLM para razonar** (OODA: Observar, Orientar, Decidir, Actuar, Verificar) en vez de múltiples scripts deterministas que no pueden adaptarse.
+
+Y el agente pensante ideal para ese proceso es el propio coordinador (opencode), no un script Python autónomo.
+
+## Arquitectura Final
+
+```
+Yo (opencode) ─── coordino, pienso, decido, verifico
+  ├── worker-1 (trading): ejecuta tareas de trading
+  ├── worker-2 (contenido): ejecuta tareas de contenido
+  └── herramientas: proxy_watchdog, dashboard, graph, helperd (bajo demanda)
+```
+
+No más procesos autónomos. Yo soy el cerebro. Las herramientas existen para servirme, no para reemplazarme.
+
+## Lecciones Clave
+
+### 1. No mezclar roles
+El sequencer empezó dando tareas de trading a worker-1 y contenido a worker-2, pero cuando se quedó sin tareas predefinidas, empezó a dar tareas genéricas mezclando los roles. Worker-2 terminó haciendo trading.
+
+### 2. No asumir que una acción funcionó (OODA)
+El helperd enviaba "ayuda" pero nunca verificaba si el agente se recuperó. Repetía la misma acción sin escalar ni cambiar de estrategia.
+
+### 3. Los procesos zombis son difíciles de matar
+El autoheal creaba procesos hijos que, al matar al padre, se re-parentaban a init. pkill -f es peligroso porque puede matar el shell actual.
+
+### 4. Un solo agente con LLM > múltiples scripts deterministas
+Un LLM puede observar, razonar, decidir y verificar. Los scripts solo ejecutan lógica fija. La flexibilidad del LLM es más valiosa que la velocidad del script.
+
+### 5. El coordinador debe estar fuera del sistema
+No incluir al coordinador (opencode) en el monitoreo automático hasta que el sistema esté probado.
 - Supervisor: **5s** (fast enough to detect and react)
 - Helperd: **5s** (cooperative reflex needs to be responsive)
 - Autoheal: **15s** (lifecycle management, doesn't need to be as fast)
