@@ -34,7 +34,8 @@ class Node:
 @dataclass
 class Edge:
     source_id: str
-    type: str  # executed, produced, depends_on, learned, relates_to, contains, next_step, blocked_by, has_capability, based_on
+    type: str  # executed, produced, depends_on, learned, relates_to, contains, next_step, blocked_by, has_capability, based_on,
+               # helped, observed, interrupted, communicated, trusts
     target_id: str
     properties: dict = field(default_factory=dict)
     id: str = ""
@@ -46,3 +47,13 @@ class Edge:
             self.id = _new_id("e")
         if not self.created_at:
             self.created_at = _now()
+
+
+RELATIONSHIP_TYPES = {
+    "helped":       "A helped B (unstuck, provided info, etc.)",
+    "observed":     "A observed B's state/output",
+    "interrupted":  "A interrupted B's command (Escape/Ctrl-C)",
+    "communicated": "A sent a message to B",
+    "ignored":      "A ignored B's state (decision not to intervene)",
+    "trusts":       "A trusts B (score 0-1 in properties)",
+}

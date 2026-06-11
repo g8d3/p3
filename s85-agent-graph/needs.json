@@ -1,7 +1,7 @@
 {
   "resources": {
-    "timestamp": "2026-06-09T22:15:08.794969+00:00",
-    "uptime_seconds": 1281.56,
+    "timestamp": "2026-06-11T02:35:04.031391+00:00",
+    "uptime_seconds": 103276.79,
     "level_1_survival": {
       "status": "ok",
       "api_keys": {
@@ -10,14 +10,14 @@
         "ANTHROPIC_API_KEY": false
       },
       "has_any_inference": true,
-      "disk_free_gb": 72.67,
+      "disk_free_gb": 71.2,
       "disk_critical": false,
       "disk_warning": false,
       "db_healthy": true
     },
     "level_2_stability": {
       "status": "ok",
-      "temp_free_gb": 7.52,
+      "temp_free_gb": 7.38,
       "python_version": "3.12.3",
       "hanging_ops": 0
     },

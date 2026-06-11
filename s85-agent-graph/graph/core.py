@@ -352,5 +352,101 @@ class Graph:
         ).fetchall()
         return [dict(r) for r in rows]
 
+    # ── Agent Relationships ──
+
+    def register_agent(self, agent_id: str, props: dict = None) -> str:
+        """Register or heartbeat an agent node. Creates if not exists."""
+        existing = self.get_node(agent_id)
+        now = self._ts()
+        if existing:
+            props = props or {}
+            props["last_seen"] = now
+            self.update_node(agent_id, props)
+        else:
+            p = props or {}
+            p.setdefault("last_seen", now)
+            p.setdefault("registered_at", now)
+            self.add_node("agent", agent_id, p, node_id=agent_id)
+        return agent_id
+
+    def add_relationship(self, source_agent: str, rel_type: str,
+                         target_agent: str, props: dict = None) -> str:
+        """Record a relationship action between two agents.
+        rel_type: helped, observed, interrupted, communicated, ignored, trusts
+        """
+        eid = self.add_edge(
+            source_id=source_agent,
+            type=rel_type,
+            target_id=target_agent,
+            properties=props or {},
+            agent_id=source_agent,
+        )
+        self.log(source_agent, rel_type, "agent", target_agent,
+                 "ok", (props or {}).get("note", ""))
+        return eid
+
+    def get_relationships(self, agent_id: str, rel_type: str = None,
+                          direction: str = "both") -> list[dict]:
+        """Get relationships for an agent. direction: both, outgoing, incoming."""
+        results = []
+        if direction in ("both", "outgoing"):
+            results.extend(self.get_edges(source_id=agent_id, type=rel_type))
+        if direction in ("both", "incoming"):
+            results.extend(self.get_edges(target_id=agent_id, type=rel_type))
+        return results
+
+    def relationship_summary(self, agent_id: str) -> dict:
+        """Summarize all relationships for an agent into readable stats."""
+        rels = self.get_relationships(agent_id)
+        summary = {
+            "agent_id": agent_id,
+            "total_interactions": len(rels),
+            "by_type": {},
+            "by_agent": {},
+            "last_interaction": None,
+            "trust_score": 0.5,
+        }
+        for r in rels:
+            t = r["type"]
+            summary["by_type"][t] = summary["by_type"].get(t, 0) + 1
+            peer = r["source_id"] if r["target_id"] == agent_id else r["target_id"]
+            if peer not in summary["by_agent"]:
+                summary["by_agent"][peer] = {"outgoing": 0, "incoming": 0, "types": {}}
+            direction = "incoming" if r["target_id"] == agent_id else "outgoing"
+            summary["by_agent"][peer][direction] += 1
+            summary["by_agent"][peer]["types"][t] = summary["by_agent"][peer]["types"].get(t, 0) + 1
+            if summary["last_interaction"] is None or r["created_at"] > summary["last_interaction"]:
+                summary["last_interaction"] = r["created_at"]
+        # Trust heuristic
+        helped = summary["by_type"].get("helped", 0)
+        interrupted = summary["by_type"].get("interrupted", 0)
+        if helped + interrupted > 0:
+            summary["trust_score"] = round(helped / (helped + interrupted), 2)
+        return summary
+
+    def get_agent_context(self, agent_id: str, for_agent: str = None) -> dict:
+        """Full context about an agent for another agent to reason about."""
+        node = self.get_node(agent_id)
+        if not node:
+            return {"error": f"agent {agent_id} not found"}
+        context = {
+            "agent": {k: v for k, v in node.items() if k != "properties"},
+            "properties": node["properties"],
+            "log": self.get_log(agent_id=agent_id, limit=10),
+            "relationships": {},
+            "pending_tasks": [],
+        }
+        if for_agent:
+            rels = self.get_relationships(agent_id, direction="both")
+            between = [
+                r for r in rels
+                if (r["source_id"] == for_agent or r["target_id"] == for_agent)
+            ]
+            context["relationships"]["with"] = for_agent
+            context["relationships"]["interactions"] = between
+            context["relationships"]["summary"] = self.relationship_summary(agent_id)
+        context["pending_tasks"] = self.pending_tasks()
+        return context
+
     def close(self):
         self.conn.close()

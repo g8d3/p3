@@ -1,0 +1,87 @@
+[
+  {
+    "user_id": "ai_user",
+    "strategy": "grid",
+    "timestamp": "2026-06-10T21:00:58.588468",
+    "initial_balance": 1.0,
+    "final_balance": 1.0,
+    "total_return_pct": 0.0,
+    "max_drawdown_pct": 13.461538461538463,
+    "params": {
+      "start_price": 30000.0,
+      "num_bars": 200,
+      "volatility": 0.02,
+      "grid_step": 100.0,
+      "num_levels": 3,
+      "trade_size": 0.01,
+      "max_position": 0.1
+    }
+  },
+  {
+    "user_id": "ai_user",
+    "strategy": "tpsl",
+    "timestamp": "2026-06-10T21:00:58.622085",
+    "initial_balance": 1.0,
+    "final_balance": 1.0,
+    "total_return_pct": 0.0,
+    "max_drawdown_pct": 1.980198019801982,
+    "params": {
+      "start_price": 30000.0,
+      "num_bars": 200,
+      "volatility": 0.02,
+      "level_spacing": 500.0,
+      "num_levels": 3,
+      "tp_pct": 0.01,
+      "sl_pct": 0.005,
+      "trade_size": 0.01,
+      "max_position": 0.1
+    }
+  },
+  {
+    "user_id": "ai_user",
+    "strategy": "grid",
+    "timestamp": "2026-06-10T21:02:51.862581",
+    "initial_balance": 1.0,
+    "final_balance": 1.0,
+    "total_return_pct": 0.0,
+    "max_drawdown_pct": 13.461538461538463,
+    "params": {
+      "start_price": 30000.0,
+      "num_bars": 200,
+      "volatility": 0.02,
+      "grid_step": 100.0,
+      "num_levels": 3,
+      "trade_size": 0.01,
+      "max_position": 0.1
+    }
+  },
+  {
+    "user_id": "ai_user",
+    "strategy": "tpsl",
+    "timestamp": "2026-06-10T21:02:51.898901",
+    "initial_balance": 1.0,
+    "final_balance": 1.0,
+    "total_return_pct": 0.0,
+    "max_drawdown_pct": 1.980198019801982,
+    "params": {
+      "start_price": 30000.0,
+      "num_bars": 200,
+      "volatility": 0.02,
+      "level_spacing": 500.0,
+      "num_levels": 3,
+      "tp_pct": 0.01,
+      "sl_pct": 0.005,
+      "trade_size": 0.01,
+      "max_position": 0.1
+    }
+  },
+  {
+    "user_id": "ai_user",
+    "strategy": "grid",
+    "timestamp": "2026-06-10T21:02:53.415550",
+    "initial_balance": 1.0,
+    "final_balance": 1.0,
+    "total_return_pct": 0.0,
+    "max_drawdown_pct": 13.461538461538463
+  }
+]
