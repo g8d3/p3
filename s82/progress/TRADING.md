@@ -368,3 +368,83 @@ Artículo leído: **"QuantAgent: Price-Driven Multi-Agent LLMs for High-Frequenc
 | RiskAgent (SL/TP fijo) | RiskManager en s39 |
 
 **Próximo paso posible**: añadir un PatternAgent que dibuje charts de ETH/BTC y los analice con visión para detectar patrones (double bottom, head & shoulders) como señal complementaria.
+
+## Research: HedgeAgents (WWW 2025)
+
+Artículo: **"HedgeAgents: A Balanced-aware Multi-agent Financial Trading System"** — WWW 2025, Sydney.
+
+### Arquitectura
+
+| Rol | Descripción |
+|-----|-------------|
+| **Fund Manager** | Orquesta discusiones, revisa propuestas, consolida señales |
+| **Hedging Experts** | Especialistas por asset class: Stocks, Forex, Bitcoin |
+
+3 tipos de conferencias entre agentes para coordinar decisiones:
+1. **Discussion conference** — todos los expertos presentan su análisis
+2. **Review conference** — fund manager revisa y cuestiona
+3. **Consolidation conference** — se fusionan señales en decisión final
+
+### Resultados
+
+| Métrica | HedgeAgents |
+|---------|-------------|
+| Total Return (3 años) | **400%** |
+| Annualized Return | **70%** |
+| Resistencia a crisis | ✅ estable en condiciones extremas |
+
+### Aplicación a nuestro sistema
+
+| HedgeAgents | Nuestro sistema |
+|-------------|----------------|
+| Fund Manager | Supervisor |
+| Hedging Experts por asset | Workers especializados por asset (ETH/BTC/SOL/HYPE) |
+| 3 tipos de conferencia | busd message bus |
+| LLM cognition para decisiones | Señales técnicas + LLM analysis |
+| 70% annualized | — (objetivo) |
+
+### Lección principal
+La coordinación entre agentes especializados + un orquestador que consolida señales es más robusta que un solo agente. Nuestro busd + supervisor ya implementa este patrón — el siguiente paso es añadir el "review conference" donde el supervisor cuestione decisiones antes de ejecutarlas.
+
+## Research: TradingAgents (arXiv 2412.20138)
+
+Leído: **"TradingAgents: Multi-Agents LLM Financial Trading Framework"** — Tauric Research (2025).
+
+### Arquitectura (pirámide de roles)
+
+```
+Analyst Team                Researcher Team          Execution Team
+├─ Fundamentals Analyst     ├─ Bull Researcher       ├─ Trader (risk-on)
+├─ Sentiment Analyst        ├─ Bear Researcher       ├─ Trader (risk-off)
+├─ News Analyst             └─ Debate → consensus    ├─ Risk Manager
+├─ Technical Analyst                               └─ Portfolio Manager
+```
+
+Cada agente tiene un rol específico con system prompts distintos. Los investigadores Bull/Bear **debaten** entre sí las señales de los analistas antes de pasar a ejecución — esto reduce el sesgo de confirmación.
+
+### Resultados vs benchmarks
+
+| Métrica | TradingAgents | Baseline |
+|---------|---------------|----------|
+| Cumulative Return | **+28.4%** | +12.1% |
+| Sharpe Ratio | **1.84** | 0.92 |
+| Max Drawdown | **-8.2%** | -15.7% |
+| Win Rate | **58.3%** | 51.2% |
+
+### Diferencias clave con QuantAgent
+
+| Aspecto | QuantAgent | TradingAgents |
+|---------|-----------|---------------|
+| Input | Solo OHLC (price-driven) | OHLC + news + sentiment |
+| Horizonte | HFT (1h/4h) | Medium-term (diario) |
+| Risk | SL/TP fijo por agente | Risk team separado |
+| Debate | No | Bull vs Bear researchers |
+| Output | LONG/SHORT con ratio R:R | BUY/SELL/ HOLD + tamaño |
+
+### Aplicación a nuestro sistema
+
+Nuestro runner ya cubre la parte técnica (RSI+MACD+funding+OB). Lo que podríamos añadir de TradingAgents:
+
+1. **Debate mechanism**: dos señales compitiendo (RSI vs funding vs OB) con votación ponderada — ya lo hacemos parcialmente en `direction()`
+2. **Risk Manager separado**: el RiskManager de s39 ya existe pero no está conectado al runner en vivo
+3. **Persistencia de decisiones**: log de señales + forward returns para análisis posterior
