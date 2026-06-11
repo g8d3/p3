@@ -1,7 +1,7 @@
 {
   "resources": {
-    "timestamp": "2026-06-11T02:35:04.031391+00:00",
-    "uptime_seconds": 103276.79,
+    "timestamp": "2026-06-11T02:43:34.157042+00:00",
+    "uptime_seconds": 103786.92,
     "level_1_survival": {
       "status": "ok",
       "api_keys": {
@@ -10,7 +10,7 @@
         "ANTHROPIC_API_KEY": false
       },
       "has_any_inference": true,
-      "disk_free_gb": 71.2,
+      "disk_free_gb": 71.22,
       "disk_critical": false,
       "disk_warning": false,
       "db_healthy": true
