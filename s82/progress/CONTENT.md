@@ -587,3 +587,24 @@ edge-tts --voice es-MX-DaliaNeural --text 'escena 2...' --write-media hype-n2.mp
 edge-tts --voice es-MX-DaliaNeural --text 'escena 3...' --write-media hype-n3.mp3
 # Combine each scene with its narration, then concat all
 ```
+
+## Video: HYPE RSI Extreme Alert (36s)
+
+*Grabado: 2026-06-11 12:52*
+
+### Escenas
+| # | Visual | Narración | Dur |
+|---|---|---|---|
+| 1 | `live_signals.json` con RSI=72.8 | "HYPE marcó RSI 72.8, sobrecompra extrema. Alerta automática publicada." | 12s |
+| 2 | Dashboard :9093 con 8 assets | "Dashboard con señales en tiempo real para ETH, BTC, SOL, HYPE, ARB, OP, AVAX, LINK." | 12s |
+| 3 | `market_analysis.json` con análisis | "Análisis completo: régimen, señales, alertas, recomendaciones." | 12s |
+
+### Especificaciones
+| Métrica | Valor |
+|---|---|
+| Archivo | `artifacts/videos/hype-rsi-alert.mp4` |
+| Duración | 36s |
+| Tamaño | 697 KB |
+| Video | H.264 1280x720, 79 kb/s |
+| Audio | AAC 24kHz mono (DaliaNeural) |
+| Contenido | ✅ REAL |
