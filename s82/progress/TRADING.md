@@ -448,3 +448,57 @@ Nuestro runner ya cubre la parte técnica (RSI+MACD+funding+OB). Lo que podríam
 1. **Debate mechanism**: dos señales compitiendo (RSI vs funding vs OB) con votación ponderada — ya lo hacemos parcialmente en `direction()`
 2. **Risk Manager separado**: el RiskManager de s39 ya existe pero no está conectado al runner en vivo
 3. **Persistencia de decisiones**: log de señales + forward returns para análisis posterior
+
+## Research: TradingGroup (arXiv 2508.17565)
+
+Leído: **"TradingGroup: Multi‑Agent Trading System with Self‑Reflection and Data‑Synthesis"** — ACM ICAIF 2025.
+
+### Arquitectura
+
+5 agentes especializados + módulo de riesgo dinámico + pipeline de datos:
+
+| Agente | Función | Inputs |
+|--------|---------|--------|
+| **News-Sentiment** | Filtra news, score de sentimiento | Serper MCP, Qwen3-Reranker |
+| **Financial-Report** | Extrae indicadores de reports | RAG híbrido con Milvus |
+| **Stock-Forecasting** | Predice tendencia con RSI+ATR+SMA | yfinance + auto-reflexión |
+| **Style-Preference** | Elige estilo (aggresivo/balanceado/conservador) | Historial + PnL |
+| **Trading-Decision** | Buy/Hold/Sell final | Todos los anteriores + reflexión |
+
+### Innovaciones clave
+
+1. **Self-Reflection**: cada agente revisa sus últimos 20 casos exitosos/fallidos antes de decidir — extrae patrones del pipeline de datos
+2. **Dynamic Risk Management**: SL/TP se ajustan según volatilidad (Simplified ATR-20) y estilo de trading
+3. **Hybrid Gate**: si RSI está extremo pero precio no ha roto el breakout threshold, fuerza sideways — evita chase de tops
+4. **Data-Synthesis Pipeline**: colecta automáticamente inputs, outputs, CoT, y recompensas → filtra quality samples para fine-tuning
+
+### Resultados
+
+| Métrica | TradingGroup (GPT-4o-mini) | Mejor baseline | Diferencia |
+|---------|---------------------------|---------------|------------|
+| Cumulative Return (AMZN) | **40.46%** | 13.27% (SMA Cross) | +27.19% |
+| Sharpe (TSLA) | **1.85** | 1.31 (PPO) | +0.54 |
+| Max Drawdown (AMZN) | **-1.67%** | -3.87% (Buy&Hold) | -2.20% |
+
+### Qwen3-Trader-8B-PEFT
+
+Fine-tunearon Qwen3-8B con datos sintéticos del pipeline (1,080 trajectories) usando LoRA (0.53% parámetros, 6h en V100). Resultado:
+
+| Stock | Qwen3-8B base | Qwen3-Trader-8B-PEFT | vs GPT-4o-mini |
+|-------|--------------|---------------------|----------------|
+| TSLA | 14.26% | **28.67%** | ✅ supera |
+| NFLX | 23.74% | **29.11%** | ✅ supera |
+| MSFT | 4.03% | **6.47%** | ✅ supera |
+
+### Aplicación a nuestro sistema
+
+| TradingGroup | Nuestro sistema |
+|-------------|----------------|
+| Self-Reflection (20 casos) | IC tracking (forward returns) |
+| Dynamic SL/TP por ATR-20 | RiskManager de s39 |
+| Hybrid Gate (RSI + breakout) | direction() con RSI+MACD voting |
+| Data-Synthesis Pipeline | trading_log.csv + ic_pairs.json |
+| Fine-tuning Qwen3-8B → Trader | — (futuro: fine-tune con nuestros datos) |
+
+### Lección principal
+El self-reflection + data pipeline cierra el loop: señal → trade → log → evaluación → mejora. Nuestro runner ya tiene el logging (trading_log.csv, ic_pairs.json). El siguiente paso es añadir el "review" automático: que el runner evalúe sus propias señales comparando con forward returns reales y ajuste pesos.
